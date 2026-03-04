@@ -1,0 +1,28 @@
+services:
+    api-gateway:
+        build:
+            context: .
+            dockerfile: Dockerfile
+            args:
+                APP_NAME: api-gateway
+        ports:
+            - "3000:3000"
+        environment:
+            - PORT=3000
+            - NODE_ENV=production
+            - USERS_SERVICE_URL=http://users-service:3001
+        env_file:
+            - .env
+    users-service:
+        build:
+            context: .
+            dockerfile: Dockerfile
+            args:
+                APP_NAME: users-service
+        ports:
+            - "3001:3001"
+        environment:
+            - PORT=3001
+            - NODE_ENV=production
+        env_file:
+            - .env
