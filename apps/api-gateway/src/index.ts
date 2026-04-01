@@ -2,6 +2,7 @@ import { serve } from "@hono/node-server";
 import { cors } from "hono/cors";
 import { Hono } from "hono";
 import { baseEnvSchema, z } from "@glybette/env";
+import { scraping } from "./routes/scraping.js";
 
 const gatewayEnvSchema = baseEnvSchema.extend({
     USERS_SERVICE_URL: z.string().url().optional(),
@@ -30,6 +31,8 @@ app.use("*", async (c, next) => {
 });
 
 const api = new Hono().basePath("/api");
+
+api.route("/scraping", scraping);
 
 api.get("/health", (c) => c.json({ status: "ok" }, 200));
 

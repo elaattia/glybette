@@ -1,4 +1,4 @@
-// Shared types for the monorepo
+export * from "./scraping.js";
 
 export type OnboardingStep =
   | 'personal-info'
