@@ -1,22 +1,27 @@
-import { OnboardingPage } from '@/pages/onboarding'
-import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
+import { OnboardingPage } from "@/pages/onboarding";
+import { Route, Routes, Navigate } from "react-router-dom";
 import HomePage from "@/pages/home";
-import { ThemeProvider } from "@/context/ThemeContext";
-
+import LoginPage from "@/pages/login";
+import ProtectedAppPage from "@/pages/app";
+import { AuthCallbackPage } from "@/pages/login/AuthCallbackPage";
+import { RequireAuth } from "@/components/auth/RequireAuth";
+import { useAuthBootstrap } from "@/hooks/useAuth";
 
 function App() {
+    useAuthBootstrap();
+
     return (
-    <ThemeProvider>
-      <BrowserRouter>
         <Routes>
-          <Route path="/" element={<HomePage />} />
-          <Route path="/onboarding" element={<OnboardingPage />} /> 
-          <Route path="*" element={<Navigate to="/" replace />} />
+            <Route path="/" element={<HomePage />} />
+            <Route path="/onboarding" element={<OnboardingPage />} />
+            <Route path="/login" element={<LoginPage />} />
+            <Route path="/auth/callback" element={<AuthCallbackPage />} />
+            <Route element={<RequireAuth />}>
+                <Route path="/dashboard" element={<ProtectedAppPage />} />
+            </Route>
+            <Route path="*" element={<Navigate to="/" replace />} />
         </Routes>
-      </BrowserRouter>
-    </ThemeProvider>
-  );
- 
+    );
 }
 
-export default App
+export default App;
