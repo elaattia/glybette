@@ -12,7 +12,7 @@ export function AuthCallbackPage() {
         }
 
         if (auth.isAuthenticated) {
-            navigate("/dashboard", { replace: true });
+            navigate("/app/dashboard", { replace: true });
             return;
         }
 

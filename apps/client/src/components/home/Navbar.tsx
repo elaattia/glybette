@@ -242,7 +242,7 @@ export default function Navbar() {
             {theme === "dark" ? <Sun className="w-4 h-4" /> : <Moon className="w-4 h-4" />}
           </button>
           {auth.isAuthenticated ? (
-            <Link to="/dashboard" className="gb-cta-nav">Dashboard</Link>
+            <Link to="/app/dashboard" className="gb-cta-nav">Dashboard</Link>
           ) : (
             <>
               <Link to="/login" className="gb-ghost">Log in</Link>
@@ -288,7 +288,7 @@ export default function Navbar() {
             {}
             <div className="gb-drawer-btns">
               {auth.isAuthenticated ? (
-                <Link to="/dashboard" className="gb-cta-nav" onClick={() => setOpen(false)}>
+                <Link to="/app/dashboard" className="gb-cta-nav" onClick={() => setOpen(false)}>
                   Dashboard
                 </Link>
               ) : (
