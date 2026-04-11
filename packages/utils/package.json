@@ -16,6 +16,9 @@
       "default": "./dist/index.js"
     }
   },
+  "dependencies": {
+    "jose": "^5.9.6"
+  },
   "devDependencies": {
     "@types/node": "^25.3.0",
     "typescript": "^5.8.3"

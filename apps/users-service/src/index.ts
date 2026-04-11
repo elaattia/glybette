@@ -1,26 +1,45 @@
 import { serve } from "@hono/node-server";
 import { Hono } from "hono";
-import { loadEnv } from "@glybette/env";
+import { loadUsersServiceEnv } from "./config/env.js";
+import { connectDb } from "./config/db.js";
+import { createAuth } from "./config/auth.js";
+import { AuthController } from "./controllers/auth.controller.js";
+import { UserController } from "./controllers/user.controller.js";
+import { UserService } from "./services/user.service.js";
+import { registerAuthRoutes } from "./routes/auth.routes.js";
+import { registerUserRoutes } from "./routes/user.routes.js";
+import { errorHandler } from "./middleware/error-handler.js";
 
-const env = loadEnv();
+async function main() {
+    const env = loadUsersServiceEnv();
+    await connectDb(env);
 
-const app = new Hono();
+    const auth = createAuth(env);
+    const userService = new UserService();
+    const authController = new AuthController(auth);
+    const userController = new UserController(userService);
 
-app.get("/", (c) => c.text("Hello Hono!"));
+    const app = new Hono();
+    app.onError(errorHandler);
 
-app.get("/users", (c) => c.json([]));
+    app.get("/", (c) => c.text("Users service"));
+    app.get("/health", (c) => c.json({ status: "ok" }));
 
-app.get("/users/:id", (c) => {
-    const id = c.req.param("id");
-    return c.json({ id, message: "User stub" });
+    registerAuthRoutes(app, authController);
+    registerUserRoutes(app, userController);
+
+    serve(
+        {
+            fetch: app.fetch,
+            port: env.PORT_USERS_SERVICE,
+        },
+        (info) => {
+            console.log(`Users service running on http://localhost:${info.port}`);
+        },
+    );
+}
+
+main().catch((err) => {
+    console.error("Failed to start users-service:", err);
+    process.exit(1);
 });
-
-serve(
-    {
-        fetch: app.fetch,
-        port: env.PORT_USERS_SERVICE,
-    },
-    (info) => {
-        console.log(`Users service running on http://localhost:${info.port}`);
-    },
-);

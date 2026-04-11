@@ -1,6 +1,40 @@
 import { z } from "zod";
+import { config as dotenvConfig } from "dotenv";
+import { dirname, resolve } from "node:path";
+import { fileURLToPath } from "node:url";
 
 export { z };
+
+const loadedEnvPaths = new Set<string>();
+
+function loadDotenvFile(path: string) {
+    if (loadedEnvPaths.has(path)) {
+        return;
+    }
+    const result = dotenvConfig({ path, override: false });
+    if (!result.error) {
+        loadedEnvPaths.add(path);
+    }
+}
+
+function bootstrapEnv() {
+    const cwd = process.cwd();
+    const packageDir = dirname(fileURLToPath(import.meta.url));
+    const candidates = [
+        resolve(cwd, ".env"),
+        resolve(cwd, ".env.local"),
+        resolve(cwd, "../../.env"),
+        resolve(cwd, "../../.env.local"),
+        resolve(packageDir, "../../../.env"),
+        resolve(packageDir, "../../../.env.local"),
+    ];
+
+    for (const candidate of candidates) {
+        loadDotenvFile(candidate);
+    }
+}
+
+bootstrapEnv();
 
 const mongoUriSchema = z
     .string()
@@ -12,7 +46,7 @@ const mongoUriSchema = z
 
 export const baseEnvSchema = z.object({
     NODE_ENV: z.enum(["development", "production", "test"]).default("development"),
-    MONGODB_URI: mongoUriSchema.optional(),
+    MONGODB_URI: z.string().optional(),
     PORT_API_GATEWAY: z.coerce.number().default(3000),
     PORT_USERS_SERVICE: z.coerce.number().default(3001),
 });
