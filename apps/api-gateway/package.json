@@ -8,7 +8,7 @@
     },
     "dependencies": {
         "@glybette/env": "workspace:*",
-        "@glybette/types": "workspace:*",
+        "@glybette/contracts": "workspace:*",
         "@glybette/utils": "workspace:*",
         "@hono/node-server": "^1.19.9",
         "hono": "^4.12.2"

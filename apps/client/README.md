@@ -1,73 +1,31 @@
-# React + TypeScript + Vite
+# Glybette Client
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+Frontend client for Glybette built with React + Vite.
 
-Currently, two official plugins are available:
+## Auth flow
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Babel](https://babeljs.io/) (or [oxc](https://oxc.rs) when used in [rolldown-vite](https://vite.dev/guide/rolldown)) for Fast Refresh
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/) for Fast Refresh
+This app uses Better Auth browser sessions with Google sign-in:
 
-## React Compiler
+- `GET/POST /api/auth/*` for OAuth/session endpoints
+- `GET /api/users/me` for authenticated profile fetch
+- cookie-based auth (`credentials: "include"`) for protected requests
 
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
+Routes:
 
-## Expanding the ESLint configuration
+- `/login` - dedicated login page
+- `/auth/callback` - OAuth callback completion
+- `/dashboard` - auth-protected test page
 
-If you are developing a production application, we recommend updating the configuration to enable type-aware lint rules:
+## Environment variables
 
-```js
-export default defineConfig([
-    globalIgnores(["dist"]),
-    {
-        files: ["**/*.{ts,tsx}"],
-        extends: [
-            // Other configs...
+- `VITE_API_BASE_URL` (optional): absolute API base URL.  
+  If omitted, requests use same-origin `/api/*`.
+- `VITE_API_PROXY_TARGET` (optional, dev server): target for Vite `/api` proxy (default `http://localhost:3000`).
 
-            // Remove tseslint.configs.recommended and replace with this
-            tseslint.configs.recommendedTypeChecked,
-            // Alternatively, use this for stricter rules
-            tseslint.configs.strictTypeChecked,
-            // Optionally, add this for stylistic rules
-            tseslint.configs.stylisticTypeChecked,
+## Development
 
-            // Other configs...
-        ],
-        languageOptions: {
-            parserOptions: {
-                project: ["./tsconfig.node.json", "./tsconfig.app.json"],
-                tsconfigRootDir: import.meta.dirname,
-            },
-            // other options...
-        },
-    },
-]);
+```bash
+pnpm --filter @glybette/client dev
 ```
 
-You can also install [eslint-plugin-react-x](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-x) and [eslint-plugin-react-dom](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-dom) for React-specific lint rules:
-
-```js
-// eslint.config.js
-import reactX from "eslint-plugin-react-x";
-import reactDom from "eslint-plugin-react-dom";
-
-export default defineConfig([
-    globalIgnores(["dist"]),
-    {
-        files: ["**/*.{ts,tsx}"],
-        extends: [
-            // Other configs...
-            // Enable lint rules for React
-            reactX.configs["recommended-typescript"],
-            // Enable lint rules for React DOM
-            reactDom.configs.recommended,
-        ],
-        languageOptions: {
-            parserOptions: {
-                project: ["./tsconfig.node.json", "./tsconfig.app.json"],
-                tsconfigRootDir: import.meta.dirname,
-            },
-            // other options...
-        },
-    },
-]);
-```
+The Vite dev server proxies `/api` to `VITE_API_PROXY_TARGET`, so local auth cookies work against the gateway without CORS setup.

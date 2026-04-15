@@ -1,7 +1,9 @@
 import { useState, useEffect } from "react";
 import { useTheme } from "@/context/ThemeContext";
+import { useAuth } from "@/hooks/useAuth";
 import logo from "@/assets/gyblette.png";
 import { Sun, Moon, Menu, X, ArrowRight } from "lucide-react";
+import { Link } from "react-router-dom";
 
 const styles = `
   .gb-nav {
@@ -209,6 +211,7 @@ export default function Navbar() {
   const [scrolled, setScrolled] = useState(false);
   const [open, setOpen] = useState(false);
   const { theme, toggle } = useTheme();
+  const auth = useAuth();
 
   useEffect(() => {
     const fn = () => setScrolled(window.scrollY > 40);
@@ -220,10 +223,10 @@ export default function Navbar() {
     <>
       <style>{styles}</style>
       <nav className={`gb-nav${scrolled ? " scrolled" : ""}`}>
-        <a href="/" className="gb-logo">
+        <Link to="/" className="gb-logo">
           <img src={logo} alt="glybette logo" />
           Glybette
-        </a>
+        </Link>
         <div className="gb-nav-links">
           <a href="#features">Features</a>
           <a href="#how-it-works">How it works</a>
@@ -238,8 +241,14 @@ export default function Navbar() {
           >
             {theme === "dark" ? <Sun className="w-4 h-4" /> : <Moon className="w-4 h-4" />}
           </button>
-          <a href="/login" className="gb-ghost">Log in</a>
-          <a href="/onboarding" className="gb-cta-nav">Get Started →</a>
+          {auth.isAuthenticated ? (
+            <Link to="/app/dashboard" className="gb-cta-nav">Dashboard</Link>
+          ) : (
+            <>
+              <Link to="/login" className="gb-ghost">Log in</Link>
+              <Link to="/onboarding" className="gb-cta-nav">Get Started →</Link>
+            </>
+          )}
           {}
           <button className="gb-hamburger" onClick={() => setOpen(true)}>
             <Menu className="w-5 h-5" />
@@ -257,11 +266,11 @@ export default function Navbar() {
 
             {}
             <div className="gb-drawer-header">
-              <a href="/" className="gb-logo" style={{ fontSize: '1.1rem' }}
+              <Link to="/" className="gb-logo" style={{ fontSize: '1.1rem' }}
                 onClick={() => setOpen(false)}>
                 <img src={logo} alt="glybette logo" style={{ width: '34px', height: '34px' }} />
                 Glybette
-              </a>
+              </Link>
               <button className="gb-drawer-close" onClick={() => setOpen(false)}>
                 <X className="w-4 h-4" />
               </button>
@@ -278,10 +287,18 @@ export default function Navbar() {
 
             {}
             <div className="gb-drawer-btns">
-              <a href="/login" className="gb-ghost">Log in</a>
-              <a href="/onboarding" className="gb-cta-nav">
-                Get Started <ArrowRight className="w-4 h-4 inline ml-1" />
-              </a>
+              {auth.isAuthenticated ? (
+                <Link to="/app/dashboard" className="gb-cta-nav" onClick={() => setOpen(false)}>
+                  Dashboard
+                </Link>
+              ) : (
+                <>
+                  <Link to="/login" className="gb-ghost" onClick={() => setOpen(false)}>Log in</Link>
+                  <Link to="/onboarding" className="gb-cta-nav" onClick={() => setOpen(false)}>
+                    Get Started <ArrowRight className="w-4 h-4 inline ml-1" />
+                  </Link>
+                </>
+              )}
             </div>
 
           </div>
