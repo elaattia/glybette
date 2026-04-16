@@ -1,7 +1,6 @@
 import { serve } from "@hono/node-server";
 import { loadGatewayEnv } from "./config/env.js";
 import { createApp } from "./app.js";
-
 async function main() {
     const env = loadGatewayEnv();
     const app = createApp(env);

@@ -6,6 +6,8 @@ import {
     ServiceUnavailableError,
 } from "@glybette/utils";
 
+type HttpMethod = "GET" | "POST" | "PUT" | "DELETE" | "PATCH";
+
 export type ForwardRequestOptions = {
     /** Upstream timeout (abort fetch when exceeded). */
     timeoutMs: number;
@@ -13,6 +15,7 @@ export type ForwardRequestOptions = {
      * When true, strip client Authorization and inject internal auth headers from `gatewayAuth`.
      */
     injectGatewayAuth?: boolean;
+    method?: HttpMethod;
 };
 
 function joinBaseAndPath(baseUrl: string, pathWithQuery: string): string {
@@ -49,7 +52,7 @@ export async function forwardToService(
     const timeout = setTimeout(() => controller.abort(), options.timeoutMs);
 
     const requestInit: RequestInit & { duplex?: "half" } = {
-        method: c.req.method,
+        method: options.method ?? c.req.method,
         headers,
         body,
         signal: controller.signal,
@@ -60,6 +63,7 @@ export async function forwardToService(
     }
 
     try {
+        console.log(" Forwarding to:", url);
         const res = await fetch(url, requestInit);
         const outHeaders = new Headers(res.headers);
         return new Response(res.body, { status: res.status, headers: outHeaders });

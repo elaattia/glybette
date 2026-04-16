@@ -146,6 +146,11 @@ def scrape_now(source: str, background_tasks: BackgroundTasks):
     return {"message": f"Scraping '{source}' lancé", "timestamp": datetime.now(timezone.utc).isoformat()}
 
 
+@app.get("/sources")
+def get_sources():
+    col = col_offres()
+    sources = col.distinct("source_site", {"status": "active"})
+    return {"sources": sources}
 
 
 @app.get("/health")

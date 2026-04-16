@@ -27,6 +27,8 @@ export function createApp(env: GatewayEnv): Hono {
     registerHealthRoutes(api);
     registerServiceRoutes(api, { env, services });
 
+
     app.route("/", api);
     return app;
 }
+
