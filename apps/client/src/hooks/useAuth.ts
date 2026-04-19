@@ -16,10 +16,13 @@ export function useAuthBootstrap() {
     const sessionQuery = authClient.useSession();
 
     useEffect(() => {
+        if (sessionQuery.data !== undefined) {
+            return;
+        }
         if (sessionQuery.isPending || sessionQuery.isRefetching) {
             setChecking();
         }
-    }, [sessionQuery.isPending, sessionQuery.isRefetching, setChecking]);
+    }, [sessionQuery.data, sessionQuery.isPending, sessionQuery.isRefetching, setChecking]);
 
     useEffect(() => {
         if (!sessionQuery.data?.session) {
@@ -30,14 +33,14 @@ export function useAuthBootstrap() {
     }, [sessionQuery.data, setAuthenticated]);
 
     useEffect(() => {
-        if (sessionQuery.isPending || sessionQuery.isRefetching) {
+        if (sessionQuery.data === undefined) {
             return;
         }
 
         if (!sessionQuery.data?.session) {
             setUnauthenticated();
         }
-    }, [sessionQuery.data, sessionQuery.isPending, sessionQuery.isRefetching, setUnauthenticated]);
+    }, [sessionQuery.data, setUnauthenticated]);
 
     return sessionQuery;
 }
@@ -63,7 +66,10 @@ export function useAuth() {
         ...authSession,
         session: sessionQuery.data?.session ?? null,
         isAuthenticated: authSession.status === "authenticated" && Boolean(sessionQuery.data?.session),
-        isChecking: authSession.status === "checking" || sessionQuery.isPending || sessionQuery.isRefetching,
+        isChecking:
+            authSession.status === "checking" ||
+            (sessionQuery.data === undefined &&
+                (sessionQuery.isPending || sessionQuery.isRefetching)),
         startGoogleSignIn: async () => {
             await authClient.signIn.social({
                 provider: "google",
