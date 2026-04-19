@@ -45,7 +45,7 @@ export default function AppShellLayout() {
 
   return (
     <div className="min-h-screen bg-[var(--gb-bg)] text-[var(--gb-text)]">
-      <div className="grid min-h-screen grid-cols-1 md:h-screen md:grid-cols-[260px_minmax(0,1fr)] md:overflow-hidden">
+      <div className="grid min-h-screen grid-cols-1 md:h-screen md:grid-cols-[auto_minmax(0,1fr)] md:overflow-hidden">
         <div className="hidden md:sticky md:top-0 md:block md:h-screen">
           <AppSidebar />
         </div>
@@ -67,7 +67,7 @@ export default function AppShellLayout() {
             aria-label="Close navigation panel"
           />
           <div className="absolute left-0 top-0 h-full w-[285px]">
-            <AppSidebar onNavigate={() => setMobileOpen(false)} />
+            <AppSidebar layout="drawer" onNavigate={() => setMobileOpen(false)} />
           </div>
         </div>
       ) : null}

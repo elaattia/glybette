@@ -377,3 +377,43 @@ body {
     animation: none;
   }
 }
+
+/*  TOOLTIP (Radix)  */
+[data-slot="tooltip-content"][data-state="instant-open"],
+[data-slot="tooltip-content"][data-state="delayed-open"] {
+  animation: gb-tooltip-in 120ms cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+[data-slot="tooltip-content"][data-state="closed"] {
+  animation: gb-tooltip-out 90ms ease-in forwards;
+}
+
+@keyframes gb-tooltip-in {
+  from {
+    opacity: 0;
+    transform: translateY(2px) scale(0.98);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+@keyframes gb-tooltip-out {
+  from {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+  to {
+    opacity: 0;
+    transform: translateY(1px) scale(0.99);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  [data-slot="tooltip-content"][data-state="instant-open"],
+  [data-slot="tooltip-content"][data-state="delayed-open"],
+  [data-slot="tooltip-content"][data-state="closed"] {
+    animation: none;
+  }
+}
