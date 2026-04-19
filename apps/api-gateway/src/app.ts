@@ -6,7 +6,6 @@ import { createCorsMiddleware } from "./middleware/cors.js";
 import { requestContextMiddleware } from "./middleware/request-context.js";
 import { gatewayHooksMiddleware } from "./middleware/gateway-hooks.js";
 import { gatewayErrorHandler } from "./middleware/error-handler.js";
-import { registerHealthRoutes } from "./routes/health.routes.js";
 import { registerServiceRoutes } from "./routes/service-routes.js";
 
 export function createApp(env: GatewayEnv): Hono {
@@ -26,7 +25,7 @@ export function createApp(env: GatewayEnv): Hono {
         await next();
     });
 
-    registerHealthRoutes(api);
+    api.get("/health", (c) => c.json({ status: "ok", name: "api-gateway" }, 200));
     registerServiceRoutes(api, { env, services });
 
     app.route("/", api);
