@@ -6,7 +6,7 @@ import {
     setAuthenticatedSessionAtom,
     setAuthCheckingAtom,
     setUnauthenticatedSessionAtom,
-} from "@/features/auth/auth.atoms";
+} from "@/state/auth/auth.atoms";
 import { authClient } from "@/lib/auth-client";
 
 export function useAuthBootstrap() {

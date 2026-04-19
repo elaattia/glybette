@@ -1,50 +1,16 @@
-const styles = `
-  .gb-strip {
-    padding: 38px 40px;
-    border-top: 1px solid var(--gb-border);
-    border-bottom: 1px solid var(--gb-border);
-    background: var(--gb-strip-bg);
-    font-family: 'DM Sans', sans-serif;
-    transition: background 0.35s, border-color 0.35s;
-  }
-  .gb-strip-label {
-    text-align: center; margin-bottom: 22px;
-    font-size: 0.75rem; color: var(--gb-muted2);
-    letter-spacing: 0.12em; text-transform: uppercase; font-weight: 400;
-  }
-  .gb-strip-row {
-    display: flex; align-items: center; justify-content: center;
-    gap: 48px; flex-wrap: wrap;
-  }
-  .gb-chip {
-    font-family: 'Bricolage Grotesque', sans-serif;
-    font-weight: 700; font-size: 1.05rem;
-    color: var(--gb-muted2); letter-spacing: -0.02em;
-    transition: color 0.2s, opacity 0.2s;
-    opacity: 0.55; cursor: default;
-  }
-  .gb-chip:hover { opacity: 1; color: var(--gb-text); }
-  @media (max-width: 600px) {
-    .gb-strip { padding: 32px 20px; }
-    .gb-strip-row { gap: 28px; }
-    .gb-chip { font-size: 0.9rem; }
-  }
-`;
+import "@/styles/home/logo-strip.css";
 
 const companies = ["Vermeg", "Telnet", "Sofrecom", "EPS", "ISSATSOUSSE"];
 
 export default function LogoStrip() {
   return (
-    <>
-      <style>{styles}</style>
-      <div className="gb-strip">
-        <p className="gb-strip-label">Trusted by companies across Tunisia</p>
-        <div className="gb-strip-row">
-          {companies.map((c) => (
-            <span key={c} className="gb-chip">{c}</span>
-          ))}
-        </div>
+    <div className="gb-strip">
+      <p className="gb-strip-label">Trusted by companies across Tunisia</p>
+      <div className="gb-strip-row">
+        {companies.map((c) => (
+          <span key={c} className="gb-chip">{c}</span>
+        ))}
       </div>
-    </>
+    </div>
   );
 }

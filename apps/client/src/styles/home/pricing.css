@@ -1,0 +1,175 @@
+.gb-pricing {
+  padding: 110px 40px;
+  max-width: 1000px;
+  margin: 0 auto;
+  font-family: "DM Sans", sans-serif;
+}
+.gb-pricing-header {
+  text-align: center;
+  margin-bottom: 64px;
+}
+.gb-pricing-header h2 {
+  font-family: "Bricolage Grotesque", sans-serif;
+  font-size: clamp(2rem, 4.5vw, 3.4rem);
+  font-weight: 800;
+  letter-spacing: -0.04em;
+  margin-bottom: 14px;
+  color: var(--gb-text);
+}
+.gb-pricing-header p {
+  color: var(--gb-muted);
+  font-size: 1rem;
+  font-weight: 300;
+}
+.gb-pricing-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 2px;
+  border-radius: 22px;
+  overflow: hidden;
+  border: 1px solid var(--gb-border);
+  transition: border-color 0.35s;
+}
+.gb-pcard {
+  background: var(--gb-card-bg);
+  padding: 48px 44px;
+  border: 1px solid transparent;
+  position: relative;
+  transition: background 0.35s;
+}
+.gb-pcard.featured {
+  background: linear-gradient(160deg, rgba(22, 163, 74, 0.07) 0%, var(--gb-card-bg) 60%);
+  border-color: rgba(22, 163, 74, 0.35);
+}
+.gb-popular-badge {
+  position: absolute;
+  top: 22px;
+  right: 22px;
+  background: linear-gradient(90deg, #16a34a, #0284c7);
+  color: #fff;
+  font-size: 0.68rem;
+  font-weight: 700;
+  padding: 5px 14px;
+  border-radius: 100px;
+  letter-spacing: 0.07em;
+  text-transform: uppercase;
+}
+.gb-plan-name {
+  font-size: 0.78rem;
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--gb-muted);
+  margin-bottom: 10px;
+}
+.gb-plan-price {
+  font-family: "Bricolage Grotesque", sans-serif;
+  font-weight: 800;
+  letter-spacing: -0.04em;
+  line-height: 1;
+  margin-bottom: 8px;
+  color: var(--gb-text);
+}
+.gb-plan-price .amt {
+  font-size: 3.8rem;
+}
+.gb-plan-price .cur {
+  font-size: 1.6rem;
+  vertical-align: top;
+  margin-top: 13px;
+  display: inline-block;
+}
+.gb-plan-price .per {
+  font-size: 0.92rem;
+  color: var(--gb-muted);
+  font-weight: 400;
+  font-family: "DM Sans", sans-serif;
+}
+.gb-plan-desc {
+  font-size: 0.875rem;
+  color: var(--gb-muted);
+  margin-bottom: 34px;
+  font-weight: 300;
+  line-height: 1.65;
+}
+.gb-plan-feats {
+  list-style: none;
+  margin-bottom: 38px;
+  display: flex;
+  flex-direction: column;
+  gap: 13px;
+}
+.gb-plan-feats li {
+  display: flex;
+  align-items: flex-start;
+  gap: 11px;
+  font-size: 0.875rem;
+  color: var(--gb-text-off);
+  line-height: 1.55;
+}
+.gb-check {
+  width: 19px;
+  height: 19px;
+  border-radius: 50%;
+  flex-shrink: 0;
+  background: rgba(22, 163, 74, 0.12);
+  border: 1px solid rgba(22, 163, 74, 0.3);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-top: 1px;
+}
+.gb-check svg {
+  width: 10px;
+  height: 10px;
+  stroke: #16a34a;
+  stroke-width: 2.5;
+  fill: none;
+}
+.gb-btn-plan {
+  display: block;
+  text-align: center;
+  padding: 15px 24px;
+  border-radius: 11px;
+  font-weight: 600;
+  font-size: 0.95rem;
+  text-decoration: none;
+  font-family: "DM Sans", sans-serif;
+  transition:
+    transform 0.2s,
+    box-shadow 0.2s,
+    background 0.2s;
+  letter-spacing: 0.01em;
+}
+.gb-btn-plan.outline {
+  border: 1px solid var(--gb-border2);
+  color: var(--gb-text-off);
+  background: transparent;
+}
+.gb-btn-plan.outline:hover {
+  border-color: rgba(22, 163, 74, 0.4);
+  background: rgba(22, 163, 74, 0.06);
+  transform: translateY(-1px);
+}
+.gb-btn-plan.filled {
+  background: linear-gradient(90deg, #16a34a, #0284c7);
+  color: #fff;
+  border: none;
+  box-shadow: 0 0 32px rgba(22, 163, 74, 0.3);
+}
+.gb-btn-plan.filled:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 10px 44px rgba(22, 163, 74, 0.48);
+  opacity: 0.93;
+}
+@media (max-width: 760px) {
+  .gb-pricing {
+    padding: 80px 20px;
+  }
+  .gb-pricing-grid {
+    grid-template-columns: 1fr;
+  }
+  .gb-pcard {
+    padding: 38px 28px;
+  }
+}
