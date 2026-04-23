@@ -35,16 +35,15 @@ export async function forwardToService(
 ): Promise<Response> {
     const url = joinBaseAndPath(baseUrl, pathWithQuery);
     const inject = options.injectGatewayAuth === true;
+    const auth = inject ? c.get("gatewayAuth") : undefined;
+    const injectHeaders = inject && !!auth;
     const headers = sanitizeProxyHeaders(c.req.raw.headers, {
-        stripAuthorization: inject,
+        stripAuthorization: injectHeaders,
     });
 
-    if (inject) {
-        const auth = c.get("gatewayAuth");
-        if (auth) {
-            headers.set(AUTH_HEADER_USER_ID, auth.userId);
-            headers.set(AUTH_HEADER_ROLES, auth.roles.join(","));
-        }
+    if (injectHeaders && auth) {
+        headers.set(AUTH_HEADER_USER_ID, auth.userId);
+        headers.set(AUTH_HEADER_ROLES, auth.roles.join(","));
     }
 
     const body = c.req.raw.body;
