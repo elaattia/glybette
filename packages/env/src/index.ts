@@ -49,6 +49,7 @@ export const baseEnvSchema = z.object({
     MONGODB_URI: z.string().optional(),
     PORT_API_GATEWAY: z.coerce.number().default(3000),
     PORT_USERS_SERVICE: z.coerce.number().default(3001),
+    PORT_SCRAPING_SERVICE: z.coerce.number().default(3002),
 });
 
 export type BaseEnv = z.infer<typeof baseEnvSchema>;

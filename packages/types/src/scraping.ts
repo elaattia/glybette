@@ -1,0 +1,96 @@
+// packages/types/src/scraping.ts
+// Types partagés pour le service de scraping
+// Utilisés par l'api-gateway ET le client React
+
+export type TypeOffre = "emploi" | "stage" | "pfe" | "opportunite";
+
+export type SourceSite =
+  | "indeed"
+  | "welcometothejungle"
+  | "linkedin"
+  | "pfebooks.com";
+
+export interface Offre {
+  _id: string;
+  hash_unique: string;
+
+  // Infos principales
+  titre: string;
+  entreprise?: string | null;
+  description?: string | null;
+  competences: string[];
+  localisation?: string | null;
+  salaire?: string | null;
+  type_contrat?: string | null;
+
+  // Liens
+  lien_original: string;
+  lien_image?: string | null;
+
+  // Classification
+  type_offre: TypeOffre;
+  domaine?: string | null;
+  status: "active" | "archivee";
+  source_site: SourceSite;
+
+  // Dates (ISO string après sérialisation)
+  date_publication?: string | null;
+  date_scraped: string;
+  date_updated: string;
+
+  // Stats
+  nb_vues: number;
+  nb_clics: number;
+
+  // Champs PFEBooks
+  categories?: string[] | null;
+  nb_sujets?: number | null;
+  email_contact?: string | null;
+  telephone?: string | null;
+  site_web_entreprise?: string | null;
+}
+
+export interface OffresResponse {
+  total: number;
+  page: number;
+  pages: number;
+  offres: Offre[];
+}
+
+export interface OffresFilters {
+  type_offre?: TypeOffre;
+  source?: SourceSite;
+  localisation?: string;
+  search?: string;
+  page?: number;
+  limit?: number;
+  tri?: "recent" | "vues";
+}
+
+export interface ScrapingStats {
+  total_actives: number;
+  total_archives: number;
+  nouvelles_24h: number;
+  par_type: Record<TypeOffre, number>;
+  par_source: Record<SourceSite, number>;
+  derniers_scrapings: ScrapingLog[];
+}
+
+export interface ScrapingLog {
+  source_site: SourceSite;
+  started_at: string;
+  finished_at?: string;
+  status: "running" | "success" | "partial" | "failed";
+  nb_scraped?: number;
+  nb_nouvelles?: number;
+  nb_doublons?: number;
+  nb_erreurs?: number;
+  message?: string;
+}
+
+export interface ScrapingSource {
+  id: string;
+  nom: string;
+  frequence: string;
+  methode: string;
+}

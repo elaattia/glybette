@@ -11,8 +11,12 @@ services:
             - PORT=3000
             - NODE_ENV=production
             - USERS_SERVICE_URL=http://users-service:3001
+            - SCRAPING_SERVICE_URL=http://scraping-service:3002
         env_file:
             - .env
+        depends_on:
+            - users-service
+            - scraping-service
     users-service:
         build:
             context: .
@@ -26,3 +30,13 @@ services:
             - NODE_ENV=production
         env_file:
             - .env
+    scraping-service:
+        build: 
+            context: ./apps/scraping-service
+            dockerfile: Dockerfile
+        ports:
+            - "3002:3002"
+        environment:
+            - PORT=3002
+        env_file:
+            - ./apps/scraping-service/.env
