@@ -3,6 +3,7 @@ from contextlib import asynccontextmanager
 from datetime import datetime, timezone, timedelta
 from typing import Optional
 
+from pydantic import BaseModel
 from fastapi import FastAPI, Query, HTTPException, BackgroundTasks
 from fastapi.middleware.cors import CORSMiddleware
 from bson import ObjectId
@@ -133,8 +134,11 @@ def get_stats():
     }
 
 
-@app.post("/scrape/now")
-def scrape_now(source: str, background_tasks: BackgroundTasks):
+class TriggerScrapeBody(BaseModel):
+    source: str = "all"
+
+
+def _enqueue_scrape(source: str, background_tasks: BackgroundTasks) -> dict:
     valides = ["indeed", "welcometothejungle", "linkedin", "pfebooks", "all"]
     if source not in valides:
         raise HTTPException(400, f"Source invalide. Options: {valides}")
@@ -144,6 +148,17 @@ def scrape_now(source: str, background_tasks: BackgroundTasks):
     else:
         background_tasks.add_task(run_scraper, source)
     return {"message": f"Scraping '{source}' lancé", "timestamp": datetime.now(timezone.utc).isoformat()}
+
+
+@app.post("/scrape/now")
+def scrape_now(source: str, background_tasks: BackgroundTasks):
+    return _enqueue_scrape(source, background_tasks)
+
+
+@app.post("/trigger")
+def trigger_scrape(body: TriggerScrapeBody, background_tasks: BackgroundTasks):
+    """JSON body alias for clients that call `/trigger` via the API gateway."""
+    return _enqueue_scrape(body.source, background_tasks)
 
 
 @app.get("/sources")

@@ -52,4 +52,13 @@ export const gatewayProxyRoutes: readonly GatewayProxyRoute[] = [
         injectGatewayAuth: false,
         methods: ["GET", "POST"],
     },
+    {
+        name: "scraping",
+        service: "scraping",
+        mount: "/scraping",
+        upstream: { kind: "rewrite", upstreamPrefix: "" },
+        session: "none",
+        injectGatewayAuth: false,
+        methods: "all",
+    },
 ];
