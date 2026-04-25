@@ -3,6 +3,7 @@ import { Route, Routes, Navigate } from "react-router-dom";
 import HomePage from "@/pages/home";
 import LoginPage from "@/pages/login";
 import { AuthCallbackPage } from "@/pages/login/AuthCallbackPage";
+import { VerifyEmailPage } from "@/pages/login/VerifyEmailPage";
 import { RequireAuth } from "@/components/auth/RequireAuth";
 import { useAuthBootstrap } from "@/hooks/useAuth";
 import AppShellLayout from "@/components/app-shell";
@@ -18,6 +19,7 @@ function App() {
             <Route path="/onboarding" element={<OnboardingPage />} />
             <Route path="/login" element={<LoginPage />} />
             <Route path="/auth/callback" element={<AuthCallbackPage />} />
+            <Route path="/verify-email" element={<VerifyEmailPage />} />
             <Route element={<RequireAuth />}>
                 <Route path="/app" element={<AppShellLayout />}>
                     <Route index element={<Navigate to="dashboard" replace />} />

@@ -57,7 +57,13 @@ export function registerProxyRoutes(
             sub.all("*", forward);
             api.route(mount, sub);
         } else {
-            api.on([...route.methods], `${mount}/*`, forward);
+            const sub = new Hono();
+            if (route.session === "optional") {
+                sub.use("*", tryResolveBetterAuthSession(env, services));
+            }
+            sub.on([...route.methods], "/", forward);
+            sub.on([...route.methods], "/*", forward);
+            api.route(mount, sub);
         }
     }
 }

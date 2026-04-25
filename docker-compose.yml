@@ -1,4 +1,12 @@
 services:
+    rabbitmq:
+        image: rabbitmq:3.13-management
+        ports:
+            - "5672:5672"
+            - "15672:15672"
+        environment:
+            - RABBITMQ_DEFAULT_USER=guest
+            - RABBITMQ_DEFAULT_PASS=guest
     api-gateway:
         build:
             context: .
@@ -12,11 +20,14 @@ services:
             - NODE_ENV=production
             - USERS_SERVICE_URL=http://users-service:3001
             - SCRAPING_SERVICE_URL=http://scraping-service:3002
+            - EMAIL_SERVICE_URL=http://email-service:3003
         env_file:
             - .env
         depends_on:
+            - rabbitmq
             - users-service
             - scraping-service
+            - email-service
     users-service:
         build:
             context: .
@@ -27,9 +38,33 @@ services:
             - "3001:3001"
         environment:
             - PORT=3001
+            - PORT_USERS_SERVICE=3001
             - NODE_ENV=production
+            - RABBITMQ_URL=amqp://rabbitmq:5672
         env_file:
             - .env
+        depends_on:
+            - rabbitmq
+    email-service:
+        build:
+            context: .
+            dockerfile: Dockerfile
+            args:
+                APP_NAME: email-service
+        ports:
+            - "3003:3003"
+        environment:
+            - PORT=3003
+            - PORT_EMAIL_SERVICE=3003
+            - NODE_ENV=production
+            - RABBITMQ_URL=amqp://rabbitmq:5672
+            - EMAIL_PROVIDER=${EMAIL_PROVIDER:-mock}
+            - EMAIL_FROM=${EMAIL_FROM:-no-reply@glybette.dev}
+            - RESEND_API_KEY=${RESEND_API_KEY:-}
+        env_file:
+            - .env
+        depends_on:
+            - rabbitmq
     scraping-service:
         build: 
             context: ./apps/scraping-service

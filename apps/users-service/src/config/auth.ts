@@ -49,7 +49,7 @@ export function createAuth(env: UsersServiceEnv) {
         },
         database: mongodbAdapter(db, { client }),
         emailAndPassword: {
-            enabled: false,
+            enabled: true,
         },
         socialProviders: {
             ...(env.GOOGLE_CLIENT_ID &&

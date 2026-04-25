@@ -5,6 +5,7 @@ import { NotFoundError } from "@glybette/utils";
 type BetterAuthUserDocument = mongoose.Document & {
     _id: mongoose.Types.ObjectId;
     email?: string;
+    emailVerifiedAt?: Date | null;
     name?: string;
     image?: string;
 };
@@ -25,6 +26,7 @@ export function toUserDTO(
     return {
         id: user._id.toString(),
         email: user.email,
+        emailVerified: Boolean(user.emailVerifiedAt),
         displayName: user.name ?? "User",
         avatarUrl: user.image,
         roles: ["user"],
@@ -33,6 +35,26 @@ export function toUserDTO(
 }
 
 export class UserService {
+    async getVerificationState(userId: string): Promise<{ requiresEmailVerification: boolean; email?: string }> {
+        const db = mongoose.connection.db;
+        if (!db) {
+            throw new Error("Mongoose database connection is not initialized");
+        }
+
+        const user = await db.collection<BetterAuthUserDocument>("users").findOne(
+            { _id: new mongoose.Types.ObjectId(userId) },
+            { projection: { email: 1, emailVerifiedAt: 1 } },
+        );
+        if (!user) {
+            throw new NotFoundError("User not found");
+        }
+
+        return {
+            requiresEmailVerification: !Boolean(user.emailVerifiedAt),
+            email: user.email,
+        };
+    }
+
     async getById(userId: string): Promise<UserDTO> {
         const db = mongoose.connection.db;
         if (!db) {

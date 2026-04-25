@@ -3,6 +3,7 @@
     "private": true,
     "scripts": {
         "dev": "pnpm -r --parallel --filter \"./apps/*\" run dev",
+        "dev:rabbitmq": "docker compose up -d rabbitmq",
         "build": "pnpm -r --filter \"./apps/*...\" run build",
         "prepare": "pnpm -r --filter \"./packages/*\" run build",
         "format": "prettier --write . --ignore-path .gitignore",

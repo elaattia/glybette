@@ -3,6 +3,7 @@ import { baseEnvSchema, z } from "@glybette/env";
 export const gatewayEnvSchema = baseEnvSchema.extend({
     USERS_SERVICE_URL: z.string().url().optional(),
     SCRAPING_SERVICE_URL: z.string().url().optional(),
+    EMAIL_SERVICE_URL: z.string().url().optional(),
     /** Comma-separated origins; defaults to local Vite dev URLs if unset. */
     CORS_ORIGINS: z.string().optional(),
     PROXY_TIMEOUT_MS: z.coerce.number().min(1000).default(30_000),

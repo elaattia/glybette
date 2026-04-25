@@ -1,23 +1,35 @@
 import { useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "@/hooks/useAuth";
+import { useEmailVerification } from "@/hooks/useEmailVerification";
 
 export function AuthCallbackPage() {
     const navigate = useNavigate();
     const auth = useAuth();
+    const verification = useEmailVerification();
 
     useEffect(() => {
-        if (auth.isChecking) {
+        if (auth.isChecking || (auth.isAuthenticated && verification.isPending)) {
             return;
         }
 
         if (auth.isAuthenticated) {
+            if (verification.requiresEmailVerification) {
+                navigate("/verify-email", { replace: true });
+                return;
+            }
             navigate("/app/dashboard", { replace: true });
             return;
         }
 
         navigate("/login?error=callback_failed", { replace: true });
-    }, [auth.isAuthenticated, auth.isChecking, navigate]);
+    }, [
+        auth.isAuthenticated,
+        auth.isChecking,
+        navigate,
+        verification.isPending,
+        verification.requiresEmailVerification,
+    ]);
 
     return (
         <main className="min-h-screen flex items-center justify-center px-6">
@@ -28,6 +40,8 @@ export function AuthCallbackPage() {
                 </h1>
                 <p className="mt-3 text-sm text-[var(--gb-muted)]">
                     {auth.isChecking
+                        ? "Waiting for session confirmation from Better Auth."
+                        : verification.isPending
                         ? "Waiting for session confirmation from Better Auth."
                         : "Session not found. Redirecting to the login page."}
                 </p>
