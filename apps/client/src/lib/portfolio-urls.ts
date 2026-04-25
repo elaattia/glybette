@@ -1,5 +1,5 @@
-export function publicPortfolioUrl(slug: string, isPremium: boolean) {
-    return isPremium ? `https://${slug}.glybette.com` : `https://glybette.com/user/${slug}`;
+export function publicPortfolioUrl(slug: string, isPremium: boolean, isDisplayUrl?: boolean) {
+    return isPremium ? `https://${slug}.glybette.com` : isDisplayUrl ? `https://glybette.com/user/${slug}` : `/user/${slug}`;
 }
 
 export function premiumPortfolioUrl(slug: string) {

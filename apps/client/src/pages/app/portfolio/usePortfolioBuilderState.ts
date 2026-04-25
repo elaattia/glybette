@@ -247,12 +247,14 @@ export function usePortfolioBuilderState() {
 
     const handleSave = useCallback(async () => {
         if (!draft || !user?.id) {
-            return;
+            return false;
         }
         const response = await mutations.save.mutateAsync(draft);
         if (response.portfolio) {
             savePortfolioDraft(user.id, toSaveRequest(response.portfolio));
+            return true;
         }
+        return false;
     }, [draft, mutations.save, user?.id]);
 
     const updateSlug = useCallback(

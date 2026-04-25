@@ -56,7 +56,7 @@ export function PortfolioSlugStep({
                                 Your public link
                             </p>
                             <p className="mt-1 font-medium text-[var(--gb-text)]">
-                                {publicPortfolioUrl(normalizedSlug || "name", isPremium)}
+                                {publicPortfolioUrl(normalizedSlug || "name", isPremium, true)}
                             </p>
                         </div>
                         {!isPremium ? (

@@ -63,6 +63,7 @@ export function PortfolioRenderer({
             <ProjectDetailModal
                 project={project}
                 chrome={chrome}
+                templateId={template.id}
                 radiusClassName={radiusClassName}
                 surfaceClassName={template.surfaceClassName}
                 onClose={() => setProject(null)}
