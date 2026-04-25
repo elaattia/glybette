@@ -14,7 +14,11 @@ export type GatewayAuthPayload = {
     requiresEmailVerification: boolean;
 };
 
-const VERIFICATION_ALLOWLIST = ["/api/auth/otp", "/api/auth/verification-status"];
+const VERIFICATION_ALLOWLIST = [
+    "/api/auth/otp",
+    "/api/auth/verification-status",
+    "/api/portfolio/public",
+];
 
 function isVerificationAllowlisted(pathname: string): boolean {
     return VERIFICATION_ALLOWLIST.some(

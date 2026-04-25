@@ -8,6 +8,7 @@ type BetterAuthUserDocument = mongoose.Document & {
     emailVerifiedAt?: Date | null;
     name?: string;
     image?: string;
+    isPremium?: boolean;
 };
 
 type BetterAuthAccountDocument = {
@@ -29,6 +30,7 @@ export function toUserDTO(
         emailVerified: Boolean(user.emailVerifiedAt),
         displayName: user.name ?? "User",
         avatarUrl: user.image,
+        isPremium: Boolean(user.isPremium),
         roles: ["user"],
         provider: isAuthProvider(account?.providerId) ? account.providerId : "google",
     };
