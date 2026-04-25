@@ -5,7 +5,7 @@ import { PortfolioBuilderRightPanel } from "@/pages/app/portfolio/components/Por
 import { PortfolioEditorTopbar } from "@/pages/app/portfolio/components/PortfolioEditorTopbar";
 import { PortfolioSlugStep } from "@/pages/app/portfolio/components/PortfolioSlugStep";
 import { PortfolioTemplateStep } from "@/pages/app/portfolio/components/PortfolioTemplateStep";
-import { usePortfolioBuilderState } from "@/pages/app/portfolio/usePortfolioBuilderState";
+import { usePortfolioBuilderState } from "@/hooks/usePortfolioBuilderState";
 
 export default function PortfolioBuilderPage() {
     const builder = usePortfolioBuilderState();

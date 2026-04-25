@@ -4,7 +4,6 @@ import {
     useSensor,
     useSensors,
     type DragEndEvent,
-    type DragStartEvent,
 } from "@dnd-kit/core";
 import { arrayMove } from "@dnd-kit/sortable";
 import type { PortfolioBlock, PortfolioBlockType, PortfolioTab, PortfolioTemplateId, SavePortfolioRequest } from "@glybette/contracts";
@@ -25,6 +24,7 @@ export type BuilderStep = "slug" | "template" | "editor";
 
 export function usePortfolioBuilderState() {
     const { user } = useUser();
+    const userId = user?.id;
     const currentPortfolio = useCurrentPortfolio();
     const mutations = usePortfolioMutations();
     const [step, setStep] = useState<BuilderStep>("slug");
@@ -53,32 +53,47 @@ export function usePortfolioBuilderState() {
     );
 
     useEffect(() => {
-        if (!user?.id || currentPortfolio.isPending || draft) {
+        if (!userId || currentPortfolio.isPending || draft) {
             return;
         }
 
         const remote = currentPortfolio.data?.portfolio;
-        if (!remote) {
-            setStep("slug");
-            return;
-        }
+        let cancelled = false;
 
-        const remoteDraft = toSaveRequest(remote);
-        const localDraft = loadPortfolioDraft(user.id, remote.slug);
-        setDraft(normalizeDraftGrid(localDraft ?? remoteDraft));
-        setSlugInput(remote.slug);
-        setActiveTabId(remote.tabs[0]?.id);
-        setStep("editor");
-    }, [currentPortfolio.data?.portfolio, currentPortfolio.isPending, draft, user?.id]);
+        queueMicrotask(() => {
+            if (cancelled) {
+                return;
+            }
+
+            if (!remote) {
+                setStep("slug");
+                return;
+            }
+
+            const remoteDraft = toSaveRequest(remote);
+            const localDraft = loadPortfolioDraft(userId, remote.slug);
+            setDraft(normalizeDraftGrid(localDraft ?? remoteDraft));
+            setSlugInput(remote.slug);
+            setActiveTabId(remote.tabs[0]?.id);
+            setStep("editor");
+        });
+
+        return () => {
+            cancelled = true;
+        };
+    }, [currentPortfolio.data?.portfolio, currentPortfolio.isPending, draft, userId]);
 
     useEffect(() => {
-        if (!draft || !user?.id) {
+        if (!draft || !userId) {
             return;
         }
 
-        savePortfolioDraft(user.id, draft);
-        setLocalSavedAt(new Date().toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" }));
-    }, [draft, user?.id]);
+        savePortfolioDraft(userId, draft);
+        const savedAt = new Date().toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" });
+        queueMicrotask(() => {
+            setLocalSavedAt(savedAt);
+        });
+    }, [draft, userId]);
 
     const updateDraft = useCallback((updater: (draft: SavePortfolioRequest) => SavePortfolioRequest) => {
         setDraft((current) => (current ? updater(current) : current));
@@ -237,7 +252,7 @@ export function usePortfolioBuilderState() {
         [activeTab, updateActiveTab],
     );
 
-    const handleDragStart = useCallback((_event: DragStartEvent) => {
+    const handleDragStart = useCallback(() => {
         setIsDraggingBlock(true);
     }, []);
 
@@ -246,16 +261,16 @@ export function usePortfolioBuilderState() {
     }, []);
 
     const handleSave = useCallback(async () => {
-        if (!draft || !user?.id) {
+        if (!draft || !userId) {
             return false;
         }
         const response = await mutations.save.mutateAsync(draft);
         if (response.portfolio) {
-            savePortfolioDraft(user.id, toSaveRequest(response.portfolio));
+            savePortfolioDraft(userId, toSaveRequest(response.portfolio));
             return true;
         }
         return false;
-    }, [draft, mutations.save, user?.id]);
+    }, [draft, mutations.save, userId]);
 
     const updateSlug = useCallback(
         async (value: string) => {
