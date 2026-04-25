@@ -1,4 +1,4 @@
-import { useMemo } from "react";
+import { useMemo, useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { Link, useParams } from "react-router-dom";
 import { Loader2 } from "lucide-react";
@@ -14,6 +14,7 @@ type PublicPortfolioPageProps = {
 export function PublicPortfolioPage({ slug: forcedSlug, resolveFromHost = false }: PublicPortfolioPageProps) {
     const params = useParams();
     const slug = forcedSlug ?? params.slug ?? "";
+    const [activeTabId, setActiveTabId] = useState<string | undefined>();
     const queryKey = useMemo(
         () => (resolveFromHost ? ["portfolio", "host", slug] : portfolioQueryKeys.public(slug)),
         [resolveFromHost, slug],
@@ -24,6 +25,10 @@ export function PublicPortfolioPage({ slug: forcedSlug, resolveFromHost = false 
         enabled: slug.length > 0,
         staleTime: 30_000,
     });
+    const portfolio = query.data?.portfolio;
+    const resolvedActiveTabId = portfolio?.tabs.some((tab) => tab.id === activeTabId)
+        ? activeTabId
+        : portfolio?.tabs[0]?.id;
 
     if (query.isPending) {
         return (
@@ -36,7 +41,7 @@ export function PublicPortfolioPage({ slug: forcedSlug, resolveFromHost = false 
         );
     }
 
-    if (query.isError || !query.data?.portfolio) {
+    if (query.isError || !portfolio) {
         return (
             <main className="grid min-h-screen place-items-center bg-[#070A0F] px-6 text-white">
                 <div className="max-w-md text-center">
@@ -55,5 +60,5 @@ export function PublicPortfolioPage({ slug: forcedSlug, resolveFromHost = false 
         );
     }
 
-    return <PortfolioRenderer portfolio={query.data.portfolio} />;
+    return <PortfolioRenderer portfolio={portfolio} activeTabId={resolvedActiveTabId} onTabChange={setActiveTabId} />;
 }

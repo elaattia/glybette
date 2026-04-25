@@ -3,104 +3,14 @@ import type {
     PortfolioBlockType,
     PortfolioDocumentDTO,
     PortfolioIdentity,
-    PortfolioStyle,
     PortfolioTab,
     PortfolioTemplateId,
     SavePortfolioRequest,
 } from "@glybette/contracts";
+import { getTemplate } from "@/components/portfolio/template-config";
 
-export type PortfolioTemplateDefinition = {
-    id: PortfolioTemplateId;
-    name: string;
-    tone: string;
-    description: string;
-    columns: number;
-    defaultStyle: PortfolioStyle;
-    previewClassName: string;
-    surfaceClassName: string;
-    accentClassName: string;
-    layout: "editorial" | "signal" | "bloom" | "mono";
-    backgroundArtClassName: string;
-};
-
-export const portfolioTemplates: PortfolioTemplateDefinition[] = [
-    {
-        id: "atelier",
-        name: "Atelier Ledger",
-        tone: "Editorial, focused, quietly luxurious",
-        description: "A magazine-like portfolio with generous type, calm panels, and sharp project storytelling.",
-        columns: 2,
-        defaultStyle: {
-            theme: "dark",
-            accentColor: "#16A34A",
-            fontFamily: "Bricolage Grotesque",
-            radius: "soft",
-        },
-        previewClassName: "bg-[#101714] text-[#F4F0E8]",
-        surfaceClassName: "border-[#D9FF8F]/15 bg-[#F4F0E8]/7",
-        accentClassName: "text-[#C8FF69]",
-        layout: "editorial",
-        backgroundArtClassName:
-            "bg-[radial-gradient(circle_at_18%_12%,var(--portfolio-accent),transparent_24%),linear-gradient(135deg,rgba(255,255,255,0.08),transparent_36%),linear-gradient(90deg,transparent_49%,rgba(255,255,255,0.08)_50%,transparent_51%)]",
-    },
-    {
-        id: "signal",
-        name: "Signal Grid",
-        tone: "Industrial, technical, high-contrast",
-        description: "A dense grid for builders who want the portfolio to feel like a control room.",
-        columns: 2,
-        defaultStyle: {
-            theme: "dark",
-            accentColor: "#38BDF8",
-            fontFamily: "DM Sans",
-            radius: "sharp",
-        },
-        previewClassName: "bg-[#070A0F] text-[#E8F4FF]",
-        surfaceClassName: "border-[#38BDF8]/20 bg-[#0D1420]",
-        accentClassName: "text-[#38BDF8]",
-        layout: "signal",
-        backgroundArtClassName:
-            "bg-[linear-gradient(rgba(56,189,248,0.12)_1px,transparent_1px),linear-gradient(90deg,rgba(56,189,248,0.12)_1px,transparent_1px),radial-gradient(circle_at_80%_15%,var(--portfolio-accent),transparent_18%)] bg-[size:36px_36px,36px_36px,auto]",
-    },
-    {
-        id: "folio",
-        name: "Folio Bloom",
-        tone: "Soft, warm, personable",
-        description: "A lighter portfolio for profiles that need warmth, clarity, and an approachable rhythm.",
-        columns: 2,
-        defaultStyle: {
-            theme: "light",
-            accentColor: "#D97706",
-            fontFamily: "DM Sans",
-            radius: "round",
-        },
-        previewClassName: "bg-[#FFF7ED] text-[#29180A]",
-        surfaceClassName: "border-[#D97706]/20 bg-white/70",
-        accentClassName: "text-[#B45309]",
-        layout: "bloom",
-        backgroundArtClassName:
-            "bg-[radial-gradient(circle_at_50%_0%,rgba(255,255,255,0.95),transparent_28%),radial-gradient(circle_at_85%_22%,var(--portfolio-accent),transparent_18%),radial-gradient(circle_at_12%_70%,#FED7AA,transparent_24%)]",
-    },
-    {
-        id: "mono",
-        name: "Mono Dispatch",
-        tone: "Brutalist, compact, sharply typographic",
-        description: "A stripped-back profile for technical specialists who want proof, links, and signal fast.",
-        columns: 2,
-        defaultStyle: {
-            theme: "light",
-            accentColor: "#111827",
-            fontFamily: "Bricolage Grotesque",
-            radius: "sharp",
-        },
-        previewClassName: "bg-[#F6F1E7] text-[#111827]",
-        surfaceClassName: "border-[#111827]/25 bg-[#FFFDF7]",
-        accentClassName: "text-[#111827]",
-        layout: "mono",
-        backgroundArtClassName:
-            "bg-[linear-gradient(90deg,rgba(17,24,39,0.16)_1px,transparent_1px),linear-gradient(rgba(17,24,39,0.16)_1px,transparent_1px)] bg-[size:18px_18px]",
-    },
-];
+export { getTemplate, portfolioTemplates } from "@/components/portfolio/template-config";
+export type { PortfolioTemplateDefinition } from "@/components/portfolio/template-config";
 
 export const blockLibrary: Array<{
     type: PortfolioBlockType;
@@ -157,10 +67,6 @@ export function normalizePortfolioSlug(value: string) {
         .replace(/[^a-z0-9-]/g, "")
         .replace(/-+/g, "-")
         .replace(/^-|-$/g, "");
-}
-
-export function getTemplate(templateId: PortfolioTemplateId) {
-    return portfolioTemplates.find((template) => template.id === templateId) ?? portfolioTemplates[0];
 }
 
 function createId(prefix: string) {
@@ -261,7 +167,13 @@ export function createPortfolioBlock(type: PortfolioBlockType, row = 1): Portfol
                 ...base,
                 title: "Skills",
                 grid: { column: 1, row, columnSpan: 2, rowSpan: 1 },
-                data: { skills: ["React", "TypeScript", "Product thinking", "APIs"] },
+                data: {
+                    skills: ["React", "TypeScript", "Product thinking", "APIs"],
+                    skillGroups: [
+                        { label: "Engineering", skills: ["React", "TypeScript", "APIs"] },
+                        { label: "Product", skills: ["Product thinking", "Systems design"] },
+                    ],
+                },
             };
         case "contactCta":
             return {
@@ -327,8 +239,4 @@ export function toSaveRequest(portfolio: PortfolioDocumentDTO): SavePortfolioReq
         style: portfolio.style,
         tabs: portfolio.tabs,
     };
-}
-
-export function portfolioLocalStorageKey(userId: string, slug: string) {
-    return `glybette:portfolio:${userId}:${slug || "new"}`;
 }
