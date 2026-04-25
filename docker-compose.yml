@@ -71,7 +71,5 @@ services:
             dockerfile: Dockerfile
         ports:
             - "3002:3002"
-        environment:
-            - PORT=3002
         env_file:
-            - ./apps/scraping-service/.env
+            - .env

@@ -3,9 +3,10 @@ from datetime import datetime, timezone
 from pymongo import MongoClient, DESCENDING, ASCENDING
 from pymongo.errors import OperationFailure
 from loguru import logger
-from dotenv import load_dotenv
 
-load_dotenv()
+from utils.repo_env import load_root_env
+
+load_root_env()
 
 _client: MongoClient | None = None
 _db = None
@@ -32,7 +33,7 @@ def get_client() -> MongoClient:
 def get_db():
     global _db
     if _db is None:
-        db_name = os.getenv("MONGO_DB_NAME", "glybette")
+        db_name = os.getenv("SCRAPING_MONGODB_NAME", "glybette")
         _db = get_client()[db_name]
     return _db
 

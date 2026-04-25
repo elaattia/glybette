@@ -4,9 +4,10 @@ import os
 from abc import ABC, abstractmethod
 from datetime import datetime, timezone
 from loguru import logger
-from dotenv import load_dotenv
 
-load_dotenv()
+from utils.repo_env import load_root_env
+
+load_root_env()
 
 USER_AGENTS = [
     "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0.6367.82 Safari/537.36",

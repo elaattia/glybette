@@ -1,3 +1,7 @@
+from utils.repo_env import load_root_env
+
+load_root_env()
+
 import os
 from contextlib import asynccontextmanager
 from datetime import datetime, timezone, timedelta
