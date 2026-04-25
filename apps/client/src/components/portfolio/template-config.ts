@@ -56,6 +56,7 @@ export const portfolioTemplates: PortfolioTemplateDefinition[] = [
             "bg-[linear-gradient(color-mix(in_srgb,var(--portfolio-accent)_12%,transparent)_1px,transparent_1px),linear-gradient(90deg,color-mix(in_srgb,var(--portfolio-accent)_12%,transparent)_1px,transparent_1px),radial-gradient(circle_at_80%_15%,var(--portfolio-accent),transparent_18%)] bg-[size:36px_36px,36px_36px,auto]",
         pickerSurfaceClassName: "rounded-lg font-mono",
         pickerTitleClassName: "mt-8",
+        sidebarPreviewClassName: "rounded-none font-mono uppercase",
     },
     {
         id: "folio",
