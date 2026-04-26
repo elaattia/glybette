@@ -4,11 +4,29 @@ import { loadUsersServiceEnv } from "./config/env.js";
 import { connectDb } from "./config/db.js";
 import { createAuth } from "./config/auth.js";
 import { AuthController } from "./controllers/auth.controller.js";
+import { OtpController } from "./controllers/otp.controller.js";
 import { UserController } from "./controllers/user.controller.js";
+import { connectRabbitMq, ensureAuthEmailTopology } from "@glybette/messaging";
+import { OtpService } from "./services/otp.service.js";
 import { UserService } from "./services/user.service.js";
 import { registerAuthRoutes } from "./routes/auth.routes.js";
+import { registerOtpRoutes } from "./routes/otp.routes.js";
 import { registerUserRoutes } from "./routes/user.routes.js";
 import { errorHandler } from "./middleware/error-handler.js";
+
+async function connectRabbitMqWithWarnings(otpService: OtpService, rabbitMqUrl: string): Promise<void> {
+    try {
+        const rabbit = await connectRabbitMq(rabbitMqUrl);
+        await ensureAuthEmailTopology(rabbit.channel);
+        otpService.setRabbitClient(rabbit);
+        console.warn("[users-service] RabbitMQ connection established.");
+    } catch (error) {
+        const message = error instanceof Error ? error.message : "unknown connection error";
+        console.warn(
+            `[users-service] RabbitMQ unavailable at ${rabbitMqUrl}. Users service will run in degraded mode. Reason: ${message}`,
+        );
+    }
+}
 
 async function main() {
     const env = loadUsersServiceEnv();
@@ -16,8 +34,19 @@ async function main() {
 
     const auth = createAuth(env);
     const userService = new UserService();
+    const otpService = new OtpService(env, null);
+    await otpService.ensureIndexes();
+    if (env.EMAIL_DELIVERY_MODE === "service") {
+        await connectRabbitMqWithWarnings(otpService, env.RABBITMQ_URL);
+    } else {
+        console.warn(
+            `[users-service] EMAIL_DELIVERY_MODE=file. OTP emails will be written to ${env.EMAIL_LOG_DIR}.`,
+        );
+    }
+
     const authController = new AuthController(auth);
     const userController = new UserController(userService);
+    const otpController = new OtpController(otpService, userService);
 
     const app = new Hono();
     app.onError(errorHandler);
@@ -27,6 +56,7 @@ async function main() {
 
     registerAuthRoutes(app, authController);
     registerUserRoutes(app, userController);
+    registerOtpRoutes(app, otpController);
 
     serve(
         {
@@ -40,6 +70,7 @@ async function main() {
 }
 
 main().catch((err) => {
-    console.error("Failed to start users-service:", err);
+    const message = err instanceof Error ? err.message : "unknown startup error";
+    console.error(`Failed to start users-service: ${message}`);
     process.exit(1);
 });

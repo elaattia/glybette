@@ -2,7 +2,7 @@ import type { SelfResponse } from "@glybette/contracts";
 import { useQuery } from "@tanstack/react-query";
 import { useSetAtom } from "jotai";
 import { useEffect } from "react";
-import { setUnauthenticatedSessionAtom } from "@/features/auth/auth.atoms";
+import { setUnauthenticatedSessionAtom } from "@/state/auth/auth.atoms";
 import { ApiError, apiRequest } from "@/lib/api";
 import { useAuth } from "@/hooks/useAuth";
 

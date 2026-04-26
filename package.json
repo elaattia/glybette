@@ -3,9 +3,10 @@
     "private": true,
     "scripts": {
         "dev": "pnpm -r --parallel --filter \"./apps/*\" run dev",
+        "dev:rabbitmq": "docker compose up -d rabbitmq",
         "build": "pnpm -r --filter \"./apps/*...\" run build",
         "prepare": "pnpm -r --filter \"./packages/*\" run build",
-        "lint": "prettier --write .",
+        "format": "prettier --write . --ignore-path .gitignore",
         "install:all": "pnpm -r install",
         "docker:up": "docker compose up -d",
         "docker:down": "docker compose down"

@@ -1,5 +1,6 @@
 @import url('https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,700;12..96,800&family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;0,9..40,600;1,9..40,300&display=swap');
 @import "tailwindcss";
+@import "tw-animate-css";
 
 :root {
   --primary-from: #16A34A;
@@ -374,6 +375,46 @@ body {
 @media (prefers-reduced-motion: reduce) {
   [data-slot="dropdown-menu-content"][data-state="open"],
   [data-slot="dropdown-menu-content"][data-state="closed"] {
+    animation: none;
+  }
+}
+
+/*  TOOLTIP (Radix)  */
+[data-slot="tooltip-content"][data-state="instant-open"],
+[data-slot="tooltip-content"][data-state="delayed-open"] {
+  animation: gb-tooltip-in 120ms cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+[data-slot="tooltip-content"][data-state="closed"] {
+  animation: gb-tooltip-out 90ms ease-in forwards;
+}
+
+@keyframes gb-tooltip-in {
+  from {
+    opacity: 0;
+    transform: translateY(2px) scale(0.98);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+@keyframes gb-tooltip-out {
+  from {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+  to {
+    opacity: 0;
+    transform: translateY(1px) scale(0.99);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  [data-slot="tooltip-content"][data-state="instant-open"],
+  [data-slot="tooltip-content"][data-state="delayed-open"],
+  [data-slot="tooltip-content"][data-state="closed"] {
     animation: none;
   }
 }

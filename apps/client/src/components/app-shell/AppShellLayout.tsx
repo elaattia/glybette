@@ -46,34 +46,36 @@ export default function AppShellLayout() {
         return { title: "Glybette workspace", subtitle: "Build your career assets and stay discoverable." };
     }, [location.pathname]);
 
-    return (
-        <div className="min-h-screen bg-[var(--gb-bg)] text-[var(--gb-text)]">
-            <div className="grid min-h-screen grid-cols-1 md:h-screen md:grid-cols-[260px_minmax(0,1fr)] md:overflow-hidden">
-                <div className="hidden md:sticky md:top-0 md:block md:h-screen">
-                    <AppSidebar />
-                </div>
-                <div className="relative md:h-screen md:overflow-y-auto">
-                    <AppTopbar title={title} subtitle={subtitle} onMenuClick={() => setMobileOpen(true)} />
-                    <main className="px-4 py-5 md:px-6 md:py-6">
-                        <Outlet />
-                    </main>
-                </div>
-            </div>
-            {mobileOpen ? (
-                <div className="fixed inset-0 z-40 md:hidden">
-                    <button
-                        type="button"
-                        className="absolute inset-0 bg-black/55"
-                        onClick={() => setMobileOpen(false)}
-                        aria-label="Close navigation panel"
-                    />
-                    <div className="absolute left-0 top-0 h-full w-[285px]">
-                        <AppSidebar onNavigate={() => setMobileOpen(false)} />
-                    </div>
-                </div>
-            ) : null}
+  return (
+    <div className="min-h-screen bg-[var(--gb-bg)] text-[var(--gb-text)]">
+      <div className="grid min-h-screen grid-cols-1 md:h-screen md:grid-cols-[auto_minmax(0,1fr)] md:overflow-hidden">
+        <div className="hidden md:sticky md:top-0 md:block md:h-screen">
+          <AppSidebar />
         </div>
-    );
+
+        <div className="relative md:h-screen md:overflow-y-auto">
+          <AppTopbar title={title} subtitle={subtitle} onMenuClick={() => setMobileOpen(true)} />
+          <main className="px-4 py-5 md:px-6 md:py-6">
+            <Outlet />
+          </main>
+        </div>
+      </div>
+
+      {mobileOpen ? (
+        <div className="fixed inset-0 z-40 md:hidden">
+          <button
+            type="button"
+            className="absolute inset-0 bg-black/55"
+            onClick={() => setMobileOpen(false)}
+            aria-label="Close navigation panel"
+          />
+          <div className="absolute left-0 top-0 h-full w-[285px]">
+            <AppSidebar layout="drawer" onNavigate={() => setMobileOpen(false)} />
+          </div>
+        </div>
+      ) : null}
+    </div>
+  );
 }
 
 

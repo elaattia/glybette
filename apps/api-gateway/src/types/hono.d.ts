@@ -6,7 +6,7 @@ declare module "hono" {
         requestId: string;
         gatewayEnv: GatewayEnv;
         services: ServiceRegistry;
-        gatewayAuth?: { userId: string; roles: string[] };
+        gatewayAuth?: { userId: string; roles: string[]; requiresEmailVerification: boolean };
     }
 }
 

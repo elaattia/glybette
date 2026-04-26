@@ -1,17 +1,15 @@
 import type { Hono } from "hono";
+import { gatewayProxyRoutes } from "../config/proxy-routes.js";
 import type { GatewayEnv } from "../config/env.js";
 import type { ServiceRegistry } from "../config/services.js";
-import { registerUsersServiceRoutes } from "./services/users.routes.js";
-import { registerScrapingServiceRoutes } from "./services/scraping.routes.js";
-import { registerCvServiceRoutes }      from "./services/cv.routes.js"; 
+import { registerProxyRoutes } from "./register-proxy-routes.js";
 
-
+/**
+ * Mount upstream proxies from {@link gatewayProxyRoutes}.
+ */
 export function registerServiceRoutes(
     api: Hono,
     ctx: { env: GatewayEnv; services: ServiceRegistry },
 ): void {
-    registerUsersServiceRoutes(api, ctx);
-    registerScrapingServiceRoutes(api, ctx);
-    registerCvServiceRoutes(api, ctx); 
-
+    registerProxyRoutes(api, ctx, gatewayProxyRoutes);
 }

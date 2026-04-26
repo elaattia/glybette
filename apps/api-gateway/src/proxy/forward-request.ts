@@ -10,7 +10,7 @@ type HttpMethod = "GET" | "POST" | "PUT" | "DELETE" | "PATCH";
 
 export type ForwardRequestOptions = {
     timeoutMs: number;
-    
+
     injectGatewayAuth?: boolean;
     method?: HttpMethod;
 };
@@ -30,18 +30,17 @@ export async function forwardToService(
 ): Promise<Response> {
     const url = joinBaseAndPath(baseUrl, pathWithQuery);
     const inject = options.injectGatewayAuth === true;
+    const auth = inject ? c.get("gatewayAuth") : undefined;
+    const injectHeaders = inject && !!auth;
     const headers = sanitizeProxyHeaders(c.req.raw.headers, {
-        stripAuthorization: inject,
+        stripAuthorization: injectHeaders,
     });
 
-    if (inject) {
-        const auth = c.get("gatewayAuth");
-        if (auth) {
-            headers.set(AUTH_HEADER_USER_ID, auth.userId);
-            headers.set(AUTH_HEADER_ROLES, auth.roles.join(","));
-            const secret = process.env.INTERNAL_SERVICE_SECRET ?? "dev-secret-ela";
-            headers.set("x-inter-secret", secret);
-        }
+    if (injectHeaders && auth) {
+        headers.set(AUTH_HEADER_USER_ID, auth.userId);
+        headers.set(AUTH_HEADER_ROLES, auth.roles.join(","));
+        const secret = process.env.INTERNAL_SERVICE_SECRET ?? "dev-secret-ela";
+        headers.set("x-internal-secret", secret);
     }
 
     const body = c.req.raw.body;

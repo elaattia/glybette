@@ -20,6 +20,13 @@ const usersServiceEnvSchema = baseEnvSchema.extend({
     GITHUB_CLIENT_SECRET: z.string().optional(),
     LINKEDIN_CLIENT_ID: z.string().optional(),
     LINKEDIN_CLIENT_SECRET: z.string().optional(),
+    EMAIL_DELIVERY_MODE: z.enum(["service", "file"]).default("service"),
+    EMAIL_LOG_DIR: z.string().min(1).default("./logs"),
+    RABBITMQ_URL: z.string().min(1).default("amqp://localhost:5672"),
+    OTP_SECRET: z.string().min(16).default("dev-otp-secret-change-me"),
+    OTP_TTL_SECONDS: z.coerce.number().int().min(60).max(3600).default(600),
+    OTP_COOLDOWN_SECONDS: z.coerce.number().int().min(15).max(600).default(60),
+    OTP_MAX_ATTEMPTS: z.coerce.number().int().min(3).max(10).default(5),
 });
 
 export type UsersServiceEnv = z.infer<typeof usersServiceEnvSchema>;

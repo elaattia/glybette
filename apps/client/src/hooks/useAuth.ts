@@ -6,8 +6,21 @@ import {
     setAuthenticatedSessionAtom,
     setAuthCheckingAtom,
     setUnauthenticatedSessionAtom,
-} from "@/features/auth/auth.atoms";
+} from "@/state/auth/auth.atoms";
 import { authClient } from "@/lib/auth-client";
+import { ApiError } from "@/lib/api";
+
+type BetterAuthMaybeError = { error?: { message?: string } | null } | null | undefined;
+
+function assertNoAuthError(result: BetterAuthMaybeError, fallbackMessage: string): void {
+    const message = result?.error?.message;
+    if (message) {
+        throw new ApiError(message, 400, "AUTH_FAILED");
+    }
+    if (result && "error" in result && result.error) {
+        throw new ApiError(fallbackMessage, 400, "AUTH_FAILED");
+    }
+}
 
 export function useAuthBootstrap() {
     const setChecking = useSetAtom(setAuthCheckingAtom);
@@ -16,10 +29,13 @@ export function useAuthBootstrap() {
     const sessionQuery = authClient.useSession();
 
     useEffect(() => {
+        if (sessionQuery.data !== undefined) {
+            return;
+        }
         if (sessionQuery.isPending || sessionQuery.isRefetching) {
             setChecking();
         }
-    }, [sessionQuery.isPending, sessionQuery.isRefetching, setChecking]);
+    }, [sessionQuery.data, sessionQuery.isPending, sessionQuery.isRefetching, setChecking]);
 
     useEffect(() => {
         if (!sessionQuery.data?.session) {
@@ -30,14 +46,14 @@ export function useAuthBootstrap() {
     }, [sessionQuery.data, setAuthenticated]);
 
     useEffect(() => {
-        if (sessionQuery.isPending || sessionQuery.isRefetching) {
+        if (sessionQuery.data === undefined) {
             return;
         }
 
         if (!sessionQuery.data?.session) {
             setUnauthenticated();
         }
-    }, [sessionQuery.data, sessionQuery.isPending, sessionQuery.isRefetching, setUnauthenticated]);
+    }, [sessionQuery.data, setUnauthenticated]);
 
     return sessionQuery;
 }
@@ -63,12 +79,24 @@ export function useAuth() {
         ...authSession,
         session: sessionQuery.data?.session ?? null,
         isAuthenticated: authSession.status === "authenticated" && Boolean(sessionQuery.data?.session),
-        isChecking: authSession.status === "checking" || sessionQuery.isPending || sessionQuery.isRefetching,
+        isChecking:
+            authSession.status === "checking" ||
+            (sessionQuery.data === undefined &&
+                (sessionQuery.isPending || sessionQuery.isRefetching)),
         startGoogleSignIn: async () => {
-            await authClient.signIn.social({
+            const result = (await authClient.signIn.social({
                 provider: "google",
                 callbackURL: `${window.location.origin}/auth/callback`,
-            });
+            })) as BetterAuthMaybeError;
+            assertNoAuthError(result, "Google sign-in failed");
+        },
+        startEmailPasswordSignIn: async (email: string, password: string) => {
+            const result = (await authClient.signIn.email({
+                email,
+                password,
+                callbackURL: `${window.location.origin}/auth/callback`,
+            })) as BetterAuthMaybeError;
+            assertNoAuthError(result, "Email sign-in failed");
         },
         logout: logoutMutation.mutateAsync,
         logoutMutation,

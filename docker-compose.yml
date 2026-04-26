@@ -1,4 +1,12 @@
 services:
+    rabbitmq:
+        image: rabbitmq:3.13-management
+        ports:
+            - "5672:5672"
+            - "15672:15672"
+        environment:
+            - RABBITMQ_DEFAULT_USER=guest
+            - RABBITMQ_DEFAULT_PASS=guest
     api-gateway:
         build:
             context: .
@@ -12,11 +20,16 @@ services:
             - NODE_ENV=production
             - USERS_SERVICE_URL=http://users-service:3001
             - SCRAPING_SERVICE_URL=http://scraping-service:3002
+            - EMAIL_SERVICE_URL=http://email-service:3003
+            - PORTFOLIO_SERVICE_URL=http://portfolio-service:3004
         env_file:
             - .env
         depends_on:
+            - rabbitmq
             - users-service
             - scraping-service
+            - email-service
+            - portfolio-service
     users-service:
         build:
             context: .
@@ -27,16 +40,54 @@ services:
             - "3001:3001"
         environment:
             - PORT=3001
+            - PORT_USERS_SERVICE=3001
+            - NODE_ENV=production
+            - RABBITMQ_URL=amqp://rabbitmq:5672
+        env_file:
+            - .env
+        depends_on:
+            - rabbitmq
+    email-service:
+        build:
+            context: .
+            dockerfile: Dockerfile
+            args:
+                APP_NAME: email-service
+        ports:
+            - "3003:3003"
+        environment:
+            - PORT=3003
+            - PORT_EMAIL_SERVICE=3003
+            - NODE_ENV=production
+            - RABBITMQ_URL=amqp://rabbitmq:5672
+            - EMAIL_PROVIDER=${EMAIL_PROVIDER:-mock}
+            - EMAIL_FROM=${EMAIL_FROM:-no-reply@glybette.dev}
+            - RESEND_API_KEY=${RESEND_API_KEY:-}
+        env_file:
+            - .env
+        depends_on:
+            - rabbitmq
+    portfolio-service:
+        build:
+            context: .
+            dockerfile: Dockerfile
+            args:
+                APP_NAME: portfolio-service
+        ports:
+            - "3004:3004"
+        environment:
+            - PORT=3004
+            - PORT_PORTFOLIO_SERVICE=3004
             - NODE_ENV=production
         env_file:
             - .env
+        depends_on:
+            - rabbitmq
     scraping-service:
         build: 
             context: ./apps/scraping-service
             dockerfile: Dockerfile
         ports:
             - "3002:3002"
-        environment:
-            - PORT=3002
         env_file:
-            - ./apps/scraping-service/.env
+            - .env

@@ -37,6 +37,14 @@ export function createAuth(env: UsersServiceEnv) {
         },
         user: {
             modelName: "users",
+            additionalFields: {
+                isPremium: {
+                    type: "boolean",
+                    required: false,
+                    defaultValue: false,
+                    input: false,
+                },
+            },
         },
         session: {
             modelName: "auth_sessions",
@@ -49,7 +57,7 @@ export function createAuth(env: UsersServiceEnv) {
         },
         database: mongodbAdapter(db, { client }),
         emailAndPassword: {
-            enabled: false,
+            enabled: true,
         },
         socialProviders: {
             ...(env.GOOGLE_CLIENT_ID &&

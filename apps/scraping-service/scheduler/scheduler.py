@@ -4,9 +4,9 @@ from loguru import logger
 from apscheduler.schedulers.background import BackgroundScheduler
 from apscheduler.triggers.interval import IntervalTrigger
 from apscheduler.events import EVENT_JOB_ERROR, EVENT_JOB_EXECUTED
-from dotenv import load_dotenv
+from utils.repo_env import load_root_env
 
-load_dotenv()
+load_root_env()
 
 _scheduler: BackgroundScheduler | None = None
 
