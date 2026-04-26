@@ -1,7 +1,3 @@
-// packages/types/src/scraping.ts
-// Types partagés pour le service de scraping
-// Utilisés par l'api-gateway ET le client React
-
 export type TypeOffre = "emploi" | "stage" | "pfe" | "opportunite";
 
 export type SourceSite =
@@ -14,7 +10,6 @@ export interface Offre {
   _id: string;
   hash_unique: string;
 
-  // Infos principales
   titre: string;
   entreprise?: string | null;
   description?: string | null;
@@ -23,31 +18,32 @@ export interface Offre {
   salaire?: string | null;
   type_contrat?: string | null;
 
-  // Liens
   lien_original: string;
   lien_image?: string | null;
 
-  // Classification
   type_offre: TypeOffre;
   domaine?: string | null;
   status: "active" | "archivee";
   source_site: SourceSite;
 
-  // Dates (ISO string après sérialisation)
   date_publication?: string | null;
   date_scraped: string;
   date_updated: string;
 
-  // Stats
   nb_vues: number;
   nb_clics: number;
 
-  // Champs PFEBooks
+  company_about?: string | null;       
+  niveau_experience?: string | null;   
+  taille_entreprise?: string | null;   
+  teletravail?: string | null;         
+  nb_candidats?: string | null;        
+  site_web_entreprise?: string | null;
+
   categories?: string[] | null;
   nb_sujets?: number | null;
   email_contact?: string | null;
   telephone?: string | null;
-  site_web_entreprise?: string | null;
 }
 
 export interface OffresResponse {
@@ -65,6 +61,9 @@ export interface OffresFilters {
   page?: number;
   limit?: number;
   tri?: "recent" | "vues";
+  date_posted?: "today" | "this_week" | "this_hour" | "3days";
+  teletravail?: "remote" | "hybrid" | "onsite";
+  niveau_experience?: string;
 }
 
 export interface ScrapingStats {

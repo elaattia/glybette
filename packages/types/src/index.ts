@@ -1,4 +1,5 @@
 export * from "./scraping.js";
+export * from "./cv.js";
 
 export type OnboardingStep =
   | 'personal-info'
@@ -8,7 +9,6 @@ export type OnboardingStep =
   | 'background'
   | 'complete'
 
-// Étape 1 — Personal Info
 export interface PersonalInfoPayload {
   firstName: string
   lastName: string
@@ -17,7 +17,6 @@ export interface PersonalInfoPayload {
   country: string
 }
 
-// Étape 2 — Academic Background
 export interface AcademicBackgroundPayload {
   university: string
   degree: string
@@ -25,14 +24,12 @@ export interface AcademicBackgroundPayload {
   graduationYear: string
 }
 
-// Étape 3 — Journey
 export type JourneyType = 'Student' | 'Graduate' | 'Job Seeker'
 
 export interface JourneyPayload {
   journey: JourneyType
 }
 
-// Étape 4 — Looking For
 export type OpportunityType =
   | 'Internship'
   | 'PFE'
@@ -45,7 +42,6 @@ export interface LookingForPayload {
   opportunities: OpportunityType[]
 }
 
-// Étape 5 — Background/Domain
 export type Domain =
   | 'IT'
   | 'Architecture'
@@ -58,13 +54,11 @@ export interface BackgroundPayload {
   domain: Domain
 }
 
-// Status global
 export interface OnboardingStatus {
   currentStep: OnboardingStep
   completed: boolean
 }
 
-// Payload complet
 export interface OnboardingData {
   personalInfo?: PersonalInfoPayload
   academicBackground?: AcademicBackgroundPayload

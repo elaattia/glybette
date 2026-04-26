@@ -23,8 +23,8 @@ def get_client() -> MongoClient:
             uri,
             serverSelectionTimeoutMS=5000,
             connectTimeoutMS=5000,
-            tz_aware=True,          
-            tzinfo=timezone.utc,    
+            tz_aware=True,
+            tzinfo=timezone.utc,
         )
     return _client
 
@@ -37,23 +37,16 @@ def get_db():
     return _db
 
 
-
-def col_offres():
-    return get_db()["offres"]
-
-def col_archives():
-    return get_db()["offres_archives"]
-
-def col_logs():
-    return get_db()["scraping_logs"]
-
+def col_offres():     return get_db()["offres"]
+def col_archives():   return get_db()["offres_archives"]
+def col_logs():       return get_db()["scraping_logs"]
 
 
 def init_db():
     try:
         db = get_db()
-
         offres = db["offres"]
+
         offres.create_index("hash_unique", unique=True)
         offres.create_index([("type_offre",   ASCENDING)])
         offres.create_index([("source_site",  ASCENDING)])
@@ -61,10 +54,16 @@ def init_db():
         offres.create_index([("date_scraped", DESCENDING)])
         offres.create_index([("date_publication", DESCENDING)])
         offres.create_index([("localisation", ASCENDING)])
+        offres.create_index([("nb_vues",      DESCENDING)])
+
+        offres.create_index([("teletravail",        ASCENDING)])
+        offres.create_index([("niveau_experience",  ASCENDING)])
+
         offres.create_index([
             ("titre",       "text"),
             ("description", "text"),
             ("entreprise",  "text"),
+            ("competences", "text"),
         ], name="text_search_index")
 
         archives = db["offres_archives"]
@@ -72,11 +71,11 @@ def init_db():
         archives.create_index([("date_archivage", DESCENDING)])
         archives.create_index([("type_offre",     ASCENDING)])
 
-        logger.success("MongoDB initialisee index crees")
+        logger.success("MongoDB initialisée — index créés")
 
     except OperationFailure as e:
         if "IndexOptionsConflict" in str(e) or "already exists" in str(e):
-            logger.warning("Index deje existant skip creation")
+            logger.warning("Index déjà existant — skip création")
         else:
             raise
     except Exception as e:
@@ -94,47 +93,46 @@ def test_connection() -> bool:
         return False
 
 
-
 def make_offre_doc(data: dict) -> dict:
     """
     Construit un document MongoDB complet depuis les données normalisées.
-    Toutes les dates sont UTC-aware (datetime avec timezone.utc).
+    Toutes les dates sont UTC-aware.
     """
     _now = now_utc()
     return {
-        "hash_unique":      data.get("hash_unique", ""),
+        "hash_unique": data.get("hash_unique", ""),
 
-      
-        "titre":            data.get("titre", ""),
-        "entreprise":       data.get("entreprise"),
-        "description":      data.get("description"),
-        "competences":      data.get("competences", []),
-        "localisation":     data.get("localisation"),
-        "salaire":          data.get("salaire"),
-        "type_contrat":     data.get("type_contrat"),
+        "titre":        data.get("titre", ""),
+        "entreprise":   data.get("entreprise"),
+        "description":  data.get("description"),
+        "competences":  data.get("competences", []),
+        "localisation": data.get("localisation"),
+        "salaire":      data.get("salaire"),
+        "type_contrat": data.get("type_contrat"),
 
-       
         "lien_original":    data.get("lien_original") or data.get("lien", ""),
         "lien_image":       data.get("lien_image"),
 
+        "type_offre":  data.get("type_offre", "emploi"),
+        "domaine":     data.get("domaine"),
+        "status":      "active",
+        "source_site": data.get("source_site", ""),
 
-        "type_offre":       data.get("type_offre", "emploi"),
-        "domaine":          data.get("domaine"),
-        "status":           "active",
-        "source_site":      data.get("source_site", ""),
+        "company_about":       data.get("company_about"),       
+        "niveau_experience":   data.get("niveau_experience"),   
+        "taille_entreprise":   data.get("taille_entreprise"),   
+        "teletravail":         data.get("teletravail"),         
+        "nb_candidats":        data.get("nb_candidats"),        
+        "site_web_entreprise": data.get("site_web_entreprise"),
+        "email_contact":       data.get("email_contact"),
 
-        #pfebooks 
-        "categories":           data.get("categories"),
-        "nb_sujets":            data.get("nb_sujets"),
-        "email_contact":        data.get("email_contact"),
-        "telephone":            data.get("telephone"),
-        "site_web_entreprise":  data.get("site_web_entreprise"),
+        "categories":  data.get("categories"),
+        "nb_sujets":   data.get("nb_sujets"),
+        "telephone":   data.get("telephone"),
 
-
-        "date_publication": data.get("date_publication"),  
+        "date_publication": data.get("date_publication"),
         "date_scraped":     _now,
         "date_updated":     _now,
-
 
         "nb_vues":  0,
         "nb_clics": 0,

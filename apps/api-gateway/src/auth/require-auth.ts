@@ -7,10 +7,7 @@ import {
 import type { GatewayEnv } from "../config/env.js";
 import type { ServiceRegistry } from "../config/services.js";
 
-/**
- * Validates the Better Auth browser session and sets `gatewayAuth`
- * for downstream proxy injection.
- */
+
 export function requireBetterAuthSession(env: GatewayEnv, services: ServiceRegistry) {
     return createMiddleware(async (c, next) => {
         const controller = new AbortController();

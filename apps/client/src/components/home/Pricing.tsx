@@ -121,7 +121,6 @@ export default function Pricing() {
             <p>Start free and unlock the full power of Glybette Pro when you're ready.</p>
           </div>
           <div className="gb-pricing-grid">
-            {/*essential */}
             <div className="gb-pcard">
               <div className="gb-plan-name">Essential</div>
               <div className="gb-plan-price">
@@ -134,7 +133,6 @@ export default function Pricing() {
               </ul>
               <a href="/onboarding" className="gb-btn-plan outline">Get Started Free</a>
             </div>
-            {/* Pro */}
             <div className="gb-pcard featured">
               <div className="gb-popular-badge">Most Popular</div>
               <div className="gb-plan-name">Professional</div>
