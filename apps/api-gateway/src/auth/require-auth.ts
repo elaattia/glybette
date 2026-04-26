@@ -14,6 +14,39 @@ export type GatewayAuthPayload = {
     requiresEmailVerification: boolean;
 };
 
+export function requireBetterAuthSession(env: GatewayEnv, services: ServiceRegistry) {
+    return createMiddleware(async (c, next) => {
+        const auth = await fetchGatewayAuthFromSession(env, services, c.req.raw.headers);
+        if (!auth) {
+            return c.json(
+                {
+                    error: {
+                        code: "UNAUTHORIZED",
+                        message: "Authentication required",
+                    },
+                },
+                401,
+            );
+        }
+        if (
+            auth.requiresEmailVerification &&
+            !isVerificationAllowlisted(new URL(c.req.url).pathname)
+        ) {
+            return c.json(
+                {
+                    error: {
+                        code: "EMAIL_VERIFICATION_REQUIRED",
+                        message: "Email verification is required before accessing this resource",
+                    },
+                },
+                403,
+            );
+        }
+        c.set("gatewayAuth", auth);
+        await next();
+    });
+}
+
 const VERIFICATION_ALLOWLIST = [
     "/api/auth/otp",
     "/api/auth/verification-status",

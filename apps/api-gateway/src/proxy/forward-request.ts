@@ -9,11 +9,8 @@ import {
 type HttpMethod = "GET" | "POST" | "PUT" | "DELETE" | "PATCH";
 
 export type ForwardRequestOptions = {
-    /** Upstream timeout (abort fetch when exceeded). */
     timeoutMs: number;
-    /**
-     * When true, strip client Authorization and inject internal auth headers from `gatewayAuth`.
-     */
+
     injectGatewayAuth?: boolean;
     method?: HttpMethod;
 };
@@ -24,9 +21,7 @@ function joinBaseAndPath(baseUrl: string, pathWithQuery: string): string {
     return `${base}${path}`;
 }
 
-/**
- * Forward the incoming request to an upstream service with sanitized headers and optional streaming body.
- */
+
 export async function forwardToService(
     c: Context,
     baseUrl: string,
@@ -44,6 +39,8 @@ export async function forwardToService(
     if (injectHeaders && auth) {
         headers.set(AUTH_HEADER_USER_ID, auth.userId);
         headers.set(AUTH_HEADER_ROLES, auth.roles.join(","));
+        const secret = process.env.INTERNAL_SERVICE_SECRET ?? "dev-secret-ela";
+        headers.set("x-internal-secret", secret);
     }
 
     const body = c.req.raw.body;

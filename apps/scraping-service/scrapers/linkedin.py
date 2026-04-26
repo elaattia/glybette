@@ -29,7 +29,6 @@ class LinkedInScraper(BaseScraper):
     ]
 
     DOMAIN_QUERIES = [
-        # Technologie & Informatique
         {"q": "Software Developer",         "location": "Tunisie", "type": "emploi"},
         {"q": "Software Engineer",          "location": "Tunisie", "type": "emploi"},
         {"q": "Développeur web",            "location": "Tunisie", "type": "emploi"},
@@ -56,92 +55,39 @@ class LinkedInScraper(BaseScraper):
         {"q": "Embedded Software Engineer", "location": "Tunisie", "type": "emploi"},
         {"q": "Flutter Developer",          "location": "Tunisie", "type": "emploi"},
         {"q": "Blockchain Developer",       "location": "Tunisie", "type": "emploi"},
-
-        # Design & Créatif
         {"q": "UI UX Designer",             "location": "Tunisie", "type": "emploi"},
         {"q": "Graphic Designer",           "location": "Tunisie", "type": "emploi"},
         {"q": "Motion Designer",            "location": "Tunisie", "type": "emploi"},
         {"q": "Product Designer",           "location": "Tunisie", "type": "emploi"},
-
-        # Finance & Comptabilité
         {"q": "Comptable",                  "location": "Tunisie", "type": "emploi"},
         {"q": "Expert Comptable",           "location": "Tunisie", "type": "emploi"},
         {"q": "Contrôleur de Gestion",      "location": "Tunisie", "type": "emploi"},
         {"q": "Analyste Financier",         "location": "Tunisie", "type": "emploi"},
         {"q": "Auditeur",                   "location": "Tunisie", "type": "emploi"},
         {"q": "Directeur Financier CFO",    "location": "Tunisie", "type": "emploi"},
-        {"q": "Trésorier Finance",          "location": "Tunisie", "type": "emploi"},
-        {"q": "Fiscaliste",                 "location": "Tunisie", "type": "emploi"},
-
-        # Banque & Assurance
-        {"q": "Conseiller Bancaire",        "location": "Tunisie", "type": "emploi"},
-        {"q": "Analyste Crédit Risque",     "location": "Tunisie", "type": "emploi"},
-        {"q": "Chargé d'affaires Banque",   "location": "Tunisie", "type": "emploi"},
-        {"q": "Gestionnaire Assurance",     "location": "Tunisie", "type": "emploi"},
-        {"q": "Actuaire",                   "location": "Tunisie", "type": "emploi"},
-
-        # Marketing & Communication
         {"q": "Marketing Manager",          "location": "Tunisie", "type": "emploi"},
         {"q": "Digital Marketing",          "location": "Tunisie", "type": "emploi"},
         {"q": "Community Manager",          "location": "Tunisie", "type": "emploi"},
         {"q": "Content Manager",            "location": "Tunisie", "type": "emploi"},
         {"q": "SEO SEM",                    "location": "Tunisie", "type": "emploi"},
         {"q": "Growth Hacker",              "location": "Tunisie", "type": "emploi"},
-        {"q": "Brand Manager",              "location": "Tunisie", "type": "emploi"},
-
-        # Vente & Commercial
         {"q": "Commercial Ingénieur Vente", "location": "Tunisie", "type": "emploi"},
         {"q": "Business Developer",         "location": "Tunisie", "type": "emploi"},
         {"q": "Account Manager",            "location": "Tunisie", "type": "emploi"},
-        {"q": "Sales Manager",              "location": "Tunisie", "type": "emploi"},
-        {"q": "Customer Success",           "location": "Tunisie", "type": "emploi"},
-        {"q": "Téléconseiller Call Center", "location": "Tunisie", "type": "emploi"},
-
-        # Ressources Humaines
         {"q": "HR Manager Responsable RH",  "location": "Tunisie", "type": "emploi"},
         {"q": "Chargé de Recrutement",      "location": "Tunisie", "type": "emploi"},
-        {"q": "Talent Acquisition",         "location": "Tunisie", "type": "emploi"},
-        {"q": "Gestionnaire Paie",          "location": "Tunisie", "type": "emploi"},
-
-        # Juridique
-        {"q": "Juriste Conseiller Juridique","location": "Tunisie", "type": "emploi"},
-        {"q": "Compliance Officer",         "location": "Tunisie", "type": "emploi"},
-
-        # Ingénierie & Industrie
         {"q": "Ingénieur Mécanique",        "location": "Tunisie", "type": "emploi"},
         {"q": "Ingénieur Électrique",       "location": "Tunisie", "type": "emploi"},
         {"q": "Ingénieur Industriel",       "location": "Tunisie", "type": "emploi"},
-        {"q": "Ingénieur Production",       "location": "Tunisie", "type": "emploi"},
         {"q": "Ingénieur Qualité HSE",      "location": "Tunisie", "type": "emploi"},
-        {"q": "Technicien Maintenance",     "location": "Tunisie", "type": "emploi"},
         {"q": "Ingénieur Télécoms",         "location": "Tunisie", "type": "emploi"},
         {"q": "Ingénieur Génie Civil",      "location": "Tunisie", "type": "emploi"},
-        {"q": "Lean Manufacturing",         "location": "Tunisie", "type": "emploi"},
-        {"q": "Automatisme Robotique",      "location": "Tunisie", "type": "emploi"},
-        {"q": "Ingénieur Aéronautique",     "location": "Tunisie", "type": "emploi"},
-        {"q": "Ingénieur Automobile",       "location": "Tunisie", "type": "emploi"},
-
-        # Santé
         {"q": "Médecin",                    "location": "Tunisie", "type": "emploi"},
         {"q": "Pharmacien",                 "location": "Tunisie", "type": "emploi"},
-        {"q": "Délégué Médical",            "location": "Tunisie", "type": "emploi"},
-        {"q": "Infirmier",                  "location": "Tunisie", "type": "emploi"},
-
-        # Éducation
-        {"q": "Formateur Enseignant",       "location": "Tunisie", "type": "emploi"},
-        {"q": "E-learning",                 "location": "Tunisie", "type": "emploi"},
-
-        # Logistique
         {"q": "Supply Chain Manager",       "location": "Tunisie", "type": "emploi"},
-        {"q": "Responsable Achats",         "location": "Tunisie", "type": "emploi"},
         {"q": "Responsable Logistique",     "location": "Tunisie", "type": "emploi"},
-
-        # Direction
         {"q": "Directeur Général CEO",      "location": "Tunisie", "type": "emploi"},
         {"q": "CTO Directeur Technique",    "location": "Tunisie", "type": "emploi"},
-        {"q": "COO Directeur Opérations",   "location": "Tunisie", "type": "emploi"},
-
-        # France remote — offres accessibles à distance
         {"q": "Développeur",      "location": "France", "remote": True, "type": "emploi"},
         {"q": "Data",             "location": "France", "remote": True, "type": "emploi"},
         {"q": "DevOps",           "location": "France", "remote": True, "type": "emploi"},
@@ -232,7 +178,7 @@ class LinkedInScraper(BaseScraper):
         if q:
             base += f"&keywords={q}"
         if remote:
-            base += "&f_WT=2"  
+            base += "&f_WT=2"
 
         for page_start in [0, 25, 50]:
             url = f"{base}&start={page_start}"
@@ -256,13 +202,20 @@ class LinkedInScraper(BaseScraper):
                         break
 
                 if not cards:
-                    break  
+                    break
 
                 page_offres = 0
                 for card in cards:
                     try:
                         o = await self._parse_card(card, query["type"])
                         if o and o.get("titre") and len(o["titre"]) > 3:
+                            if o.get("lien"):
+                                try:
+                                    detail = await self._scrape_detail(page, o["lien"])
+                                    o.update(detail)
+                                    await asyncio.sleep(random.uniform(2, 4))
+                                except Exception as e:
+                                    logger.debug(f"[LinkedIn] détail impossible: {e}")
                             offres.append(self.normalize(o))
                             self.stats["scraped"] += 1
                             page_offres += 1
@@ -270,7 +223,7 @@ class LinkedInScraper(BaseScraper):
                         pass
 
                 if page_offres < 5:
-                    break  
+                    break
 
                 await asyncio.sleep(random.uniform(3, 6))
 
@@ -282,6 +235,156 @@ class LinkedInScraper(BaseScraper):
                 break
 
         return offres
+
+    async def _scrape_detail(self, page, url: str) -> dict:
+        """Scrape la page détail d'une offre LinkedIn pour récupérer :
+        - Description complète (À propos de l'offre d'emploi)
+        - À propos de l'entreprise
+        - Critères (type emploi, niveau, secteur, taille entreprise)
+        - Salaire si affiché
+        - Email de contact si présent
+        """
+        result = {}
+        try:
+            await page.goto(url, wait_until="domcontentloaded", timeout=30000)
+            await asyncio.sleep(random.uniform(2, 3))
+
+            for see_more_sel in [
+                "button.show-more-less-html__button",
+                "button[aria-label*='more']",
+                ".show-more-less-html__button--more",
+            ]:
+                try:
+                    btn = await page.query_selector(see_more_sel)
+                    if btn:
+                        await btn.click()
+                        await asyncio.sleep(0.8)
+                        break
+                except Exception:
+                    pass
+
+            description = None
+            for sel in [
+                ".show-more-less-html__markup",
+                ".description__text",
+                "[class*='job-description']",
+                "div[class*='description'] .show-more-less-html__markup",
+                "section.description div",
+            ]:
+                el = await page.query_selector(sel)
+                if el:
+                    txt = (await el.inner_text()).strip()
+                    if txt and len(txt) > 50:
+                        description = txt
+                        break
+            if description:
+                result["description"] = description
+
+            company_about = None
+            for sel in [
+                ".company-details-description",
+                "[class*='company-description']",
+                "section[class*='company'] p",
+                ".jobs-company__company-description",
+                "[data-test-id='job-company-description']",
+            ]:
+                el = await page.query_selector(sel)
+                if el:
+                    txt = (await el.inner_text()).strip()
+                    if txt and len(txt) > 30:
+                        company_about = txt
+                        break
+            if company_about:
+                result["company_about"] = company_about
+
+            criteria = {}
+            criteria_items = await page.query_selector_all(
+                ".description__job-criteria-item, "
+                "[class*='job-criteria-item'], "
+                "li.job-criteria__item"
+            )
+            for item in criteria_items:
+                try:
+                    label_el = await item.query_selector(
+                        "h3, .job-criteria-subheader, [class*='label'], [class*='subheader']"
+                    )
+                    value_el = await item.query_selector(
+                        "span, .job-criteria-text, [class*='value'], [class*='text']"
+                    )
+                    if label_el and value_el:
+                        label = (await label_el.inner_text()).strip().lower()
+                        value = (await value_el.inner_text()).strip()
+                        if value:
+                            criteria[label] = value
+                except Exception:
+                    pass
+
+            if criteria:
+                for k, v in criteria.items():
+                    if any(w in k for w in ["type", "contrat", "emploi"]):
+                        result["type_contrat"] = v
+                    elif any(w in k for w in ["niveau", "expérience", "experience", "level"]):
+                        result["niveau_experience"] = v
+                    elif any(w in k for w in ["secteur", "industry", "industrie"]):
+                        result["domaine"] = v
+                    elif any(w in k for w in ["taille", "size", "effectif"]):
+                        result["taille_entreprise"] = v
+
+            if not result.get("salaire"):
+                for sel in [
+                    ".compensation__salary-range",
+                    "[class*='salary']",
+                    "[class*='compensation']",
+                    "div[class*='Salary']",
+                ]:
+                    el = await page.query_selector(sel)
+                    if el:
+                        txt = (await el.inner_text()).strip()
+                        if txt and any(c in txt for c in ["€", "$", "DT", "TND", "£", "K"]):
+                            result["salaire"] = txt
+                            break
+
+            for sel in [
+                ".num-applicants__caption",
+                "[class*='applicant']",
+                "figcaption[class*='applicant']",
+            ]:
+                el = await page.query_selector(sel)
+                if el:
+                    txt = (await el.inner_text()).strip()
+                    if txt:
+                        result["nb_candidats"] = txt
+                        break
+
+            if not result.get("taille_entreprise"):
+                for sel in [
+                    ".jobs-company__inline-information",
+                    "[class*='company-size']",
+                    "[data-test-id='job-company-size']",
+                ]:
+                    el = await page.query_selector(sel)
+                    if el:
+                        txt = (await el.inner_text()).strip()
+                        if txt:
+                            result["taille_entreprise"] = txt
+                            break
+
+            for sel in ["a[data-tracking-control-name*='website']", "a[href*='company/'][href*='/about']"]:
+                el = await page.query_selector(sel)
+                if el:
+                    href = await el.get_attribute("href")
+                    if href and "linkedin.com" not in href:
+                        result["site_web_entreprise"] = href
+                        break
+
+            logger.debug(f"[LinkedIn] détail OK — {len(result)} champs extraits depuis {url[:60]}")
+
+        except PWTimeout:
+            logger.warning(f"[LinkedIn] Timeout détail {url[:60]}")
+        except Exception as e:
+            logger.debug(f"[LinkedIn] Erreur détail {url[:60]}: {e}")
+
+        return result
 
     async def _parse_card(self, card, type_offre: str) -> dict:
         titre = ""
@@ -346,8 +449,22 @@ class LinkedInScraper(BaseScraper):
                 if lien_image:
                     break
 
+        salaire = None
+        for sel in ["[class*='salary']", "[class*='compensation']", "[data-test-id*='salary']"]:
+            el = await card.query_selector(sel)
+            if el:
+                t = (await el.inner_text()).strip()
+                if t and any(c in t for c in ["€", "$", "DT", "TND", "£", "K"]):
+                    salaire = t
+                    break
+
         return {
-            "titre": titre, "entreprise": entreprise, "localisation": localisation,
-            "lien": lien, "lien_image": lien_image, "type_offre": type_offre,
+            "titre": titre,
+            "entreprise": entreprise,
+            "localisation": localisation,
+            "lien": lien,
+            "lien_image": lien_image,
+            "salaire": salaire,
+            "type_offre": type_offre,
             "date_publication": date_pub,
         }

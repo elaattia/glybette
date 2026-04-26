@@ -11,9 +11,7 @@ export function LoginCard({ children, title, subtitle, error }: LoginCardProps) 
     return (
         <div className="login-card-wrapper">
             <div className="login-card">
-                {/* Content */}
                 <div className="login-card-content">
-                    {/* Header */}
                     <div className="login-header">
                         <h1 className="login-title">
                             {title}
@@ -23,7 +21,6 @@ export function LoginCard({ children, title, subtitle, error }: LoginCardProps) 
                         </p>
                     </div>
 
-                    {/* Error message */}
                     {error && (
                         <div className="login-error">
                             <svg width="16" height="16" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg" className="flex-shrink-0">
@@ -33,12 +30,10 @@ export function LoginCard({ children, title, subtitle, error }: LoginCardProps) 
                         </div>
                     )}
 
-                    {/* Auth buttons */}
                     <div className="login-buttons">
                         {children}
                     </div>
 
-                    {/* Footer note */}
                     <p className="login-footer-note">
                         By continuing, you agree to Glybette's Terms of Service and Privacy Policy
                     </p>

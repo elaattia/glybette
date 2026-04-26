@@ -1,5 +1,3 @@
-// apps/client/src/hooks/useScraping.ts
-// Hook React pour consommer l'API de scraping via le gateway
 import { useState, useEffect, useCallback } from "react";
 import type {
   Offre,
@@ -10,7 +8,6 @@ import type {
 
 const API_BASE = import.meta.env.VITE_API_URL ?? "http://localhost:3000/api";
 
-// ── useOffres ─────────────────────────────────────────────────────────────────
 export function useOffres(filters: OffresFilters = {}) {
   const [data, setData]     = useState<OffresResponse | null>(null);
   const [loading, setLoading] = useState(true);
@@ -41,7 +38,6 @@ export function useOffres(filters: OffresFilters = {}) {
   return { data, loading, error, refetch: fetch_ };
 }
 
-// ── useOffre (détail) ─────────────────────────────────────────────────────────
 export function useOffre(id: string | null) {
   const [offre, setOffre]   = useState<Offre | null>(null);
   const [loading, setLoading] = useState(false);
@@ -60,7 +56,6 @@ export function useOffre(id: string | null) {
   return { offre, loading, error };
 }
 
-// ── useStats ──────────────────────────────────────────────────────────────────
 export function useStats() {
   const [stats, setStats]   = useState<ScrapingStats | null>(null);
   const [loading, setLoading] = useState(true);
@@ -76,7 +71,6 @@ export function useStats() {
   return { stats, loading };
 }
 
-// ── useTriggerScraping ────────────────────────────────────────────────────────
 export function useTriggerScraping() {
   const [loading, setLoading] = useState(false);
 

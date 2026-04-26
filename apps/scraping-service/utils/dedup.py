@@ -13,9 +13,9 @@ try:
     )
     r.ping()
     _redis = r
-    logger.success("✅ Redis connecté (dedup rapide activé)")
+    logger.success("Redis connecté (dedup rapide activé)")
 except Exception:
-    logger.info("ℹ️  Redis absent — déduplication via index unique MongoDB")
+    logger.info("ℹ Redis absent — déduplication via index unique MongoDB")
 
 
 def make_hash(titre: str, entreprise: str, lien: str) -> str:

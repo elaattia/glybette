@@ -3,6 +3,8 @@ import { baseEnvSchema, z } from "@glybette/env";
 export const gatewayEnvSchema = baseEnvSchema.extend({
     USERS_SERVICE_URL: z.string().url().optional(),
     SCRAPING_SERVICE_URL: z.string().url().optional(),
+    CV_SERVICE_URL: z.string().url().optional(),
+    INTERNAL_SERVICE_SECRET: z.string().min(1).default("dev-secret-change-in-prod"),
     EMAIL_SERVICE_URL: z.string().url().optional(),
     PORTFOLIO_SERVICE_URL: z.string().url().optional(),
     /** Comma-separated origins; defaults to local Vite dev URLs if unset. */

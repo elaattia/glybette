@@ -8,6 +8,10 @@ import { useAuthBootstrap } from "@/hooks/useAuth";
 import AppShellLayout from "@/components/app-shell";
 import DashboardPage from "@/pages/app/dashboard";
 import AppSectionPlaceholder from "@/pages/app/AppSectionPlaceholder";
+import CvListPage from "@/pages/app/cv-builder";
+import CvCreatePage from "@/pages/app/cv-builder/create";
+import CvEditorPage from "@/pages/app/cv-builder/[id]";
+import OpportunitiesPage from "@/pages/app/opportunities";
 import PortfolioBuilderPage from "@/pages/app/portfolio";
 import { PublicPortfolioPage } from "@/pages/portfolio/PublicPortfolioPage";
 import { PortfolioRoot } from "@/pages/portfolio/PortfolioRoot";
@@ -27,14 +31,14 @@ function App() {
                 <Route path="/app" element={<AppShellLayout />}>
                     <Route index element={<Navigate to="dashboard" replace />} />
                     <Route path="dashboard" element={<DashboardPage />} />
-                    <Route path="cv-builder" element={<AppSectionPlaceholder sectionName="CV Builder" />} />
+                    <Route path="cv" element={<CvListPage />} />
+                    <Route path="cv-builder" element={<Navigate to="/app/cv" replace />} />
                     <Route path="portfolio" element={<PortfolioBuilderPage />} />
-                    <Route
-                        path="opportunities"
-                        element={<AppSectionPlaceholder sectionName="Opportunities" />}
-                    />
+                    <Route path="opportunities" element={<OpportunitiesPage />} />
                     <Route path="projects" element={<AppSectionPlaceholder sectionName="Projects" />} />
                     <Route path="settings" element={<AppSectionPlaceholder sectionName="Settings" />} />
+                    <Route path="cv/create" element={<CvCreatePage />} />
+                    <Route path="cv/:id" element={<CvEditorPage />} />
                 </Route>
                 <Route path="/dashboard" element={<Navigate to="/app/dashboard" replace />} />
             </Route>
