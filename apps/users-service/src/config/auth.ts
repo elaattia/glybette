@@ -37,6 +37,14 @@ export function createAuth(env: UsersServiceEnv) {
         },
         user: {
             modelName: "users",
+            additionalFields: {
+                isPremium: {
+                    type: "boolean",
+                    required: false,
+                    defaultValue: false,
+                    input: false,
+                },
+            },
         },
         session: {
             modelName: "auth_sessions",

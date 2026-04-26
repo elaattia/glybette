@@ -21,6 +21,7 @@ services:
             - USERS_SERVICE_URL=http://users-service:3001
             - SCRAPING_SERVICE_URL=http://scraping-service:3002
             - EMAIL_SERVICE_URL=http://email-service:3003
+            - PORTFOLIO_SERVICE_URL=http://portfolio-service:3004
         env_file:
             - .env
         depends_on:
@@ -28,6 +29,7 @@ services:
             - users-service
             - scraping-service
             - email-service
+            - portfolio-service
     users-service:
         build:
             context: .
@@ -61,6 +63,22 @@ services:
             - EMAIL_PROVIDER=${EMAIL_PROVIDER:-mock}
             - EMAIL_FROM=${EMAIL_FROM:-no-reply@glybette.dev}
             - RESEND_API_KEY=${RESEND_API_KEY:-}
+        env_file:
+            - .env
+        depends_on:
+            - rabbitmq
+    portfolio-service:
+        build:
+            context: .
+            dockerfile: Dockerfile
+            args:
+                APP_NAME: portfolio-service
+        ports:
+            - "3004:3004"
+        environment:
+            - PORT=3004
+            - PORT_PORTFOLIO_SERVICE=3004
+            - NODE_ENV=production
         env_file:
             - .env
         depends_on:
