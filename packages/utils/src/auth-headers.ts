@@ -18,6 +18,11 @@ export function getUserFromHeaders(headers: Headers): AuthContext | null {
     const userId = headers.get(AUTH_HEADER_USER_ID);
     if (!userId) return null;
     const rolesHeader = headers.get(AUTH_HEADER_ROLES);
-    const roles = rolesHeader ? rolesHeader.split(",").map((r) => r.trim()).filter(Boolean) : [];
+    const roles = rolesHeader
+        ? rolesHeader
+              .split(",")
+              .map((r) => r.trim())
+              .filter(Boolean)
+        : [];
     return { userId, roles };
 }

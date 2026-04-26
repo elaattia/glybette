@@ -40,10 +40,7 @@ type PortfolioThemeRootProps = {
 };
 
 export function PortfolioThemeRoot({ portfolio, template, chrome, children }: PortfolioThemeRootProps) {
-    const accentContrast = useMemo(
-        () => getContrastColor(portfolio.style.accentColor),
-        [portfolio.style.accentColor],
-    );
+    const accentContrast = useMemo(() => getContrastColor(portfolio.style.accentColor), [portfolio.style.accentColor]);
 
     return (
         <div
@@ -52,14 +49,17 @@ export function PortfolioThemeRoot({ portfolio, template, chrome, children }: Po
                 template.previewClassName,
                 chrome === "builder" ? "h-full overflow-y-auto" : "min-h-screen overflow-hidden",
             )}
-            style={{
-                "--portfolio-accent": portfolio.style.accentColor,
-                "--portfolio-accent-contrast": accentContrast,
-                "--portfolio-radius": getRadiusValue(portfolio.style.radius),
-                fontFamily: portfolio.style.fontFamily,
-            } as CSSProperties}
-        >
-            <div className={cn("pointer-events-none absolute inset-0 -z-10 opacity-35", template.backgroundArtClassName)} />
+            style={
+                {
+                    "--portfolio-accent": portfolio.style.accentColor,
+                    "--portfolio-accent-contrast": accentContrast,
+                    "--portfolio-radius": getRadiusValue(portfolio.style.radius),
+                    fontFamily: portfolio.style.fontFamily,
+                } as CSSProperties
+            }>
+            <div
+                className={cn("pointer-events-none absolute inset-0 -z-10 opacity-35", template.backgroundArtClassName)}
+            />
             {children}
         </div>
     );

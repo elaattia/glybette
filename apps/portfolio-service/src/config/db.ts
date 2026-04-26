@@ -6,9 +6,7 @@ export async function connectDb(env: PortfolioServiceEnv): Promise<typeof mongoo
         dbName: env.PORTFOLIO_SERVICE_MONGODB_DB_NAME,
     });
 
-    console.log(
-        `Portfolio service connected to MongoDB database ${env.PORTFOLIO_SERVICE_MONGODB_DB_NAME}`,
-    );
+    console.log(`Portfolio service connected to MongoDB database ${env.PORTFOLIO_SERVICE_MONGODB_DB_NAME}`);
 
     return db;
 }

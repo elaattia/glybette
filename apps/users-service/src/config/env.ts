@@ -31,9 +31,7 @@ const usersServiceEnvSchema = baseEnvSchema.extend({
 
 export type UsersServiceEnv = z.infer<typeof usersServiceEnvSchema>;
 
-export function loadUsersServiceEnv(
-    env: Record<string, string | undefined> = process.env,
-): UsersServiceEnv {
+export function loadUsersServiceEnv(env: Record<string, string | undefined> = process.env): UsersServiceEnv {
     return usersServiceEnvSchema.parse(env);
 }
 

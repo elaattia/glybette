@@ -1,11 +1,9 @@
 import type { Context, Next } from "hono";
 
 export async function authMiddleware(c: Context, next: Next) {
-    const userId  = c.req.header("x-user-id");
+    const userId = c.req.header("x-user-id");
 
-    const secret  =
-        c.req.header("x-internal-secret") ??
-        c.req.header("x-inter-secret");
+    const secret = c.req.header("x-internal-secret") ?? c.req.header("x-inter-secret");
 
     const expected = process.env.INTERNAL_SERVICE_SECRET ?? "dev-secret-ela";
 

@@ -7,9 +7,6 @@ import { registerProxyRoutes } from "./register-proxy-routes.js";
 /**
  * Mount upstream proxies from {@link gatewayProxyRoutes}.
  */
-export function registerServiceRoutes(
-    api: Hono,
-    ctx: { env: GatewayEnv; services: ServiceRegistry },
-): void {
+export function registerServiceRoutes(api: Hono, ctx: { env: GatewayEnv; services: ServiceRegistry }): void {
     registerProxyRoutes(api, ctx, gatewayProxyRoutes);
 }

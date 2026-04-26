@@ -10,22 +10,54 @@ export interface AtsScoreResult {
 export interface SuggestionsResult {
     suggestions: Array<{ section: string; issue: string; suggestion: string; priority: "high" | "medium" | "low" }>;
 }
-export interface EnhanceResult     { enhanced: string }
-export interface TailorResult      { summary: string; suggestedSkills: string[]; suggestedKeywords: string[] }
-export interface CoverLetterResult { content: string }
-export interface ExtractResult {
-    personalInfo: { firstName: string; lastName: string; roleTitle: string; email: string; phone: string; location: string; linkedin: string; github: string; website: string };
+export interface EnhanceResult {
+    enhanced: string;
+}
+export interface TailorResult {
     summary: string;
-    experience: Array<{ company: string; position: string; startDate: string; endDate: string; current: boolean; location: string; description: string }>;
-    education:  Array<{ institution: string; degree: string; field: string; startDate: string; endDate: string; gpa: string }>;
-    skills:         Array<{ category: string; skills: string[] }>;
-    projects:       Array<{ name: string; description: string; technologies: string[] }>;
-    languages:      Array<{ language: string; level: string }>;
+    suggestedSkills: string[];
+    suggestedKeywords: string[];
+}
+export interface CoverLetterResult {
+    content: string;
+}
+export interface ExtractResult {
+    personalInfo: {
+        firstName: string;
+        lastName: string;
+        roleTitle: string;
+        email: string;
+        phone: string;
+        location: string;
+        linkedin: string;
+        github: string;
+        website: string;
+    };
+    summary: string;
+    experience: Array<{
+        company: string;
+        position: string;
+        startDate: string;
+        endDate: string;
+        current: boolean;
+        location: string;
+        description: string;
+    }>;
+    education: Array<{
+        institution: string;
+        degree: string;
+        field: string;
+        startDate: string;
+        endDate: string;
+        gpa: string;
+    }>;
+    skills: Array<{ category: string; skills: string[] }>;
+    projects: Array<{ name: string; description: string; technologies: string[] }>;
+    languages: Array<{ language: string; level: string }>;
     certifications: Array<{ name: string; issuer: string; date: string }>;
 }
 
 export class CvAiService {
-
     async scoreAts(cvText: string, jobDescription: string): Promise<AtsScoreResult> {
         const prompt = `You are an ATS expert. Analyze the CV against the job description.
 
@@ -65,8 +97,7 @@ Priority must be "high", "medium", or "low". Provide exactly 5 suggestions.`;
     async enhanceText(text: string, sectionType: string, context?: { jobTitle?: string }): Promise<EnhanceResult> {
         const ctxHint = context?.jobTitle ? `Poste visé : ${context.jobTitle}` : "";
         const isLikelyFrench =
-            /[àâäéèêëîïôùûüç]/i.test(text) ||
-            /\b(je|mon|ma|les|des|une|pour|dans|avec|en|sur|par)\b/i.test(text);
+            /[àâäéèêëîïôùûüç]/i.test(text) || /\b(je|mon|ma|les|des|une|pour|dans|avec|en|sur|par)\b/i.test(text);
         const langInstruction = isLikelyFrench
             ? "IMPORTANT: Tu DOIS répondre UNIQUEMENT en français."
             : "IMPORTANT: You MUST respond ONLY in English.";
@@ -112,11 +143,15 @@ Return ONLY this JSON, no markdown, no explanation:
         return callOllamaJson<TailorResult>(prompt, { maxTokens: 700 });
     }
 
-    async generateCoverLetter(cvText: string, jobDescription: string, tone: "professional" | "enthusiastic" | "concise" = "professional"): Promise<CoverLetterResult> {
+    async generateCoverLetter(
+        cvText: string,
+        jobDescription: string,
+        tone: "professional" | "enthusiastic" | "concise" = "professional",
+    ): Promise<CoverLetterResult> {
         const toneGuide: Record<string, string> = {
             professional: "formal, confident, and professional",
             enthusiastic: "energetic, passionate, and engaging",
-            concise:      "brief and impactful — maximum 3 short paragraphs",
+            concise: "brief and impactful — maximum 3 short paragraphs",
         };
         const prompt = `Write a cover letter in a ${toneGuide[tone]} tone.
 Use the same language as the CV (if CV is in French, write in French).
@@ -213,7 +248,12 @@ ${text}`;
 
         let p1: { personalInfo: ExtractResult["personalInfo"]; summary: string } | null = null;
         let p2: { experience: ExtractResult["experience"]; education: ExtractResult["education"] } | null = null;
-        let p3: { skills: ExtractResult["skills"]; projects: ExtractResult["projects"]; languages: ExtractResult["languages"]; certifications: ExtractResult["certifications"] } | null = null;
+        let p3: {
+            skills: ExtractResult["skills"];
+            projects: ExtractResult["projects"];
+            languages: ExtractResult["languages"];
+            certifications: ExtractResult["certifications"];
+        } | null = null;
 
         try {
             console.log("[extractFromText] step 1: personal info + summary");
@@ -240,21 +280,21 @@ ${text}`;
         }
 
         const result: ExtractResult = {
-            personalInfo:   p1?.personalInfo   ?? emptyPersonal(),
-            summary:        p1?.summary        ?? "",
-            experience:     p2?.experience     ?? [],
-            education:      p2?.education      ?? [],
-            skills:         p3?.skills         ?? [],
-            projects:       p3?.projects       ?? [],
-            languages:      p3?.languages      ?? [],
+            personalInfo: p1?.personalInfo ?? emptyPersonal(),
+            summary: p1?.summary ?? "",
+            experience: p2?.experience ?? [],
+            education: p2?.education ?? [],
+            skills: p3?.skills ?? [],
+            projects: p3?.projects ?? [],
+            languages: p3?.languages ?? [],
             certifications: p3?.certifications ?? [],
         };
 
         console.log("[extractFromText] result:", {
             hasPersonal: !!result.personalInfo.firstName,
-            expCount:    result.experience.length,
-            eduCount:    result.education.length,
-            skillCount:  result.skills.length,
+            expCount: result.experience.length,
+            eduCount: result.education.length,
+            skillCount: result.skills.length,
         });
 
         return result;
@@ -272,5 +312,15 @@ Return ONLY a JSON array of strings, no markdown: ["skill1", "skill2", "skill3"]
 }
 
 function emptyPersonal() {
-    return { firstName: "", lastName: "", roleTitle: "", email: "", phone: "", location: "", linkedin: "", github: "", website: "" };
+    return {
+        firstName: "",
+        lastName: "",
+        roleTitle: "",
+        email: "",
+        phone: "",
+        location: "",
+        linkedin: "",
+        github: "",
+        website: "",
+    };
 }

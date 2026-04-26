@@ -12,13 +12,7 @@ type PortfolioEditorTopbarProps = {
     onSave: () => Promise<boolean>;
 };
 
-export function PortfolioEditorTopbar({
-    slug,
-    isPremium,
-    localSavedAt,
-    isSaving,
-    onSave,
-}: PortfolioEditorTopbarProps) {
+export function PortfolioEditorTopbar({ slug, isPremium, localSavedAt, isSaving, onSave }: PortfolioEditorTopbarProps) {
     const [successOpen, setSuccessOpen] = useState(false);
     const [copied, setCopied] = useState(false);
     const portfolioUrl = publicPortfolioUrl(slug, isPremium);
@@ -57,9 +51,7 @@ export function PortfolioEditorTopbar({
                 <div className="flex flex-col gap-3 lg:flex-row lg:items-center lg:justify-between">
                     <div>
                         <p className="text-xs uppercase tracking-[0.28em] text-[var(--gb-muted)]">Live URL</p>
-                        <p className="font-medium text-[var(--gb-text)]">
-                            {publicPortfolioUrl(slug, isPremium, true)}
-                        </p>
+                        <p className="font-medium text-[var(--gb-text)]">{publicPortfolioUrl(slug, isPremium, true)}</p>
                     </div>
                     <div className="flex flex-wrap items-center gap-2">
                         <span className="text-xs text-[var(--gb-muted)]">
@@ -70,8 +62,7 @@ export function PortfolioEditorTopbar({
                             variant="outline"
                             onClick={openPortfolio}
                             disabled={!slug.trim()}
-                            title="Open public portfolio in a new tab"
-                        >
+                            title="Open public portfolio in a new tab">
                             <ExternalLink />
                             Open
                         </Button>

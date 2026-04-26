@@ -20,10 +20,7 @@ async function main() {
     app.get("/", (c) => c.text("Portfolio service"));
     app.get("/health", (c) => c.json({ status: "ok" }));
 
-    registerPortfolioRoutes(
-        app,
-        new PortfolioController(portfolioService, env.PORTFOLIO_PUBLIC_ROOT_DOMAIN),
-    );
+    registerPortfolioRoutes(app, new PortfolioController(portfolioService, env.PORTFOLIO_PUBLIC_ROOT_DOMAIN));
 
     serve(
         {

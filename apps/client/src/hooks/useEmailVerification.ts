@@ -1,8 +1,4 @@
-import type {
-    OtpRequestResponse,
-    OtpVerifyResponse,
-    VerificationStatusResponse,
-} from "@glybette/contracts";
+import type { OtpRequestResponse, OtpVerifyResponse, VerificationStatusResponse } from "@glybette/contracts";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useSetAtom } from "jotai";
 import { useEffect } from "react";

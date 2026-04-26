@@ -46,9 +46,7 @@ export function PublicPortfolioPage({ slug: forcedSlug, resolveFromHost = false 
             <main className="grid min-h-screen place-items-center bg-[#070A0F] px-6 text-white">
                 <div className="max-w-md text-center">
                     <p className="text-xs uppercase tracking-[0.4em] text-[#16A34A]">Portfolio not found</p>
-                    <h1 className="mt-4 text-4xl font-semibold tracking-[-0.06em]">
-                        This portfolio is not live yet.
-                    </h1>
+                    <h1 className="mt-4 text-4xl font-semibold tracking-[-0.06em]">This portfolio is not live yet.</h1>
                     <p className="mt-3 text-sm leading-6 opacity-70">
                         The owner may still be building it, or the URL may have changed.
                     </p>

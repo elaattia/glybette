@@ -3,50 +3,38 @@ import { Tooltip as TooltipPrimitive } from "radix-ui";
 
 import { cn } from "@/lib/utils";
 
-function TooltipProvider({
-  delayDuration = 200,
-  ...props
-}: React.ComponentProps<typeof TooltipPrimitive.Provider>) {
-  return (
-    <TooltipPrimitive.Provider
-      data-slot="tooltip-provider"
-      delayDuration={delayDuration}
-      {...props}
-    />
-  );
+function TooltipProvider({ delayDuration = 200, ...props }: React.ComponentProps<typeof TooltipPrimitive.Provider>) {
+    return <TooltipPrimitive.Provider data-slot="tooltip-provider" delayDuration={delayDuration} {...props} />;
 }
 
 function Tooltip({ ...props }: React.ComponentProps<typeof TooltipPrimitive.Root>) {
-  return <TooltipPrimitive.Root data-slot="tooltip" {...props} />;
+    return <TooltipPrimitive.Root data-slot="tooltip" {...props} />;
 }
 
-function TooltipTrigger({
-  ...props
-}: React.ComponentProps<typeof TooltipPrimitive.Trigger>) {
-  return <TooltipPrimitive.Trigger data-slot="tooltip-trigger" {...props} />;
+function TooltipTrigger({ ...props }: React.ComponentProps<typeof TooltipPrimitive.Trigger>) {
+    return <TooltipPrimitive.Trigger data-slot="tooltip-trigger" {...props} />;
 }
 
 function TooltipContent({
-  className,
-  sideOffset = 6,
-  children,
-  ...props
+    className,
+    sideOffset = 6,
+    children,
+    ...props
 }: React.ComponentProps<typeof TooltipPrimitive.Content>) {
-  return (
-    <TooltipPrimitive.Portal>
-      <TooltipPrimitive.Content
-        data-slot="tooltip-content"
-        sideOffset={sideOffset}
-        className={cn(
-          "gb-tooltip-content z-50 max-w-xs rounded-lg border border-[var(--gb-border)] bg-[var(--gb-app-panel-bg)] px-3 py-2 text-xs font-medium text-[var(--gb-text)] shadow-[var(--gb-shadow)]",
-          className,
-        )}
-        {...props}
-      >
-        {children}
-      </TooltipPrimitive.Content>
-    </TooltipPrimitive.Portal>
-  );
+    return (
+        <TooltipPrimitive.Portal>
+            <TooltipPrimitive.Content
+                data-slot="tooltip-content"
+                sideOffset={sideOffset}
+                className={cn(
+                    "gb-tooltip-content z-50 max-w-xs rounded-lg border border-[var(--gb-border)] bg-[var(--gb-app-panel-bg)] px-3 py-2 text-xs font-medium text-[var(--gb-text)] shadow-[var(--gb-shadow)]",
+                    className,
+                )}
+                {...props}>
+                {children}
+            </TooltipPrimitive.Content>
+        </TooltipPrimitive.Portal>
+    );
 }
 
 export { Tooltip, TooltipTrigger, TooltipContent, TooltipProvider };

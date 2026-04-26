@@ -29,10 +29,7 @@ export async function connectRabbitMq(url: string): Promise<RabbitMqClient> {
         });
     };
 
-    const consumeJson = async <T>(
-        queue: string,
-        onMessage: (payload: T, raw: ConsumeMessage) => Promise<void>,
-    ) => {
+    const consumeJson = async <T>(queue: string, onMessage: (payload: T, raw: ConsumeMessage) => Promise<void>) => {
         await channel.consume(queue, async (message) => {
             if (!message) {
                 return;

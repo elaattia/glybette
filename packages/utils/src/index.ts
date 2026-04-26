@@ -1,10 +1,5 @@
 export { createJwt, verifyJwt, type JwtPayload, type CreateJwtOptions } from "./jwt.js";
-export {
-    getUserFromHeaders,
-    AUTH_HEADER_USER_ID,
-    AUTH_HEADER_ROLES,
-    type AuthContext,
-} from "./auth-headers.js";
+export { getUserFromHeaders, AUTH_HEADER_USER_ID, AUTH_HEADER_ROLES, type AuthContext } from "./auth-headers.js";
 export {
     UnauthorizedError,
     BadRequestError,

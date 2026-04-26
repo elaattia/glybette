@@ -57,8 +57,7 @@ export function PortfolioBuilderRightPanel({
                                         radius: value as SavePortfolioRequest["style"]["radius"],
                                     },
                                 }))
-                            }
-                        >
+                            }>
                             <SelectTrigger className="w-full">
                                 <SelectValue />
                             </SelectTrigger>
@@ -82,8 +81,7 @@ export function PortfolioBuilderRightPanel({
                                 variant="destructive"
                                 size="icon-sm"
                                 onClick={deleteSelectedBlock}
-                                aria-label="Delete selected block"
-                            >
+                                aria-label="Delete selected block">
                                 <Trash2 className="size-3.5" />
                             </Button>
                         ) : null}
@@ -121,8 +119,7 @@ export function PortfolioBuilderRightPanel({
                                                 rowSpan: 1,
                                             },
                                         }))
-                                    }
-                                >
+                                    }>
                                     <SelectTrigger className="w-full">
                                         <SelectValue />
                                     </SelectTrigger>

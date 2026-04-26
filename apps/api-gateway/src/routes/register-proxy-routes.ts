@@ -17,8 +17,7 @@ function buildUpstreamPath(route: GatewayProxyRoute, c: Context): string {
     if (route.upstream.kind === "requestPath") {
         return url.pathname + search;
     }
-    const publicPrefix =
-        route.upstream.publicPrefix ?? defaultPublicPrefix(route.mount);
+    const publicPrefix = route.upstream.publicPrefix ?? defaultPublicPrefix(route.mount);
     const { upstreamPrefix } = route.upstream;
     const pathname = url.pathname;
     const rest =

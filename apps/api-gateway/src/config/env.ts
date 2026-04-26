@@ -14,9 +14,7 @@ export const gatewayEnvSchema = baseEnvSchema.extend({
 
 export type GatewayEnv = z.infer<typeof gatewayEnvSchema>;
 
-export function loadGatewayEnv(
-    env: Record<string, string | undefined> = process.env,
-): GatewayEnv {
+export function loadGatewayEnv(env: Record<string, string | undefined> = process.env): GatewayEnv {
     return gatewayEnvSchema.parse(env);
 }
 

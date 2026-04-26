@@ -20,7 +20,7 @@ export default function LoginPage() {
     const [password, setPassword] = useState("");
     const [passwordError, setPasswordError] = useState<string | null>(null);
     const errorCode = searchParams.get("error");
-    const errorMessage = errorCode ? errorMessages[errorCode] ?? "Sign-in failed." : null;
+    const errorMessage = errorCode ? (errorMessages[errorCode] ?? "Sign-in failed.") : null;
 
     if (auth.isAuthenticated && verification.isPending) {
         return null;
@@ -39,10 +39,10 @@ export default function LoginPage() {
             <div className="login-orb login-orb-1" />
             <div className="login-orb login-orb-2" />
             <div className="login-orb login-orb-3" />
-            
+
             {/* Grid overlay */}
             <div className="login-grid" />
-            
+
             <LoginCard
                 title={
                     <>
@@ -50,8 +50,7 @@ export default function LoginPage() {
                     </>
                 }
                 subtitle="Sign in or create an account to continue"
-                error={errorMessage}
-            >
+                error={errorMessage}>
                 <AuthButton
                     onClick={() => {
                         void auth.startGoogleSignIn();
@@ -80,8 +79,7 @@ export default function LoginPage() {
                             }
                         };
                         void run();
-                    }}
-                >
+                    }}>
                     <input
                         type="email"
                         autoComplete="email"
@@ -100,29 +98,15 @@ export default function LoginPage() {
                         className="login-input"
                         required
                     />
-                    <button
-                        type="submit"
-                        className="login-primary-button"
-                        disabled={auth.isChecking}
-                    >
+                    <button type="submit" className="login-primary-button" disabled={auth.isChecking}>
                         {auth.isChecking ? "Signing in..." : "Continue with Email"}
                     </button>
                 </form>
                 {passwordError && <p className="login-password-error">{passwordError}</p>}
-                
-                <AuthButton
-                    disabled
-                    icon={<LinkedInIcon />}
-                    label="Continue with LinkedIn"
-                    variant="linkedin"
-                />
-                
-                <AuthButton
-                    disabled
-                    icon={<GitHubIcon />}
-                    label="Continue with GitHub"
-                    variant="github"
-                />
+
+                <AuthButton disabled icon={<LinkedInIcon />} label="Continue with LinkedIn" variant="linkedin" />
+
+                <AuthButton disabled icon={<GitHubIcon />} label="Continue with GitHub" variant="github" />
             </LoginCard>
         </main>
     );

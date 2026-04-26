@@ -32,20 +32,17 @@ app.onError((err, c) => {
     return c.json({ error: err.message ?? "Internal error" }, 500);
 });
 
-serve(
-    { fetch: app.fetch, port: env.PORT_AI_SERVICE },
-    () => {
-        console.log(`[ai-service]  running on port ${env.PORT_AI_SERVICE} | provider: ${env.AI_PROVIDER}`);
+serve({ fetch: app.fetch, port: env.PORT_AI_SERVICE }, () => {
+    console.log(`[ai-service]  running on port ${env.PORT_AI_SERVICE} | provider: ${env.AI_PROVIDER}`);
 
-        if (env.AI_PROVIDER === "ollama") {
-            pingOllama().then((ok) => {
-                if (!ok) {
-                    console.warn("[ai-service]   Ollama not reachable.");
-                    console.warn(`  Run: ollama pull ${env.OLLAMA_MODEL}`);
-                } else {
-                    console.log(`[ai-service]  Ollama connected — model: ${env.OLLAMA_MODEL}`);
-                }
-            });
-        }
+    if (env.AI_PROVIDER === "ollama") {
+        pingOllama().then((ok) => {
+            if (!ok) {
+                console.warn("[ai-service]   Ollama not reachable.");
+                console.warn(`  Run: ollama pull ${env.OLLAMA_MODEL}`);
+            } else {
+                console.log(`[ai-service]  Ollama connected — model: ${env.OLLAMA_MODEL}`);
+            }
+        });
     }
-);
+});

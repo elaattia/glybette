@@ -9,22 +9,21 @@ import Pricing from "@/components/home/Pricing";
 import CTA from "@/components/home/CTA";
 import Footer from "@/components/home/Footer";
 
-
 export default function HomePage() {
-  return (
-    <>
-      <Navbar />
-      <main>
-        <Hero />
-        <LogoStrip />
-        <Features />
-        <HowItWorks />
-        <Stats />
-        <Testimonials />
-        <Pricing />
-        <CTA />
-      </main>
-      <Footer />
-    </>
-  );
+    return (
+        <>
+            <Navbar />
+            <main>
+                <Hero />
+                <LogoStrip />
+                <Features />
+                <HowItWorks />
+                <Stats />
+                <Testimonials />
+                <Pricing />
+                <CTA />
+            </main>
+            <Footer />
+        </>
+    );
 }

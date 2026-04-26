@@ -191,10 +191,7 @@ function validateBlock(value: unknown): PortfolioBlock {
         data: value.data,
         source: isRecord(value.source)
             ? {
-                  kind:
-                      value.source.kind === "project" || value.source.kind === "cv"
-                          ? value.source.kind
-                          : "manual",
+                  kind: value.source.kind === "project" || value.source.kind === "cv" ? value.source.kind : "manual",
                   refId: typeof value.source.refId === "string" ? value.source.refId : undefined,
               }
             : { kind: "manual" },

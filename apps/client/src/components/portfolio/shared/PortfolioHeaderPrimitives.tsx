@@ -19,8 +19,7 @@ export function PortfolioName({ identity, titleClassName }: PortfolioNameProps) 
                     "text-5xl font-semibold tracking-[-0.07em] md:text-7xl",
                     identity.eyebrowPlacement === "above" && "mt-3",
                     titleClassName,
-                )}
-            >
+                )}>
                 {identity.displayName}
             </h1>
             {identity.eyebrowPlacement === "below" ? (
@@ -40,13 +39,7 @@ type PortfolioTabNavProps = {
     buttonClassName?: string;
 };
 
-export function PortfolioTabNav({
-    tabs,
-    activeTab,
-    onTabChange,
-    className,
-    buttonClassName,
-}: PortfolioTabNavProps) {
+export function PortfolioTabNav({ tabs, activeTab, onTabChange, className, buttonClassName }: PortfolioTabNavProps) {
     return (
         <nav className={cn("flex flex-wrap gap-2", className)}>
             {tabs.map((tab) => (
@@ -61,8 +54,7 @@ export function PortfolioTabNav({
                         activeTab?.id === tab.id
                             ? "border-transparent bg-[var(--portfolio-accent)] text-[var(--portfolio-accent-contrast)]"
                             : "border-current/15 hover:border-current/40",
-                    )}
-                >
+                    )}>
                     {tab.label}
                 </button>
             ))}

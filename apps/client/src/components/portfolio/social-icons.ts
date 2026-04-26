@@ -1,14 +1,4 @@
-import {
-    Dribbble,
-    Github,
-    Globe,
-    Instagram,
-    Linkedin,
-    Mail,
-    Sparkles,
-    Twitter,
-    type LucideIcon,
-} from "lucide-react";
+import { Dribbble, Github, Globe, Instagram, Linkedin, Mail, Sparkles, Twitter, type LucideIcon } from "lucide-react";
 
 export type PortfolioSocialIconOption = {
     value: string;

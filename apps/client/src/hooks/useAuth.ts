@@ -81,8 +81,7 @@ export function useAuth() {
         isAuthenticated: authSession.status === "authenticated" && Boolean(sessionQuery.data?.session),
         isChecking:
             authSession.status === "checking" ||
-            (sessionQuery.data === undefined &&
-                (sessionQuery.isPending || sessionQuery.isRefetching)),
+            (sessionQuery.data === undefined && (sessionQuery.isPending || sessionQuery.isRefetching)),
         startGoogleSignIn: async () => {
             const result = (await authClient.signIn.social({
                 provider: "google",

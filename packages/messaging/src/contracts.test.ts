@@ -1,9 +1,6 @@
 import assert from "node:assert/strict";
 import test from "node:test";
-import {
-    OTP_PURPOSE_EMAIL_VERIFICATION,
-    isOtpEmailRequestedEvent,
-} from "./contracts.js";
+import { OTP_PURPOSE_EMAIL_VERIFICATION, isOtpEmailRequestedEvent } from "./contracts.js";
 
 test("isOtpEmailRequestedEvent validates correct event payload", () => {
     const valid = {

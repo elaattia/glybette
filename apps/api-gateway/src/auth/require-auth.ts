@@ -1,10 +1,5 @@
 import { createMiddleware } from "hono/factory";
-import {
-    AUTH_HEADER_ROLES,
-    AUTH_HEADER_USER_ID,
-    sanitizeProxyHeaders,
-    ServiceUnavailableError,
-} from "@glybette/utils";
+import { AUTH_HEADER_ROLES, AUTH_HEADER_USER_ID, sanitizeProxyHeaders, ServiceUnavailableError } from "@glybette/utils";
 import type { GatewayEnv } from "../config/env.js";
 import type { ServiceRegistry } from "../config/services.js";
 
@@ -28,10 +23,7 @@ export function requireBetterAuthSession(env: GatewayEnv, services: ServiceRegis
                 401,
             );
         }
-        if (
-            auth.requiresEmailVerification &&
-            !isVerificationAllowlisted(new URL(c.req.url).pathname)
-        ) {
+        if (auth.requiresEmailVerification && !isVerificationAllowlisted(new URL(c.req.url).pathname)) {
             return c.json(
                 {
                     error: {
@@ -47,16 +39,10 @@ export function requireBetterAuthSession(env: GatewayEnv, services: ServiceRegis
     });
 }
 
-const VERIFICATION_ALLOWLIST = [
-    "/api/auth/otp",
-    "/api/auth/verification-status",
-    "/api/portfolio/public",
-];
+const VERIFICATION_ALLOWLIST = ["/api/auth/otp", "/api/auth/verification-status", "/api/portfolio/public"];
 
 function isVerificationAllowlisted(pathname: string): boolean {
-    return VERIFICATION_ALLOWLIST.some(
-        (prefix) => pathname === prefix || pathname.startsWith(`${prefix}/`),
-    );
+    return VERIFICATION_ALLOWLIST.some((prefix) => pathname === prefix || pathname.startsWith(`${prefix}/`));
 }
 
 async function fetchVerificationState(
@@ -73,14 +59,11 @@ async function fetchVerificationState(
     headers.set(AUTH_HEADER_ROLES, roles.join(","));
 
     try {
-        const response = await fetch(
-            `${services.users.baseUrl.replace(/\/$/, "")}/users/verification-state`,
-            {
-                method: "GET",
-                headers,
-                signal: controller.signal,
-            },
-        );
+        const response = await fetch(`${services.users.baseUrl.replace(/\/$/, "")}/users/verification-state`, {
+            method: "GET",
+            headers,
+            signal: controller.signal,
+        });
 
         if (response.status === 404) {
             return false;
@@ -90,9 +73,7 @@ async function fetchVerificationState(
             throw new ServiceUnavailableError("Unable to resolve verification state");
         }
 
-        const payload = (await response.json()) as
-            | { requiresEmailVerification?: boolean }
-            | null;
+        const payload = (await response.json()) as { requiresEmailVerification?: boolean } | null;
         return Boolean(payload?.requiresEmailVerification);
     } finally {
         clearTimeout(timeout);
@@ -179,10 +160,7 @@ export function tryResolveBetterAuthSession(env: GatewayEnv, services: ServiceRe
 
         const auth = await fetchGatewayAuthFromSession(env, services, c.req.raw.headers);
         if (auth) {
-            if (
-                auth.requiresEmailVerification &&
-                !isVerificationAllowlisted(new URL(c.req.url).pathname)
-            ) {
+            if (auth.requiresEmailVerification && !isVerificationAllowlisted(new URL(c.req.url).pathname)) {
                 return c.json(
                     {
                         error: {

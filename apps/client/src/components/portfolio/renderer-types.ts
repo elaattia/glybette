@@ -2,10 +2,7 @@ import type { CSSProperties, ReactNode } from "react";
 import type { PortfolioBlock, PortfolioDocumentDTO, PortfolioIdentity, PortfolioTab } from "@glybette/contracts";
 import type { PortfolioTemplateDefinition } from "@/components/portfolio/template-config";
 
-export type PortfolioRenderModel = Pick<
-    PortfolioDocumentDTO,
-    "slug" | "identity" | "templateId" | "style" | "tabs"
->;
+export type PortfolioRenderModel = Pick<PortfolioDocumentDTO, "slug" | "identity" | "templateId" | "style" | "tabs">;
 
 export type PortfolioChrome = "public" | "builder";
 

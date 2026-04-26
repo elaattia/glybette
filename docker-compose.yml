@@ -84,7 +84,7 @@ services:
         depends_on:
             - rabbitmq
     scraping-service:
-        build: 
+        build:
             context: ./apps/scraping-service
             dockerfile: Dockerfile
         ports:

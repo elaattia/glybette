@@ -126,10 +126,7 @@ export class PortfolioService {
         };
     }
 
-    async checkSlugAvailability(
-        rawSlug: string,
-        userId?: string,
-    ): Promise<PortfolioSlugAvailabilityResponse> {
+    async checkSlugAvailability(rawSlug: string, userId?: string): Promise<PortfolioSlugAvailabilityResponse> {
         const slug = validatePortfolioSlug(rawSlug);
         const owner = await this.collection().findOne({ slug }, { projection: { userId: 1, slug: 1 } });
 

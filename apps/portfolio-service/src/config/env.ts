@@ -14,8 +14,6 @@ const portfolioServiceEnvSchema = baseEnvSchema.extend({
 
 export type PortfolioServiceEnv = z.infer<typeof portfolioServiceEnvSchema>;
 
-export function loadPortfolioServiceEnv(
-    env: Record<string, string | undefined> = process.env,
-): PortfolioServiceEnv {
+export function loadPortfolioServiceEnv(env: Record<string, string | undefined> = process.env): PortfolioServiceEnv {
     return portfolioServiceEnvSchema.parse(env);
 }

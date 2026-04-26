@@ -31,15 +31,14 @@ export function PortfolioSaveSuccessDialog({
     onClose,
 }: PortfolioSaveSuccessDialogProps) {
     return (
-        <Dialog open={open} onOpenChange={(nextOpen) => {
-            if (!nextOpen) {
-                onClose();
-            }
-        }}>
-            <DialogContent
-                className="max-w-lg"
-                aria-describedby="portfolio-save-success-description"
-            >
+        <Dialog
+            open={open}
+            onOpenChange={(nextOpen) => {
+                if (!nextOpen) {
+                    onClose();
+                }
+            }}>
+            <DialogContent className="max-w-lg" aria-describedby="portfolio-save-success-description">
                 <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_18%_0%,rgba(22,163,74,0.24),transparent_34%),radial-gradient(circle_at_95%_18%,rgba(2,132,199,0.16),transparent_30%),linear-gradient(180deg,rgba(255,255,255,0.05),transparent_46%)]" />
 
                 <div className="relative z-10">
@@ -83,8 +82,7 @@ export function PortfolioSaveSuccessDialog({
                         <Button
                             size="lg"
                             className="h-10 flex-1 rounded-xl bg-[#16A34A] px-4 text-white hover:bg-[#15803D]"
-                            asChild
-                        >
+                            asChild>
                             <a href={url} target="_blank" rel="noreferrer">
                                 <ExternalLink className="size-4" />
                                 Open portfolio
@@ -94,9 +92,11 @@ export function PortfolioSaveSuccessDialog({
                             type="button"
                             variant="outline"
                             size="lg"
-                            className={cn("h-10 flex-1 rounded-xl px-4", copied && "border-[#16A34A]/40 text-[#16A34A]")}
-                            onClick={onCopy}
-                        >
+                            className={cn(
+                                "h-10 flex-1 rounded-xl px-4",
+                                copied && "border-[#16A34A]/40 text-[#16A34A]",
+                            )}
+                            onClick={onCopy}>
                             {copied ? <Check className="size-4" /> : <Copy className="size-4" />}
                             {copied ? "Copied" : "Share"}
                         </Button>

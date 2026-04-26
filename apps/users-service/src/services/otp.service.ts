@@ -52,17 +52,14 @@ export class OtpService {
             throw new Error("Mongoose database connection is not initialized");
         }
 
-        await db.collection<EmailOtpDocument>(OTP_COLLECTION).createIndexes([
-            { key: { userId: 1, purpose: 1, expiresAt: 1 } },
-            { key: { createdAt: 1 } },
-        ]);
+        await db
+            .collection<EmailOtpDocument>(OTP_COLLECTION)
+            .createIndexes([{ key: { userId: 1, purpose: 1, expiresAt: 1 } }, { key: { createdAt: 1 } }]);
     }
 
     async requestVerificationOtp(userId: string): Promise<{ expiresInSeconds: number; cooldownSeconds: number }> {
         if (this.env.EMAIL_DELIVERY_MODE === "service" && !this.rabbit) {
-            console.warn(
-                "[users-service] OTP request rejected because RabbitMQ is unavailable.",
-            );
+            console.warn("[users-service] OTP request rejected because RabbitMQ is unavailable.");
             throw new ServiceUnavailableError(
                 "OTP delivery service is temporarily unavailable. Please try again shortly.",
             );
@@ -73,10 +70,9 @@ export class OtpService {
             throw new Error("Mongoose database connection is not initialized");
         }
 
-        const user = await db.collection<BetterAuthUserDocument>("users").findOne(
-            { _id: new mongoose.Types.ObjectId(userId) },
-            { projection: { email: 1, emailVerifiedAt: 1 } },
-        );
+        const user = await db
+            .collection<BetterAuthUserDocument>("users")
+            .findOne({ _id: new mongoose.Types.ObjectId(userId) }, { projection: { email: 1, emailVerifiedAt: 1 } });
         if (!user) {
             throw new NotFoundError("User not found");
         }
@@ -101,9 +97,7 @@ export class OtpService {
 
         const now = new Date();
         if (existingOtp) {
-            const secondsSinceLastSend = Math.floor(
-                (now.getTime() - existingOtp.lastSentAt.getTime()) / 1000,
-            );
+            const secondsSinceLastSend = Math.floor((now.getTime() - existingOtp.lastSentAt.getTime()) / 1000);
             if (secondsSinceLastSend < this.env.OTP_COOLDOWN_SECONDS) {
                 throw new BadRequestError("Please wait before requesting another OTP");
             }
@@ -183,21 +177,18 @@ export class OtpService {
 
         const incomingHash = this.hashCode(code);
         if (incomingHash !== otp.codeHash) {
-            await db.collection<EmailOtpDocument>(OTP_COLLECTION).updateOne(
-                { _id: otp._id },
-                { $set: { updatedAt: now }, $inc: { attempts: 1 } },
-            );
+            await db
+                .collection<EmailOtpDocument>(OTP_COLLECTION)
+                .updateOne({ _id: otp._id }, { $set: { updatedAt: now }, $inc: { attempts: 1 } });
             throw new BadRequestError("Invalid OTP");
         }
 
-        await db.collection<EmailOtpDocument>(OTP_COLLECTION).updateOne(
-            { _id: otp._id },
-            { $set: { usedAt: now, updatedAt: now } },
-        );
-        await db.collection<BetterAuthUserDocument>("users").updateOne(
-            { _id: new mongoose.Types.ObjectId(userId) },
-            { $set: { emailVerifiedAt: now } },
-        );
+        await db
+            .collection<EmailOtpDocument>(OTP_COLLECTION)
+            .updateOne({ _id: otp._id }, { $set: { usedAt: now, updatedAt: now } });
+        await db
+            .collection<BetterAuthUserDocument>("users")
+            .updateOne({ _id: new mongoose.Types.ObjectId(userId) }, { $set: { emailVerifiedAt: now } });
     }
 
     private hashCode(code: string): string {

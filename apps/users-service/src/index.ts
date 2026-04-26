@@ -39,9 +39,7 @@ async function main() {
     if (env.EMAIL_DELIVERY_MODE === "service") {
         await connectRabbitMqWithWarnings(otpService, env.RABBITMQ_URL);
     } else {
-        console.warn(
-            `[users-service] EMAIL_DELIVERY_MODE=file. OTP emails will be written to ${env.EMAIL_LOG_DIR}.`,
-        );
+        console.warn(`[users-service] EMAIL_DELIVERY_MODE=file. OTP emails will be written to ${env.EMAIL_LOG_DIR}.`);
     }
 
     const authController = new AuthController(auth);

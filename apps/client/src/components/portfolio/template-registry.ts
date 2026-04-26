@@ -4,7 +4,11 @@ import { AtelierPortfolio } from "@/components/portfolio/templates/AtelierPortfo
 import { FolioPortfolio } from "@/components/portfolio/templates/FolioPortfolio";
 import { MonoPortfolio } from "@/components/portfolio/templates/MonoPortfolio";
 import { SignalPortfolio } from "@/components/portfolio/templates/SignalPortfolio";
-import { getTemplate, portfolioTemplates, type PortfolioTemplateDefinition } from "@/components/portfolio/template-config";
+import {
+    getTemplate,
+    portfolioTemplates,
+    type PortfolioTemplateDefinition,
+} from "@/components/portfolio/template-config";
 import type { TemplateViewProps } from "@/components/portfolio/renderer-types";
 
 export type PortfolioTemplateRegistryEntry = {

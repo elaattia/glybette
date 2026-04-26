@@ -3,62 +3,62 @@ import { useOffres, useOffre } from "@/hooks/useScraping";
 import type { Offre, OffresFilters, TypeOffre, SourceSite } from "@glybette/types";
 
 const TYPE_COLORS: Record<string, { bg: string; text: string; dot: string }> = {
-  emploi:     { bg: "rgba(22,163,74,0.12)",  text: "#22c55e", dot: "#22c55e" },
-  stage:      { bg: "rgba(2,132,199,0.12)",   text: "#38bdf8", dot: "#38bdf8" },
-  pfe:        { bg: "rgba(139,92,246,0.12)",  text: "#a78bfa", dot: "#a78bfa" },
-  opportunite:{ bg: "rgba(251,146,60,0.12)",  text: "#fb923c", dot: "#fb923c" },
+    emploi: { bg: "rgba(22,163,74,0.12)", text: "#22c55e", dot: "#22c55e" },
+    stage: { bg: "rgba(2,132,199,0.12)", text: "#38bdf8", dot: "#38bdf8" },
+    pfe: { bg: "rgba(139,92,246,0.12)", text: "#a78bfa", dot: "#a78bfa" },
+    opportunite: { bg: "rgba(251,146,60,0.12)", text: "#fb923c", dot: "#fb923c" },
 };
 const FALLBACK_COLORS = { bg: "rgba(255,255,255,0.06)", text: "#94a3b8", dot: "#94a3b8" };
 
 const SOURCE_ICONS: Record<SourceSite, string> = {
-  "indeed":             "🔵",
-  "linkedin":           "💼",
-  "welcometothejungle": "🌿",
-  "pfebooks.com":       "📚",
+    indeed: "🔵",
+    linkedin: "💼",
+    welcometothejungle: "🌿",
+    "pfebooks.com": "📚",
 };
 const SOURCE_LABELS: Record<SourceSite, string> = {
-  "indeed":             "Indeed",
-  "linkedin":           "LinkedIn",
-  "welcometothejungle": "WTTJ",
-  "pfebooks.com":       "PFEBooks",
+    indeed: "Indeed",
+    linkedin: "LinkedIn",
+    welcometothejungle: "WTTJ",
+    "pfebooks.com": "PFEBooks",
 };
 
 function getTypeColors(type: string) {
-  return TYPE_COLORS[type?.toLowerCase()] ?? FALLBACK_COLORS;
+    return TYPE_COLORS[type?.toLowerCase()] ?? FALLBACK_COLORS;
 }
-
 
 function timeAgo(dateStr?: string | null): string {
-  if (!dateStr) return "Récemment";
-  const date = new Date(dateStr);
-  if (isNaN(date.getTime())) return "Récemment";
-  const diff = Math.floor((Date.now() - date.getTime()) / 1000);
-  if (diff < 0)      return "À l'instant";   
-  if (diff < 60)     return "À l'instant";
-  if (diff < 3600)   return `Il y a ${Math.floor(diff / 60)}min`;
-  if (diff < 86400)  return `Il y a ${Math.floor(diff / 3600)}h`;
-  if (diff < 604800) return `Il y a ${Math.floor(diff / 86400)}j`;
-  return date.toLocaleDateString("fr-FR", { day: "numeric", month: "short" });
+    if (!dateStr) return "Récemment";
+    const date = new Date(dateStr);
+    if (isNaN(date.getTime())) return "Récemment";
+    const diff = Math.floor((Date.now() - date.getTime()) / 1000);
+    if (diff < 0) return "À l'instant";
+    if (diff < 60) return "À l'instant";
+    if (diff < 3600) return `Il y a ${Math.floor(diff / 60)}min`;
+    if (diff < 86400) return `Il y a ${Math.floor(diff / 3600)}h`;
+    if (diff < 604800) return `Il y a ${Math.floor(diff / 86400)}j`;
+    return date.toLocaleDateString("fr-FR", { day: "numeric", month: "short" });
 }
-
 
 function getDisplayDate(offre: Offre): string {
-  if (offre.date_publication) {
-    return timeAgo(offre.date_publication);
-  }
-  return timeAgo(offre.date_scraped);
+    if (offre.date_publication) {
+        return timeAgo(offre.date_publication);
+    }
+    return timeAgo(offre.date_scraped);
 }
 
-
 function getFullDate(offre: Offre): string {
-  const d = offre.date_publication ?? offre.date_scraped;
-  if (!d) return "";
-  const date = new Date(d);
-  if (isNaN(date.getTime())) return "";
-  return date.toLocaleString("fr-FR", {
-    day: "numeric", month: "long", year: "numeric",
-    hour: "2-digit", minute: "2-digit",
-  });
+    const d = offre.date_publication ?? offre.date_scraped;
+    if (!d) return "";
+    const date = new Date(d);
+    if (isNaN(date.getTime())) return "";
+    return date.toLocaleString("fr-FR", {
+        day: "numeric",
+        month: "long",
+        year: "numeric",
+        hour: "2-digit",
+        minute: "2-digit",
+    });
 }
 
 const styles = `
@@ -301,652 +301,852 @@ const styles = `
 `;
 
 function formatDescription(text: string) {
-  const sections = text.split(/\n## /);
-  if (sections.length === 1) {
-    return <p className="modal-desc">{text}</p>;
-  }
-  return (
-    <>
-      {sections.map((section, i) => {
-        if (i === 0 && section.trim()) {
-          return <p key={i} className="modal-desc" style={{ marginBottom: 12 }}>{section.trim()}</p>;
-        }
-        if (i === 0) return null;
-        const [title, ...bodyLines] = section.split("\n");
-        const body = bodyLines.join("\n").trim();
-        return (
-          <div key={i} className="modal-desc-section">
-            <h4>{title}</h4>
-            {body && <p>{body}</p>}
-          </div>
-        );
-      })}
-    </>
-  );
+    const sections = text.split(/\n## /);
+    if (sections.length === 1) {
+        return <p className="modal-desc">{text}</p>;
+    }
+    return (
+        <>
+            {sections.map((section, i) => {
+                if (i === 0 && section.trim()) {
+                    return (
+                        <p key={i} className="modal-desc" style={{ marginBottom: 12 }}>
+                            {section.trim()}
+                        </p>
+                    );
+                }
+                if (i === 0) return null;
+                const [title, ...bodyLines] = section.split("\n");
+                const body = bodyLines.join("\n").trim();
+                return (
+                    <div key={i} className="modal-desc-section">
+                        <h4>{title}</h4>
+                        {body && <p>{body}</p>}
+                    </div>
+                );
+            })}
+        </>
+    );
 }
 
 function SkeletonCard() {
-  return (
-    <div className="opp-skeleton">
-      <div style={{ display: "flex", gap: 11, marginBottom: 11 }}>
-        <div style={{ width: 40, height: 40, borderRadius: 10, background: "var(--gb-bg3)", flexShrink: 0 }} />
-        <div style={{ flex: 1 }}>
-          <div className="sk-line" style={{ height: 12, width: "65%", marginBottom: 6 }} />
-          <div className="sk-line" style={{ height: 10, width: "40%" }} />
+    return (
+        <div className="opp-skeleton">
+            <div style={{ display: "flex", gap: 11, marginBottom: 11 }}>
+                <div style={{ width: 40, height: 40, borderRadius: 10, background: "var(--gb-bg3)", flexShrink: 0 }} />
+                <div style={{ flex: 1 }}>
+                    <div className="sk-line" style={{ height: 12, width: "65%", marginBottom: 6 }} />
+                    <div className="sk-line" style={{ height: 10, width: "40%" }} />
+                </div>
+            </div>
+            <div style={{ display: "flex", gap: 5, marginBottom: 10 }}>
+                <div className="sk-line" style={{ width: 55, height: 19, borderRadius: 100 }} />
+                <div className="sk-line" style={{ width: 68, height: 19, borderRadius: 100 }} />
+            </div>
+            <div className="sk-line" style={{ height: 9, width: "100%" }} />
         </div>
-      </div>
-      <div style={{ display: "flex", gap: 5, marginBottom: 10 }}>
-        <div className="sk-line" style={{ width: 55, height: 19, borderRadius: 100 }} />
-        <div className="sk-line" style={{ width: 68, height: 19, borderRadius: 100 }} />
-      </div>
-      <div className="sk-line" style={{ height: 9, width: "100%" }} />
-    </div>
-  );
+    );
 }
 
 function JobCard({ offre, onClick }: { offre: Offre; onClick: () => void }) {
-  const colors = getTypeColors(offre.type_offre);
-  const icon   = SOURCE_ICONS[offre.source_site] ?? "🌐";
+    const colors = getTypeColors(offre.type_offre);
+    const icon = SOURCE_ICONS[offre.source_site] ?? "🌐";
 
-  return (
-    <div className="job-card" onClick={onClick} role="button" tabIndex={0}
-      onKeyDown={(e) => e.key === "Enter" && onClick()}>
-      <div className="job-top">
-        <div className="job-logo">
-          {offre.lien_image
-            ? <img src={offre.lien_image} alt="" onError={(e) => { (e.currentTarget as HTMLImageElement).style.display = "none"; }} />
-            : <span>{icon}</span>}
-        </div>
-        <div className="job-meta">
-          <div className="job-title">{offre.titre}</div>
-          <div className="job-company">{offre.entreprise ?? SOURCE_LABELS[offre.source_site]}</div>
-        </div>
-      </div>
+    return (
+        <div
+            className="job-card"
+            onClick={onClick}
+            role="button"
+            tabIndex={0}
+            onKeyDown={(e) => e.key === "Enter" && onClick()}>
+            <div className="job-top">
+                <div className="job-logo">
+                    {offre.lien_image ? (
+                        <img
+                            src={offre.lien_image}
+                            alt=""
+                            onError={(e) => {
+                                (e.currentTarget as HTMLImageElement).style.display = "none";
+                            }}
+                        />
+                    ) : (
+                        <span>{icon}</span>
+                    )}
+                </div>
+                <div className="job-meta">
+                    <div className="job-title">{offre.titre}</div>
+                    <div className="job-company">{offre.entreprise ?? SOURCE_LABELS[offre.source_site]}</div>
+                </div>
+            </div>
 
-      <div className="job-tags">
-        <span className="job-tag" style={{ background: colors.bg, color: colors.text }}>
-          <span className="job-tag-dot" style={{ background: colors.dot }} />{offre.type_offre}
-        </span>
-        {offre.type_contrat && <span className="job-tag-outline">{offre.type_contrat}</span>}
-        {(offre as any).teletravail && (
-          <span className="job-tag-outline" style={{ color: "#38bdf8", borderColor: "rgba(2,132,199,0.3)" }}>
-            🌐 {(offre as any).teletravail}
-          </span>
-        )}
-        {(offre as any).niveau_experience && (
-          <span className="job-tag-outline">{(offre as any).niveau_experience}</span>
-        )}
-        {offre.domaine && <span className="job-tag-outline">{offre.domaine}</span>}
-      </div>
+            <div className="job-tags">
+                <span className="job-tag" style={{ background: colors.bg, color: colors.text }}>
+                    <span className="job-tag-dot" style={{ background: colors.dot }} />
+                    {offre.type_offre}
+                </span>
+                {offre.type_contrat && <span className="job-tag-outline">{offre.type_contrat}</span>}
+                {(offre as any).teletravail && (
+                    <span className="job-tag-outline" style={{ color: "#38bdf8", borderColor: "rgba(2,132,199,0.3)" }}>
+                        🌐 {(offre as any).teletravail}
+                    </span>
+                )}
+                {(offre as any).niveau_experience && (
+                    <span className="job-tag-outline">{(offre as any).niveau_experience}</span>
+                )}
+                {offre.domaine && <span className="job-tag-outline">{offre.domaine}</span>}
+            </div>
 
-      {offre.competences.length > 0 && (
-        <div className="job-skills">
-          {offre.competences.slice(0, 4).map((s) => <span key={s} className="job-skill">{s}</span>)}
-          {offre.competences.length > 4 && <span className="job-skill-more">+{offre.competences.length - 4}</span>}
-        </div>
-      )}
+            {offre.competences.length > 0 && (
+                <div className="job-skills">
+                    {offre.competences.slice(0, 4).map((s) => (
+                        <span key={s} className="job-skill">
+                            {s}
+                        </span>
+                    ))}
+                    {offre.competences.length > 4 && (
+                        <span className="job-skill-more">+{offre.competences.length - 4}</span>
+                    )}
+                </div>
+            )}
 
-      <div className="job-footer">
-        <div className="job-footer-left">
-          {offre.localisation && (
-            <span className="job-location">
-              <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
-                <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/>
-              </svg>
-              {offre.localisation}
-            </span>
-          )}
-          {offre.salaire && (
-            <span style={{ fontSize: "0.7rem", color: "#22c55e", fontWeight: 600 }}>
-              💰 {offre.salaire}
-            </span>
-          )}
-          <span className="job-time" title={getFullDate(offre)}>{getDisplayDate(offre)}</span>
+            <div className="job-footer">
+                <div className="job-footer-left">
+                    {offre.localisation && (
+                        <span className="job-location">
+                            <svg
+                                width="10"
+                                height="10"
+                                viewBox="0 0 24 24"
+                                fill="none"
+                                stroke="currentColor"
+                                strokeWidth="2.5">
+                                <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z" />
+                                <circle cx="12" cy="10" r="3" />
+                            </svg>
+                            {offre.localisation}
+                        </span>
+                    )}
+                    {offre.salaire && (
+                        <span style={{ fontSize: "0.7rem", color: "#22c55e", fontWeight: 600 }}>
+                            💰 {offre.salaire}
+                        </span>
+                    )}
+                    <span className="job-time" title={getFullDate(offre)}>
+                        {getDisplayDate(offre)}
+                    </span>
+                </div>
+                <span className="job-source">
+                    {icon} {SOURCE_LABELS[offre.source_site]}
+                </span>
+            </div>
         </div>
-        <span className="job-source">{icon} {SOURCE_LABELS[offre.source_site]}</span>
-      </div>
-    </div>
-  );
+    );
 }
 
 function JobDetailModal({ offreId, onClose }: { offreId: string; onClose: () => void }) {
-  const { offre, loading } = useOffre(offreId);
-  const o = offre as (Offre & {
-    company_about?: string | null;
-    niveau_experience?: string | null;
-    taille_entreprise?: string | null;
-    teletravail?: string | null;
-    nb_candidats?: string | null;
-  }) | null;
+    const { offre, loading } = useOffre(offreId);
+    const o = offre as
+        | (Offre & {
+              company_about?: string | null;
+              niveau_experience?: string | null;
+              taille_entreprise?: string | null;
+              teletravail?: string | null;
+              nb_candidats?: string | null;
+          })
+        | null;
 
-  const colors    = o ? getTypeColors(o.type_offre) : FALLBACK_COLORS;
-  const icon      = o ? (SOURCE_ICONS[o.source_site] ?? "🌐") : "🌐";
-  const hasEmail  = Boolean(o?.email_contact);
-  const isPFE     = o?.source_site === "pfebooks.com";
+    const colors = o ? getTypeColors(o.type_offre) : FALLBACK_COLORS;
+    const icon = o ? (SOURCE_ICONS[o.source_site] ?? "🌐") : "🌐";
+    const hasEmail = Boolean(o?.email_contact);
+    const isPFE = o?.source_site === "pfebooks.com";
 
-  function buildGmailUrl(to: string, subject: string, body: string): string {
-    const base = "https://mail.google.com/mail/?view=cm&fs=1";
-    return `${base}&to=${encodeURIComponent(to)}&su=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
-  }
-
-  function buildEmailBody(): string {
-    const company = o?.entreprise ?? SOURCE_LABELS[o!.source_site];
-    return [
-      `Bonjour,`,
-      ``,
-      `Je me permets de vous contacter au sujet de l'offre "${o?.titre}" publiée sur ${SOURCE_LABELS[o!.source_site]}.`,
-      ``,
-      `[Présentez-vous ici et exprimez votre motivation]`,
-      ``,
-      `Cordialement,`,
-      `[Votre nom]`,
-    ].join("\n");
-  }
-
-
-  function renderApplyButton() {
-    if (!o) return null;
-
-    const emailBody  = buildEmailBody();
-    const subject    = `Candidature : ${o.titre}`;
-
-    if (isPFE && o.email_contact) {
-      const gmailUrl = buildGmailUrl(o.email_contact, subject, emailBody);
-      return (
-        <div style={{ display: "flex", gap: 8 }}>
-          <a href={gmailUrl} target="_blank" rel="noopener noreferrer" className="modal-apply-email">
-            <svg width="16" height="12" viewBox="0 0 24 18" fill="none">
-              <path d="M2 2l10 8 10-8" stroke="#4285F4" strokeWidth="2" strokeLinecap="round"/>
-              <rect x="1" y="1" width="22" height="16" rx="2" stroke="#4285F4" strokeWidth="2"/>
-            </svg>
-            Postuler via Gmail
-          </a>
-          <a
-            href={`mailto:${o.email_contact}?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(emailBody)}`}
-            className="modal-apply-link"
-            style={{ padding: "9px 14px", fontSize: "0.78rem", background: "var(--gb-app-hover)", border: "1px solid var(--gb-border)", color: "var(--gb-muted)", boxShadow: "none" }}
-            title="Ouvrir avec votre client mail par défaut"
-          >
-            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
-              <path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/>
-              <polyline points="22,6 12,13 2,6"/>
-            </svg>
-            Autre client
-          </a>
-        </div>
-      );
+    function buildGmailUrl(to: string, subject: string, body: string): string {
+        const base = "https://mail.google.com/mail/?view=cm&fs=1";
+        return `${base}&to=${encodeURIComponent(to)}&su=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
     }
 
-    if (o.email_contact) {
-      const gmailUrl = buildGmailUrl(o.email_contact, subject, emailBody);
-      return (
-        <div style={{ display: "flex", gap: 8 }}>
-          <a href={o.lien_original} target="_blank" rel="noopener noreferrer" className="modal-apply-link">
-            Postuler
-            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
-              <path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/>
-              <polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/>
-            </svg>
-          </a>
-          <a href={gmailUrl} target="_blank" rel="noopener noreferrer" className="modal-apply-email">
-            <svg width="16" height="12" viewBox="0 0 24 18" fill="none">
-              <path d="M2 2l10 8 10-8" stroke="#4285F4" strokeWidth="2" strokeLinecap="round"/>
-              <rect x="1" y="1" width="22" height="16" rx="2" stroke="#4285F4" strokeWidth="2"/>
-            </svg>
-            Gmail
-          </a>
-        </div>
-      );
+    function buildEmailBody(): string {
+        const company = o?.entreprise ?? SOURCE_LABELS[o!.source_site];
+        return [
+            `Bonjour,`,
+            ``,
+            `Je me permets de vous contacter au sujet de l'offre "${o?.titre}" publiée sur ${SOURCE_LABELS[o!.source_site]}.`,
+            ``,
+            `[Présentez-vous ici et exprimez votre motivation]`,
+            ``,
+            `Cordialement,`,
+            `[Votre nom]`,
+        ].join("\n");
+    }
+
+    function renderApplyButton() {
+        if (!o) return null;
+
+        const emailBody = buildEmailBody();
+        const subject = `Candidature : ${o.titre}`;
+
+        if (isPFE && o.email_contact) {
+            const gmailUrl = buildGmailUrl(o.email_contact, subject, emailBody);
+            return (
+                <div style={{ display: "flex", gap: 8 }}>
+                    <a href={gmailUrl} target="_blank" rel="noopener noreferrer" className="modal-apply-email">
+                        <svg width="16" height="12" viewBox="0 0 24 18" fill="none">
+                            <path d="M2 2l10 8 10-8" stroke="#4285F4" strokeWidth="2" strokeLinecap="round" />
+                            <rect x="1" y="1" width="22" height="16" rx="2" stroke="#4285F4" strokeWidth="2" />
+                        </svg>
+                        Postuler via Gmail
+                    </a>
+                    <a
+                        href={`mailto:${o.email_contact}?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(emailBody)}`}
+                        className="modal-apply-link"
+                        style={{
+                            padding: "9px 14px",
+                            fontSize: "0.78rem",
+                            background: "var(--gb-app-hover)",
+                            border: "1px solid var(--gb-border)",
+                            color: "var(--gb-muted)",
+                            boxShadow: "none",
+                        }}
+                        title="Ouvrir avec votre client mail par défaut">
+                        <svg
+                            width="13"
+                            height="13"
+                            viewBox="0 0 24 24"
+                            fill="none"
+                            stroke="currentColor"
+                            strokeWidth="2.5">
+                            <path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z" />
+                            <polyline points="22,6 12,13 2,6" />
+                        </svg>
+                        Autre client
+                    </a>
+                </div>
+            );
+        }
+
+        if (o.email_contact) {
+            const gmailUrl = buildGmailUrl(o.email_contact, subject, emailBody);
+            return (
+                <div style={{ display: "flex", gap: 8 }}>
+                    <a href={o.lien_original} target="_blank" rel="noopener noreferrer" className="modal-apply-link">
+                        Postuler
+                        <svg
+                            width="12"
+                            height="12"
+                            viewBox="0 0 24 24"
+                            fill="none"
+                            stroke="currentColor"
+                            strokeWidth="2.5">
+                            <path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6" />
+                            <polyline points="15 3 21 3 21 9" />
+                            <line x1="10" y1="14" x2="21" y2="3" />
+                        </svg>
+                    </a>
+                    <a href={gmailUrl} target="_blank" rel="noopener noreferrer" className="modal-apply-email">
+                        <svg width="16" height="12" viewBox="0 0 24 18" fill="none">
+                            <path d="M2 2l10 8 10-8" stroke="#4285F4" strokeWidth="2" strokeLinecap="round" />
+                            <rect x="1" y="1" width="22" height="16" rx="2" stroke="#4285F4" strokeWidth="2" />
+                        </svg>
+                        Gmail
+                    </a>
+                </div>
+            );
+        }
+
+        return (
+            <a href={o.lien_original} target="_blank" rel="noopener noreferrer" className="modal-apply-link">
+                Postuler
+                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
+                    <path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6" />
+                    <polyline points="15 3 21 3 21 9" />
+                    <line x1="10" y1="14" x2="21" y2="3" />
+                </svg>
+            </a>
+        );
     }
 
     return (
-      <a href={o.lien_original} target="_blank" rel="noopener noreferrer" className="modal-apply-link">
-        Postuler
-        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
-          <path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/>
-          <polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/>
-        </svg>
-      </a>
+        <div
+            className="opp-backdrop"
+            onClick={(e) => e.target === e.currentTarget && onClose()}
+            role="dialog"
+            aria-modal="true">
+            <div className="opp-modal">
+                {loading || !o ? (
+                    <div className="modal-loading">
+                        <div className="modal-spinner" />
+                        <p style={{ color: "var(--gb-muted)", fontSize: "0.875rem", margin: 0 }}>Chargement...</p>
+                    </div>
+                ) : (
+                    <>
+                        <div className="modal-hd">
+                            <button className="modal-close" onClick={onClose} aria-label="Fermer">
+                                ✕
+                            </button>
+                            <div className="modal-hd-top">
+                                <div className="modal-logo">
+                                    {o.lien_image ? (
+                                        <img
+                                            src={o.lien_image}
+                                            alt=""
+                                            onError={(e) => {
+                                                (e.currentTarget as HTMLImageElement).style.display = "none";
+                                            }}
+                                        />
+                                    ) : (
+                                        <span>{icon}</span>
+                                    )}
+                                </div>
+                                <div className="modal-hd-info">
+                                    <div className="modal-title">{o.titre}</div>
+                                    <div className="modal-company">{o.entreprise ?? SOURCE_LABELS[o.source_site]}</div>
+                                </div>
+                            </div>
+                            <div className="modal-chips">
+                                <span
+                                    className="modal-chip"
+                                    style={{ background: colors.bg, color: colors.text, borderColor: "transparent" }}>
+                                    {o.type_offre}
+                                </span>
+                                {o.localisation && (
+                                    <span className="modal-chip">
+                                        <svg
+                                            width="10"
+                                            height="10"
+                                            viewBox="0 0 24 24"
+                                            fill="none"
+                                            stroke="currentColor"
+                                            strokeWidth="2.5">
+                                            <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z" />
+                                            <circle cx="12" cy="10" r="3" />
+                                        </svg>
+                                        {o.localisation}
+                                    </span>
+                                )}
+                                {o.type_contrat && <span className="modal-chip">{o.type_contrat}</span>}
+                                {o.teletravail && (
+                                    <span
+                                        className="modal-chip"
+                                        style={{
+                                            color: "#38bdf8",
+                                            background: "rgba(2,132,199,0.1)",
+                                            borderColor: "rgba(2,132,199,0.25)",
+                                        }}>
+                                        🌐 {o.teletravail}
+                                    </span>
+                                )}
+                                {o.salaire && (
+                                    <span
+                                        className="modal-chip"
+                                        style={{
+                                            color: "#22c55e",
+                                            background: "rgba(22,163,74,0.1)",
+                                            borderColor: "rgba(22,163,74,0.2)",
+                                        }}>
+                                        💰 {o.salaire}
+                                    </span>
+                                )}
+                                {o.niveau_experience && <span className="modal-chip">🎓 {o.niveau_experience}</span>}
+                            </div>
+                        </div>
+
+                        <div className="modal-bd">
+                            <div className="modal-section">
+                                <div className="modal-info-grid">
+                                    <div className="modal-info-cell">
+                                        <div className="modal-info-label">Source</div>
+                                        <div className="modal-info-value">
+                                            {icon} {SOURCE_LABELS[o.source_site]}
+                                        </div>
+                                    </div>
+                                    <div className="modal-info-cell">
+                                        <div className="modal-info-label">Publié</div>
+                                        <div className="modal-info-value" title={getFullDate(o)}>
+                                            {getDisplayDate(o)}
+                                        </div>
+                                    </div>
+                                    {o.domaine && (
+                                        <div className="modal-info-cell">
+                                            <div className="modal-info-label">Domaine</div>
+                                            <div className="modal-info-value">{o.domaine}</div>
+                                        </div>
+                                    )}
+                                    {o.taille_entreprise && (
+                                        <div className="modal-info-cell">
+                                            <div className="modal-info-label">Taille entreprise</div>
+                                            <div className="modal-info-value">{o.taille_entreprise}</div>
+                                        </div>
+                                    )}
+                                    {o.nb_sujets != null && (
+                                        <div className="modal-info-cell">
+                                            <div className="modal-info-label">Sujets PFE</div>
+                                            <div className="modal-info-value">{o.nb_sujets} sujets</div>
+                                        </div>
+                                    )}
+                                    {o.nb_candidats && (
+                                        <div className="modal-info-cell">
+                                            <div className="modal-info-label">Candidats</div>
+                                            <div className="modal-info-value">{o.nb_candidats}</div>
+                                        </div>
+                                    )}
+                                    <div className="modal-info-cell">
+                                        <div className="modal-info-label">Vues</div>
+                                        <div className="modal-info-value">{o.nb_vues}</div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            {o.competences.length > 0 && (
+                                <div className="modal-section">
+                                    <div className="modal-sec-title">Compétences requises</div>
+                                    <div className="modal-skills">
+                                        {o.competences.map((s) => (
+                                            <span key={s} className="modal-skill">
+                                                {s}
+                                            </span>
+                                        ))}
+                                    </div>
+                                </div>
+                            )}
+
+                            {o.description && (
+                                <div className="modal-section">
+                                    <div className="modal-sec-title">Description du poste</div>
+                                    {formatDescription(o.description)}
+                                </div>
+                            )}
+
+                            {o.company_about && (
+                                <div className="modal-section">
+                                    <div className="modal-sec-title">À propos de l'entreprise</div>
+                                    <div className="modal-company-about">{o.company_about}</div>
+                                </div>
+                            )}
+
+                            {o.categories && o.categories.length > 0 && (
+                                <div className="modal-section">
+                                    <div className="modal-sec-title">Catégories</div>
+                                    <div className="modal-cats">
+                                        {o.categories.map((c) => (
+                                            <span key={c} className="modal-cat">
+                                                {c}
+                                            </span>
+                                        ))}
+                                    </div>
+                                </div>
+                            )}
+
+                            {(o.email_contact || o.telephone || o.site_web_entreprise) && (
+                                <div className="modal-section">
+                                    <div className="modal-sec-title">Contact</div>
+                                    <div className="modal-contact">
+                                        {o.email_contact && (
+                                            <a href={`mailto:${o.email_contact}`}>
+                                                <svg
+                                                    width="13"
+                                                    height="13"
+                                                    viewBox="0 0 24 24"
+                                                    fill="none"
+                                                    stroke="currentColor"
+                                                    strokeWidth="2">
+                                                    <path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z" />
+                                                    <polyline points="22,6 12,13 2,6" />
+                                                </svg>
+                                                {o.email_contact}
+                                            </a>
+                                        )}
+                                        {o.telephone && (
+                                            <span>
+                                                <svg
+                                                    width="13"
+                                                    height="13"
+                                                    viewBox="0 0 24 24"
+                                                    fill="none"
+                                                    stroke="currentColor"
+                                                    strokeWidth="2">
+                                                    <path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07A19.5 19.5 0 0 1 4.69 13a19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 3.6 2.18h3a2 2 0 0 1 2 1.72c.127.96.361 1.903.7 2.81a2 2 0 0 1-.45 2.11L7.91 9.91a16 16 0 0 0 6.18 6.18l1.09-.91a2 2 0 0 1 2.11-.45c.907.339 1.85.573 2.81.7A2 2 0 0 1 22 16.92z" />
+                                                </svg>
+                                                {o.telephone}
+                                            </span>
+                                        )}
+                                        {o.site_web_entreprise && (
+                                            <a href={o.site_web_entreprise} target="_blank" rel="noopener noreferrer">
+                                                <svg
+                                                    width="13"
+                                                    height="13"
+                                                    viewBox="0 0 24 24"
+                                                    fill="none"
+                                                    stroke="currentColor"
+                                                    strokeWidth="2">
+                                                    <circle cx="12" cy="12" r="10" />
+                                                    <line x1="2" y1="12" x2="22" y2="12" />
+                                                    <path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z" />
+                                                </svg>
+                                                {o.site_web_entreprise}
+                                            </a>
+                                        )}
+                                    </div>
+                                </div>
+                            )}
+                        </div>
+
+                        <div className="modal-ft">
+                            <div className="modal-ft-meta">
+                                <svg
+                                    width="11"
+                                    height="11"
+                                    viewBox="0 0 24 24"
+                                    fill="none"
+                                    stroke="currentColor"
+                                    strokeWidth="2">
+                                    <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z" />
+                                    <circle cx="12" cy="12" r="3" />
+                                </svg>
+                                {o.nb_vues} vue{o.nb_vues !== 1 ? "s" : ""} · Publié {getDisplayDate(o)}
+                            </div>
+                            {renderApplyButton()}
+                        </div>
+                    </>
+                )}
+            </div>
+        </div>
     );
-  }
-
-  return (
-    <div className="opp-backdrop" onClick={(e) => e.target === e.currentTarget && onClose()} role="dialog" aria-modal="true">
-      <div className="opp-modal">
-        {loading || !o ? (
-          <div className="modal-loading">
-            <div className="modal-spinner" />
-            <p style={{ color: "var(--gb-muted)", fontSize: "0.875rem", margin: 0 }}>Chargement...</p>
-          </div>
-        ) : (
-          <>
-            <div className="modal-hd">
-              <button className="modal-close" onClick={onClose} aria-label="Fermer">✕</button>
-              <div className="modal-hd-top">
-                <div className="modal-logo">
-                  {o.lien_image
-                    ? <img src={o.lien_image} alt="" onError={(e) => { (e.currentTarget as HTMLImageElement).style.display = "none"; }} />
-                    : <span>{icon}</span>}
-                </div>
-                <div className="modal-hd-info">
-                  <div className="modal-title">{o.titre}</div>
-                  <div className="modal-company">{o.entreprise ?? SOURCE_LABELS[o.source_site]}</div>
-                </div>
-              </div>
-              <div className="modal-chips">
-                <span className="modal-chip" style={{ background: colors.bg, color: colors.text, borderColor: "transparent" }}>
-                  {o.type_offre}
-                </span>
-                {o.localisation && (
-                  <span className="modal-chip">
-                    <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
-                      <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/>
-                    </svg>
-                    {o.localisation}
-                  </span>
-                )}
-                {o.type_contrat && <span className="modal-chip">{o.type_contrat}</span>}
-                {o.teletravail && (
-                  <span className="modal-chip" style={{ color: "#38bdf8", background: "rgba(2,132,199,0.1)", borderColor: "rgba(2,132,199,0.25)" }}>
-                    🌐 {o.teletravail}
-                  </span>
-                )}
-                {o.salaire && (
-                  <span className="modal-chip" style={{ color: "#22c55e", background: "rgba(22,163,74,0.1)", borderColor: "rgba(22,163,74,0.2)" }}>
-                    💰 {o.salaire}
-                  </span>
-                )}
-                {o.niveau_experience && (
-                  <span className="modal-chip">🎓 {o.niveau_experience}</span>
-                )}
-              </div>
-            </div>
-
-            <div className="modal-bd">
-              <div className="modal-section">
-                <div className="modal-info-grid">
-                  <div className="modal-info-cell">
-                    <div className="modal-info-label">Source</div>
-                    <div className="modal-info-value">{icon} {SOURCE_LABELS[o.source_site]}</div>
-                  </div>
-                  <div className="modal-info-cell">
-                    <div className="modal-info-label">Publié</div>
-                    <div className="modal-info-value" title={getFullDate(o)}>{getDisplayDate(o)}</div>
-                  </div>
-                  {o.domaine && (
-                    <div className="modal-info-cell">
-                      <div className="modal-info-label">Domaine</div>
-                      <div className="modal-info-value">{o.domaine}</div>
-                    </div>
-                  )}
-                  {o.taille_entreprise && (
-                    <div className="modal-info-cell">
-                      <div className="modal-info-label">Taille entreprise</div>
-                      <div className="modal-info-value">{o.taille_entreprise}</div>
-                    </div>
-                  )}
-                  {o.nb_sujets != null && (
-                    <div className="modal-info-cell">
-                      <div className="modal-info-label">Sujets PFE</div>
-                      <div className="modal-info-value">{o.nb_sujets} sujets</div>
-                    </div>
-                  )}
-                  {o.nb_candidats && (
-                    <div className="modal-info-cell">
-                      <div className="modal-info-label">Candidats</div>
-                      <div className="modal-info-value">{o.nb_candidats}</div>
-                    </div>
-                  )}
-                  <div className="modal-info-cell">
-                    <div className="modal-info-label">Vues</div>
-                    <div className="modal-info-value">{o.nb_vues}</div>
-                  </div>
-                </div>
-              </div>
-
-              {o.competences.length > 0 && (
-                <div className="modal-section">
-                  <div className="modal-sec-title">Compétences requises</div>
-                  <div className="modal-skills">
-                    {o.competences.map((s) => <span key={s} className="modal-skill">{s}</span>)}
-                  </div>
-                </div>
-              )}
-
-              {o.description && (
-                <div className="modal-section">
-                  <div className="modal-sec-title">Description du poste</div>
-                  {formatDescription(o.description)}
-                </div>
-              )}
-
-              {o.company_about && (
-                <div className="modal-section">
-                  <div className="modal-sec-title">À propos de l'entreprise</div>
-                  <div className="modal-company-about">{o.company_about}</div>
-                </div>
-              )}
-
-              {o.categories && o.categories.length > 0 && (
-                <div className="modal-section">
-                  <div className="modal-sec-title">Catégories</div>
-                  <div className="modal-cats">
-                    {o.categories.map((c) => <span key={c} className="modal-cat">{c}</span>)}
-                  </div>
-                </div>
-              )}
-
-              {(o.email_contact || o.telephone || o.site_web_entreprise) && (
-                <div className="modal-section">
-                  <div className="modal-sec-title">Contact</div>
-                  <div className="modal-contact">
-                    {o.email_contact && (
-                      <a href={`mailto:${o.email_contact}`}>
-                        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                          <path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/>
-                          <polyline points="22,6 12,13 2,6"/>
-                        </svg>
-                        {o.email_contact}
-                      </a>
-                    )}
-                    {o.telephone && (
-                      <span>
-                        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                          <path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07A19.5 19.5 0 0 1 4.69 13a19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 3.6 2.18h3a2 2 0 0 1 2 1.72c.127.96.361 1.903.7 2.81a2 2 0 0 1-.45 2.11L7.91 9.91a16 16 0 0 0 6.18 6.18l1.09-.91a2 2 0 0 1 2.11-.45c.907.339 1.85.573 2.81.7A2 2 0 0 1 22 16.92z"/>
-                        </svg>
-                        {o.telephone}
-                      </span>
-                    )}
-                    {o.site_web_entreprise && (
-                      <a href={o.site_web_entreprise} target="_blank" rel="noopener noreferrer">
-                        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                          <circle cx="12" cy="12" r="10"/>
-                          <line x1="2" y1="12" x2="22" y2="12"/>
-                          <path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/>
-                        </svg>
-                        {o.site_web_entreprise}
-                      </a>
-                    )}
-                  </div>
-                </div>
-              )}
-            </div>
-
-            <div className="modal-ft">
-              <div className="modal-ft-meta">
-                <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                  <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/>
-                </svg>
-                {o.nb_vues} vue{o.nb_vues !== 1 ? "s" : ""} · Publié {getDisplayDate(o)}
-              </div>
-              {renderApplyButton()}
-            </div>
-          </>
-        )}
-      </div>
-    </div>
-  );
 }
 
 function buildPageRange(current: number, total: number): (number | "…")[] {
-  if (total <= 7) return Array.from({ length: total }, (_, i) => i + 1);
-  const r: (number | "…")[] = [1];
-  if (current > 3) r.push("…");
-  for (let p = Math.max(2, current - 1); p <= Math.min(total - 1, current + 1); p++) r.push(p);
-  if (current < total - 2) r.push("…");
-  r.push(total);
-  return r;
+    if (total <= 7) return Array.from({ length: total }, (_, i) => i + 1);
+    const r: (number | "…")[] = [1];
+    if (current > 3) r.push("…");
+    for (let p = Math.max(2, current - 1); p <= Math.min(total - 1, current + 1); p++) r.push(p);
+    if (current < total - 2) r.push("…");
+    r.push(total);
+    return r;
 }
 
 const FILTER_LABELS: Record<string, Record<string, string>> = {
-  type_offre:       { emploi: "Emploi", stage: "Stage", pfe: "PFE", opportunite: "Opportunité" },
-  source:           { indeed: "Indeed", linkedin: "LinkedIn", welcometothejungle: "WTTJ", "pfebooks.com": "PFEBooks" },
-  tri:              { recent: "Plus récents", vues: "Plus vus" },
-  date_posted:      { today: "Aujourd'hui", this_week: "Cette semaine", "3days": "3 derniers jours", this_hour: "Cette heure" },
-  teletravail:      { remote: "Full Remote", hybrid: "Hybride", onsite: "Présentiel" },
-  niveau_experience:{ junior: "Junior", mid: "Intermédiaire", senior: "Senior" },
+    type_offre: { emploi: "Emploi", stage: "Stage", pfe: "PFE", opportunite: "Opportunité" },
+    source: { indeed: "Indeed", linkedin: "LinkedIn", welcometothejungle: "WTTJ", "pfebooks.com": "PFEBooks" },
+    tri: { recent: "Plus récents", vues: "Plus vus" },
+    date_posted: {
+        today: "Aujourd'hui",
+        this_week: "Cette semaine",
+        "3days": "3 derniers jours",
+        this_hour: "Cette heure",
+    },
+    teletravail: { remote: "Full Remote", hybrid: "Hybride", onsite: "Présentiel" },
+    niveau_experience: { junior: "Junior", mid: "Intermédiaire", senior: "Senior" },
 };
 
 export default function OpportunitiesPage() {
-  const [filters, setFilters] = useState<OffresFilters>({ page: 1, limit: 18 });
-  const [searchInput, setSearchInput] = useState("");
-  const [selectedId, setSelectedId] = useState<string | null>(null);
+    const [filters, setFilters] = useState<OffresFilters>({ page: 1, limit: 18 });
+    const [searchInput, setSearchInput] = useState("");
+    const [selectedId, setSelectedId] = useState<string | null>(null);
 
-  const { data, loading, error } = useOffres(filters);
+    const { data, loading, error } = useOffres(filters);
 
-  const offres      = data?.offres ?? [];
-  const total       = data?.total  ?? 0;
-  const pages       = data?.pages  ?? 1;
-  const currentPage = filters.page ?? 1;
+    const offres = data?.offres ?? [];
+    const total = data?.total ?? 0;
+    const pages = data?.pages ?? 1;
+    const currentPage = filters.page ?? 1;
 
-  const activeFilters = Object.entries(filters).filter(([k, v]) => {
-    if (!v || k === "page" || k === "limit") return false;
-    if (k === "tri" && v === "recent") return false;
-    return true;
-  }) as [keyof OffresFilters, string][];
+    const activeFilters = Object.entries(filters).filter(([k, v]) => {
+        if (!v || k === "page" || k === "limit") return false;
+        if (k === "tri" && v === "recent") return false;
+        return true;
+    }) as [keyof OffresFilters, string][];
 
-  const applySearch = useCallback((e: React.FormEvent) => {
-    e.preventDefault();
-    setFilters((f) => ({ ...f, search: searchInput.trim() || undefined, page: 1 }));
-  }, [searchInput]);
+    const applySearch = useCallback(
+        (e: React.FormEvent) => {
+            e.preventDefault();
+            setFilters((f) => ({ ...f, search: searchInput.trim() || undefined, page: 1 }));
+        },
+        [searchInput],
+    );
 
-  const setFilter = useCallback((key: keyof OffresFilters, value: string) => {
-    setFilters((f) => ({ ...f, [key]: (value || undefined) as never, page: 1 }));
-  }, []);
+    const setFilter = useCallback((key: keyof OffresFilters, value: string) => {
+        setFilters((f) => ({ ...f, [key]: (value || undefined) as never, page: 1 }));
+    }, []);
 
-  const removeFilter = useCallback((key: keyof OffresFilters) => {
-    setFilters((f) => {
-      const next = { ...f };
-      delete next[key];
-      next.page = 1;
-      return next;
-    });
-    if (key === "search") setSearchInput("");
-  }, []);
+    const removeFilter = useCallback((key: keyof OffresFilters) => {
+        setFilters((f) => {
+            const next = { ...f };
+            delete next[key];
+            next.page = 1;
+            return next;
+        });
+        if (key === "search") setSearchInput("");
+    }, []);
 
-  const setPage = useCallback((p: number) => {
-    setFilters((f) => ({ ...f, page: p }));
-    window.scrollTo({ top: 0, behavior: "smooth" });
-  }, []);
+    const setPage = useCallback((p: number) => {
+        setFilters((f) => ({ ...f, page: p }));
+        window.scrollTo({ top: 0, behavior: "smooth" });
+    }, []);
 
-  const resetAll = () => {
-    setFilters({ page: 1, limit: 18 });
-    setSearchInput("");
-  };
+    const resetAll = () => {
+        setFilters({ page: 1, limit: 18 });
+        setSearchInput("");
+    };
 
-  const typeCounts = offres.reduce<Partial<Record<TypeOffre, number>>>((acc, o) => {
-    acc[o.type_offre] = (acc[o.type_offre] ?? 0) + 1;
-    return acc;
-  }, {});
+    const typeCounts = offres.reduce<Partial<Record<TypeOffre, number>>>((acc, o) => {
+        acc[o.type_offre] = (acc[o.type_offre] ?? 0) + 1;
+        return acc;
+    }, {});
 
-  return (
-    <>
-      <style>{styles}</style>
-      <div className="opp-page">
-
-        <div className="opp-header">
-          <div className="gb-sec-label">Découvrir</div>
-          <h1>Opportunités</h1>
-          <div className="opp-header-sub">
-            <p>{loading ? "Chargement..." : `${total.toLocaleString("fr-FR")} offres disponibles`}</p>
-            <span className="opp-live-badge"><span className="opp-live-dot" />LIVE</span>
-          </div>
-        </div>
-
-        <form className="opp-search-row" onSubmit={applySearch}>
-          <div className="opp-search-wrap">
-            <svg className="opp-search-icon" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
-              <circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/>
-            </svg>
-            <input type="text" className="opp-search" placeholder="Rechercher un poste, entreprise, compétence..."
-              value={searchInput} onChange={(e) => setSearchInput(e.target.value)} />
-          </div>
-          <button type="submit" className="opp-btn-search">Rechercher</button>
-        </form>
-
-        <div className="opp-filters-row">
-          <select className={`opp-select${filters.type_offre ? " active" : ""}`}
-            value={filters.type_offre ?? ""}
-            onChange={(e) => setFilter("type_offre", e.target.value)}>
-            <option value="">Type</option>
-            <option value="emploi">Emploi</option>
-            <option value="stage">Stage</option>
-            <option value="pfe">PFE</option>
-            <option value="opportunite">Opportunité</option>
-          </select>
-
-          <select className={`opp-select${filters.source ? " active" : ""}`}
-            value={filters.source ?? ""}
-            onChange={(e) => setFilter("source", e.target.value)}>
-            <option value="">Source</option>
-            <option value="indeed">Indeed</option>
-            <option value="linkedin">LinkedIn</option>
-            <option value="welcometothejungle">WTTJ</option>
-            <option value="pfebooks.com">PFEBooks</option>
-          </select>
-
-          <input
-            type="text"
-            placeholder="📍 Localisation"
-            value={filters.localisation ?? ""}
-            onChange={(e) => setFilter("localisation", e.target.value)}
-            style={{
-              height: 36, padding: "0 11px",
-              background: filters.localisation ? "rgba(22,163,74,0.06)" : "var(--gb-app-panel-bg)",
-              border: `1px solid ${filters.localisation ? "rgba(22,163,74,0.5)" : "var(--gb-border)"}`,
-              borderRadius: 10, color: filters.localisation ? "#22c55e" : "var(--gb-text)",
-              fontSize: "0.8rem", fontFamily: "'DM Sans', sans-serif", outline: "none",
-              minWidth: 130, transition: "border-color 0.2s",
-            }}
-          />
-
-          <div className="opp-filter-sep" />
-
-          <select className={`opp-select${filters.date_posted ? " active" : ""}`}
-            value={(filters as any).date_posted ?? ""}
-            onChange={(e) => setFilter("date_posted" as keyof OffresFilters, e.target.value)}>
-            <option value="">Quand</option>
-            <option value="this_hour">Cette heure</option>
-            <option value="today">Aujourd'hui</option>
-            <option value="3days">3 derniers jours</option>
-            <option value="this_week">Cette semaine</option>
-          </select>
-
-          <select className={`opp-select${(filters as any).teletravail ? " active" : ""}`}
-            value={(filters as any).teletravail ?? ""}
-            onChange={(e) => setFilter("teletravail" as keyof OffresFilters, e.target.value)}>
-            <option value="">Mode</option>
-            <option value="remote">Full Remote</option>
-            <option value="hybrid">Hybride</option>
-            <option value="onsite">Présentiel</option>
-          </select>
-
-          <select className={`opp-select${(filters as any).niveau_experience ? " active" : ""}`}
-            value={(filters as any).niveau_experience ?? ""}
-            onChange={(e) => setFilter("niveau_experience" as keyof OffresFilters, e.target.value)}>
-            <option value="">Niveau</option>
-            <option value="junior">Junior</option>
-            <option value="mid">Intermédiaire</option>
-            <option value="senior">Senior</option>
-          </select>
-
-          <div className="opp-filter-sep" />
-
-          <select className="opp-select" value={filters.tri ?? "recent"}
-            onChange={(e) => setFilter("tri", e.target.value)}>
-            <option value="recent">Plus récents</option>
-            <option value="vues">Plus vus</option>
-          </select>
-
-          {activeFilters.length > 0 && (
-            <button onClick={resetAll} style={{
-              height: 36, padding: "0 12px", borderRadius: 10, fontSize: "0.78rem",
-              background: "transparent", border: "1px solid rgba(239,68,68,0.3)",
-              color: "#fca5a5", cursor: "pointer", fontFamily: "'DM Sans', sans-serif",
-              transition: "all 0.2s", whiteSpace: "nowrap",
-            }}>
-              ✕ Réinitialiser
-            </button>
-          )}
-        </div>
-
-        {activeFilters.length > 0 && (
-          <div className="opp-active-filters">
-            {activeFilters.map(([key, value]) => {
-              const label = FILTER_LABELS[key]?.[value] ?? value;
-              return (
-                <div key={key} className="opp-filter-chip">
-                  {label}
-                  <button onClick={() => removeFilter(key)} aria-label={`Retirer ${label}`}>✕</button>
+    return (
+        <>
+            <style>{styles}</style>
+            <div className="opp-page">
+                <div className="opp-header">
+                    <div className="gb-sec-label">Découvrir</div>
+                    <h1>Opportunités</h1>
+                    <div className="opp-header-sub">
+                        <p>{loading ? "Chargement..." : `${total.toLocaleString("fr-FR")} offres disponibles`}</p>
+                        <span className="opp-live-badge">
+                            <span className="opp-live-dot" />
+                            LIVE
+                        </span>
+                    </div>
                 </div>
-              );
-            })}
-          </div>
-        )}
 
-        {!loading && offres.length > 0 && (
-          <div className="opp-stats-bar">
-            <span style={{ fontSize: "0.78rem", fontWeight: 700, color: "var(--gb-text)" }}>
-              {offres.length} affichées
-            </span>
-            {(Object.entries(typeCounts) as [TypeOffre, number][]).map(([type, count], i) => {
-              const c = getTypeColors(type);
-              return (
-                <div key={type} style={{ display: "contents" }}>
-                  {i > 0 && <div className="opp-stat-sep" />}
-                  <div className="opp-stat-item">
-                    <div className="opp-stat-dot" style={{ background: c.dot }} />
-                    <span className="opp-stat-count">{count}</span>
-                    <span>{type}</span>
-                  </div>
+                <form className="opp-search-row" onSubmit={applySearch}>
+                    <div className="opp-search-wrap">
+                        <svg
+                            className="opp-search-icon"
+                            width="14"
+                            height="14"
+                            viewBox="0 0 24 24"
+                            fill="none"
+                            stroke="currentColor"
+                            strokeWidth="2.5">
+                            <circle cx="11" cy="11" r="8" />
+                            <line x1="21" y1="21" x2="16.65" y2="16.65" />
+                        </svg>
+                        <input
+                            type="text"
+                            className="opp-search"
+                            placeholder="Rechercher un poste, entreprise, compétence..."
+                            value={searchInput}
+                            onChange={(e) => setSearchInput(e.target.value)}
+                        />
+                    </div>
+                    <button type="submit" className="opp-btn-search">
+                        Rechercher
+                    </button>
+                </form>
+
+                <div className="opp-filters-row">
+                    <select
+                        className={`opp-select${filters.type_offre ? " active" : ""}`}
+                        value={filters.type_offre ?? ""}
+                        onChange={(e) => setFilter("type_offre", e.target.value)}>
+                        <option value="">Type</option>
+                        <option value="emploi">Emploi</option>
+                        <option value="stage">Stage</option>
+                        <option value="pfe">PFE</option>
+                        <option value="opportunite">Opportunité</option>
+                    </select>
+
+                    <select
+                        className={`opp-select${filters.source ? " active" : ""}`}
+                        value={filters.source ?? ""}
+                        onChange={(e) => setFilter("source", e.target.value)}>
+                        <option value="">Source</option>
+                        <option value="indeed">Indeed</option>
+                        <option value="linkedin">LinkedIn</option>
+                        <option value="welcometothejungle">WTTJ</option>
+                        <option value="pfebooks.com">PFEBooks</option>
+                    </select>
+
+                    <input
+                        type="text"
+                        placeholder="📍 Localisation"
+                        value={filters.localisation ?? ""}
+                        onChange={(e) => setFilter("localisation", e.target.value)}
+                        style={{
+                            height: 36,
+                            padding: "0 11px",
+                            background: filters.localisation ? "rgba(22,163,74,0.06)" : "var(--gb-app-panel-bg)",
+                            border: `1px solid ${filters.localisation ? "rgba(22,163,74,0.5)" : "var(--gb-border)"}`,
+                            borderRadius: 10,
+                            color: filters.localisation ? "#22c55e" : "var(--gb-text)",
+                            fontSize: "0.8rem",
+                            fontFamily: "'DM Sans', sans-serif",
+                            outline: "none",
+                            minWidth: 130,
+                            transition: "border-color 0.2s",
+                        }}
+                    />
+
+                    <div className="opp-filter-sep" />
+
+                    <select
+                        className={`opp-select${filters.date_posted ? " active" : ""}`}
+                        value={(filters as any).date_posted ?? ""}
+                        onChange={(e) => setFilter("date_posted" as keyof OffresFilters, e.target.value)}>
+                        <option value="">Quand</option>
+                        <option value="this_hour">Cette heure</option>
+                        <option value="today">Aujourd'hui</option>
+                        <option value="3days">3 derniers jours</option>
+                        <option value="this_week">Cette semaine</option>
+                    </select>
+
+                    <select
+                        className={`opp-select${(filters as any).teletravail ? " active" : ""}`}
+                        value={(filters as any).teletravail ?? ""}
+                        onChange={(e) => setFilter("teletravail" as keyof OffresFilters, e.target.value)}>
+                        <option value="">Mode</option>
+                        <option value="remote">Full Remote</option>
+                        <option value="hybrid">Hybride</option>
+                        <option value="onsite">Présentiel</option>
+                    </select>
+
+                    <select
+                        className={`opp-select${(filters as any).niveau_experience ? " active" : ""}`}
+                        value={(filters as any).niveau_experience ?? ""}
+                        onChange={(e) => setFilter("niveau_experience" as keyof OffresFilters, e.target.value)}>
+                        <option value="">Niveau</option>
+                        <option value="junior">Junior</option>
+                        <option value="mid">Intermédiaire</option>
+                        <option value="senior">Senior</option>
+                    </select>
+
+                    <div className="opp-filter-sep" />
+
+                    <select
+                        className="opp-select"
+                        value={filters.tri ?? "recent"}
+                        onChange={(e) => setFilter("tri", e.target.value)}>
+                        <option value="recent">Plus récents</option>
+                        <option value="vues">Plus vus</option>
+                    </select>
+
+                    {activeFilters.length > 0 && (
+                        <button
+                            onClick={resetAll}
+                            style={{
+                                height: 36,
+                                padding: "0 12px",
+                                borderRadius: 10,
+                                fontSize: "0.78rem",
+                                background: "transparent",
+                                border: "1px solid rgba(239,68,68,0.3)",
+                                color: "#fca5a5",
+                                cursor: "pointer",
+                                fontFamily: "'DM Sans', sans-serif",
+                                transition: "all 0.2s",
+                                whiteSpace: "nowrap",
+                            }}>
+                            ✕ Réinitialiser
+                        </button>
+                    )}
                 </div>
-              );
-            })}
-          </div>
-        )}
 
-        {error && (
-          <div className="opp-error">
-            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-              <circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/>
-            </svg>
-            Impossible de charger les offres. Vérifiez que le scraping-service est démarré.
-          </div>
-        )}
+                {activeFilters.length > 0 && (
+                    <div className="opp-active-filters">
+                        {activeFilters.map(([key, value]) => {
+                            const label = FILTER_LABELS[key]?.[value] ?? value;
+                            return (
+                                <div key={key} className="opp-filter-chip">
+                                    {label}
+                                    <button onClick={() => removeFilter(key)} aria-label={`Retirer ${label}`}>
+                                        ✕
+                                    </button>
+                                </div>
+                            );
+                        })}
+                    </div>
+                )}
 
-        <div className="opp-grid">
-          {loading
-            ? Array.from({ length: 9 }).map((_, i) => <SkeletonCard key={i} />)
-            : offres.length === 0
-            ? (
-              <div className="opp-empty">
-                <div className="opp-empty-icon">🔍</div>
-                <h3>Aucune offre trouvée</h3>
-                <p>Essayez de modifier vos filtres ou votre recherche.</p>
-                <button className="opp-btn-ghost" onClick={resetAll}>Réinitialiser les filtres</button>
-              </div>
-            )
-            : offres.map((offre) => (
-              <JobCard key={offre._id} offre={offre} onClick={() => setSelectedId(offre._id)} />
-            ))
-          }
-        </div>
+                {!loading && offres.length > 0 && (
+                    <div className="opp-stats-bar">
+                        <span style={{ fontSize: "0.78rem", fontWeight: 700, color: "var(--gb-text)" }}>
+                            {offres.length} affichées
+                        </span>
+                        {(Object.entries(typeCounts) as [TypeOffre, number][]).map(([type, count], i) => {
+                            const c = getTypeColors(type);
+                            return (
+                                <div key={type} style={{ display: "contents" }}>
+                                    {i > 0 && <div className="opp-stat-sep" />}
+                                    <div className="opp-stat-item">
+                                        <div className="opp-stat-dot" style={{ background: c.dot }} />
+                                        <span className="opp-stat-count">{count}</span>
+                                        <span>{type}</span>
+                                    </div>
+                                </div>
+                            );
+                        })}
+                    </div>
+                )}
 
-        {!loading && pages > 1 && (
-          <div className="opp-pagination">
-            <button className="opp-pager" disabled={currentPage <= 1} onClick={() => setPage(currentPage - 1)}>←</button>
-            {buildPageRange(currentPage, pages).map((p, i) =>
-              p === "…"
-                ? <span key={`ell-${i}`} style={{ color: "var(--gb-muted)", padding: "0 4px" }}>…</span>
-                : <button key={p} className={`opp-pager${currentPage === p ? " active" : ""}`} onClick={() => setPage(p as number)}>{p}</button>
-            )}
-            <button className="opp-pager" disabled={currentPage >= pages} onClick={() => setPage(currentPage + 1)}>→</button>
-          </div>
-        )}
+                {error && (
+                    <div className="opp-error">
+                        <svg
+                            width="15"
+                            height="15"
+                            viewBox="0 0 24 24"
+                            fill="none"
+                            stroke="currentColor"
+                            strokeWidth="2">
+                            <circle cx="12" cy="12" r="10" />
+                            <line x1="12" y1="8" x2="12" y2="12" />
+                            <line x1="12" y1="16" x2="12.01" y2="16" />
+                        </svg>
+                        Impossible de charger les offres. Vérifiez que le scraping-service est démarré.
+                    </div>
+                )}
 
-      </div>
+                <div className="opp-grid">
+                    {loading ? (
+                        Array.from({ length: 9 }).map((_, i) => <SkeletonCard key={i} />)
+                    ) : offres.length === 0 ? (
+                        <div className="opp-empty">
+                            <div className="opp-empty-icon">🔍</div>
+                            <h3>Aucune offre trouvée</h3>
+                            <p>Essayez de modifier vos filtres ou votre recherche.</p>
+                            <button className="opp-btn-ghost" onClick={resetAll}>
+                                Réinitialiser les filtres
+                            </button>
+                        </div>
+                    ) : (
+                        offres.map((offre) => (
+                            <JobCard key={offre._id} offre={offre} onClick={() => setSelectedId(offre._id)} />
+                        ))
+                    )}
+                </div>
 
-      {selectedId && <JobDetailModal offreId={selectedId} onClose={() => setSelectedId(null)} />}
-    </>
-  );
+                {!loading && pages > 1 && (
+                    <div className="opp-pagination">
+                        <button
+                            className="opp-pager"
+                            disabled={currentPage <= 1}
+                            onClick={() => setPage(currentPage - 1)}>
+                            ←
+                        </button>
+                        {buildPageRange(currentPage, pages).map((p, i) =>
+                            p === "…" ? (
+                                <span key={`ell-${i}`} style={{ color: "var(--gb-muted)", padding: "0 4px" }}>
+                                    …
+                                </span>
+                            ) : (
+                                <button
+                                    key={p}
+                                    className={`opp-pager${currentPage === p ? " active" : ""}`}
+                                    onClick={() => setPage(p as number)}>
+                                    {p}
+                                </button>
+                            ),
+                        )}
+                        <button
+                            className="opp-pager"
+                            disabled={currentPage >= pages}
+                            onClick={() => setPage(currentPage + 1)}>
+                            →
+                        </button>
+                    </div>
+                )}
+            </div>
+
+            {selectedId && <JobDetailModal offreId={selectedId} onClose={() => setSelectedId(null)} />}
+        </>
+    );
 }

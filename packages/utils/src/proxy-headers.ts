@@ -23,10 +23,7 @@ export interface SanitizeProxyHeadersOptions {
 /**
  * Build a new Headers instance safe to send to an upstream service.
  */
-export function sanitizeProxyHeaders(
-    source: Headers,
-    options: SanitizeProxyHeadersOptions = {},
-): Headers {
+export function sanitizeProxyHeaders(source: Headers, options: SanitizeProxyHeadersOptions = {}): Headers {
     const out = new Headers();
     for (const [key, value] of source) {
         const lower = key.toLowerCase();

@@ -1,5 +1,12 @@
 import { useCallback, type CSSProperties, type ReactNode } from "react";
-import { closestCenter, DndContext, type DragEndEvent, type DragStartEvent, type SensorDescriptor, type SensorOptions } from "@dnd-kit/core";
+import {
+    closestCenter,
+    DndContext,
+    type DragEndEvent,
+    type DragStartEvent,
+    type SensorDescriptor,
+    type SensorOptions,
+} from "@dnd-kit/core";
 import { rectSortingStrategy, SortableContext } from "@dnd-kit/sortable";
 import type { PortfolioBlock, PortfolioTab, SavePortfolioRequest } from "@glybette/contracts";
 import { PortfolioRenderer } from "@/components/portfolio/PortfolioRenderer";
@@ -37,8 +44,7 @@ export function PortfolioBuilderCanvas({
                 block={block}
                 className={className}
                 style={style}
-                onSelect={setSelectedBlockId}
-            >
+                onSelect={setSelectedBlockId}>
                 {content}
             </SortableBlockShell>
         ),
@@ -52,8 +58,7 @@ export function PortfolioBuilderCanvas({
                 collisionDetection={closestCenter}
                 onDragStart={onDragStart}
                 onDragCancel={onDragCancel}
-                onDragEnd={onDragEnd}
-            >
+                onDragEnd={onDragEnd}>
                 <SortableContext items={activeTab.blocks.map((block) => block.id)} strategy={rectSortingStrategy}>
                     <PortfolioRenderer
                         portfolio={draft}

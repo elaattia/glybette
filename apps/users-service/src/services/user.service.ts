@@ -20,10 +20,7 @@ function isAuthProvider(value: string | undefined): value is AuthProvider {
     return Boolean(value && AUTH_PROVIDERS.includes(value as AuthProvider));
 }
 
-export function toUserDTO(
-    user: BetterAuthUserDocument,
-    account: BetterAuthAccountDocument | null,
-): UserDTO {
+export function toUserDTO(user: BetterAuthUserDocument, account: BetterAuthAccountDocument | null): UserDTO {
     return {
         id: user._id.toString(),
         email: user.email,
@@ -43,10 +40,9 @@ export class UserService {
             throw new Error("Mongoose database connection is not initialized");
         }
 
-        const user = await db.collection<BetterAuthUserDocument>("users").findOne(
-            { _id: new mongoose.Types.ObjectId(userId) },
-            { projection: { email: 1, emailVerifiedAt: 1 } },
-        );
+        const user = await db
+            .collection<BetterAuthUserDocument>("users")
+            .findOne({ _id: new mongoose.Types.ObjectId(userId) }, { projection: { email: 1, emailVerifiedAt: 1 } });
         if (!user) {
             throw new NotFoundError("User not found");
         }
@@ -65,7 +61,9 @@ export class UserService {
 
         console.log("getting user from database", userId);
 
-        const user = await db.collection<BetterAuthUserDocument>("users").findOne({ _id: new mongoose.Types.ObjectId(userId) });
+        const user = await db
+            .collection<BetterAuthUserDocument>("users")
+            .findOne({ _id: new mongoose.Types.ObjectId(userId) });
         if (!user) {
             console.log("user not found", userId);
             throw new NotFoundError("User not found");

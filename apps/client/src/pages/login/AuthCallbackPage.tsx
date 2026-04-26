@@ -42,8 +42,8 @@ export function AuthCallbackPage() {
                     {auth.isChecking
                         ? "Waiting for session confirmation from Better Auth."
                         : verification.isPending
-                        ? "Waiting for session confirmation from Better Auth."
-                        : "Session not found. Redirecting to the login page."}
+                          ? "Waiting for session confirmation from Better Auth."
+                          : "Session not found. Redirecting to the login page."}
                 </p>
             </div>
         </main>

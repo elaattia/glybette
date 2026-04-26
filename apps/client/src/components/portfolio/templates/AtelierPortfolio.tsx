@@ -1,4 +1,8 @@
-import { PortfolioFooter, PortfolioName, PortfolioTabNav } from "@/components/portfolio/shared/PortfolioHeaderPrimitives";
+import {
+    PortfolioFooter,
+    PortfolioName,
+    PortfolioTabNav,
+} from "@/components/portfolio/shared/PortfolioHeaderPrimitives";
 import { PortfolioGrid } from "@/components/portfolio/shared/PortfolioGrid";
 import type { TemplateViewProps } from "@/components/portfolio/renderer-types";
 

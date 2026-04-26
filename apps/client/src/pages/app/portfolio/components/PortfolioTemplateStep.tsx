@@ -25,18 +25,25 @@ export function PortfolioTemplateStep({ onChooseTemplate }: PortfolioTemplateSte
                         key={template.id}
                         type="button"
                         onClick={() => onChooseTemplate(template.id)}
-                        className="overflow-hidden rounded-3xl border border-[var(--gb-border)] bg-[var(--gb-app-panel-bg)] p-3 text-left transition hover:-translate-y-1 hover:border-[#16A34A]/50"
-                    >
+                        className="overflow-hidden rounded-3xl border border-[var(--gb-border)] bg-[var(--gb-app-panel-bg)] p-3 text-left transition hover:-translate-y-1 hover:border-[#16A34A]/50">
                         <div
                             className={cn("relative h-48 overflow-hidden rounded-2xl p-5", template.previewClassName)}
-                            style={{ "--portfolio-accent": template.defaultStyle.accentColor } as CSSProperties}
-                        >
+                            style={{ "--portfolio-accent": template.defaultStyle.accentColor } as CSSProperties}>
                             <div className={cn("absolute inset-0 opacity-35", template.backgroundArtClassName)} />
-                            <div className={cn("relative h-full border p-4", template.surfaceClassName, template.pickerSurfaceClassName)}>
+                            <div
+                                className={cn(
+                                    "relative h-full border p-4",
+                                    template.surfaceClassName,
+                                    template.pickerSurfaceClassName,
+                                )}>
                                 <p className={cn("text-xs uppercase tracking-[0.3em]", template.accentClassName)}>
                                     {template.tone}
                                 </p>
-                                <p className={cn("text-3xl font-semibold tracking-[-0.06em]", template.pickerTitleClassName)}>
+                                <p
+                                    className={cn(
+                                        "text-3xl font-semibold tracking-[-0.06em]",
+                                        template.pickerTitleClassName,
+                                    )}>
                                     {template.name}
                                 </p>
                             </div>

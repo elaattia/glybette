@@ -9,8 +9,6 @@ const emailServiceEnvSchema = baseEnvSchema.extend({
 
 export type EmailServiceEnv = z.infer<typeof emailServiceEnvSchema>;
 
-export function loadEmailServiceEnv(
-    env: Record<string, string | undefined> = process.env,
-): EmailServiceEnv {
+export function loadEmailServiceEnv(env: Record<string, string | undefined> = process.env): EmailServiceEnv {
     return emailServiceEnvSchema.parse(env);
 }

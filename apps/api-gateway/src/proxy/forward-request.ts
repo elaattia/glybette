@@ -1,10 +1,5 @@
 import type { Context } from "hono";
-import {
-    sanitizeProxyHeaders,
-    AUTH_HEADER_USER_ID,
-    AUTH_HEADER_ROLES,
-    ServiceUnavailableError,
-} from "@glybette/utils";
+import { sanitizeProxyHeaders, AUTH_HEADER_USER_ID, AUTH_HEADER_ROLES, ServiceUnavailableError } from "@glybette/utils";
 
 type HttpMethod = "GET" | "POST" | "PUT" | "DELETE" | "PATCH";
 
@@ -20,7 +15,6 @@ function joinBaseAndPath(baseUrl: string, pathWithQuery: string): string {
     const path = pathWithQuery.startsWith("/") ? pathWithQuery : `/${pathWithQuery}`;
     return `${base}${path}`;
 }
-
 
 export async function forwardToService(
     c: Context,

@@ -50,7 +50,9 @@ function SkillsFields({ block, onChange }: BlockDataFieldProps) {
     return (
         <div className="space-y-3">
             {groups.map((group, index) => (
-                <div key={`${group.label}-${index}`} className="space-y-2 rounded-xl border border-[var(--gb-border)] p-3">
+                <div
+                    key={`${group.label}-${index}`}
+                    className="space-y-2 rounded-xl border border-[var(--gb-border)] p-3">
                     <div className="flex items-center gap-2">
                         <Input
                             value={group.label}
@@ -63,8 +65,7 @@ function SkillsFields({ block, onChange }: BlockDataFieldProps) {
                             variant="ghost"
                             size="icon-sm"
                             onClick={() => updateGroups(groups.filter((_, groupIndex) => groupIndex !== index))}
-                            aria-label={`Delete ${group.label || "skill"} group`}
-                        >
+                            aria-label={`Delete ${group.label || "skill"} group`}>
                             <Trash2 className="size-3.5" />
                         </Button>
                     </div>
@@ -87,8 +88,7 @@ function SkillsFields({ block, onChange }: BlockDataFieldProps) {
                 type="button"
                 variant="outline"
                 className="w-full"
-                onClick={() => updateGroups([...groups, { label: "New group", skills: ["New skill"] }])}
-            >
+                onClick={() => updateGroups([...groups, { label: "New group", skills: ["New skill"] }])}>
                 Add skill group
             </Button>
         </div>
@@ -99,16 +99,28 @@ function ContactCtaFields({ block, updateField }: BlockDataFieldProps) {
     return (
         <>
             <InspectorField label="Heading">
-                <Input value={getText(block.data, "heading")} onChange={(event) => updateField("heading", event.target.value)} />
+                <Input
+                    value={getText(block.data, "heading")}
+                    onChange={(event) => updateField("heading", event.target.value)}
+                />
             </InspectorField>
             <InspectorField label="Body">
-                <Textarea value={getText(block.data, "body")} onChange={(event) => updateField("body", event.target.value)} />
+                <Textarea
+                    value={getText(block.data, "body")}
+                    onChange={(event) => updateField("body", event.target.value)}
+                />
             </InspectorField>
             <InspectorField label="Button label">
-                <Input value={getText(block.data, "label")} onChange={(event) => updateField("label", event.target.value)} />
+                <Input
+                    value={getText(block.data, "label")}
+                    onChange={(event) => updateField("label", event.target.value)}
+                />
             </InspectorField>
             <InspectorField label="Button URL">
-                <Input value={getText(block.data, "url")} onChange={(event) => updateField("url", event.target.value)} />
+                <Input
+                    value={getText(block.data, "url")}
+                    onChange={(event) => updateField("url", event.target.value)}
+                />
             </InspectorField>
         </>
     );
@@ -118,10 +130,16 @@ function MediaFields({ block, updateField }: BlockDataFieldProps) {
     return (
         <>
             <InspectorField label="Image URL">
-                <Input value={getText(block.data, "imageUrl")} onChange={(event) => updateField("imageUrl", event.target.value)} />
+                <Input
+                    value={getText(block.data, "imageUrl")}
+                    onChange={(event) => updateField("imageUrl", event.target.value)}
+                />
             </InspectorField>
             <InspectorField label="Caption">
-                <Input value={getText(block.data, "caption")} onChange={(event) => updateField("caption", event.target.value)} />
+                <Input
+                    value={getText(block.data, "caption")}
+                    onChange={(event) => updateField("caption", event.target.value)}
+                />
             </InspectorField>
         </>
     );
@@ -131,10 +149,16 @@ function CustomLinkFields({ block, updateField }: BlockDataFieldProps) {
     return (
         <>
             <InspectorField label="Link label">
-                <Input value={getText(block.data, "label")} onChange={(event) => updateField("label", event.target.value)} />
+                <Input
+                    value={getText(block.data, "label")}
+                    onChange={(event) => updateField("label", event.target.value)}
+                />
             </InspectorField>
             <InspectorField label="URL">
-                <Input value={getText(block.data, "url")} onChange={(event) => updateField("url", event.target.value)} />
+                <Input
+                    value={getText(block.data, "url")}
+                    onChange={(event) => updateField("url", event.target.value)}
+                />
             </InspectorField>
         </>
     );
@@ -152,7 +176,9 @@ function SocialLinksFields({ block, updateField }: BlockDataFieldProps) {
     return (
         <div className="space-y-3">
             {links.map((link, index) => (
-                <div key={`${link.label}-${index}`} className="space-y-2 rounded-xl border border-[var(--gb-border)] p-3">
+                <div
+                    key={`${link.label}-${index}`}
+                    className="space-y-2 rounded-xl border border-[var(--gb-border)] p-3">
                     <Input
                         value={link.label ?? ""}
                         onChange={(event) => updateLink(index, "label", event.target.value)}
@@ -184,8 +210,7 @@ function SocialLinksFields({ block, updateField }: BlockDataFieldProps) {
                 type="button"
                 variant="outline"
                 className="w-full"
-                onClick={() => updateField("links", [...links, { label: "New link", url: "https://", icon: "globe" }])}
-            >
+                onClick={() => updateField("links", [...links, { label: "New link", url: "https://", icon: "globe" }])}>
                 Add link
             </Button>
         </div>
@@ -202,18 +227,38 @@ function ProjectListFields({ block, updateField }: BlockDataFieldProps) {
     const updateProject = (index: number, field: "title" | "summary" | "detail" | "url", value: string) => {
         updateField(
             "projects",
-            projects.map((project, projectIndex) => (projectIndex === index ? { ...project, [field]: value } : project)),
+            projects.map((project, projectIndex) =>
+                projectIndex === index ? { ...project, [field]: value } : project,
+            ),
         );
     };
 
     return (
         <div className="space-y-3">
             {projects.map((project, index) => (
-                <div key={`${project.title}-${index}`} className="space-y-2 rounded-xl border border-[var(--gb-border)] p-3">
-                    <Input value={project.title ?? ""} onChange={(event) => updateProject(index, "title", event.target.value)} placeholder="Project title" />
-                    <Input value={project.summary ?? ""} onChange={(event) => updateProject(index, "summary", event.target.value)} placeholder="Short summary" />
-                    <Textarea value={project.detail ?? ""} onChange={(event) => updateProject(index, "detail", event.target.value)} placeholder="Modal detail" />
-                    <Input value={project.url ?? ""} onChange={(event) => updateProject(index, "url", event.target.value)} placeholder="Project URL" />
+                <div
+                    key={`${project.title}-${index}`}
+                    className="space-y-2 rounded-xl border border-[var(--gb-border)] p-3">
+                    <Input
+                        value={project.title ?? ""}
+                        onChange={(event) => updateProject(index, "title", event.target.value)}
+                        placeholder="Project title"
+                    />
+                    <Input
+                        value={project.summary ?? ""}
+                        onChange={(event) => updateProject(index, "summary", event.target.value)}
+                        placeholder="Short summary"
+                    />
+                    <Textarea
+                        value={project.detail ?? ""}
+                        onChange={(event) => updateProject(index, "detail", event.target.value)}
+                        placeholder="Modal detail"
+                    />
+                    <Input
+                        value={project.url ?? ""}
+                        onChange={(event) => updateProject(index, "url", event.target.value)}
+                        placeholder="Project URL"
+                    />
                 </div>
             ))}
             <Button
@@ -225,8 +270,7 @@ function ProjectListFields({ block, updateField }: BlockDataFieldProps) {
                         ...projects,
                         { title: "New project", summary: "Short outcome", detail: "What changed?", url: "" },
                     ])
-                }
-            >
+                }>
                 Add project
             </Button>
         </div>
@@ -250,11 +294,29 @@ function ExperienceTimelineFields({ block, updateField }: BlockDataFieldProps) {
     return (
         <div className="space-y-3">
             {items.map((item, index) => (
-                <div key={`${item.role}-${index}`} className="space-y-2 rounded-xl border border-[var(--gb-border)] p-3">
-                    <Input value={item.role ?? ""} onChange={(event) => updateItem(index, "role", event.target.value)} placeholder="Role" />
-                    <Input value={item.company ?? ""} onChange={(event) => updateItem(index, "company", event.target.value)} placeholder="Company" />
-                    <Input value={item.period ?? ""} onChange={(event) => updateItem(index, "period", event.target.value)} placeholder="2024 - Present" />
-                    <Textarea value={item.description ?? ""} onChange={(event) => updateItem(index, "description", event.target.value)} placeholder="What you did" />
+                <div
+                    key={`${item.role}-${index}`}
+                    className="space-y-2 rounded-xl border border-[var(--gb-border)] p-3">
+                    <Input
+                        value={item.role ?? ""}
+                        onChange={(event) => updateItem(index, "role", event.target.value)}
+                        placeholder="Role"
+                    />
+                    <Input
+                        value={item.company ?? ""}
+                        onChange={(event) => updateItem(index, "company", event.target.value)}
+                        placeholder="Company"
+                    />
+                    <Input
+                        value={item.period ?? ""}
+                        onChange={(event) => updateItem(index, "period", event.target.value)}
+                        placeholder="2024 - Present"
+                    />
+                    <Textarea
+                        value={item.description ?? ""}
+                        onChange={(event) => updateItem(index, "description", event.target.value)}
+                        placeholder="What you did"
+                    />
                 </div>
             ))}
             <Button
@@ -266,8 +328,7 @@ function ExperienceTimelineFields({ block, updateField }: BlockDataFieldProps) {
                         ...items,
                         { role: "New role", company: "Company", period: "Year", description: "Impact" },
                     ])
-                }
-            >
+                }>
                 Add experience
             </Button>
         </div>

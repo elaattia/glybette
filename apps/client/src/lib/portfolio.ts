@@ -88,11 +88,12 @@ export function createPortfolioTab(label = "About"): PortfolioTab {
 
 export function createPortfolioIdentity(slug: string): PortfolioIdentity {
     return {
-        displayName: slug
-            .split("-")
-            .filter(Boolean)
-            .map((word) => word.charAt(0).toUpperCase() + word.slice(1))
-            .join(" ") || "Your Name",
+        displayName:
+            slug
+                .split("-")
+                .filter(Boolean)
+                .map((word) => word.charAt(0).toUpperCase() + word.slice(1))
+                .join(" ") || "Your Name",
         eyebrowText: "Independent portfolio",
         eyebrowPlacement: "above",
     };
@@ -139,8 +140,7 @@ export function createPortfolioBlock(type: PortfolioBlockType, row = 1): Portfol
                         {
                             title: "Glybette portfolio",
                             summary: "A portfolio system with live editing, templates, and custom URLs.",
-                            detail:
-                                "Describe the context, your role, technical decisions, and measurable outcome.",
+                            detail: "Describe the context, your role, technical decisions, and measurable outcome.",
                             url: "https://glybette.com",
                         },
                     ],

@@ -75,8 +75,7 @@ export function PortfolioSlugStep({
                     <Button
                         className="gb-btn-primary h-10"
                         onClick={onContinue}
-                        disabled={isCheckingSlug || normalizedSlug.length < 3}
-                    >
+                        disabled={isCheckingSlug || normalizedSlug.length < 3}>
                         {isCheckingSlug ? <Loader2 className="animate-spin" /> : <Check />}
                         Continue to templates
                     </Button>

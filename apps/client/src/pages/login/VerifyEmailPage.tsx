@@ -15,8 +15,7 @@ export function VerifyEmailPage() {
     const [requestMessage, setRequestMessage] = useState<string | null>(null);
     const [errorMessage, setErrorMessage] = useState<string | null>(null);
 
-    const isSubmitting =
-        verification.requestOtpMutation.isPending || verification.verifyOtpMutation.isPending;
+    const isSubmitting = verification.requestOtpMutation.isPending || verification.verifyOtpMutation.isPending;
 
     const maskedEmail = useMemo(() => {
         if (!verification.email) {
@@ -67,8 +66,7 @@ export function VerifyEmailPage() {
             await verification.verifyOtp(code.trim());
             navigate("/app/dashboard", { replace: true });
         } catch (error) {
-            const message =
-                error instanceof ApiError ? error.message : "Unable to verify OTP code";
+            const message = error instanceof ApiError ? error.message : "Unable to verify OTP code";
             setErrorMessage(message);
         }
     };
@@ -77,12 +75,9 @@ export function VerifyEmailPage() {
         setErrorMessage(null);
         try {
             const response = await verification.requestOtp();
-            setRequestMessage(
-                `A new code was sent. It expires in ${response.expiresInSeconds} seconds.`,
-            );
+            setRequestMessage(`A new code was sent. It expires in ${response.expiresInSeconds} seconds.`);
         } catch (error) {
-            const message =
-                error instanceof ApiError ? error.message : "Unable to request a new OTP";
+            const message = error instanceof ApiError ? error.message : "Unable to request a new OTP";
             setErrorMessage(message);
         }
     };
@@ -124,8 +119,7 @@ export function VerifyEmailPage() {
                                     pattern={REGEXP_ONLY_DIGITS}
                                     value={code}
                                     onChange={setCode}
-                                    disabled={isSubmitting}
-                                >
+                                    disabled={isSubmitting}>
                                     <InputOTPGroup>
                                         <InputOTPSlot index={0} />
                                         <InputOTPSlot index={1} />
@@ -143,8 +137,7 @@ export function VerifyEmailPage() {
                                     void submitCode();
                                 }}
                                 disabled={code.trim().length !== 6 || isSubmitting}
-                                className="login-primary-button"
-                            >
+                                className="login-primary-button">
                                 {verification.verifyOtpMutation.isPending ? "Verifying..." : "Verify email"}
                             </button>
                             <button
@@ -153,8 +146,7 @@ export function VerifyEmailPage() {
                                     void resendCode();
                                 }}
                                 disabled={isSubmitting}
-                                className="w-full rounded-xl border border-[var(--gb-border)] px-4 py-3 font-medium text-[var(--gb-text)] transition hover:bg-[var(--gb-surface2)] disabled:cursor-not-allowed disabled:opacity-50"
-                            >
+                                className="w-full rounded-xl border border-[var(--gb-border)] px-4 py-3 font-medium text-[var(--gb-text)] transition hover:bg-[var(--gb-surface2)] disabled:cursor-not-allowed disabled:opacity-50">
                                 {verification.requestOtpMutation.isPending ? "Sending..." : "Resend code"}
                             </button>
                         </div>

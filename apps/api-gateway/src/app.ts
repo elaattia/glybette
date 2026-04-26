@@ -28,8 +28,6 @@ export function createApp(env: GatewayEnv): Hono {
     api.get("/health", (c) => c.json({ status: "ok", name: "api-gateway" }, 200));
     registerServiceRoutes(api, { env, services });
 
-
     app.route("/", api);
     return app;
 }
-

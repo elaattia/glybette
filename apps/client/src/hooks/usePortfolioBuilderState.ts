@@ -1,12 +1,13 @@
 import { useCallback, useEffect, useMemo, useState } from "react";
-import {
-    PointerSensor,
-    useSensor,
-    useSensors,
-    type DragEndEvent,
-} from "@dnd-kit/core";
+import { PointerSensor, useSensor, useSensors, type DragEndEvent } from "@dnd-kit/core";
 import { arrayMove } from "@dnd-kit/sortable";
-import type { PortfolioBlock, PortfolioBlockType, PortfolioTab, PortfolioTemplateId, SavePortfolioRequest } from "@glybette/contracts";
+import type {
+    PortfolioBlock,
+    PortfolioBlockType,
+    PortfolioTab,
+    PortfolioTemplateId,
+    SavePortfolioRequest,
+} from "@glybette/contracts";
 import { useCurrentPortfolio, usePortfolioMutations } from "@/hooks/usePortfolio";
 import { useUser } from "@/hooks/useUser";
 import {

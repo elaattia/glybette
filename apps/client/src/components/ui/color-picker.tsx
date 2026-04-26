@@ -12,16 +12,7 @@ type ColorPickerProps = {
     className?: string;
 };
 
-const defaultSwatches = [
-    "#16A34A",
-    "#0284C7",
-    "#38BDF8",
-    "#D97706",
-    "#EF4444",
-    "#A855F7",
-    "#111827",
-    "#F4F0E8",
-];
+const defaultSwatches = ["#16A34A", "#0284C7", "#38BDF8", "#D97706", "#EF4444", "#A855F7", "#111827", "#F4F0E8"];
 
 function normalizeHex(value: string) {
     const trimmed = value.trim();
@@ -31,21 +22,18 @@ function normalizeHex(value: string) {
     return value;
 }
 
-export function ColorPicker({
-    value,
-    onChange,
-    swatches = defaultSwatches,
-    className,
-}: ColorPickerProps) {
+export function ColorPicker({ value, onChange, swatches = defaultSwatches, className }: ColorPickerProps) {
     const handleEyeDropper = async () => {
         if (!("EyeDropper" in window)) {
             return;
         }
 
         try {
-            const eyeDropper = new (window as typeof window & {
-                EyeDropper: new () => { open: () => Promise<{ sRGBHex: string }> };
-            }).EyeDropper();
+            const eyeDropper = new (
+                window as typeof window & {
+                    EyeDropper: new () => { open: () => Promise<{ sRGBHex: string }> };
+                }
+            ).EyeDropper();
             const result = await eyeDropper.open();
             onChange(result.sRGBHex.toUpperCase());
         } catch {
@@ -58,13 +46,11 @@ export function ColorPicker({
             className={cn(
                 "rounded-2xl border border-[var(--gb-border)] bg-[var(--gb-bg)] p-3 shadow-inner",
                 className,
-            )}
-        >
+            )}>
             <div className="flex items-center gap-3">
                 <label
                     className="relative grid size-12 shrink-0 cursor-pointer place-items-center overflow-hidden rounded-xl border border-[var(--gb-border)] shadow-lg"
-                    style={{ background: value }}
-                >
+                    style={{ background: value }}>
                     <Input
                         aria-label="Accent color"
                         type="color"
@@ -89,8 +75,7 @@ export function ColorPicker({
                                 onClick={() => onChange(swatch)}
                                 className={cn(
                                     "size-5 rounded-full border border-white/20 ring-offset-2 transition hover:scale-110",
-                                    value.toUpperCase() === swatch.toUpperCase() &&
-                                        "ring-2 ring-[var(--gb-app-ring)]",
+                                    value.toUpperCase() === swatch.toUpperCase() && "ring-2 ring-[var(--gb-app-ring)]",
                                 )}
                                 style={{ background: swatch }}
                             />
@@ -104,8 +89,7 @@ export function ColorPicker({
                         size="icon-sm"
                         onClick={handleEyeDropper}
                         disabled={!("EyeDropper" in window)}
-                        aria-label="Pick color from screen"
-                    >
+                        aria-label="Pick color from screen">
                         <Pipette className="size-3.5" />
                     </Button>
                     <Button
@@ -113,8 +97,7 @@ export function ColorPicker({
                         variant="outline"
                         size="icon-sm"
                         onClick={() => onChange("#16A34A")}
-                        aria-label="Reset color"
-                    >
+                        aria-label="Reset color">
                         <RotateCcw className="size-3.5" />
                     </Button>
                 </div>

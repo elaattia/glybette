@@ -89,8 +89,7 @@ export function PortfolioBuilderLeftPanel({
                                         eyebrowPlacement: value === "below" ? "below" : "above",
                                     },
                                 }))
-                            }
-                        >
+                            }>
                             <SelectTrigger className="w-full">
                                 <SelectValue />
                             </SelectTrigger>
@@ -133,16 +132,14 @@ export function PortfolioBuilderLeftPanel({
                                 draft.templateId === template.id
                                     ? "border-[#16A34A]/50 bg-[#16A34A]/10"
                                     : "border-[var(--gb-border)] hover:border-[#16A34A]/30",
-                            )}
-                        >
+                            )}>
                             <span
                                 className={cn(
                                     "relative block overflow-hidden rounded-lg px-3 py-2 text-xs font-semibold",
                                     template.previewClassName,
                                     template.sidebarPreviewClassName,
                                 )}
-                                style={{ "--portfolio-accent": template.defaultStyle.accentColor } as CSSProperties}
-                            >
+                                style={{ "--portfolio-accent": template.defaultStyle.accentColor } as CSSProperties}>
                                 <span className={cn("absolute inset-0 opacity-30", template.backgroundArtClassName)} />
                                 <span className="relative">{template.name}</span>
                             </span>
@@ -170,8 +167,7 @@ export function PortfolioBuilderLeftPanel({
                                 activeTab.id === tab.id
                                     ? "border-[#16A34A]/40 bg-[#16A34A]/10"
                                     : "border-[var(--gb-border)]",
-                            )}
-                        >
+                            )}>
                             <Input
                                 value={tab.label}
                                 onFocus={() => selectTab(tab)}
@@ -185,8 +181,7 @@ export function PortfolioBuilderLeftPanel({
                                 size="icon-sm"
                                 onClick={() => deleteTab(tab.id)}
                                 disabled={draft.tabs.length <= 1}
-                                aria-label={`Delete ${tab.label} tab`}
-                            >
+                                aria-label={`Delete ${tab.label} tab`}>
                                 <Trash2 className="size-3.5" />
                             </Button>
                         </div>
@@ -211,8 +206,7 @@ export function PortfolioBuilderLeftPanel({
                             key={block.type}
                             type="button"
                             onClick={() => addBlock(block.type)}
-                            className="w-full rounded-xl border border-[var(--gb-border)] p-3 text-left transition hover:border-[#0284C7]/40 hover:bg-[#0284C7]/10"
-                        >
+                            className="w-full rounded-xl border border-[var(--gb-border)] p-3 text-left transition hover:border-[#0284C7]/40 hover:bg-[#0284C7]/10">
                             <span className="block text-sm font-medium text-[var(--gb-text)]">{block.label}</span>
                             <span className="mt-1 block text-xs leading-5 text-[var(--gb-muted)]">
                                 {block.description}

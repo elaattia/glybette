@@ -24,7 +24,7 @@
 .login-orb-1 {
     width: 620px;
     height: 620px;
-    background: #16A34A;
+    background: #16a34a;
     top: -220px;
     left: -180px;
     animation-delay: 0s;
@@ -33,7 +33,7 @@
 .login-orb-2 {
     width: 520px;
     height: 520px;
-    background: #0284C7;
+    background: #0284c7;
     top: 30%;
     right: -200px;
     animation-delay: -5s;
@@ -42,14 +42,15 @@
 .login-orb-3 {
     width: 380px;
     height: 380px;
-    background: #16A34A;
+    background: #16a34a;
     bottom: -80px;
     left: 42%;
     animation-delay: -9s;
 }
 
 @keyframes loginOrbFloat {
-    0%, 100% {
+    0%,
+    100% {
         transform: translate(0, 0) scale(1);
     }
     33% {
@@ -101,7 +102,7 @@
     border: 1px solid var(--gb-border);
     border-radius: 24px;
     padding: 3rem 2.5rem;
-    box-shadow: 
+    box-shadow:
         0 8px 32px rgba(0, 0, 0, 0.12),
         0 2px 8px rgba(0, 0, 0, 0.08),
         inset 0 1px 0 rgba(255, 255, 255, 0.05);
@@ -123,7 +124,7 @@
 }
 
 .login-title {
-    font-family: 'Bricolage Grotesque', sans-serif;
+    font-family: "Bricolage Grotesque", sans-serif;
     font-size: 2rem;
     font-weight: 800;
     line-height: 1.2;
@@ -133,14 +134,14 @@
 }
 
 .login-title .gradient-text {
-    background: linear-gradient(135deg, #16A34A, #0284C7);
+    background: linear-gradient(135deg, #16a34a, #0284c7);
     -webkit-background-clip: text;
     -webkit-text-fill-color: transparent;
     background-clip: text;
 }
 
 .login-subtitle {
-    font-family: 'DM Sans', sans-serif;
+    font-family: "DM Sans", sans-serif;
     font-size: 0.9375rem;
     color: var(--gb-muted);
     font-weight: 400;
@@ -205,7 +206,7 @@
     font-weight: 600;
     cursor: pointer;
     color: #fff;
-    background: linear-gradient(135deg, #16A34A, #0284C7);
+    background: linear-gradient(135deg, #16a34a, #0284c7);
 }
 
 .login-primary-button:disabled {
@@ -283,7 +284,7 @@
 
 /* Light mode adjustments */
 [data-theme="light"] .login-card {
-    box-shadow: 
+    box-shadow:
         0 8px 32px rgba(22, 163, 74, 0.08),
         0 2px 8px rgba(22, 163, 74, 0.04),
         inset 0 1px 0 rgba(255, 255, 255, 0.8);

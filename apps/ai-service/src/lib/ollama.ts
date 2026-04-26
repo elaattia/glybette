@@ -1,10 +1,9 @@
-const BASE_URL  = process.env.OLLAMA_BASE_URL  ?? "http://localhost:11434";
-const MODEL     = process.env.OLLAMA_MODEL     ?? "mistral";
+const BASE_URL = process.env.OLLAMA_BASE_URL ?? "http://localhost:11434";
+const MODEL = process.env.OLLAMA_MODEL ?? "mistral";
 
 const SYSTEM_DEFAULT =
     "You are an expert CV/resume writer and career coach. " +
     "Always respond in the same language as the CV content provided.";
-
 
 interface OllamaGenerateResponse {
     model: string;
@@ -23,24 +22,22 @@ interface OllamaChatResponse {
     done: boolean;
 }
 
-
-
 export async function callOllama(
     prompt: string,
     opts: {
         system?: string;
         maxTokens?: number;
-        format?: "json";        
-        temperature?: number;   
-    } = {}
+        format?: "json";
+        temperature?: number;
+    } = {},
 ): Promise<string> {
-    const system      = opts.system ?? SYSTEM_DEFAULT;
-    const numPredict  = opts.maxTokens ?? 1024;
-    const temperature = opts.temperature ?? 0.7; 
+    const system = opts.system ?? SYSTEM_DEFAULT;
+    const numPredict = opts.maxTokens ?? 1024;
+    const temperature = opts.temperature ?? 0.7;
 
     const messages: OllamaChatMessage[] = [
         { role: "system", content: system },
-        { role: "user",   content: prompt },
+        { role: "user", content: prompt },
     ];
 
     const body: any = {
@@ -69,22 +66,17 @@ export async function callOllama(
         throw new Error(`Ollama error (${res.status}): ${err}`);
     }
 
-    const data = await res.json() as OllamaChatResponse;
+    const data = (await res.json()) as OllamaChatResponse;
     const text = data.message?.content?.trim();
     if (!text) throw new Error("Empty response from Ollama");
     return text;
 }
 
-
-export async function callOllamaJson<T>(
-    prompt: string,
-    opts: Parameters<typeof callOllama>[1] = {}
-): Promise<T> {
-    
+export async function callOllamaJson<T>(prompt: string, opts: Parameters<typeof callOllama>[1] = {}): Promise<T> {
     const strictJsonOpts = {
         ...opts,
         format: "json" as const,
-        temperature: opts.temperature ?? 0.1, 
+        temperature: opts.temperature ?? 0.1,
     };
 
     const raw = await callOllama(prompt, strictJsonOpts);
@@ -105,7 +97,6 @@ function stripJsonFences(text: string): string {
         .replace(/\s*```\s*$/, "")
         .trim();
 }
-
 
 export async function pingOllama(): Promise<boolean> {
     try {

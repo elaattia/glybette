@@ -60,8 +60,7 @@ function getModalTheme(templateId: PortfolioTemplateDefinition["id"]): ModalThem
                 "rounded-full border border-[#E8D2B7] bg-white/72 text-[#7A4E24] hover:bg-[#FFFDF8] hover:text-[#29180A]",
             primaryClassName:
                 "rounded-full bg-[var(--portfolio-accent)] px-4 text-[var(--portfolio-accent-contrast)] shadow-[0_12px_30px_color-mix(in_srgb,var(--portfolio-accent)_28%,transparent)] hover:bg-[color-mix(in_srgb,var(--portfolio-accent)_86%,black)]",
-            secondaryClassName:
-                "rounded-full border-[#E8D2B7] bg-white/60 px-4 text-[#5F3B1F] hover:bg-white",
+            secondaryClassName: "rounded-full border-[#E8D2B7] bg-white/60 px-4 text-[#5F3B1F] hover:bg-white",
             decoration: "folio",
         };
     }
@@ -72,8 +71,7 @@ function getModalTheme(templateId: PortfolioTemplateDefinition["id"]): ModalThem
                 "bg-[#111827]/42 backdrop-blur-[2px] [background-image:linear-gradient(90deg,rgba(17,24,39,0.12)_1px,transparent_1px),linear-gradient(rgba(17,24,39,0.12)_1px,transparent_1px)] [background-size:18px_18px]",
             panelClassName:
                 "max-w-lg border-4 border-[#111827] bg-[#FFFDF7] p-5 text-[#111827] shadow-[10px_10px_0_var(--portfolio-accent)]",
-            eyebrowClassName:
-                "border-b-4 border-[#111827] pb-3 text-xs font-black uppercase tracking-[0.28em]",
+            eyebrowClassName: "border-b-4 border-[#111827] pb-3 text-xs font-black uppercase tracking-[0.28em]",
             titleClassName: "mt-5 text-4xl font-black uppercase leading-none tracking-[-0.075em] md:text-5xl",
             bodyClassName: "mt-4 border-l-4 border-[#111827] pl-4 text-sm font-semibold leading-7",
             closeClassName:
@@ -95,8 +93,7 @@ function getModalTheme(templateId: PortfolioTemplateDefinition["id"]): ModalThem
             "font-['DM_Sans'] text-xs uppercase tracking-[0.34em] text-[color-mix(in_srgb,var(--portfolio-accent)_72%,#F4F0E8)]",
         titleClassName: "mt-4 text-4xl font-semibold tracking-[-0.06em] md:text-5xl",
         bodyClassName: "mt-5 max-w-prose text-base leading-8 text-[#D6D0C4]",
-        closeClassName:
-            "rounded-full border border-white/15 bg-white/8 text-[#F4F0E8] hover:bg-white/14",
+        closeClassName: "rounded-full border border-white/15 bg-white/8 text-[#F4F0E8] hover:bg-white/14",
         primaryClassName:
             "rounded-[var(--portfolio-radius)] bg-[var(--portfolio-accent)] text-[var(--portfolio-accent-contrast)] hover:bg-[color-mix(in_srgb,var(--portfolio-accent)_84%,white)]",
         secondaryClassName:
@@ -129,8 +126,7 @@ export function ProjectDetailModal({
             role="dialog"
             aria-modal="true"
             aria-labelledby="project-detail-title"
-            onClick={onClose}
-        >
+            onClick={onClose}>
             <div
                 className={cn(
                     "relative w-full overflow-hidden animate-in fade-in-0 duration-200",
@@ -138,8 +134,7 @@ export function ProjectDetailModal({
                     theme.panelClassName,
                     radiusClassName,
                 )}
-                onClick={(event) => event.stopPropagation()}
-            >
+                onClick={(event) => event.stopPropagation()}>
                 {theme.decoration === "atelier" ? (
                     <div className="pointer-events-none absolute right-6 top-6 h-24 w-24 rounded-full border border-[color:color-mix(in_srgb,var(--portfolio-accent)_42%,transparent)] opacity-50" />
                 ) : null}
@@ -157,10 +152,12 @@ export function ProjectDetailModal({
 
                 <button
                     type="button"
-                    className={cn("absolute right-4 top-4 z-10 grid size-9 place-items-center transition", theme.closeClassName)}
+                    className={cn(
+                        "absolute right-4 top-4 z-10 grid size-9 place-items-center transition",
+                        theme.closeClassName,
+                    )}
                     onClick={onClose}
-                    aria-label="Close project detail"
-                >
+                    aria-label="Close project detail">
                     <X className="size-4" />
                 </button>
 
@@ -171,10 +168,7 @@ export function ProjectDetailModal({
                 <p className={theme.bodyClassName}>{project.detail ?? project.summary}</p>
                 <div className="mt-7 flex flex-wrap gap-2">
                     {project.url ? (
-                        <Button
-                            className={theme.primaryClassName}
-                            asChild
-                        >
+                        <Button className={theme.primaryClassName} asChild>
                             <a href={project.url} target="_blank" rel="noreferrer">
                                 <ExternalLink />
                                 Open project

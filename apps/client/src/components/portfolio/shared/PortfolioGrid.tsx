@@ -38,8 +38,7 @@ export const PortfolioGrid = memo(function PortfolioGrid({
                 "relative grid grid-cols-1 gap-4 rounded-[var(--portfolio-radius)] transition md:grid-cols-2",
                 showGrid &&
                     "outline outline-1 outline-white/20 [background-image:linear-gradient(90deg,transparent_calc(50%_-_1px),rgba(255,255,255,0.24)_calc(50%_-_1px),rgba(255,255,255,0.24)_calc(50%_+_1px),transparent_calc(50%_+_1px))]",
-            )}
-        >
+            )}>
             {(activeTab?.blocks ?? []).map((block) => {
                 const className = cn(
                     "group/card relative col-span-1 min-w-0 overflow-hidden border p-5 shadow-2xl shadow-black/10 backdrop-blur",

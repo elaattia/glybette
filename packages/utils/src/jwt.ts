@@ -20,11 +20,7 @@ export interface CreateJwtOptions {
  * @param secret - Signing secret (min 32 chars recommended)
  * @param options - Optional expiry (default "1h")
  */
-export async function createJwt(
-    payload: JwtPayload,
-    secret: string,
-    options: CreateJwtOptions = {},
-): Promise<string> {
+export async function createJwt(payload: JwtPayload, secret: string, options: CreateJwtOptions = {}): Promise<string> {
     const secretKey = new TextEncoder().encode(secret);
     const expiresIn = options.expiresIn ?? DEFAULT_EXPIRY;
     const jwt = await new jose.SignJWT({ ...payload, roles: payload.roles ?? [], sessionId: payload.sessionId })

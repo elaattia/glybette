@@ -46,9 +46,7 @@ export function getPublicPortfolio(slug: string) {
 }
 
 export function resolvePublicPortfolio(slug: string) {
-    return apiRequest<PublicPortfolioResponse>(
-        `/api/portfolio/public/resolve?slug=${encodeURIComponent(slug)}`,
-    );
+    return apiRequest<PublicPortfolioResponse>(`/api/portfolio/public/resolve?slug=${encodeURIComponent(slug)}`);
 }
 
 export function useCurrentPortfolio() {

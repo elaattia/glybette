@@ -37,9 +37,7 @@ export const PortfolioBlockContent = memo(function PortfolioBlockContent({
             const links = getObjectList<{ label?: string; url?: string; icon?: string }>(block.data, "links");
             return (
                 <div>
-                    <p className="mb-4 text-xs font-semibold uppercase tracking-[0.3em] opacity-60">
-                        {block.title}
-                    </p>
+                    <p className="mb-4 text-xs font-semibold uppercase tracking-[0.3em] opacity-60">{block.title}</p>
                     <div className="flex flex-wrap gap-2">
                         {links.map((link) => {
                             const Icon = getSocialIcon(link.icon);
@@ -50,8 +48,7 @@ export const PortfolioBlockContent = memo(function PortfolioBlockContent({
                                     href={link.url}
                                     target="_blank"
                                     rel="noreferrer"
-                                    className="inline-flex items-center gap-1.5 rounded-[var(--portfolio-radius)] border border-[color:color-mix(in_srgb,var(--portfolio-accent)_35%,transparent)] px-3 py-1 text-xs transition hover:border-[var(--portfolio-accent)] hover:text-[var(--portfolio-accent)]"
-                                >
+                                    className="inline-flex items-center gap-1.5 rounded-[var(--portfolio-radius)] border border-[color:color-mix(in_srgb,var(--portfolio-accent)_35%,transparent)] px-3 py-1 text-xs transition hover:border-[var(--portfolio-accent)] hover:text-[var(--portfolio-accent)]">
                                     <Icon className="size-3.5" />
                                     {link.label}
                                 </a>
@@ -72,8 +69,7 @@ export const PortfolioBlockContent = memo(function PortfolioBlockContent({
                                 key={`${project.title}-${project.summary}`}
                                 type="button"
                                 onClick={() => onProjectClick(project)}
-                                className="rounded-[var(--portfolio-radius)] border border-[color:color-mix(in_srgb,var(--portfolio-accent)_26%,transparent)] bg-[color-mix(in_srgb,var(--portfolio-accent)_8%,transparent)] p-4 text-left transition hover:-translate-y-0.5 hover:border-[var(--portfolio-accent)] hover:bg-[color-mix(in_srgb,var(--portfolio-accent)_16%,transparent)]"
-                            >
+                                className="rounded-[var(--portfolio-radius)] border border-[color:color-mix(in_srgb,var(--portfolio-accent)_26%,transparent)] bg-[color-mix(in_srgb,var(--portfolio-accent)_8%,transparent)] p-4 text-left transition hover:-translate-y-0.5 hover:border-[var(--portfolio-accent)] hover:bg-[color-mix(in_srgb,var(--portfolio-accent)_16%,transparent)]">
                                 <span className="block text-base font-semibold">{project.title}</span>
                                 <span className="mt-2 block text-sm leading-6 opacity-70">{project.summary}</span>
                             </button>
@@ -96,8 +92,7 @@ export const PortfolioBlockContent = memo(function PortfolioBlockContent({
                         {items.map((item) => (
                             <div
                                 key={`${item.role}-${item.company}`}
-                                className="border-l border-[var(--portfolio-accent)] pl-4"
-                            >
+                                className="border-l border-[var(--portfolio-accent)] pl-4">
                                 <p className="text-xs uppercase tracking-[0.24em] text-[var(--portfolio-accent)] opacity-80">
                                     {item.period}
                                 </p>
@@ -115,15 +110,12 @@ export const PortfolioBlockContent = memo(function PortfolioBlockContent({
             const skillGroups = getSkillGroups(block.data);
             return (
                 <div>
-                    <p className="mb-4 text-xs font-semibold uppercase tracking-[0.3em] opacity-60">
-                        {block.title}
-                    </p>
+                    <p className="mb-4 text-xs font-semibold uppercase tracking-[0.3em] opacity-60">{block.title}</p>
                     <div className="grid gap-4 md:grid-cols-2">
                         {skillGroups.map((group) => (
                             <section
                                 key={group.label}
-                                className="rounded-[var(--portfolio-radius)] border border-[color:color-mix(in_srgb,var(--portfolio-accent)_22%,transparent)] bg-[color-mix(in_srgb,var(--portfolio-accent)_7%,transparent)] p-3"
-                            >
+                                className="rounded-[var(--portfolio-radius)] border border-[color:color-mix(in_srgb,var(--portfolio-accent)_22%,transparent)] bg-[color-mix(in_srgb,var(--portfolio-accent)_7%,transparent)] p-3">
                                 <p className="text-[0.65rem] font-semibold uppercase tracking-[0.24em] text-[var(--portfolio-accent)]">
                                     {group.label}
                                 </p>
@@ -131,8 +123,7 @@ export const PortfolioBlockContent = memo(function PortfolioBlockContent({
                                     {group.skills.map((skill) => (
                                         <span
                                             key={`${group.label}-${skill}`}
-                                            className="rounded-[var(--portfolio-radius)] bg-[color-mix(in_srgb,var(--portfolio-accent)_18%,transparent)] px-3 py-1 text-xs text-[var(--portfolio-accent)]"
-                                        >
+                                            className="rounded-[var(--portfolio-radius)] bg-[color-mix(in_srgb,var(--portfolio-accent)_18%,transparent)] px-3 py-1 text-xs text-[var(--portfolio-accent)]">
                                             {skill}
                                         </span>
                                     ))}
@@ -146,14 +137,11 @@ export const PortfolioBlockContent = memo(function PortfolioBlockContent({
         case "contactCta":
             return (
                 <div>
-                    <h2 className="text-2xl font-semibold tracking-[-0.035em]">
-                        {getText(block.data, "heading")}
-                    </h2>
+                    <h2 className="text-2xl font-semibold tracking-[-0.035em]">{getText(block.data, "heading")}</h2>
                     <p className="mt-3 text-sm leading-6 opacity-70">{getText(block.data, "body")}</p>
                     <Button
                         className="mt-5 rounded-[var(--portfolio-radius)] bg-[var(--portfolio-accent)] text-[var(--portfolio-accent-contrast)] hover:bg-[color-mix(in_srgb,var(--portfolio-accent)_84%,black)]"
-                        asChild
-                    >
+                        asChild>
                         <a href={getText(block.data, "url")}>{getText(block.data, "label", "Contact")}</a>
                     </Button>
                 </div>
@@ -175,8 +163,7 @@ export const PortfolioBlockContent = memo(function PortfolioBlockContent({
                     href={getText(block.data, "url")}
                     target="_blank"
                     rel="noreferrer"
-                    className="flex items-center justify-between gap-3 text-lg font-semibold text-[var(--portfolio-accent)]"
-                >
+                    className="flex items-center justify-between gap-3 text-lg font-semibold text-[var(--portfolio-accent)]">
                     {getText(block.data, "label", block.title ?? "Open link")}
                     <ExternalLink className="size-4" />
                 </a>
