@@ -1,93 +1,222 @@
 services:
-    rabbitmq:
-        image: rabbitmq:3.13-management
-        ports:
-            - "5672:5672"
-            - "15672:15672"
-        environment:
-            - RABBITMQ_DEFAULT_USER=guest
-            - RABBITMQ_DEFAULT_PASS=guest
-    api-gateway:
-        build:
-            context: .
-            dockerfile: Dockerfile
-            args:
-                APP_NAME: api-gateway
-        ports:
-            - "3000:3000"
-        environment:
-            - PORT=3000
-            - NODE_ENV=production
-            - USERS_SERVICE_URL=http://users-service:3001
-            - SCRAPING_SERVICE_URL=http://scraping-service:3002
-            - EMAIL_SERVICE_URL=http://email-service:3003
-            - PORTFOLIO_SERVICE_URL=http://portfolio-service:3004
-        env_file:
-            - .env
-        depends_on:
-            - rabbitmq
-            - users-service
-            - scraping-service
-            - email-service
-            - portfolio-service
-    users-service:
-        build:
-            context: .
-            dockerfile: Dockerfile
-            args:
-                APP_NAME: users-service
-        ports:
-            - "3001:3001"
-        environment:
-            - PORT=3001
-            - PORT_USERS_SERVICE=3001
-            - NODE_ENV=production
-            - RABBITMQ_URL=amqp://rabbitmq:5672
-        env_file:
-            - .env
-        depends_on:
-            - rabbitmq
-    email-service:
-        build:
-            context: .
-            dockerfile: Dockerfile
-            args:
-                APP_NAME: email-service
-        ports:
-            - "3003:3003"
-        environment:
-            - PORT=3003
-            - PORT_EMAIL_SERVICE=3003
-            - NODE_ENV=production
-            - RABBITMQ_URL=amqp://rabbitmq:5672
-            - EMAIL_PROVIDER=${EMAIL_PROVIDER:-mock}
-            - EMAIL_FROM=${EMAIL_FROM:-no-reply@glybette.dev}
-            - RESEND_API_KEY=${RESEND_API_KEY:-}
-        env_file:
-            - .env
-        depends_on:
-            - rabbitmq
-    portfolio-service:
-        build:
-            context: .
-            dockerfile: Dockerfile
-            args:
-                APP_NAME: portfolio-service
-        ports:
-            - "3004:3004"
-        environment:
-            - PORT=3004
-            - PORT_PORTFOLIO_SERVICE=3004
-            - NODE_ENV=production
-        env_file:
-            - .env
-        depends_on:
-            - rabbitmq
-    scraping-service:
-        build:
-            context: ./apps/scraping-service
-            dockerfile: Dockerfile
-        ports:
-            - "3002:3002"
-        env_file:
-            - .env
+  rabbitmq:
+    image: rabbitmq:3.13-management
+    ports:
+      - "5672:5672"
+      - "15672:15672"
+    environment:
+      RABBITMQ_DEFAULT_USER: guest
+      RABBITMQ_DEFAULT_PASS: guest
+    healthcheck:
+      test: ["CMD", "rabbitmq-diagnostics", "-q", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 8
+
+  api-gateway:
+    build:
+      context: .
+      dockerfile: Dockerfile
+      args:
+        APP_NAME: api-gateway
+    ports:
+      - "3000:3000"
+    env_file:
+      - .env
+    environment:
+      NODE_ENV: production
+      PORT_API_GATEWAY: 3000
+      USERS_SERVICE_URL: http://users-service:3001
+      SCRAPING_SERVICE_URL: http://scraping-service:3002
+      EMAIL_SERVICE_URL: http://email-service:3003
+      PORTFOLIO_SERVICE_URL: http://portfolio-service:3004
+      CV_SERVICE_URL: http://cv-service:3006
+      AI_SERVICE_URL: http://ai-service:3005
+    depends_on:
+      rabbitmq:
+        condition: service_healthy
+      users-service:
+        condition: service_started
+      scraping-service:
+        condition: service_started
+      email-service:
+        condition: service_started
+      portfolio-service:
+        condition: service_started
+      cv-service:
+        condition: service_started
+    healthcheck:
+      test:
+        [
+          "CMD",
+          "node",
+          "-e",
+          "fetch('http://localhost:3000/api/health').then(r=>process.exit(r.ok?0:1)).catch(()=>process.exit(1))",
+        ]
+      interval: 15s
+      timeout: 5s
+      retries: 8
+
+  users-service:
+    build:
+      context: .
+      dockerfile: Dockerfile
+      args:
+        APP_NAME: users-service
+    ports:
+      - "3001:3001"
+    env_file:
+      - .env
+    environment:
+      NODE_ENV: production
+      PORT_USERS_SERVICE: 3001
+      RABBITMQ_URL: amqp://rabbitmq:5672
+    depends_on:
+      rabbitmq:
+        condition: service_healthy
+    healthcheck:
+      test:
+        [
+          "CMD",
+          "node",
+          "-e",
+          "fetch('http://localhost:3001/health').then(r=>process.exit(r.ok?0:1)).catch(()=>process.exit(1))",
+        ]
+      interval: 15s
+      timeout: 5s
+      retries: 8
+
+  email-service:
+    build:
+      context: .
+      dockerfile: Dockerfile
+      args:
+        APP_NAME: email-service
+    ports:
+      - "3003:3003"
+    env_file:
+      - .env
+    environment:
+      NODE_ENV: production
+      PORT_EMAIL_SERVICE: 3003
+      RABBITMQ_URL: amqp://rabbitmq:5672
+      EMAIL_PROVIDER: ${EMAIL_PROVIDER:-mock}
+      EMAIL_FROM: ${EMAIL_FROM:-no-reply@glybette.dev}
+      RESEND_API_KEY: ${RESEND_API_KEY:-}
+    depends_on:
+      rabbitmq:
+        condition: service_healthy
+    healthcheck:
+      test:
+        [
+          "CMD",
+          "node",
+          "-e",
+          "fetch('http://localhost:3003/health').then(r=>process.exit(r.ok?0:1)).catch(()=>process.exit(1))",
+        ]
+      interval: 15s
+      timeout: 5s
+      retries: 8
+
+  portfolio-service:
+    build:
+      context: .
+      dockerfile: Dockerfile
+      args:
+        APP_NAME: portfolio-service
+    ports:
+      - "3004:3004"
+    env_file:
+      - .env
+    environment:
+      NODE_ENV: production
+      PORT_PORTFOLIO_SERVICE: 3004
+    healthcheck:
+      test:
+        [
+          "CMD",
+          "node",
+          "-e",
+          "fetch('http://localhost:3004/health').then(r=>process.exit(r.ok?0:1)).catch(()=>process.exit(1))",
+        ]
+      interval: 15s
+      timeout: 5s
+      retries: 8
+
+  scraping-service:
+    build:
+      context: ./apps/scraping-service
+      dockerfile: Dockerfile
+    ports:
+      - "3002:3002"
+    env_file:
+      - .env
+    environment:
+      PORT_SCRAPING_SERVICE: 3002
+      HOST: 0.0.0.0
+    healthcheck:
+      test:
+        [
+          "CMD",
+          "python",
+          "-c",
+          "import urllib.request,sys;sys.exit(0 if urllib.request.urlopen('http://localhost:3002/health').status==200 else 1)",
+        ]
+      interval: 20s
+      timeout: 5s
+      retries: 8
+
+  cv-service:
+    build:
+      context: .
+      dockerfile: Dockerfile
+      args:
+        APP_NAME: cv-service
+    ports:
+      - "3006:3006"
+    env_file:
+      - .env
+    environment:
+      NODE_ENV: production
+      PORT_CV_SERVICE: 3006
+      AI_SERVICE_URL: http://ai-service:3005
+    healthcheck:
+      test:
+        [
+          "CMD",
+          "node",
+          "-e",
+          "fetch('http://localhost:3006/health').then(r=>process.exit(r.ok?0:1)).catch(()=>process.exit(1))",
+        ]
+      interval: 15s
+      timeout: 5s
+      retries: 8
+
+  ai-service:
+    profiles: ["ai"]
+    build:
+      context: .
+      dockerfile: Dockerfile
+      args:
+        APP_NAME: ai-service
+    ports:
+      - "3005:3005"
+    env_file:
+      - .env
+    environment:
+      NODE_ENV: production
+      PORT_AI_SERVICE: 3005
+      OLLAMA_BASE_URL: ${OLLAMA_BASE_URL:-http://host.docker.internal:11434}
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+    healthcheck:
+      test:
+        [
+          "CMD",
+          "node",
+          "-e",
+          "fetch('http://localhost:3005/health').then(r=>process.exit(r.ok?0:1)).catch(()=>process.exit(1))",
+        ]
+      interval: 20s
+      timeout: 5s
+      retries: 8

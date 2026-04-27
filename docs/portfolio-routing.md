@@ -86,4 +86,48 @@ Open:
 http://rayen.glybette.test:5173
 ```
 
+## Docker Dev Testing (Vite in Docker)
+
+For Docker-based backend development:
+
+1. Copy `.env.docker.dev.example` to `.env` and set a valid Atlas `MONGODB_URI`.
+2. Start backend services:
+
+```bash
+pnpm docker:dev:up
+```
+
+1. Ensure the client proxy target points to the gateway service:
+
+```bash
+VITE_API_PROXY_TARGET=http://api-gateway:3000
+```
+
+1. For subdomain tests, ensure these values match:
+
+```bash
+VITE_PORTFOLIO_ROOT_DOMAIN=glybette.test
+PORTFOLIO_PUBLIC_ROOT_DOMAIN=glybette.test
+```
+
+1. CORS and Better Auth trusted origins must explicitly include the dev host(s), for example:
+
+```bash
+CORS_ORIGINS=http://localhost:5173,http://127.0.0.1:5173,http://glybette.test:5173,http://rayen.glybette.test:5173
+BETTER_AUTH_TRUSTED_ORIGINS=http://localhost:5173,http://127.0.0.1:5173,http://glybette.test:5173,http://rayen.glybette.test:5173
+```
+
+1. Open frontend from Docker on:
+
+```text
+http://localhost:5173
+http://rayen.glybette.test:5173
+```
+
+`ai-service` is optional in Docker dev and can be enabled only when needed:
+
+```bash
+pnpm docker:dev:up:ai
+```
+
 Production DNS and TLS certificates must include the wildcard hostname.
