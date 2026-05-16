@@ -4,6 +4,9 @@ import { createUploadProvider } from "@glybette/uploads";
 import {
     connectRabbitMq,
     ensureProjectsTopology,
+    ensureProjectsUserProjectionTopology,
+    isUserProfileUpsertedEvent,
+    PROJECTS_USER_PROJECTION_QUEUE,
     PROJECTS_EXCHANGE,
     ROUTING_KEY_PROJECT_COMMENT_CREATED,
     ROUTING_KEY_PROJECT_JOIN_REQUEST_APPROVED,
@@ -12,6 +15,8 @@ import {
     type ProjectDomainEvent,
     type ProjectEventName,
 } from "@glybette/messaging";
+import type { ResolveUsersResponse } from "@glybette/contracts";
+import { internalRequestJson } from "@glybette/utils";
 import { connectDb } from "./config/db.js";
 import { loadProjectsServiceEnv, resolveUploadProviderConfig } from "./config/env.js";
 import { ProjectsController } from "./controllers/projects.controller.js";
@@ -31,6 +36,7 @@ async function connectProjectsRabbitMqWithWarnings(rabbitMqUrl: string) {
     try {
         const rabbit = await connectRabbitMq(rabbitMqUrl);
         await ensureProjectsTopology(rabbit.channel);
+        await ensureProjectsUserProjectionTopology(rabbit.channel);
         console.warn("[projects-service] RabbitMQ connection established.");
         return rabbit;
     } catch (error) {
@@ -46,6 +52,7 @@ async function main() {
     const env = loadProjectsServiceEnv();
     await connectDb(env);
     const rabbit = env.RABBITMQ_URL ? await connectProjectsRabbitMqWithWarnings(env.RABBITMQ_URL) : null;
+    const usersServiceBaseUrl = (env.USERS_SERVICE_URL ?? `http://localhost:${env.PORT_USERS_SERVICE}`).replace(/\/$/, "");
 
     const uploadProvider = createUploadProvider(resolveUploadProviderConfig(env));
     const projectsService = new ProjectsService(async (eventName, payload) => {
@@ -60,6 +67,7 @@ async function main() {
         const event: ProjectDomainEvent = {
             eventId: randomUUID(),
             eventName,
+            schemaVersion: 1,
             projectId,
             actorUserId,
             occurredAtIso: new Date().toISOString(),
@@ -67,8 +75,34 @@ async function main() {
         };
 
         rabbit.publishJsonTo(PROJECTS_EXCHANGE, routingKey, event);
+    }, async (userIds) => {
+        if (userIds.length === 0) {
+            return [];
+        }
+        const response = await internalRequestJson<ResolveUsersResponse>(`${usersServiceBaseUrl}/users/resolve`, {
+            method: "POST",
+            timeoutMs: env.INTEROP_SYNC_TIMEOUT_MS,
+            internalSecret: env.INTERNAL_SERVICE_SECRET,
+            body: JSON.stringify({ userIds }),
+        });
+        return response.users.map((user) => ({
+            id: user.id,
+            displayName: user.displayName,
+            avatarUrl: user.avatarUrl,
+            isPremium: user.isPremium,
+            roles: user.roles,
+        }));
     });
     await projectsService.ensureIndexes();
+
+    if (rabbit) {
+        await rabbit.consumeJson(PROJECTS_USER_PROJECTION_QUEUE, async (payload) => {
+            if (!isUserProfileUpsertedEvent(payload)) {
+                throw new Error("Invalid users profile event payload");
+            }
+            await projectsService.applyUserProfileUpsertedEvent(payload);
+        });
+    }
 
     const app = new Hono();
     app.onError(errorHandler);

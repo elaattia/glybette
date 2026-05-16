@@ -310,6 +310,8 @@ services:
             PROJECTS_UPLOAD_DISK_DIR: /workspace/.data/projects-uploads
             PROJECTS_UPLOAD_PUBLIC_BASE_URL: /api/projects/media
             PROJECTS_UPLOAD_MAX_MB: 5
+            USERS_SERVICE_URL: http://users-service:3001
+            INTEROP_SYNC_TIMEOUT_MS: 7000
             CHOKIDAR_USEPOLLING: "1"
             CHOKIDAR_INTERVAL: "300"
             WATCHPACK_POLLING: "true"

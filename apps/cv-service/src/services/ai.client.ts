@@ -1,3 +1,5 @@
+import { internalRequestJson } from "@glybette/utils";
+
 function getBaseUrl() {
     return process.env.AI_SERVICE_URL ?? "http://localhost:3004";
 }
@@ -6,19 +8,12 @@ function getSecret() {
 }
 
 async function post<T>(path: string, body: object): Promise<T> {
-    const res = await fetch(`${getBaseUrl()}/ai/cv${path}`, {
+    return internalRequestJson<T>(`${getBaseUrl()}/ai/cv${path}`, {
         method: "POST",
-        headers: {
-            "Content-Type": "application/json",
-            "x-internal-secret": getSecret(),
-        },
+        timeoutMs: Number(process.env.INTEROP_SYNC_TIMEOUT_MS ?? 12_000),
+        internalSecret: getSecret(),
         body: JSON.stringify(body),
     });
-    if (!res.ok) {
-        const err = await res.text();
-        throw new Error(`[ai-service] ${res.status} ${path}: ${err}`);
-    }
-    return res.json() as Promise<T>;
 }
 
 export interface AtsScoreResult {

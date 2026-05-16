@@ -8,7 +8,13 @@ import {
     AUTH_EXCHANGE_TYPE,
     PROJECTS_EXCHANGE,
     PROJECTS_EXCHANGE_TYPE,
+    PROJECTS_USER_PROJECTION_QUEUE,
+    PROJECTS_USER_PROJECTION_QUEUE_DLX,
+    PROJECTS_USER_PROJECTION_QUEUE_DLQ,
     ROUTING_KEY_AUTH_OTP_SEND,
+    ROUTING_KEY_USERS_PROFILE_UPSERTED,
+    USERS_EXCHANGE,
+    USERS_EXCHANGE_TYPE,
 } from "./topology.js";
 
 export interface RabbitMqClient {
@@ -85,4 +91,26 @@ export async function ensureAuthEmailTopology(channel: Channel): Promise<void> {
 
 export async function ensureProjectsTopology(channel: Channel): Promise<void> {
     await channel.assertExchange(PROJECTS_EXCHANGE, PROJECTS_EXCHANGE_TYPE, { durable: true });
+}
+
+export async function ensureUsersTopology(channel: Channel): Promise<void> {
+    await channel.assertExchange(USERS_EXCHANGE, USERS_EXCHANGE_TYPE, { durable: true });
+}
+
+export async function ensureProjectsUserProjectionTopology(channel: Channel): Promise<void> {
+    await ensureUsersTopology(channel);
+
+    await channel.assertExchange(PROJECTS_USER_PROJECTION_QUEUE_DLX, USERS_EXCHANGE_TYPE, { durable: true });
+    await channel.assertQueue(PROJECTS_USER_PROJECTION_QUEUE_DLQ, { durable: true });
+    await channel.bindQueue(
+        PROJECTS_USER_PROJECTION_QUEUE_DLQ,
+        PROJECTS_USER_PROJECTION_QUEUE_DLX,
+        ROUTING_KEY_USERS_PROFILE_UPSERTED,
+    );
+
+    await channel.assertQueue(PROJECTS_USER_PROJECTION_QUEUE, {
+        durable: true,
+        deadLetterExchange: PROJECTS_USER_PROJECTION_QUEUE_DLX,
+    });
+    await channel.bindQueue(PROJECTS_USER_PROJECTION_QUEUE, USERS_EXCHANGE, ROUTING_KEY_USERS_PROFILE_UPSERTED);
 }

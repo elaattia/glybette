@@ -10,6 +10,7 @@ export type ProjectEventName = (typeof PROJECT_EVENT_NAMES)[number];
 export interface ProjectDomainEvent {
     eventId: string;
     eventName: ProjectEventName;
+    schemaVersion: 1;
     projectId: string;
     actorUserId: string;
     occurredAtIso: string;
@@ -32,6 +33,7 @@ export function isProjectDomainEvent(value: unknown): value is ProjectDomainEven
 
     return (
         typeof value.eventId === "string" &&
+        value.schemaVersion === 1 &&
         typeof value.projectId === "string" &&
         typeof value.actorUserId === "string" &&
         typeof value.occurredAtIso === "string" &&

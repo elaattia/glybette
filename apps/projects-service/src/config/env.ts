@@ -24,6 +24,9 @@ const projectsServiceEnvSchema = baseEnvSchema.extend({
     PROJECTS_UPLOAD_S3_SECRET_ACCESS_KEY: z.string().optional(),
     PROJECTS_UPLOAD_S3_PUBLIC_BASE_URL: z.string().url().optional(),
     RABBITMQ_URL: z.string().optional(),
+    USERS_SERVICE_URL: z.string().url().optional(),
+    INTERNAL_SERVICE_SECRET: z.string().min(1).default("dev-secret-change-in-prod"),
+    INTEROP_SYNC_TIMEOUT_MS: z.coerce.number().min(1000).max(60000).default(7000),
 });
 
 export type ProjectsServiceEnv = z.infer<typeof projectsServiceEnvSchema>;

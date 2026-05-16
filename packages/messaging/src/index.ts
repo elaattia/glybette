@@ -18,6 +18,26 @@ export {
     ROUTING_KEY_PROJECT_JOIN_REQUEST_APPROVED,
     ROUTING_KEY_PROJECT_JOIN_REQUEST_REJECTED,
     ROUTING_KEY_PROJECT_COMMENT_CREATED,
+    USERS_EXCHANGE,
+    USERS_EXCHANGE_TYPE,
+    ROUTING_KEY_USERS_PROFILE_UPSERTED,
+    PROJECTS_USER_PROJECTION_QUEUE,
+    PROJECTS_USER_PROJECTION_QUEUE_DLX,
+    PROJECTS_USER_PROJECTION_QUEUE_DLQ,
 } from "./topology.js";
-export { connectRabbitMq, ensureAuthEmailTopology, ensureProjectsTopology, type RabbitMqClient } from "./rabbit.js";
+export {
+    connectRabbitMq,
+    ensureAuthEmailTopology,
+    ensureProjectsTopology,
+    ensureUsersTopology,
+    ensureProjectsUserProjectionTopology,
+    type RabbitMqClient,
+} from "./rabbit.js";
 export { PROJECT_EVENT_NAMES, type ProjectEventName, type ProjectDomainEvent, isProjectDomainEvent } from "./projects-contracts.js";
+export {
+    USER_EVENT_NAMES,
+    type UserEventName,
+    type UserPublicProfileSnapshot,
+    type UserProfileUpsertedEvent,
+    isUserProfileUpsertedEvent,
+} from "./users-contracts.js";

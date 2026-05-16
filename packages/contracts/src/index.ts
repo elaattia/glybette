@@ -18,6 +18,14 @@ export interface SelfResponse {
     user: UserDTO;
 }
 
+export interface PublicUserSummaryDTO {
+    id: string;
+    displayName: string;
+    avatarUrl?: string;
+    isPremium: boolean;
+    roles: string[];
+}
+
 export interface AuthRedirectResponse {
     redirectUrl: string;
 }
@@ -40,6 +48,19 @@ export interface OtpRequestResponse {
 export interface OtpVerifyResponse {
     ok: true;
     verified: boolean;
+}
+
+export interface UpdateOwnProfileRequest {
+    displayName: string;
+    avatarUrl?: string;
+}
+
+export interface ResolveUsersRequest {
+    userIds: string[];
+}
+
+export interface ResolveUsersResponse {
+    users: PublicUserSummaryDTO[];
 }
 
 export const PORTFOLIO_TEMPLATE_IDS = ["atelier", "signal", "folio", "mono"] as const;
@@ -149,6 +170,7 @@ export {
     type ProjectJoinRequestStatus,
     type ProjectCommentStatus,
     type UploadedAssetDTO,
+    type ProjectUserSummaryDTO,
     type ProjectRoleRequirementDTO,
     type ProjectRoleRequirementInput,
     type ProjectMilestoneDTO,

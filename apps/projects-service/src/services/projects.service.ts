@@ -16,10 +16,12 @@ import type {
     ProjectStatus,
     ProjectSummaryDTO,
     ProjectsListResponse,
+    ProjectUserSummaryDTO,
     UpdateProjectRequest,
     UploadedAssetDTO,
 } from "@glybette/contracts";
 import type { ProjectEventName } from "@glybette/messaging";
+import type { UserProfileUpsertedEvent } from "@glybette/messaging";
 import { BadRequestError, NotFoundError, ServiceUnavailableError, UnauthorizedError } from "@glybette/utils";
 import type { ListProjectsQuery } from "./projects.validation.js";
 
@@ -93,13 +95,27 @@ type CommentDocument = {
     deletedAt?: Date;
 };
 
-type CountRow = { _id: mongoose.Types.ObjectId; count: number };
 type OptionalCountRow = { _id: mongoose.Types.ObjectId; pendingCount?: number; memberCount?: number; commentCount?: number };
 
 type EventPublisher = (eventName: ProjectEventName, payload: Record<string, unknown>) => Promise<void>;
+type UserResolver = (userIds: string[]) => Promise<ProjectUserSummaryDTO[]>;
+
+type UserProfileSnapshotDocument = {
+    _id: mongoose.Types.ObjectId;
+    userId: string;
+    displayName: string;
+    avatarUrl?: string;
+    isPremium: boolean;
+    roles: string[];
+    sourceUpdatedAt: Date;
+    updatedAt: Date;
+};
 
 export class ProjectsService {
-    constructor(private readonly publishEvent?: EventPublisher) {}
+    constructor(
+        private readonly publishEvent?: EventPublisher,
+        private readonly resolveUsers?: UserResolver,
+    ) {}
 
     private projectsCollection() {
         const db = mongoose.connection.db;
@@ -123,6 +139,12 @@ export class ProjectsService {
         const db = mongoose.connection.db;
         if (!db) throw new ServiceUnavailableError("Projects database is not initialized");
         return db.collection<CommentDocument>("project_comments");
+    }
+
+    private userProfilesCollection() {
+        const db = mongoose.connection.db;
+        if (!db) throw new ServiceUnavailableError("Projects database is not initialized");
+        return db.collection<UserProfileSnapshotDocument>("project_user_profiles");
     }
 
     async ensureIndexes(): Promise<void> {
@@ -156,6 +178,38 @@ export class ProjectsService {
             { key: { projectId: 1, status: 1, createdAt: -1 } },
             { key: { authorId: 1, createdAt: -1 } },
         ]);
+
+        await this.userProfilesCollection().createIndexes([
+            { key: { userId: 1 }, unique: true },
+            { key: { updatedAt: -1 } },
+        ]);
+    }
+
+    async applyUserProfileUpsertedEvent(event: UserProfileUpsertedEvent): Promise<void> {
+        const sourceUpdatedAt = new Date(event.occurredAtIso);
+        const profile = event.profile;
+
+        await this.userProfilesCollection().updateOne(
+            {
+                userId: profile.userId,
+                $or: [{ sourceUpdatedAt: { $exists: false } }, { sourceUpdatedAt: { $lte: sourceUpdatedAt } }],
+            },
+            {
+                $set: {
+                    displayName: profile.displayName,
+                    avatarUrl: profile.avatarUrl,
+                    isPremium: profile.isPremium,
+                    roles: profile.roles,
+                    sourceUpdatedAt,
+                    updatedAt: new Date(),
+                },
+                $setOnInsert: {
+                    _id: new mongoose.Types.ObjectId(),
+                    userId: profile.userId,
+                },
+            },
+            { upsert: true },
+        );
     }
 
     async listProjects(userId: string, query: ListProjectsQuery): Promise<ProjectsListResponse> {
@@ -188,6 +242,7 @@ export class ProjectsService {
             this.aggregateCounts(this.commentsCollection(), ids, "commentCount", { status: "active" }),
             this.aggregateCounts(this.joinRequestsCollection(), ids, "pendingCount", { status: "pending" }),
         ]);
+        const ownerProfiles = await this.getUserSummariesByIds(items.map((item) => item.ownerId));
 
         return {
             items: items.map((item) =>
@@ -195,6 +250,7 @@ export class ProjectsService {
                     memberCount: memberCounts.get(item._id.toString()) ?? 0,
                     commentCount: commentCounts.get(item._id.toString()) ?? 0,
                     pendingJoinRequestCount: pendingCounts.get(item._id.toString()) ?? 0,
+                    owner: ownerProfiles.get(item.ownerId),
                 }),
             ),
             page,
@@ -225,6 +281,11 @@ export class ProjectsService {
             this.commentsCollection().countDocuments({ projectId: projectObjectId, status: "active" }),
             this.joinRequestsCollection().countDocuments({ projectId: projectObjectId, status: "pending" }),
         ]);
+        const relatedUserIds = [project.ownerId, ...members.map((member) => member.userId)];
+        if (viewerJoinRequest?.userId) {
+            relatedUserIds.push(viewerJoinRequest.userId);
+        }
+        const users = await this.getUserSummariesByIds(relatedUserIds);
 
         return {
             project: this.toProjectDto(project, {
@@ -235,9 +296,11 @@ export class ProjectsService {
                     userId: member.userId,
                     role: member.role,
                     joinedAt: member.createdAt.toISOString(),
+                    user: users.get(member.userId) ?? this.fallbackUserSummary(member.userId),
                 })),
                 viewerMembershipRole: viewerMembership?.role,
                 viewerJoinRequestStatus: viewerJoinRequest?.status,
+                owner: users.get(project.ownerId) ?? this.fallbackUserSummary(project.ownerId),
             }),
         };
     }
@@ -278,11 +341,19 @@ export class ProjectsService {
 
         return {
             project: this.toProjectDto(project, {
-                members: [{ userId: ownerId, role: "owner", joinedAt: now.toISOString() }],
+                members: [
+                    {
+                        userId: ownerId,
+                        role: "owner",
+                        joinedAt: now.toISOString(),
+                        user: this.fallbackUserSummary(ownerId),
+                    },
+                ],
                 memberCount: 1,
                 commentCount: 0,
                 pendingJoinRequestCount: 0,
                 viewerMembershipRole: "owner",
+                owner: this.fallbackUserSummary(ownerId),
             }),
         };
     }
@@ -423,8 +494,11 @@ export class ProjectsService {
         await this.ensureOwnerAccess(projectId, ownerId);
         const projectObjectId = new mongoose.Types.ObjectId(projectId);
         const requests = await this.joinRequestsCollection().find({ projectId: projectObjectId }).sort({ createdAt: -1 }).toArray();
+        const users = await this.getUserSummariesByIds(
+            requests.flatMap((request) => [request.userId, request.decidedByUserId].filter(Boolean) as string[]),
+        );
         return {
-            requests: requests.map((request) => this.toJoinRequestDto(request)),
+            requests: requests.map((request) => this.toJoinRequestDto(request, users)),
         };
     }
 
@@ -487,19 +561,21 @@ export class ProjectsService {
 
         const updated = await this.joinRequestsCollection().findOne({ _id: requestObjectId });
         if (!updated) throw new NotFoundError("Join request not found after update.");
-        return { request: this.toJoinRequestDto(updated) };
+        const users = await this.getUserSummariesByIds([updated.userId, updated.decidedByUserId].filter(Boolean) as string[]);
+        return { request: this.toJoinRequestDto(updated, users) };
     }
 
     async listComments(projectId: string, viewerId: string): Promise<ProjectCommentsResponse> {
         await this.assertProjectReadable(projectId, viewerId);
         const projectObjectId = new mongoose.Types.ObjectId(projectId);
         const comments = await this.commentsCollection().find({ projectId: projectObjectId }).sort({ createdAt: 1 }).toArray();
+        const users = await this.getUserSummariesByIds(comments.map((comment) => comment.authorId));
 
         const topLevel: ProjectCommentDTO[] = [];
         const repliesByParent = new Map<string, ProjectCommentDTO[]>();
 
         for (const row of comments) {
-            const dto = this.toCommentDto(row);
+            const dto = this.toCommentDto(row, users);
             if (!row.parentId) {
                 topLevel.push(dto);
                 continue;
@@ -563,7 +639,8 @@ export class ProjectsService {
             createdAt: now.toISOString(),
         });
 
-        return { comment: this.toCommentDto(comment) };
+        const users = await this.getUserSummariesByIds([authorId]);
+        return { comment: this.toCommentDto(comment, users) };
     }
 
     async deleteComment(projectId: string, commentId: string, actorUserId: string): Promise<{ ok: true }> {
@@ -645,11 +722,17 @@ export class ProjectsService {
 
     private toSummaryDto(
         doc: ProjectDocument,
-        counts: { memberCount: number; commentCount: number; pendingJoinRequestCount: number },
+        counts: {
+            memberCount: number;
+            commentCount: number;
+            pendingJoinRequestCount: number;
+            owner?: ProjectUserSummaryDTO;
+        },
     ): ProjectSummaryDTO {
         return {
             id: doc._id.toString(),
             ownerId: doc.ownerId,
+            owner: counts.owner ?? this.fallbackUserSummary(doc.ownerId),
             title: doc.title,
             shortDescription: doc.shortDescription,
             domain: doc.domain,
@@ -675,7 +758,8 @@ export class ProjectsService {
             memberCount: number;
             commentCount: number;
             pendingJoinRequestCount: number;
-            members: { userId: string; role: ProjectMembershipRole; joinedAt: string }[];
+            members: { userId: string; role: ProjectMembershipRole; joinedAt: string; user?: ProjectUserSummaryDTO }[];
+            owner?: ProjectUserSummaryDTO;
             viewerMembershipRole?: ProjectMembershipRole;
             viewerJoinRequestStatus?: "pending" | "approved" | "rejected";
         },
@@ -690,30 +774,101 @@ export class ProjectsService {
         };
     }
 
-    private toJoinRequestDto(request: JoinRequestDocument): ProjectJoinRequestDTO {
+    private toJoinRequestDto(
+        request: JoinRequestDocument,
+        users: Map<string, ProjectUserSummaryDTO> = new Map(),
+    ): ProjectJoinRequestDTO {
         return {
             id: request._id.toString(),
             projectId: request.projectId.toString(),
             userId: request.userId,
+            user: users.get(request.userId) ?? this.fallbackUserSummary(request.userId),
             status: request.status,
             message: request.message,
             createdAt: request.createdAt.toISOString(),
             decidedAt: request.decidedAt?.toISOString(),
             decidedByUserId: request.decidedByUserId,
+            decidedByUser: request.decidedByUserId
+                ? users.get(request.decidedByUserId) ?? this.fallbackUserSummary(request.decidedByUserId)
+                : undefined,
             decisionReason: request.decisionReason,
         };
     }
 
-    private toCommentDto(comment: CommentDocument): ProjectCommentDTO {
+    private toCommentDto(comment: CommentDocument, users: Map<string, ProjectUserSummaryDTO> = new Map()): ProjectCommentDTO {
         return {
             id: comment._id.toString(),
             projectId: comment.projectId.toString(),
             authorId: comment.authorId,
+            author: users.get(comment.authorId) ?? this.fallbackUserSummary(comment.authorId),
             parentId: comment.parentId?.toString(),
             content: comment.content,
             status: comment.status,
             createdAt: comment.createdAt.toISOString(),
             updatedAt: comment.updatedAt.toISOString(),
+        };
+    }
+
+    private async getUserSummariesByIds(userIds: string[]): Promise<Map<string, ProjectUserSummaryDTO>> {
+        const ids = [...new Set(userIds.map((id) => id?.trim()).filter(Boolean) as string[])];
+        if (ids.length === 0) {
+            return new Map();
+        }
+
+        const existing = await this.userProfilesCollection().find({ userId: { $in: ids } }).toArray();
+        const result = new Map<string, ProjectUserSummaryDTO>();
+        for (const profile of existing) {
+            result.set(profile.userId, {
+                id: profile.userId,
+                displayName: profile.displayName,
+                avatarUrl: profile.avatarUrl,
+                isPremium: profile.isPremium,
+                roles: profile.roles,
+            });
+        }
+
+        const missingIds = ids.filter((id) => !result.has(id));
+        if (missingIds.length > 0 && this.resolveUsers) {
+            const resolvedUsers = await this.resolveUsers(missingIds).catch(() => []);
+            if (resolvedUsers.length > 0) {
+                await Promise.all(
+                    resolvedUsers.map((user) =>
+                        this.userProfilesCollection().updateOne(
+                            { userId: user.id },
+                            {
+                                $set: {
+                                    displayName: user.displayName,
+                                    avatarUrl: user.avatarUrl,
+                                    isPremium: user.isPremium,
+                                    roles: user.roles,
+                                    updatedAt: new Date(),
+                                },
+                                $setOnInsert: {
+                                    _id: new mongoose.Types.ObjectId(),
+                                    userId: user.id,
+                                    sourceUpdatedAt: new Date(),
+                                },
+                            },
+                            { upsert: true },
+                        ),
+                    ),
+                );
+                for (const user of resolvedUsers) {
+                    result.set(user.id, user);
+                }
+            }
+        }
+
+        return result;
+    }
+
+    private fallbackUserSummary(userId: string): ProjectUserSummaryDTO {
+        return {
+            id: userId,
+            displayName: "User",
+            avatarUrl: undefined,
+            isPremium: false,
+            roles: ["user"],
         };
     }
 

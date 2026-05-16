@@ -134,9 +134,13 @@ export default function ProjectDetailPage() {
                                         key={`${member.userId}-${member.role}`}
                                         className="inline-flex items-center gap-2 rounded-full border border-[var(--gb-border)] bg-[var(--gb-surface)] px-3 py-1.5">
                                         <Avatar size="sm">
-                                            <AvatarFallback>{member.userId.slice(0, 2).toUpperCase()}</AvatarFallback>
+                                            <AvatarFallback>
+                                                {(member.user?.displayName ?? member.userId).slice(0, 2).toUpperCase()}
+                                            </AvatarFallback>
                                         </Avatar>
-                                        <span className="text-xs text-[var(--gb-text)]">{member.role}</span>
+                                        <span className="text-xs text-[var(--gb-text)]">
+                                            {member.user?.displayName ?? member.userId} - {member.role}
+                                        </span>
                                     </div>
                                 ))}
                             </div>
@@ -239,7 +243,9 @@ export default function ProjectDetailPage() {
                                     <h3 className="text-sm font-semibold text-[var(--gb-text)]">Pending requests</h3>
                                     {joinRequestsQuery.data?.requests.filter((request) => request.status === "pending").slice(0, 5).map((request) => (
                                         <div key={request.id} className="rounded-lg border border-[var(--gb-border)] bg-[var(--gb-app-panel-bg)] p-2">
-                                            <p className="text-xs text-[var(--gb-text)]">{request.userId}</p>
+                                            <p className="text-xs text-[var(--gb-text)]">
+                                                {request.user?.displayName ?? request.userId}
+                                            </p>
                                             <p className="mt-1 text-[11px] text-[var(--gb-muted)]">{request.message ?? "No message provided."}</p>
                                             <div className="mt-2 flex gap-2">
                                                 <Button
@@ -287,10 +293,14 @@ export default function ProjectDetailPage() {
                             <div className="flex items-start justify-between gap-3">
                                 <div className="flex items-start gap-2">
                                     <Avatar size="sm">
-                                        <AvatarFallback>{thread.comment.authorId.slice(0, 2).toUpperCase()}</AvatarFallback>
+                                        <AvatarFallback>
+                                            {(thread.comment.author?.displayName ?? thread.comment.authorId).slice(0, 2).toUpperCase()}
+                                        </AvatarFallback>
                                     </Avatar>
                                     <div>
-                                        <p className="text-xs font-semibold text-[var(--gb-text)]">{thread.comment.authorId}</p>
+                                        <p className="text-xs font-semibold text-[var(--gb-text)]">
+                                            {thread.comment.author?.displayName ?? thread.comment.authorId}
+                                        </p>
                                         <p className="text-sm text-[var(--gb-text-off)]">{thread.comment.content}</p>
                                     </div>
                                 </div>
@@ -308,7 +318,9 @@ export default function ProjectDetailPage() {
                                 <div className="mt-3 space-y-2 border-l border-[var(--gb-border)] pl-4">
                                     {thread.replies.map((reply) => (
                                         <div key={reply.id} className="rounded-lg border border-[var(--gb-border)] bg-[var(--gb-app-panel-bg)] p-2">
-                                            <p className="text-xs font-semibold text-[var(--gb-text)]">{reply.authorId}</p>
+                                            <p className="text-xs font-semibold text-[var(--gb-text)]">
+                                                {reply.author?.displayName ?? reply.authorId}
+                                            </p>
                                             <p className="text-sm text-[var(--gb-text-off)]">{reply.content}</p>
                                         </div>
                                     ))}

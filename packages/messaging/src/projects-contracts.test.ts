@@ -6,6 +6,7 @@ test("isProjectDomainEvent validates project event payload", () => {
     const valid = {
         eventId: "evt-1",
         eventName: "join_request_created",
+        schemaVersion: 1,
         projectId: "project-1",
         actorUserId: "user-1",
         occurredAtIso: new Date().toISOString(),

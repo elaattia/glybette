@@ -23,6 +23,14 @@ export interface UploadedAssetDTO {
     size: number;
 }
 
+export interface ProjectUserSummaryDTO {
+    id: string;
+    displayName: string;
+    avatarUrl?: string;
+    isPremium: boolean;
+    roles: string[];
+}
+
 export interface ProjectRoleRequirementDTO {
     id: string;
     title: string;
@@ -60,6 +68,7 @@ export interface ProjectMemberDTO {
     userId: string;
     role: ProjectMembershipRole;
     joinedAt: string;
+    user?: ProjectUserSummaryDTO;
 }
 
 export interface ProjectSummaryDTO {
@@ -78,6 +87,7 @@ export interface ProjectSummaryDTO {
     memberCount: number;
     commentCount: number;
     pendingJoinRequestCount: number;
+    owner?: ProjectUserSummaryDTO;
     createdAt: string;
     updatedAt: string;
     publishedAt?: string;
@@ -98,6 +108,7 @@ export interface ProjectCommentDTO {
     parentId?: string;
     content: string;
     status: ProjectCommentStatus;
+    author?: ProjectUserSummaryDTO;
     createdAt: string;
     updatedAt: string;
 }
@@ -133,9 +144,11 @@ export interface ProjectJoinRequestDTO {
     userId: string;
     status: ProjectJoinRequestStatus;
     message?: string;
+    user?: ProjectUserSummaryDTO;
     createdAt: string;
     decidedAt?: string;
     decidedByUserId?: string;
+    decidedByUser?: ProjectUserSummaryDTO;
     decisionReason?: string;
 }
 
