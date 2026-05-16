@@ -1,0 +1,18 @@
+FROM node:20-bookworm-slim
+
+RUN corepack enable pnpm
+
+ENV PNPM_HOME=/pnpm
+ENV PNPM_STORE_PATH=/pnpm/store
+ENV PATH=$PNPM_HOME:$PATH
+
+WORKDIR /workspace
+
+# Install dependencies from lockfiles first for better layer caching.
+COPY pnpm-lock.yaml pnpm-workspace.yaml package.json ./
+COPY apps ./apps
+COPY packages ./packages
+
+RUN pnpm install --frozen-lockfile
+
+CMD ["bash", "-lc", "sleep infinity"]
