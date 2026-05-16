@@ -22,6 +22,7 @@ export interface ServiceRegistry {
     cv: ServiceConfig;
     email: { baseUrl: string };
     portfolio: PortfolioServiceConfig;
+    projects: ServiceConfig;
 }
 
 export function buildServiceRegistry(env: GatewayEnv): ServiceRegistry {
@@ -30,6 +31,7 @@ export function buildServiceRegistry(env: GatewayEnv): ServiceRegistry {
     const cvRaw = env.CV_SERVICE_URL ?? "http://localhost:3003";
     const emailRaw = env.EMAIL_SERVICE_URL ?? `http://localhost:${env.PORT_EMAIL_SERVICE}`;
     const portfolioRaw = env.PORTFOLIO_SERVICE_URL ?? `http://localhost:${env.PORT_PORTFOLIO_SERVICE}`;
+    const projectsRaw = env.PROJECTS_SERVICE_URL ?? `http://localhost:${env.PORT_PROJECTS_SERVICE}`;
 
     return {
         users: { baseUrl: raw.replace(/\/$/, "") },
@@ -37,5 +39,6 @@ export function buildServiceRegistry(env: GatewayEnv): ServiceRegistry {
         cv: { baseUrl: cvRaw.replace(/\/$/, "") },
         email: { baseUrl: emailRaw.replace(/\/$/, "") },
         portfolio: { baseUrl: portfolioRaw.replace(/\/$/, "") },
+        projects: { baseUrl: projectsRaw.replace(/\/$/, "") },
     };
 }

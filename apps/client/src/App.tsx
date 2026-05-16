@@ -13,6 +13,9 @@ import CvCreatePage from "@/pages/app/cv-builder/create";
 import CvEditorPage from "@/pages/app/cv-builder/[id]";
 import OpportunitiesPage from "@/pages/app/opportunities";
 import PortfolioBuilderPage from "@/pages/app/portfolio";
+import ProjectsListPage from "@/pages/app/projects";
+import ProjectCreatePage from "@/pages/app/projects/create";
+import ProjectDetailPage from "@/pages/app/projects/[id]";
 import { PublicPortfolioPage } from "@/pages/portfolio/PublicPortfolioPage";
 import { PortfolioRoot } from "@/pages/portfolio/PortfolioRoot";
 
@@ -35,7 +38,9 @@ function App() {
                     <Route path="cv-builder" element={<Navigate to="/app/cv" replace />} />
                     <Route path="portfolio" element={<PortfolioBuilderPage />} />
                     <Route path="opportunities" element={<OpportunitiesPage />} />
-                    <Route path="projects" element={<AppSectionPlaceholder sectionName="Projects" />} />
+                    <Route path="projects" element={<ProjectsListPage />} />
+                    <Route path="projects/create" element={<ProjectCreatePage />} />
+                    <Route path="projects/:id" element={<ProjectDetailPage />} />
                     <Route path="settings" element={<AppSectionPlaceholder sectionName="Settings" />} />
                     <Route path="cv/create" element={<CvCreatePage />} />
                     <Route path="cv/:id" element={<CvEditorPage />} />

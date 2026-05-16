@@ -52,6 +52,7 @@ export const baseEnvSchema = z.object({
     PORT_SCRAPING_SERVICE: z.coerce.number().default(3002),
     PORT_EMAIL_SERVICE: z.coerce.number().default(3003),
     PORT_PORTFOLIO_SERVICE: z.coerce.number().default(3004),
+    PORT_PROJECTS_SERVICE: z.coerce.number().default(3007),
 });
 
 export type BaseEnv = z.infer<typeof baseEnvSchema>;

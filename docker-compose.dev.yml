@@ -43,6 +43,7 @@ services:
             SCRAPING_SERVICE_URL: http://scraping-service:3002
             EMAIL_SERVICE_URL: http://email-service:3003
             PORTFOLIO_SERVICE_URL: http://portfolio-service:3004
+            PROJECTS_SERVICE_URL: http://projects-service:3007
             CV_SERVICE_URL: http://cv-service:3006
             AI_SERVICE_URL: http://ai-service:3005
             CHOKIDAR_USEPOLLING: "1"
@@ -64,6 +65,8 @@ services:
             email-service:
                 condition: service_started
             portfolio-service:
+                condition: service_started
+            projects-service:
                 condition: service_started
             cv-service:
                 condition: service_started
@@ -284,6 +287,46 @@ services:
                     "node",
                     "-e",
                     "fetch('http://localhost:3006/health').then(r=>process.exit(r.ok?0:1)).catch(()=>process.exit(1))",
+                ]
+            interval: 15s
+            timeout: 5s
+            retries: 8
+
+    projects-service:
+        build:
+            context: .
+            dockerfile: Dockerfile.dev
+        working_dir: /workspace
+        command: bash -lc "pnpm --filter \"@glybette/projects-service\" dev"
+        ports:
+            - "3007:3007"
+        env_file:
+            - .env
+        environment:
+            NODE_ENV: development
+            PORT_PROJECTS_SERVICE: 3007
+            PROJECTS_SERVICE_MONGODB_DB_NAME: glybette_projects
+            UPLOAD_PROVIDER: disk
+            PROJECTS_UPLOAD_DISK_DIR: /workspace/.data/projects-uploads
+            PROJECTS_UPLOAD_PUBLIC_BASE_URL: /api/projects/media
+            PROJECTS_UPLOAD_MAX_MB: 5
+            CHOKIDAR_USEPOLLING: "1"
+            CHOKIDAR_INTERVAL: "300"
+            WATCHPACK_POLLING: "true"
+        volumes:
+            - ./:/workspace
+            - node_modules:/workspace/node_modules
+            - pnpm-store:/pnpm/store
+        depends_on:
+            workspace-deps:
+                condition: service_completed_successfully
+        healthcheck:
+            test:
+                [
+                    "CMD",
+                    "node",
+                    "-e",
+                    "fetch('http://localhost:3007/health').then(r=>process.exit(r.ok?0:1)).catch(()=>process.exit(1))",
                 ]
             interval: 15s
             timeout: 5s

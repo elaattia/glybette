@@ -28,6 +28,10 @@ const routeMeta: Record<string, { title: string; subtitle: string }> = {
         title: "Projects",
         subtitle: "Look for projects to contribute to.",
     },
+    "/app/projects/create": {
+        title: "Create Project",
+        subtitle: "Describe your concept and define the team you'll recruit.",
+    },
     "/app/settings": {
         title: "Settings",
         subtitle: "Control account preferences and workspace personalization.",
@@ -42,6 +46,9 @@ export default function AppShellLayout() {
         if (routeMeta[location.pathname]) return routeMeta[location.pathname];
         if (/^\/app\/cv\/[^/]+$/.test(location.pathname)) {
             return { title: "CV Editor", subtitle: "Edit, preview and export your CV." };
+        }
+        if (/^\/app\/projects\/[^/]+$/.test(location.pathname)) {
+            return { title: "Project Details", subtitle: "Review milestones, team and community feedback." };
         }
         return { title: "Glybette workspace", subtitle: "Build your career assets and stay discoverable." };
     }, [location.pathname]);
