@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { apiRequest } from "@/lib/api";
 import type {
     OnboardingStep,
     PersonalInfoPayload,
@@ -18,6 +19,54 @@ const STEPS: OnboardingStep[] = [
     "complete",
 ];
 
+const STORAGE_KEY = "gb-onboarding-profile";
+export const ONBOARDING_DONE_KEY = "gb-onboarding-done";
+
+function persistProfile(data: OnboardingData) {
+    const flat = {
+        firstName: data.personalInfo?.firstName,
+        lastName: data.personalInfo?.lastName,
+        email: data.personalInfo?.email,
+        phone: data.personalInfo?.phone,
+        country: data.personalInfo?.country,
+        university: data.academicBackground?.university,
+        degree: data.academicBackground?.degree,
+        specialization: data.academicBackground?.specialization,
+        graduationYear: data.academicBackground?.graduationYear,
+        journey: data.journey?.journey,
+        opportunities: data.lookingFor?.opportunities ?? [],
+        domain: data.background?.domain,
+        lookingFor: data.lookingFor?.opportunities ?? [],
+    };
+    try {
+        localStorage.setItem(STORAGE_KEY, JSON.stringify(flat));
+    } catch {}
+}
+
+async function syncToServer(data: OnboardingData) {
+    try {
+        const flat = {
+            firstName: data.personalInfo?.firstName,
+            lastName: data.personalInfo?.lastName,
+            email: data.personalInfo?.email,
+            phone: data.personalInfo?.phone,
+            country: data.personalInfo?.country,
+            university: data.academicBackground?.university,
+            degree: data.academicBackground?.degree,
+            specialization: data.academicBackground?.specialization,
+            graduationYear: data.academicBackground?.graduationYear,
+            journey: data.journey?.journey,
+            opportunities: data.lookingFor?.opportunities ?? [],
+            domain: data.background?.domain,
+        };
+        await apiRequest("/api/users/me/profile", {
+            method: "PUT",
+            body: JSON.stringify({ profile: flat }),
+        });
+    } catch {
+    }
+}
+
 export function useOnboarding() {
     const [currentStep, setCurrentStep] = useState<OnboardingStep>("personal-info");
     const [data, setData] = useState<OnboardingData>({});
@@ -36,33 +85,51 @@ export function useOnboarding() {
         if (prev >= 0) setCurrentStep(STEPS[prev]);
     }
 
+    function updateAndPersist(newData: OnboardingData) {
+        persistProfile(newData);
+        syncToServer(newData);
+        return newData;
+    }
+
     function savePersonalInfo(payload: PersonalInfoPayload) {
-        setData((d) => ({ ...d, personalInfo: payload }));
+        const newData = { ...data, personalInfo: payload };
+        setData(updateAndPersist(newData));
         goNext();
     }
 
     function saveAcademicBackground(payload: AcademicBackgroundPayload) {
-        setData((d) => ({ ...d, academicBackground: payload }));
+        const newData = { ...data, academicBackground: payload };
+        setData(updateAndPersist(newData));
         goNext();
     }
 
     function saveJourney(payload: JourneyPayload) {
-        setData((d) => ({ ...d, journey: payload }));
+        const newData = { ...data, journey: payload };
+        setData(updateAndPersist(newData));
         goNext();
     }
 
     function saveLookingFor(payload: LookingForPayload) {
-        setData((d) => ({ ...d, lookingFor: payload }));
+        const newData = { ...data, lookingFor: payload };
+        setData(updateAndPersist(newData));
         goNext();
     }
 
     function saveBackground(payload: BackgroundPayload) {
-        setData((d) => ({ ...d, background: payload }));
+        const newData = { ...data, background: payload };
+        setData(updateAndPersist(newData));
         goNext();
     }
 
     function skip() {
         goNext();
+    }
+
+    
+    function markOnboardingDone() {
+        try {
+            localStorage.setItem(ONBOARDING_DONE_KEY, "true");
+        } catch {}
     }
 
     return {
@@ -78,5 +145,6 @@ export function useOnboarding() {
         saveJourney,
         saveLookingFor,
         saveBackground,
+        markOnboardingDone,
     };
 }

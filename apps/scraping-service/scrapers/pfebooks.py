@@ -6,6 +6,9 @@ from bs4 import BeautifulSoup
 import dateparser
 
 from .base_scraper import BaseScraper
+import os
+from datetime import datetime, timezone, timedelta
+from database.db import col_offres
 
 CATEGORIES_MAP = {
     "business-startup":             "Business & Entrepreneuriat",
@@ -32,6 +35,12 @@ class PFEBooksScraper(BaseScraper):
         max_pages = self._get_max_pages()
         logger.info(f"[pfebooks.com] {max_pages} pages")
 
+        
+        stop_threshold = int(os.getenv("PFEBOOKS_STOP_THRESHOLD_PAGES", 3))
+        max_age_days = int(os.getenv("PFEBOOKS_MAX_AGE_DAYS", 30))
+        consecutive_no_new = 0
+        now = datetime.now(timezone.utc)
+
         for page_num in range(1, max_pages + 1):
             url = self.CATALOGUE if page_num == 1 else f"{self.CATALOGUE}/page/{page_num}/"
             logger.info(f"[pfebooks.com] Page {page_num}/{max_pages}")
@@ -39,8 +48,20 @@ class PFEBooksScraper(BaseScraper):
                 entries = self._scrape_catalogue_page(url)
                 if not entries:
                     break
+
+                page_has_new = False
                 for entry in entries:
                     try:
+                        date_pub = entry.get("date_publication")
+                        if date_pub and isinstance(date_pub, datetime):
+                            if (now - date_pub) > timedelta(days=max_age_days):
+                                continue
+
+                        lien = entry.get("lien") or entry.get("lien_detail")
+                        if lien and col_offres().find_one({"lien_original": lien}):
+                            continue
+
+                        page_has_new = True
                         detail = self._scrape_detail(entry["lien_detail"])
                         offre  = {**entry, **detail}
                         results.append(self.normalize(offre))
@@ -49,6 +70,18 @@ class PFEBooksScraper(BaseScraper):
                     except Exception:
                         results.append(self.normalize(entry))
                         self.stats["scraped"] += 1
+
+                # Si aucune nouvelle offre trouvée sur cette page, incrémenter le compteur
+                if page_has_new:
+                    consecutive_no_new = 0
+                else:
+                    consecutive_no_new += 1
+
+                # Si N pages consécutives sans nouvelle, arrêter le scrape
+                if consecutive_no_new >= stop_threshold:
+                    logger.info(f"[pfebooks.com] Stop: {consecutive_no_new} pages consécutives sans nouvelles")
+                    break
+
                 self.wait(2, 4)
             except Exception as e:
                 logger.error(f"[pfebooks.com] Page {page_num}: {e}")
@@ -72,14 +105,30 @@ class PFEBooksScraper(BaseScraper):
         soup = BeautifulSoup(resp.text, "lxml")
         entries = []
 
-        voir_links = soup.select("a[href*='/catalogue/2026/']")
+        # Essaye plusieurs sélecteurs possibles
+        selectors = [
+            "a[href*='/catalogue/2026/']",  # Ancien format
+            "a[href*='/catalogue/']",        # Format générique
+            "article a, .job-card a, div.post a",  # Sélecteurs génériques
+        ]
+
+        voir_links = []
+        for sel in selectors:
+            voir_links = soup.select(sel)
+            if voir_links:
+                logger.debug(f"[pfebooks.com] Sélecteur trouvé: {sel} → {len(voir_links)} liens")
+                break
+
+        if not voir_links:
+            logger.warning(f"[pfebooks.com] Aucun sélecteur n'a trouvé de liens. HTML page size: {len(resp.text)} bytes")
+            return entries
+
         seen = set()
         for a in voir_links:
             href = a.get("href", "")
-            if "/catalogue/2026/" in href and href not in seen:
+            if "/catalogue/" in href and href not in seen:
                 seen.add(href)
                 titre = a.get("title") or a.get_text(strip=True) or ""
-
 
                 lien_image = None
                 parent = a.find_parent()
@@ -92,8 +141,6 @@ class PFEBooksScraper(BaseScraper):
                     if img:
                         src = img.get("src", "")
                         lien_image = re.sub(r"-\d+x\d+(\.\w+)$", r"\1", src)
-
-
 
                 date_pub = None
                 if parent:

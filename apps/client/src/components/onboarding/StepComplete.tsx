@@ -1,31 +1,42 @@
 import { useEffect, useState } from "react";
+import { useNavigate } from "react-router-dom";
 import { Sparkles, LayoutDashboard, Briefcase, FileText, Shield } from "lucide-react";
 
 interface Props {
     name: string;
     domain?: string;
     lookingFor?: string[];
-    onFinish: () => void;
+    onFinish?: () => void; 
 }
 
 export function StepComplete({ name, domain, lookingFor, onFinish }: Props) {
+    const navigate = useNavigate();
     const [countdown, setCountdown] = useState(5);
+
+    function handleFinish() {
+        onFinish?.();
+        navigate("/app/dashboard");
+    }
 
     useEffect(() => {
         const timer = setInterval(() => {
             setCountdown((c) => {
                 if (c <= 1) {
                     clearInterval(timer);
-                    onFinish();
+                    handleFinish();
                     return 0;
                 }
                 return c - 1;
             });
         }, 1000);
         return () => clearInterval(timer);
-    }, [onFinish]);
+    }, []);
 
-    const profileSummary = [name, domain, lookingFor && lookingFor.length > 0 ? `looking for a ${lookingFor[0]}` : null]
+    const profileSummary = [
+        name,
+        domain,
+        lookingFor && lookingFor.length > 0 ? `looking for a ${lookingFor[0]}` : null,
+    ]
         .filter(Boolean)
         .join(" · ");
 
@@ -93,7 +104,7 @@ export function StepComplete({ name, domain, lookingFor, onFinish }: Props) {
             <div className="ob-complete-actions">
                 <button
                     type="button"
-                    onClick={onFinish}
+                    onClick={handleFinish}
                     className="ob-complete-launch w-full text-white font-semibold text-base transition-all hover:scale-[1.02] hover:shadow-xl shadow-lg flex items-center justify-center gap-2">
                     Launch My Experience
                 </button>

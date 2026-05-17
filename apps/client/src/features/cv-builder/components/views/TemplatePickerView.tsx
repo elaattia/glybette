@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { ArrowLeft } from "lucide-react";
-import { TemplateCard } from "../TemplateCard";
+import { TemplateCard } from "../TemplateCard/TemplateCard";
 import { CreationOptionsModal } from "./CreationOptionsModal";
 import { TEMPLATES, DOMAIN_LABELS, filterTemplates } from "../../templates";
 import type { CvTemplateCategory, CvTemplateDomain, TemplateInfo } from "../../types/cv.types";

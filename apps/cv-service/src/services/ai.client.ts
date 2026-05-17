@@ -1,8 +1,16 @@
 function getBaseUrl() {
-    return process.env.AI_SERVICE_URL ?? "http://localhost:3004";
+    const url = process.env.AI_SERVICE_URL;
+    if (!url) {
+        throw new Error("AI_SERVICE_URL environment variable is required");
+    }
+    return url;
 }
 function getSecret() {
-    return process.env.INTERNAL_SERVICE_SECRET ?? "dev-secret-change-in-prod";
+    const secret = process.env.INTERNAL_SERVICE_SECRET;
+    if (!secret) {
+        throw new Error("INTERNAL_SERVICE_SECRET environment variable is required");
+    }
+    return secret;
 }
 
 async function post<T>(path: string, body: object): Promise<T> {

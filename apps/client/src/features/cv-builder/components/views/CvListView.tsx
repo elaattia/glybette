@@ -1,5 +1,5 @@
 import { Plus, FileText, Sparkles } from "lucide-react";
-import { CvCard } from "../CvCard";
+import { CvCard } from "../CvCard/CvCard";
 import { useCvList } from "../../hooks/useCvList";
 import type { CvDTO } from "../../types/cv.types";
 

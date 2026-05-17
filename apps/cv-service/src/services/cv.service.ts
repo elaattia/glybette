@@ -169,9 +169,15 @@ export class CvService {
 
     async exportPdf(id: string, userId: string) {
         const cv = await this.getCvById(id, userId);
-        const pdfUrl = await pdfService.generatePdf(cv as Parameters<typeof pdfService.generatePdf>[0]);
-        await repo.update(id, userId, { pdfUrl });
-        return { pdfUrl };
+        try {
+            const pdfUrl = await pdfService.generatePdf(cv as Parameters<typeof pdfService.generatePdf>[0]);
+            await repo.update(id, userId, { pdfUrl });
+            return { pdfUrl };
+        } catch (err: any) {
+            console.error("[exportPdf] ERREUR COMPLETE:", err?.message);
+            console.error("[exportPdf] STACK:", err?.stack);
+            throw err;
+        }
     }
 
     async scoreAts(id: string, userId: string, jobDescription: string) {

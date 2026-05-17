@@ -8,6 +8,10 @@ const routeMeta: Record<string, { title: string; subtitle: string }> = {
         title: "Welcome back",
         subtitle: "Your opportunity pipeline is active and ready for updates.",
     },
+    "/app/insights": {
+        title: "Career Insights",
+        subtitle: "Visualisez les tendances de marché et les données de vos offres scrappées.",
+    },
     "/app/cv": {
         title: "CV Builder",
         subtitle: "Create and tailor CV versions for each target role.",

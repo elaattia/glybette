@@ -3,6 +3,7 @@ import { Hono } from "hono";
 import { cors } from "hono/cors";
 import { logger } from "hono/logger";
 import { serve } from "@hono/node-server";
+import mongoose from "mongoose";
 import { connectDb } from "./config/db.js";
 import { cvRoutes, publicCvRoutes } from "./routes/cv.routes.js";
 import { errorMiddleware } from "./middleware/error.middleware.js";
@@ -20,7 +21,32 @@ app.use(
     }),
 );
 
-app.get("/health", (c) => c.json({ status: "ok", service: "cv-service" }));
+app.get("/health", async (c) => {
+    try {
+        const mongoState = mongoose.connection.readyState;
+        const isHealthy = mongoState === 1;
+
+        if (!isHealthy) {
+            return c.json({ 
+                status: "degraded", 
+                service: "cv-service", 
+                mongodb: mongoState === 2 ? "connecting" : "disconnected" 
+            }, mongoState === 2 ? 200 : 503);
+        }
+
+        return c.json({ 
+            status: "ok", 
+            service: "cv-service",
+            mongodb: "healthy" 
+        });
+    } catch (err) {
+        return c.json({ 
+            status: "unhealthy", 
+            service: "cv-service",
+            error: err instanceof Error ? err.message : "unknown error"
+        }, 503);
+    }
+});
 
 app.route("/api", publicCvRoutes);
 
