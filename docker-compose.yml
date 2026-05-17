@@ -34,6 +34,11 @@ services:
         environment:
             - RABBITMQ_DEFAULT_USER=guest
             - RABBITMQ_DEFAULT_PASS=guest
+        healthcheck:
+            test: ["CMD", "rabbitmq-diagnostics", "-q", "ping"]
+            interval: 10s
+            timeout: 5s
+            retries: 8
 
     api-gateway:
         build:
@@ -157,7 +162,7 @@ services:
             redis:
                 condition: service_healthy
             rabbitmq:
-                condition: service_started
+                condition: service_healthy
         restart: unless-stopped
 
     ai-service:
@@ -231,7 +236,7 @@ services:
             - .env
         depends_on:
             rabbitmq:
-                condition: service_started
+                condition: service_healthy
             mongodb:
                 condition: service_healthy
             ai-service:

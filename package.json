@@ -3,13 +3,22 @@
     "private": true,
     "scripts": {
         "dev": "pnpm -r --parallel --filter \"./apps/*\" run dev",
+        "dev:frontend": "pnpm --filter \"@glybette/client\" dev",
         "dev:rabbitmq": "docker compose up -d rabbitmq",
         "build": "pnpm -r --filter \"./apps/*...\" run build",
         "prepare": "pnpm -r --filter \"./packages/*\" run build",
+        "clean:host": "powershell -NoProfile -ExecutionPolicy Bypass -File scripts/clean-host-modules.ps1",
         "format": "prettier --write . --ignore-path .gitignore",
         "install:all": "pnpm -r install",
-        "docker:up": "docker compose up -d",
-        "docker:down": "docker compose down"
+        "docker:env:check": "node scripts/check-docker-env.js",
+        "docker:env:check:ai": "node scripts/check-docker-env.js --ai",
+        "docker:up": "pnpm docker:env:check && docker compose up -d",
+        "docker:down": "docker compose down",
+        "docker:dev:up": "pnpm docker:env:check && docker compose -f docker-compose.dev.yml up -d --build",
+        "docker:dev:down": "docker compose -f docker-compose.dev.yml down",
+        "docker:dev:logs": "docker compose -f docker-compose.dev.yml logs -f",
+        "docker:dev:logs:frontend": "docker compose -f docker-compose.dev.yml logs -f client",
+        "docker:dev:up:ai": "pnpm docker:env:check:ai && docker compose -f docker-compose.dev.yml --profile ai up -d --build"
     },
     "devDependencies": {
         "prettier": "^3.5.3"
