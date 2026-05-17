@@ -1,13 +1,18 @@
-# Reusable Dockerfile for monorepo apps. Build with: docker build --build-arg APP_NAME=api-gateway -t api-gateway .
-FROM node:20-alpine AS base
+# Reusable Dockerfile for monorepo apps.
+FROM node:22-alpine AS base
 RUN corepack enable pnpm
+ENV NODE_OPTIONS="--dns-result-order=ipv4first"
 WORKDIR /app
 
 FROM base AS deps
 COPY pnpm-lock.yaml pnpm-workspace.yaml package.json ./
 COPY apps ./apps
 COPY packages ./packages
-RUN pnpm install --frozen-lockfile
+RUN pnpm config set registry https://registry.npmjs.org/ && \
+    pnpm config set fetch-retries 5 && \
+    pnpm config set fetch-retry-mintimeout 20000 && \
+    pnpm config set fetch-retry-maxtimeout 120000 && \
+    pnpm install --frozen-lockfile
 
 FROM base AS builder
 ARG APP_NAME

@@ -106,4 +106,13 @@ export const gatewayProxyRoutes: readonly GatewayProxyRoute[] = [
         injectGatewayAuth: true,
         methods: "all",
     },
+    {
+        name: "jobs",
+        service: "jobs",
+        mount: "/jobs",
+        upstream: { kind: "rewrite", upstreamPrefix: "/api" },
+        session: "optional",
+        injectGatewayAuth: true,
+        methods: "all",
+    },
 ];

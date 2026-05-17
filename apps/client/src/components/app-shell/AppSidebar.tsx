@@ -19,6 +19,7 @@ import logo from "@/assets/gyblette.png";
 
 const navItems = [
     { to: "/app/dashboard", label: "Dashboard", icon: Gauge },
+    { to: "/app/insights", label: "Career Insights", icon: ChartColumnIncreasing },
     { to: "/app/cv", label: "CV Builder", icon: FileUser },
     { to: "/app/portfolio", label: "Portfolio", icon: FolderKanban },
     { to: "/app/opportunities", label: "Opportunities", icon: BriefcaseBusiness },

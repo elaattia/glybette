@@ -43,9 +43,9 @@ services:
             SCRAPING_SERVICE_URL: http://scraping-service:3002
             EMAIL_SERVICE_URL: http://email-service:3003
             PORTFOLIO_SERVICE_URL: http://portfolio-service:3004
-            PROJECTS_SERVICE_URL: http://projects-service:3007
+            PROJECTS_SERVICE_URL: http://projects-service:3008
             CV_SERVICE_URL: http://cv-service:3006
-            AI_SERVICE_URL: http://ai-service:3005
+            AI_SERVICE_URL: http://ai-service:3007
             CHOKIDAR_USEPOLLING: "1"
             CHOKIDAR_INTERVAL: "300"
             WATCHPACK_POLLING: "true"
@@ -269,7 +269,7 @@ services:
         environment:
             NODE_ENV: development
             PORT_CV_SERVICE: 3006
-            AI_SERVICE_URL: http://ai-service:3005
+            AI_SERVICE_URL: http://ai-service:3007
             CHOKIDAR_USEPOLLING: "1"
             CHOKIDAR_INTERVAL: "300"
             WATCHPACK_POLLING: "true"
@@ -299,12 +299,12 @@ services:
         working_dir: /workspace
         command: bash -lc "pnpm --filter \"@glybette/projects-service\" dev"
         ports:
-            - "3007:3007"
+            - "3008:3008"
         env_file:
             - .env
         environment:
             NODE_ENV: development
-            PORT_PROJECTS_SERVICE: 3007
+            PORT_PROJECTS_SERVICE: 3008
             PROJECTS_SERVICE_MONGODB_DB_NAME: glybette_projects
             UPLOAD_PROVIDER: disk
             PROJECTS_UPLOAD_DISK_DIR: /workspace/.data/projects-uploads
@@ -328,7 +328,7 @@ services:
                     "CMD",
                     "node",
                     "-e",
-                    "fetch('http://localhost:3007/health').then(r=>process.exit(r.ok?0:1)).catch(()=>process.exit(1))",
+                    "fetch('http://localhost:3008/health').then(r=>process.exit(r.ok?0:1)).catch(()=>process.exit(1))",
                 ]
             interval: 15s
             timeout: 5s
@@ -342,12 +342,12 @@ services:
         working_dir: /workspace
         command: bash -lc "pnpm --filter \"@glybette/ai-service\" dev"
         ports:
-            - "3005:3005"
+            - "3007:3007"
         env_file:
             - .env
         environment:
             NODE_ENV: development
-            PORT_AI_SERVICE: 3005
+            PORT_AI_SERVICE: 3007
             OLLAMA_BASE_URL: ${OLLAMA_BASE_URL:-http://host.docker.internal:11434}
             CHOKIDAR_USEPOLLING: "1"
             CHOKIDAR_INTERVAL: "300"
@@ -367,7 +367,7 @@ services:
                     "CMD",
                     "node",
                     "-e",
-                    "fetch('http://localhost:3005/health').then(r=>process.exit(r.ok?0:1)).catch(()=>process.exit(1))",
+                    "fetch('http://localhost:3007/health').then(r=>process.exit(r.ok?0:1)).catch(()=>process.exit(1))",
                 ]
             interval: 20s
             timeout: 5s

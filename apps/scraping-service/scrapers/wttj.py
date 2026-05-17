@@ -240,8 +240,6 @@ class WTTJScraper(BaseScraper):
                 await page.evaluate("window.scrollBy(0, 600)")
                 await asyncio.sleep(0.8)
 
-            
-
             page_text = await page.inner_text("body")
 
             contract_match = re.search(
@@ -321,11 +319,10 @@ class WTTJScraper(BaseScraper):
                         result["date_publication"] = parsed
                         break
 
-            
             loc_match = re.search(
                 r"(?:📍|🏢|•)?\s*([A-ZÀ-Ÿa-zà-ÿ\-\s]+(?:,\s*[A-ZÀ-Ÿa-zà-ÿ\-\s]+)?)"
                 r"\s*(?:\||\n|·|–)",
-                page_text[:500], 
+                page_text[:500],
             )
             if loc_match:
                 loc = loc_match.group(1).strip()
@@ -334,7 +331,6 @@ class WTTJScraper(BaseScraper):
                 ):
                     result["localisation"] = loc
 
-            
             description_parts = []
 
             all_headings = await page.query_selector_all("article h2, article h3, main h2, main h3")
@@ -399,13 +395,12 @@ class WTTJScraper(BaseScraper):
                                     if idx != -1:
                                         txt = txt[idx:]
                                         break
-                                description_parts.append(txt[:3000])  
+                                description_parts.append(txt[:3000])
                                 break
 
             if description_parts:
                 result["description"] = "\n\n".join(description_parts)
 
-            
             company_about = None
 
             about_markers = [
@@ -444,7 +439,6 @@ class WTTJScraper(BaseScraper):
             if company_about:
                 result["company_about"] = company_about
 
-            
             competences = []
 
             for sel in [
@@ -476,7 +470,6 @@ class WTTJScraper(BaseScraper):
             if competences:
                 result["competences"] = list(dict.fromkeys(competences))[:15]
 
-            
             size_match = re.search(
                 r"(\d+\s*[-–]\s*\d+|\d+\+?)\s*(salariés?|employés?|personnes?|collaborateurs?|people|employees)",
                 page_text,

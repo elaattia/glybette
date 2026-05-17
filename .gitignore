@@ -10,5 +10,6 @@ __pycache__/
 *.pyc
 *.pyo
 logs/
+.venv/
 .pnpm-store/
 .data/

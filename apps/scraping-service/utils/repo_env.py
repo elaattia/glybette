@@ -1,5 +1,3 @@
-"""Load monorepo root `.env` once (local dev). Under Docker, variables come from `env_file` / the runtime."""
-
 from __future__ import annotations
 
 from pathlib import Path

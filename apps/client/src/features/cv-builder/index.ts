@@ -4,9 +4,9 @@ export { CvListView } from "./components/views/CvListView";
 export { TemplatePickerView } from "./components/views/TemplatePickerView";
 export { CvEditorView } from "./components/views/CvEditorView";
 
-export { CvPreview } from "./components/CvPreview";
+export { CvPreview } from "./components/CvPreview/CvPreview";
 export { AtsScorePanel } from "./components/AtsScorePanel";
-export { CvCard } from "./components/CvCard";
+export { CvCard } from "./components/CvCard/CvCard";
 
 export { useCvList } from "./hooks/useCvList";
 export { useCvEditor } from "./hooks/useCvEditor";

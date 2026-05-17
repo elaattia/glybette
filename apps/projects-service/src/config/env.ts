@@ -9,7 +9,7 @@ const projectsServiceEnvSchema = baseEnvSchema.extend({
             (val) => val.startsWith("mongodb://") || val.startsWith("mongodb+srv://"),
             "MONGODB_URI must be a valid MongoDB connection string",
         ),
-    PORT_PROJECTS_SERVICE: z.coerce.number().default(3007),
+    PORT_PROJECTS_SERVICE: z.coerce.number().default(3008),
     PROJECTS_SERVICE_MONGODB_DB_NAME: z.string().min(1).default("glybette_projects"),
     UPLOAD_PROVIDER: z.enum(["disk", "s3"]).default("disk"),
     PROJECTS_UPLOAD_DISK_DIR: z.string().min(1).default("./uploads/projects"),

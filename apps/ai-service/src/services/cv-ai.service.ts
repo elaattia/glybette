@@ -171,7 +171,7 @@ Return ONLY the letter text, no subject line, no markdown.`;
         const text = rawText.slice(0, 3000);
         console.log("[extractFromText] text length:", text.length);
 
-        // Step 1: Extract personal info + summary
+        
         const prompt1 = `Extract personal information and professional summary from this CV text.
 Return ONLY valid JSON matching this exact structure:
 {
@@ -193,7 +193,7 @@ Use empty string "" for any missing field. No explanation, no markdown fences.
 CV TEXT:
 ${text}`;
 
-        // Step 2: Extract experience + education
+        
         const prompt2 = `Extract work experience and education from this CV text.
 Return ONLY valid JSON matching this exact structure:
 {
@@ -224,7 +224,7 @@ Use empty arrays [] if none found. No explanation, no markdown fences.
 CV TEXT:
 ${text}`;
 
-        // Step 3: Extract skills + languages + certifications
+        
         const prompt3 = `Extract skills, projects, languages and certifications from this CV text.
 Return ONLY valid JSON matching this exact structure:
 {
