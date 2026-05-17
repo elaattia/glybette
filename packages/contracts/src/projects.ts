@@ -7,6 +7,19 @@ export type ProjectDifficulty = (typeof PROJECT_DIFFICULTIES)[number];
 export const PROJECT_WORK_MODES = ["async", "hybrid", "live"] as const;
 export type ProjectWorkMode = (typeof PROJECT_WORK_MODES)[number];
 
+export const PROJECT_DOMAINS = [
+    "Software / IT",
+    "AI / ML",
+    "Data / Analytics",
+    "Design",
+    "Mobile",
+    "Cybersecurity",
+    "Product",
+    "Marketing",
+    "Other",
+] as const;
+export type ProjectDomain = (typeof PROJECT_DOMAINS)[number];
+
 export const PROJECT_MEMBERSHIP_ROLES = ["owner", "member"] as const;
 export type ProjectMembershipRole = (typeof PROJECT_MEMBERSHIP_ROLES)[number];
 
@@ -76,7 +89,7 @@ export interface ProjectSummaryDTO {
     ownerId: string;
     title: string;
     shortDescription: string;
-    domain: string;
+    domain: ProjectDomain;
     difficulty: ProjectDifficulty;
     technologies: string[];
     status: ProjectStatus;
@@ -156,7 +169,7 @@ export interface UpsertProjectRequest {
     title: string;
     shortDescription: string;
     description: string;
-    domain: string;
+    domain: ProjectDomain;
     difficulty: ProjectDifficulty;
     technologies: string[];
     teamSizeTarget: number;

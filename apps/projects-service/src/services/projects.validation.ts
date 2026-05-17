@@ -1,5 +1,6 @@
 import {
     PROJECT_DIFFICULTIES,
+    PROJECT_DOMAINS,
     PROJECT_WORK_MODES,
     type CreateJoinRequestRequest,
     type CreateProjectCommentRequest,
@@ -33,7 +34,7 @@ const upsertProjectSchema = z.object({
     title: z.string().trim().min(3).max(120),
     shortDescription: z.string().trim().min(10).max(240),
     description: z.string().trim().min(20).max(6000),
-    domain: z.string().trim().min(2).max(80),
+    domain: z.enum(PROJECT_DOMAINS),
     difficulty: z.enum(PROJECT_DIFFICULTIES),
     technologies: z.array(z.string().trim().min(1).max(40)).max(20),
     teamSizeTarget: z.coerce.number().int().min(1).max(50),
@@ -67,7 +68,17 @@ const listProjectsQuerySchema = z.object({
     q: z.string().trim().max(80).optional(),
     domain: z.string().trim().max(80).optional(),
     difficulty: z.enum(PROJECT_DIFFICULTIES).optional(),
-    technology: z.string().trim().max(40).optional(),
+    technology: z
+        .string()
+        .trim()
+        .max(200)
+        .optional()
+        .transform((value) =>
+            value
+                ?.split(",")
+                .map((item) => item.trim())
+                .filter(Boolean),
+        ),
     mine: z
         .enum(["true", "false"])
         .optional()

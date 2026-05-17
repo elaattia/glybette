@@ -1,6 +1,11 @@
 import { useMemo, useState, type ReactNode } from "react";
 import { useNavigate } from "react-router-dom";
-import type { CreateProjectRequest, ProjectMilestoneInput, ProjectRoleRequirementInput } from "@glybette/contracts";
+import {
+    PROJECT_DOMAINS,
+    type CreateProjectRequest,
+    type ProjectMilestoneInput,
+    type ProjectRoleRequirementInput,
+} from "@glybette/contracts";
 import { ArrowLeft, ArrowRight, CheckCircle2, ImageUp, Save } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -8,6 +13,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { useProjectsMutations } from "@/features/projects";
+import { ApiError } from "@/lib/api";
 
 type Step = 1 | 2;
 
@@ -32,13 +38,15 @@ export default function ProjectCreatePage() {
     const mutations = useProjectsMutations();
     const [step, setStep] = useState<Step>(1);
     const [coverFile, setCoverFile] = useState<File | null>(null);
+    const [coverPreviewUrl, setCoverPreviewUrl] = useState<string | null>(null);
 
     const [title, setTitle] = useState("");
     const [shortDescription, setShortDescription] = useState("");
     const [description, setDescription] = useState("");
-    const [domain, setDomain] = useState("Software / IT");
+    const [domain, setDomain] = useState<(typeof PROJECT_DOMAINS)[number]>("Software / IT");
     const [difficulty, setDifficulty] = useState<"beginner" | "intermediate" | "advanced">("intermediate");
-    const [technologiesInput, setTechnologiesInput] = useState("React, Tailwind CSS");
+    const [technologyInput, setTechnologyInput] = useState("");
+    const [technologies, setTechnologies] = useState<string[]>(["React", "Tailwind CSS"]);
 
     const [teamSizeTarget, setTeamSizeTarget] = useState(3);
     const [hoursPerWeek, setHoursPerWeek] = useState(10);
@@ -50,6 +58,8 @@ export default function ProjectCreatePage() {
     const [milestones, setMilestones] = useState<ProjectMilestoneInput[]>([
         { title: "MVP layout", description: "Build first clickable flow for profile optimization.", status: "todo" },
     ]);
+    const [formError, setFormError] = useState<string | null>(null);
+    const [fieldErrors, setFieldErrors] = useState<Record<string, string>>({});
 
     const canContinue = useMemo(
         () => title.trim().length >= 3 && shortDescription.trim().length >= 10 && description.trim().length >= 20,
@@ -71,9 +81,9 @@ export default function ProjectCreatePage() {
         title: title.trim(),
         shortDescription: shortDescription.trim(),
         description: description.trim(),
-        domain: domain.trim(),
+        domain,
         difficulty,
-        technologies: parseCommaSeparated(technologiesInput),
+        technologies,
         teamSizeTarget,
         engagement: {
             hoursPerWeek,
@@ -99,13 +109,46 @@ export default function ProjectCreatePage() {
     });
 
     const submit = async (publish: boolean) => {
-        const payload = buildPayload(publish);
-        const response = await mutations.createProject.mutateAsync(payload);
-        const projectId = response.project.id;
-        if (coverFile) {
-            await mutations.uploadCover.mutateAsync({ id: projectId, file: coverFile });
+        const validationErrors = validateForm({
+            title,
+            shortDescription,
+            description,
+            technologies,
+            roles,
+            milestones,
+        });
+        setFieldErrors(validationErrors);
+        setFormError(null);
+
+        if (Object.keys(validationErrors).length > 0) {
+            setFormError("Please correct the highlighted fields before submitting.");
+            return;
         }
-        navigate(`/app/projects/${projectId}`);
+
+        try {
+            const payload = buildPayload(publish);
+            const response = await mutations.createProject.mutateAsync(payload);
+            const projectId = response.project.id;
+            if (coverFile) {
+                await mutations.uploadCover.mutateAsync({ id: projectId, file: coverFile });
+            }
+            navigate(`/app/projects/${projectId}`);
+        } catch (error) {
+            if (error instanceof ApiError) {
+                setFormError(error.message);
+                return;
+            }
+            setFormError("Failed to save project. Please try again.");
+        }
+    };
+
+    const addTechnology = () => {
+        const candidate = technologyInput.trim();
+        if (!candidate) return;
+        setTechnologies((current) =>
+            current.some((item) => item.toLowerCase() === candidate.toLowerCase()) ? current : [...current, candidate],
+        );
+        setTechnologyInput("");
     };
 
     return (
@@ -134,19 +177,34 @@ export default function ProjectCreatePage() {
                                 <h2 className="text-sm font-semibold uppercase tracking-[0.12em] text-[var(--gb-muted)]">
                                     Visual identity
                                 </h2>
-                                <label className="flex cursor-pointer flex-col items-center justify-center gap-2 rounded-xl border border-dashed border-[var(--gb-border)] bg-[var(--gb-surface)] px-4 py-8 text-center">
-                                    <ImageUp className="h-5 w-5 text-[var(--gb-muted)]" />
-                                    <span className="text-sm text-[var(--gb-text)]">
-                                        {coverFile ? coverFile.name : "Upload project cover (PNG/JPG/WEBP, max 5MB)"}
-                                    </span>
+                                <label className="flex min-h-[220px] cursor-pointer flex-col items-center justify-center gap-2 rounded-xl border border-dashed border-[var(--gb-border)] bg-[var(--gb-surface)] px-4 py-8 text-center">
+                                    {coverPreviewUrl ? (
+                                        <img src={coverPreviewUrl} alt="Project cover preview" className="h-full w-full rounded-lg object-cover" />
+                                    ) : (
+                                        <>
+                                            <ImageUp className="h-5 w-5 text-[var(--gb-muted)]" />
+                                            <span className="text-sm text-[var(--gb-text)]">
+                                                {coverFile ? coverFile.name : "Upload project cover (PNG/JPG/WEBP, max 5MB)"}
+                                            </span>
+                                        </>
+                                    )}
                                     <input
                                         type="file"
                                         accept="image/png,image/jpeg,image/webp"
                                         className="hidden"
-                                        onChange={(event) => setCoverFile(event.target.files?.[0] ?? null)}
+                                        onChange={(event) => {
+                                            const file = event.target.files?.[0] ?? null;
+                                            setCoverFile(file);
+                                            setCoverPreviewUrl((current) => {
+                                                if (current) URL.revokeObjectURL(current);
+                                                return file ? URL.createObjectURL(file) : null;
+                                            });
+                                        }}
                                     />
                                 </label>
                             </section>
+
+                            {formError ? <p className="rounded-lg border border-red-500/50 bg-red-500/10 px-3 py-2 text-sm text-red-200">{formError}</p> : null}
 
                             <section className="grid gap-3 md:grid-cols-2">
                                 <div className="space-y-2 md:col-span-2">
@@ -157,6 +215,7 @@ export default function ProjectCreatePage() {
                                         placeholder="AI Portfolio Optimizer"
                                         className="h-10 border-[var(--gb-border)] bg-[var(--gb-surface)]"
                                     />
+                                    {fieldErrors.title ? <p className="text-xs text-red-300">{fieldErrors.title}</p> : null}
                                 </div>
                                 <div className="space-y-2 md:col-span-2">
                                     <label className="text-sm font-medium text-[var(--gb-text)]">Short description</label>
@@ -166,6 +225,9 @@ export default function ProjectCreatePage() {
                                         placeholder="One-line pitch for project card preview."
                                         className="h-10 border-[var(--gb-border)] bg-[var(--gb-surface)]"
                                     />
+                                    {fieldErrors.shortDescription ? (
+                                        <p className="text-xs text-red-300">{fieldErrors.shortDescription}</p>
+                                    ) : null}
                                 </div>
                                 <div className="space-y-2 md:col-span-2">
                                     <label className="text-sm font-medium text-[var(--gb-text)]">Detailed description</label>
@@ -176,15 +238,20 @@ export default function ProjectCreatePage() {
                                         placeholder="Describe vision, constraints, and expected impact."
                                         className="border-[var(--gb-border)] bg-[var(--gb-surface)]"
                                     />
+                                    {fieldErrors.description ? <p className="text-xs text-red-300">{fieldErrors.description}</p> : null}
                                 </div>
                                 <div className="space-y-2">
                                     <label className="text-sm font-medium text-[var(--gb-text)]">Domain</label>
-                                    <Input
+                                    <select
                                         value={domain}
-                                        onChange={(event) => setDomain(event.target.value)}
-                                        placeholder="Software / IT"
-                                        className="h-10 border-[var(--gb-border)] bg-[var(--gb-surface)]"
-                                    />
+                                        onChange={(event) => setDomain(event.target.value as (typeof PROJECT_DOMAINS)[number])}
+                                        className="h-10 w-full rounded-lg border border-[var(--gb-border)] bg-[var(--gb-surface)] px-3 text-sm text-[var(--gb-text)] outline-none focus:border-[var(--gb-app-ring)]">
+                                        {PROJECT_DOMAINS.map((option) => (
+                                            <option key={option} value={option}>
+                                                {option}
+                                            </option>
+                                        ))}
+                                    </select>
                                 </div>
                                 <div className="space-y-2">
                                     <label className="text-sm font-medium text-[var(--gb-text)]">Difficulty</label>
@@ -202,18 +269,37 @@ export default function ProjectCreatePage() {
                                 <div className="space-y-2 md:col-span-2">
                                     <label className="text-sm font-medium text-[var(--gb-text)]">Technologies</label>
                                     <Input
-                                        value={technologiesInput}
-                                        onChange={(event) => setTechnologiesInput(event.target.value)}
-                                        placeholder="React, Python, OpenAI..."
+                                        value={technologyInput}
+                                        onChange={(event) => setTechnologyInput(event.target.value)}
+                                        onKeyDown={(event) => {
+                                            if (event.key === "Enter") {
+                                                event.preventDefault();
+                                                addTechnology();
+                                            }
+                                        }}
+                                        onBlur={addTechnology}
+                                        placeholder="Type a technology and press Enter"
                                         className="h-10 border-[var(--gb-border)] bg-[var(--gb-surface)]"
                                     />
                                     <div className="flex flex-wrap gap-1.5">
-                                        {parseCommaSeparated(technologiesInput).slice(0, 8).map((tech) => (
-                                            <Badge key={tech} variant="outline" className="border-[var(--gb-border)] bg-[var(--gb-surface)]">
+                                        {technologies.map((tech) => (
+                                            <Badge
+                                                key={tech}
+                                                variant="outline"
+                                                className="h-6 border-[var(--gb-border)] bg-[var(--gb-app-panel-bg)] text-[var(--gb-text)]">
                                                 {tech}
+                                                <button
+                                                    type="button"
+                                                    className="ml-1 rounded-full px-1 text-[var(--gb-muted)] hover:text-[var(--gb-text)]"
+                                                    onClick={() =>
+                                                        setTechnologies((current) => current.filter((item) => item !== tech))
+                                                    }>
+                                                    x
+                                                </button>
                                             </Badge>
                                         ))}
                                     </div>
+                                    {fieldErrors.technologies ? <p className="text-xs text-red-300">{fieldErrors.technologies}</p> : null}
                                 </div>
                             </section>
                         </>
@@ -253,6 +339,8 @@ export default function ProjectCreatePage() {
                                     </select>
                                 </Field>
                             </section>
+
+                            {fieldErrors.openRoles ? <p className="text-xs text-red-300">{fieldErrors.openRoles}</p> : null}
 
                             <section className="space-y-3">
                                 <div className="flex items-center justify-between">
@@ -379,6 +467,7 @@ export default function ProjectCreatePage() {
                                     ))}
                                 </div>
                             </section>
+                            {fieldErrors.milestones ? <p className="text-xs text-red-300">{fieldErrors.milestones}</p> : null}
                         </>
                     )}
                 </CardContent>
@@ -424,6 +513,26 @@ export default function ProjectCreatePage() {
             </div>
         </div>
     );
+}
+
+function validateForm(input: {
+    title: string;
+    shortDescription: string;
+    description: string;
+    technologies: string[];
+    roles: ProjectRoleRequirementInput[];
+    milestones: ProjectMilestoneInput[];
+}): Record<string, string> {
+    const errors: Record<string, string> = {};
+    if (input.title.trim().length < 3) errors.title = "Title must be at least 3 characters.";
+    if (input.shortDescription.trim().length < 10) errors.shortDescription = "Short description must be at least 10 characters.";
+    if (input.description.trim().length < 20) errors.description = "Detailed description must be at least 20 characters.";
+    if (input.technologies.length === 0) errors.technologies = "Add at least one technology.";
+    if (!input.roles.some((role) => role.title.trim())) errors.openRoles = "Add at least one role with a title.";
+    if (!input.milestones.some((milestone) => milestone.title.trim() && milestone.description.trim())) {
+        errors.milestones = "Add at least one milestone with title and description.";
+    }
+    return errors;
 }
 
 function StepChip({ label, active, completed }: { label: string; active: boolean; completed: boolean }) {

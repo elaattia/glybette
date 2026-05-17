@@ -1,6 +1,7 @@
 import { useMemo, useState } from "react";
-import { Link } from "react-router-dom";
-import { BriefcaseBusiness, Filter, MessageSquare, Sparkles, Users } from "lucide-react";
+import { Link, useNavigate } from "react-router-dom";
+import { PROJECT_DOMAINS } from "@glybette/contracts";
+import { BriefcaseBusiness, Clock3, Filter, MessageSquare, Sparkles, Users, X } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
@@ -15,10 +16,12 @@ const difficulties = [
 ] as const;
 
 export default function ProjectsListPage() {
+    const navigate = useNavigate();
     const [search, setSearch] = useState("");
     const [domain, setDomain] = useState("");
     const [difficulty, setDifficulty] = useState<(typeof difficulties)[number]["value"]>("");
-    const [technology, setTechnology] = useState("");
+    const [technologyInput, setTechnologyInput] = useState("");
+    const [technology, setTechnology] = useState<string[]>([]);
     const [mineOnly, setMineOnly] = useState(false);
 
     const query = useMemo(
@@ -26,7 +29,7 @@ export default function ProjectsListPage() {
             q: search || undefined,
             domain: domain || undefined,
             difficulty: difficulty || undefined,
-            technology: technology || undefined,
+            technology: technology.length > 0 ? technology : undefined,
             mine: mineOnly || undefined,
             page: 1,
             pageSize: 18,
@@ -36,6 +39,15 @@ export default function ProjectsListPage() {
 
     const projectsQuery = useProjectsList(query);
     const items = projectsQuery.data?.items ?? [];
+
+    const addTechnologyFilter = () => {
+        const candidate = technologyInput.trim();
+        if (!candidate) return;
+        setTechnology((current) =>
+            current.some((item) => item.toLowerCase() === candidate.toLowerCase()) ? current : [...current, candidate],
+        );
+        setTechnologyInput("");
+    };
 
     return (
         <div className="space-y-5">
@@ -71,41 +83,89 @@ export default function ProjectsListPage() {
                         Filter projects
                     </div>
                     <div className="grid gap-3 md:grid-cols-2 xl:grid-cols-5">
-                        <Input
-                            placeholder="Search title or problem"
-                            value={search}
-                            onChange={(event) => setSearch(event.target.value)}
-                            className="h-10 border-[var(--gb-border)] bg-[var(--gb-surface)]"
-                        />
-                        <Input
-                            placeholder="Domain (AI, Web, Data...)"
-                            value={domain}
-                            onChange={(event) => setDomain(event.target.value)}
-                            className="h-10 border-[var(--gb-border)] bg-[var(--gb-surface)]"
-                        />
-                        <select
-                            className="h-10 rounded-lg border border-[var(--gb-border)] bg-[var(--gb-surface)] px-3 text-sm text-[var(--gb-text)] outline-none focus:border-[var(--gb-app-ring)]"
-                            value={difficulty}
-                            onChange={(event) => setDifficulty(event.target.value as (typeof difficulties)[number]["value"])}>
-                            {difficulties.map((option) => (
-                                <option key={option.value || "all"} value={option.value}>
-                                    {option.label}
-                                </option>
-                            ))}
-                        </select>
-                        <Input
-                            placeholder="Technology tag"
-                            value={technology}
-                            onChange={(event) => setTechnology(event.target.value)}
-                            className="h-10 border-[var(--gb-border)] bg-[var(--gb-surface)]"
-                        />
-                        <Button
-                            type="button"
-                            variant={mineOnly ? "default" : "outline"}
-                            className="h-10 justify-center border-[var(--gb-border)]"
-                            onClick={() => setMineOnly((value) => !value)}>
-                            {mineOnly ? "Showing my projects" : "Show my projects"}
-                        </Button>
+                        <label className="space-y-1.5">
+                            <span className="text-xs font-medium uppercase tracking-[0.08em] text-[var(--gb-muted)]">Search</span>
+                            <Input
+                                placeholder="Title or problem"
+                                value={search}
+                                onChange={(event) => setSearch(event.target.value)}
+                                className="h-10 border-[var(--gb-border)] bg-[var(--gb-surface)]"
+                            />
+                        </label>
+                        <label className="space-y-1.5">
+                            <span className="text-xs font-medium uppercase tracking-[0.08em] text-[var(--gb-muted)]">Domain</span>
+                            <select
+                                className="h-10 w-full rounded-lg border border-[var(--gb-border)] bg-[var(--gb-surface)] px-3 text-sm text-[var(--gb-text)] outline-none focus:border-[var(--gb-app-ring)]"
+                                value={domain}
+                                onChange={(event) => setDomain(event.target.value)}>
+                                <option value="">All domains</option>
+                                {PROJECT_DOMAINS.map((option) => (
+                                    <option key={option} value={option}>
+                                        {option}
+                                    </option>
+                                ))}
+                            </select>
+                        </label>
+                        <label className="space-y-1.5">
+                            <span className="text-xs font-medium uppercase tracking-[0.08em] text-[var(--gb-muted)]">
+                                Difficulty
+                            </span>
+                            <select
+                                className="h-10 w-full rounded-lg border border-[var(--gb-border)] bg-[var(--gb-surface)] px-3 text-sm text-[var(--gb-text)] outline-none focus:border-[var(--gb-app-ring)]"
+                                value={difficulty}
+                                onChange={(event) => setDifficulty(event.target.value as (typeof difficulties)[number]["value"])}>
+                                {difficulties.map((option) => (
+                                    <option key={option.value || "all"} value={option.value}>
+                                        {option.label}
+                                    </option>
+                                ))}
+                            </select>
+                        </label>
+                        <div className="space-y-1.5">
+                            <span className="text-xs font-medium uppercase tracking-[0.08em] text-[var(--gb-muted)]">Technologies</span>
+                            <Input
+                                placeholder="Add and press Enter"
+                                value={technologyInput}
+                                onChange={(event) => setTechnologyInput(event.target.value)}
+                                onKeyDown={(event) => {
+                                    if (event.key === "Enter") {
+                                        event.preventDefault();
+                                        addTechnologyFilter();
+                                    }
+                                }}
+                                onBlur={addTechnologyFilter}
+                                className="h-10 border-[var(--gb-border)] bg-[var(--gb-surface)]"
+                            />
+                            {technology.length > 0 ? (
+                                <div className="flex flex-wrap gap-1.5">
+                                    {technology.map((tech) => (
+                                        <Badge
+                                            key={tech}
+                                            variant="outline"
+                                            className="h-6 gap-1 border-[var(--gb-border)] bg-[var(--gb-app-panel-bg)] text-[var(--gb-text)]">
+                                            {tech}
+                                            <button
+                                                type="button"
+                                                className="rounded-full p-0.5 text-[var(--gb-muted)] hover:text-[var(--gb-text)]"
+                                                onClick={() => setTechnology((current) => current.filter((item) => item !== tech))}
+                                                aria-label={`Remove ${tech} filter`}>
+                                                <X className="h-3 w-3" />
+                                            </button>
+                                        </Badge>
+                                    ))}
+                                </div>
+                            ) : null}
+                        </div>
+                        <label className="space-y-1.5">
+                            <span className="text-xs font-medium uppercase tracking-[0.08em] text-[var(--gb-muted)]">Ownership</span>
+                            <Button
+                                type="button"
+                                variant={mineOnly ? "default" : "outline"}
+                                className="h-10 w-full justify-center border-[var(--gb-border)]"
+                                onClick={() => setMineOnly((value) => !value)}>
+                                {mineOnly ? "Showing my projects" : "Show my projects"}
+                            </Button>
+                        </label>
                     </div>
                 </CardContent>
             </Card>
@@ -149,7 +209,16 @@ export default function ProjectsListPage() {
                     {items.map((project) => (
                         <article
                             key={project.id}
-                            className="group overflow-hidden rounded-2xl border border-[var(--gb-border)] bg-[var(--gb-app-panel-bg)] shadow-[0_10px_28px_rgba(0,0,0,0.15)] transition-transform hover:-translate-y-0.5">
+                            className="group cursor-pointer overflow-hidden rounded-2xl border border-[var(--gb-border)] bg-[var(--gb-app-panel-bg)] shadow-[0_10px_28px_rgba(0,0,0,0.15)] transition-transform hover:-translate-y-0.5 focus-within:ring-2 focus-within:ring-[var(--gb-app-ring)]"
+                            role="button"
+                            tabIndex={0}
+                            onClick={() => navigate(`/app/projects/${project.id}`)}
+                            onKeyDown={(event) => {
+                                if (event.key === "Enter" || event.key === " ") {
+                                    event.preventDefault();
+                                    navigate(`/app/projects/${project.id}`);
+                                }
+                            }}>
                             <div className="relative h-40 overflow-hidden border-b border-[var(--gb-border)] bg-[linear-gradient(145deg,#102338,#1b3651)]">
                                 {project.coverAsset?.publicUrl ? (
                                     <img
@@ -162,7 +231,13 @@ export default function ProjectsListPage() {
                                         Cover pending
                                     </div>
                                 )}
-                                <span className="absolute left-3 top-3 rounded-full bg-[var(--gb-app-active-bg)] px-2 py-1 text-[11px] font-semibold uppercase tracking-[0.08em] text-[#16a34a]">
+                                <span
+                                    className={[
+                                        "absolute left-3 top-3 rounded-full px-2 py-1 text-[11px] font-semibold uppercase tracking-[0.08em]",
+                                        project.status === "published"
+                                            ? "bg-emerald-500/20 text-emerald-200 ring-1 ring-emerald-400/40"
+                                            : "bg-amber-500/20 text-amber-200 ring-1 ring-amber-300/40",
+                                    ].join(" ")}>
                                     {project.status}
                                 </span>
                             </div>
@@ -179,17 +254,23 @@ export default function ProjectsListPage() {
 
                                 <div className="flex flex-wrap gap-1.5">
                                     {project.technologies.slice(0, 4).map((tech) => (
-                                        <Badge key={tech} variant="outline" className="border-[var(--gb-border)] bg-[var(--gb-surface)] text-[11px]">
+                                        <Badge
+                                            key={tech}
+                                            variant="outline"
+                                            className="border-[var(--gb-border)] bg-[var(--gb-app-panel-bg)] text-[11px] text-[var(--gb-text)]">
                                             {tech}
                                         </Badge>
                                     ))}
                                 </div>
 
-                                <div className="flex items-center justify-between text-xs text-[var(--gb-muted)]">
-                                    <span className="inline-flex items-center gap-1">
+                                <div className="flex flex-wrap items-center gap-x-4 gap-y-2 text-xs text-[var(--gb-muted)]">
+                                    <span className="inline-flex items-center gap-1.5">
                                         <Users className="h-3.5 w-3.5" /> {project.memberCount} members
                                     </span>
-                                    <span className="inline-flex items-center gap-1">
+                                    <span className="inline-flex items-center gap-1.5">
+                                        <Clock3 className="h-3.5 w-3.5" /> {project.engagement.hoursPerWeek}h/week
+                                    </span>
+                                    <span className="inline-flex items-center gap-1.5">
                                         <MessageSquare className="h-3.5 w-3.5" /> {project.commentCount} comments
                                     </span>
                                 </div>
@@ -198,7 +279,12 @@ export default function ProjectsListPage() {
                                     <Badge variant="secondary" className="bg-[var(--gb-app-hover)] text-[var(--gb-text-off)]">
                                         {project.difficulty}
                                     </Badge>
-                                    <Button asChild size="sm">
+                                    <Button
+                                        asChild
+                                        size="sm"
+                                        onClick={(event) => {
+                                            event.stopPropagation();
+                                        }}>
                                         <Link to={`/app/projects/${project.id}`}>Open project</Link>
                                     </Button>
                                 </div>

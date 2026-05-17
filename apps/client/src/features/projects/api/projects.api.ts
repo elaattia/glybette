@@ -17,7 +17,7 @@ export interface ProjectsListParams {
     q?: string;
     domain?: string;
     difficulty?: "beginner" | "intermediate" | "advanced";
-    technology?: string;
+    technology?: string[];
     mine?: boolean;
     page?: number;
     pageSize?: number;
@@ -28,7 +28,7 @@ function toQueryString(params: ProjectsListParams): string {
     if (params.q) query.set("q", params.q);
     if (params.domain) query.set("domain", params.domain);
     if (params.difficulty) query.set("difficulty", params.difficulty);
-    if (params.technology) query.set("technology", params.technology);
+    if (params.technology && params.technology.length > 0) query.set("technology", params.technology.join(","));
     if (params.mine !== undefined) query.set("mine", String(params.mine));
     if (params.page) query.set("page", String(params.page));
     if (params.pageSize) query.set("pageSize", String(params.pageSize));

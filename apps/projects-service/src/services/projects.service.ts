@@ -9,6 +9,7 @@ import type {
     ProjectCommentStatus,
     ProjectCommentsResponse,
     ProjectDTO,
+    ProjectDomain,
     ProjectJoinRequestDTO,
     ProjectJoinRequestsResponse,
     ProjectMembershipRole,
@@ -45,7 +46,7 @@ type ProjectDocument = {
     title: string;
     shortDescription: string;
     description: string;
-    domain: string;
+    domain: ProjectDomain;
     difficulty: "beginner" | "intermediate" | "advanced";
     technologies: string[];
     status: ProjectStatus;
@@ -218,17 +219,32 @@ export class ProjectsService {
         const skip = (page - 1) * pageSize;
 
         const filter: Record<string, unknown> = {};
+        const andFilters: Record<string, unknown>[] = [];
         if (query.mine) {
             filter.ownerId = userId;
             filter.status = { $ne: "archived" };
         } else {
             filter.status = "published";
         }
-        if (query.domain) filter.domain = query.domain;
+        if (query.domain) {
+            filter.domain = { $regex: escapeRegex(query.domain), $options: "i" };
+        }
         if (query.difficulty) filter.difficulty = query.difficulty;
-        if (query.technology) filter.technologies = query.technology;
+        if (query.technology && query.technology.length > 0) {
+            andFilters.push(
+                ...query.technology.map((technology: string) => ({
+                    technologies: { $elemMatch: { $regex: escapeRegex(technology), $options: "i" } },
+                })),
+            );
+        }
         if (query.q) {
-            filter.$text = { $search: query.q };
+            const searchRegex = { $regex: escapeRegex(query.q), $options: "i" };
+            andFilters.push({
+                $or: [{ title: searchRegex }, { shortDescription: searchRegex }, { description: searchRegex }],
+            });
+        }
+        if (andFilters.length > 0) {
+            filter.$and = andFilters;
         }
 
         const [items, total] = await Promise.all([
@@ -880,4 +896,8 @@ export class ProjectsService {
 
 function dedupe(values: string[]): string[] {
     return [...new Set(values.map((value) => value.trim()).filter(Boolean))];
+}
+
+function escapeRegex(input: string): string {
+    return input.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
 }

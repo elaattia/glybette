@@ -11,3 +11,4 @@ __pycache__/
 *.pyo
 logs/
 .pnpm-store/
+.data/
