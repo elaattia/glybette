@@ -21,10 +21,11 @@ export function OnboardingPage() {
         saveJourney,
         saveLookingFor,
         saveBackground,
+        markOnboardingDone,
     } = useOnboarding();
 
     function handleFinish() {
-        console.log("Onboarding terminé !", data);
+        markOnboardingDone();
     }
 
     if (currentStep === "complete") {
@@ -47,13 +48,21 @@ export function OnboardingPage() {
             progress={progress}
             showBack={currentIndex > 0}
             onBack={goBack}>
-            {currentStep === "personal-info" && <StepPersonalInfo onNext={savePersonalInfo} onSkip={skip} />}
+            {currentStep === "personal-info" && (
+                <StepPersonalInfo onNext={savePersonalInfo} onSkip={skip} />
+            )}
             {currentStep === "academic-background" && (
                 <StepAcademicBackground onNext={saveAcademicBackground} onSkip={skip} />
             )}
-            {currentStep === "journey" && <StepJourney onNext={saveJourney} onSkip={skip} />}
-            {currentStep === "looking-for" && <StepLookingFor onNext={saveLookingFor} onSkip={skip} />}
-            {currentStep === "background" && <StepBackground onNext={saveBackground} onSkip={skip} />}
+            {currentStep === "journey" && (
+                <StepJourney onNext={saveJourney} onSkip={skip} />
+            )}
+            {currentStep === "looking-for" && (
+                <StepLookingFor onNext={saveLookingFor} onSkip={skip} />
+            )}
+            {currentStep === "background" && (
+                <StepBackground onNext={saveBackground} onSkip={skip} />
+            )}
         </OnboardingLayout>
     );
 }

@@ -8,6 +8,10 @@ export interface ScrapingServiceConfig {
     baseUrl: string;
 }
 
+export interface JobsServiceConfig { 
+    baseUrl: string 
+}
+
 export interface ServiceConfig {
     baseUrl: string;
 }
@@ -22,14 +26,16 @@ export interface ServiceRegistry {
     cv: ServiceConfig;
     email: { baseUrl: string };
     portfolio: PortfolioServiceConfig;
+    jobs: JobsServiceConfig
 }
 
 export function buildServiceRegistry(env: GatewayEnv): ServiceRegistry {
     const raw = env.USERS_SERVICE_URL ?? `http://localhost:${env.PORT_USERS_SERVICE}`;
     const scrapingRaw = env.SCRAPING_SERVICE_URL ?? `http://localhost:${env.PORT_SCRAPING_SERVICE}`;
-    const cvRaw = env.CV_SERVICE_URL ?? "http://localhost:3003";
+    const cvRaw = env.CV_SERVICE_URL ?? `http://localhost:${env.PORT_CV_SERVICE}`;
     const emailRaw = env.EMAIL_SERVICE_URL ?? `http://localhost:${env.PORT_EMAIL_SERVICE}`;
     const portfolioRaw = env.PORTFOLIO_SERVICE_URL ?? `http://localhost:${env.PORT_PORTFOLIO_SERVICE}`;
+    const jobsRaw = env.JOBS_SERVICE_URL ?? `http://localhost:${env.PORT_JOBS_SERVICE}`;
 
     return {
         users: { baseUrl: raw.replace(/\/$/, "") },
@@ -37,5 +43,6 @@ export function buildServiceRegistry(env: GatewayEnv): ServiceRegistry {
         cv: { baseUrl: cvRaw.replace(/\/$/, "") },
         email: { baseUrl: emailRaw.replace(/\/$/, "") },
         portfolio: { baseUrl: portfolioRaw.replace(/\/$/, "") },
+        jobs: { baseUrl: jobsRaw.replace(/\/$/, "") },
     };
 }

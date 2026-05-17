@@ -8,13 +8,14 @@ from datetime import datetime, timezone, timedelta
 from typing import Optional, Literal
 
 from pydantic import BaseModel
-from fastapi import FastAPI, Query, HTTPException, BackgroundTasks
+from fastapi import FastAPI, Query, HTTPException, BackgroundTasks, Request
 from fastapi.middleware.cors import CORSMiddleware
 from bson import ObjectId
 from loguru import logger
 
 from database.db import col_offres, col_archives, col_logs, test_connection, init_db
 from scheduler.scheduler import start_scheduler, stop_scheduler
+import requests
 
 
 @asynccontextmanager
@@ -90,6 +91,126 @@ def _build_date_filter(date_posted: str) -> dict | None:
     }
 
 
+def _calculate_matching_score(offre: dict, user_skills: list[str] = None, user_experience: str = None) -> int:
+    """
+    Calcule le score de recommandation d'une offre pour un profil utilisateur.
+    Score de 0 à 100 basé sur :
+      - Match de compétences (0-50)
+      - Match d'expérience (0-30)
+      - Autres facteurs (0-20)
+    
+    Retourne 0 si pas de profil utilisateur fourni (aucun tri recommandation).
+    """
+    if not user_skills and not user_experience:
+        return 0  
+    
+    score = 0
+    
+    if user_skills:
+        offre_skills = offre.get("competences", [])
+        if offre_skills:
+            matches = sum(1 for skill in user_skills 
+                         if any(s.lower() in skill.lower() or skill.lower() in s.lower() 
+                               for s in offre_skills))
+            if matches > 0:
+                match_ratio = min(matches / len(user_skills), 1.0)
+                score += int(match_ratio * 50)
+        else:
+            pass
+    
+    if user_experience:
+        offre_exp = offre.get("niveau_experience", "").lower()
+        user_exp_lower = user_experience.lower()
+        
+        exp_levels = {
+            "junior":  (0, 1),
+            "mid":     (1, 3),
+            "senior":  (3, 10),
+            "confirmé": (1, 10),
+            "expert":  (5, 10),
+        }
+        
+        if any(exp_type in offre_exp for exp_type in ["junior", "débutant", "entry"]):
+            if user_exp_lower in ["junior", "débutant"]:
+                score += 30
+            elif user_exp_lower == "mid":
+                score += 20
+        elif any(exp_type in offre_exp for exp_type in ["mid", "intermédiaire", "confirmé"]):
+            if user_exp_lower in ["mid", "intermédiaire", "confirmé"]:
+                score += 30
+            elif user_exp_lower == "junior":
+                score += 15
+            elif user_exp_lower == "senior":
+                score += 20
+        elif any(exp_type in offre_exp for exp_type in ["senior", "expert", "lead"]):
+            if user_exp_lower in ["senior", "expert", "lead"]:
+                score += 30
+            elif user_exp_lower == "mid":
+                score += 15
+    
+    if offre.get("description"):
+        score += 10
+    
+    if offre.get("company_about"):
+        score += 10
+    
+    return min(score, 100)  
+
+
+def _fetch_user_profile(request: Request) -> tuple[list[str] | None, str | None]:
+    """
+    Tente de récupérer le profil utilisateur (skills, experience) depuis les services internes.
+    Priorité : portfolio-service (/portfolio/me) via l'entête Authorization.
+    Retourne (skills_list or None, experience or None).
+    """
+    headers = {}
+    auth = request.headers.get("authorization") or request.headers.get("Authorization")
+    if auth:
+        headers["Authorization"] = auth
+
+    portfolio_url = os.getenv("PORTFOLIO_SERVICE_URL", "http://localhost:3004")
+    users_url = os.getenv("USERS_SERVICE_URL", "http://localhost:3001")
+
+    try:
+        resp = requests.get(f"{portfolio_url}/portfolio/me", headers=headers, timeout=3)
+        if resp.status_code == 200:
+            data = resp.json()
+            portfolio = data.get("portfolio")
+            if portfolio:
+                skills = []
+                for tab in portfolio.get("tabs", []):
+                    for block in tab.get("blocks", []):
+                        if block.get("type") == "skills":
+                            d = block.get("data", {})
+                            if isinstance(d.get("skills"), list):
+                                skills.extend([s for s in d.get("skills") if isinstance(s, str)])
+                            if isinstance(d.get("skillGroups"), list):
+                                for g in d.get("skillGroups"):
+                                    for s in (g.get("skills") or []):
+                                        if isinstance(s, str):
+                                            skills.append(s)
+                skills = list({s.strip() for s in skills if isinstance(s, str) and s.strip()})
+                if skills:
+                    return skills, None
+    except Exception:
+        pass
+
+    try:
+        resp = requests.get(f"{users_url}/users/me", headers=headers, timeout=3)
+        if resp.status_code == 200:
+            data = resp.json()
+            user = data.get("user")
+            if user:
+                skills = user.get("skills") if isinstance(user.get("skills"), list) else None
+                experience = user.get("experience") if isinstance(user.get("experience"), str) else None
+                if skills:
+                    return skills, experience
+    except Exception:
+        pass
+
+    return None, None
+
+
 @app.get("/offres")
 def get_offres(
     type_offre:        Optional[str] = Query(None),
@@ -102,7 +223,22 @@ def get_offres(
     date_posted:       Optional[Literal["this_hour", "today", "3days", "this_week"]] = Query(None),
     teletravail:       Optional[Literal["remote", "hybrid", "onsite"]] = Query(None),
     niveau_experience: Optional[str] = Query(None),
+    user_skills:       Optional[str] = Query(None),
+    user_experience:   Optional[str] = Query(None),
+    request:           Request        = None,
 ):
+    """
+    Récupère les offres d'emploi avec support optionnel du scoring de recommandation.
+    
+    Paramètres additionnels pour recommandation :
+      - user_skills: CSV des compétences de l'utilisateur (ex: "Python,React,SQL")
+      - user_experience: niveau d'expérience de l'utilisateur (junior|mid|senior)
+    
+    Comportement :
+      - Avec profil: Affiche d'abord les offres recommandées (score > 60),
+        puis les autres offres, chacun trié par date
+      - Sans profil: Tri classique par date de publication
+    """
     filtre: dict = {"status": "active"}
 
     if type_offre:
@@ -137,27 +273,63 @@ def get_offres(
         pattern = exp_patterns.get(niveau_experience, re.escape(niveau_experience))
         filtre["niveau_experience"] = {"$regex": pattern, "$options": "i"}
 
+    profile_skills = [s.strip() for s in user_skills.split(",") if s.strip()] if user_skills else None
+    profile_experience = user_experience.strip() if user_experience else None
+
+    if not profile_skills and not profile_experience and request is not None:
+        try:
+            prof_skills, prof_exp = _fetch_user_profile(request)
+            if prof_skills and not profile_skills:
+                profile_skills = prof_skills
+            if prof_exp and not profile_experience:
+                profile_experience = prof_exp
+        except Exception:
+            pass
     
     sort_map = {
-        "recent": [("date_scraped", -1)],
+        "recent": [("date_publication", -1), ("date_scraped", -1)],
         "vues":   [("nb_vues", -1)],
     }
-    sort = sort_map.get(tri, [("date_scraped", -1)])
+    sort = sort_map.get(tri, [("date_publication", -1), ("date_scraped", -1)])
 
     col   = col_offres()
     total = col.count_documents(filtre)
-    docs  = list(
-        col.find(filtre, {"description": 0, "company_about": 0})
+    
+    projection = None if (profile_skills or profile_experience) else {"description": 0, "company_about": 0}
+    all_docs = list(
+        col.find(filtre, projection)
            .sort(sort)
-           .skip((page - 1) * limit)
-           .limit(limit)
     )
+    
+    if profile_skills or profile_experience:
+        for doc in all_docs:
+            doc["_matching_score"] = _calculate_matching_score(
+                doc, profile_skills, profile_experience
+            )
+        
+
+        all_docs.sort(
+            key=lambda x: (
+                0 if x["_matching_score"] > 0 else 1,
+                -x["_matching_score"],
+                -(x.get("date_publication") or x.get("date_scraped") or datetime.now(timezone.utc)).timestamp()
+            )
+        )
+    
+    docs = all_docs[(page - 1) * limit : page * limit]
+    
+    serialized_offres = []
+    for d in docs:
+        serialized = _serialize(d)
+        if "_matching_score" in d:
+            serialized["matching_score"] = d["_matching_score"]
+        serialized_offres.append(serialized)
 
     return {
         "total":  total,
         "page":   page,
         "pages":  (total + limit - 1) // limit if limit else 1,
-        "offres": [_serialize(d) for d in docs],
+        "offres": serialized_offres,
     }
 
 

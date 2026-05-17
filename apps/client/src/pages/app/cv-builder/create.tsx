@@ -2,6 +2,7 @@ import * as pdfjsLib from "pdfjs-dist";
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useQueryClient } from "@tanstack/react-query";
+import { FileText, Bot, Sparkles } from "lucide-react";
 import { TemplatePickerView } from "@/features/cv-builder";
 import { makeDefaultSections } from "@/features/cv-builder";
 import { cvApi } from "@/features/cv-builder";
@@ -12,15 +13,16 @@ pdfjsLib.GlobalWorkerOptions.workerSrc = `https://unpkg.com/pdfjs-dist@${pdfjsLi
 
 type UploadStep = "reading" | "extracting" | "creating" | null;
 
-const STEPS = [
-    { key: "reading", label: "Lecture du fichier", icon: "📄" },
-    { key: "extracting", label: "Extraction IA des données…", icon: "🤖" },
-    { key: "creating", label: "Création de votre CV", icon: "✨" },
+const STEPS: { key: UploadStep & string; label: string; Icon: React.ComponentType<{ size?: number; style?: React.CSSProperties }> }[] = [
+    { key: "reading", label: "Lecture du fichier", Icon: FileText },
+    { key: "extracting", label: "Extraction IA des données…", Icon: Bot },
+    { key: "creating", label: "Création de votre CV", Icon: Sparkles },
 ] as const;
 
 function UploadProgressOverlay({ step, fileName }: { step: UploadStep; fileName?: string }) {
     if (!step) return null;
     const currentIdx = STEPS.findIndex((s) => s.key === step);
+    const CurrentIcon = STEPS[currentIdx]?.Icon;
     return (
         <div
             style={{
@@ -54,10 +56,9 @@ function UploadProgressOverlay({ step, fileName }: { step: UploadStep; fileName?
                         alignItems: "center",
                         justifyContent: "center",
                         margin: "0 auto 20px",
-                        fontSize: "32px",
                         animation: "pulse 1.5s ease-in-out infinite",
                     }}>
-                    {STEPS[currentIdx]?.icon}
+                    {CurrentIcon && <CurrentIcon size={32} style={{ color: "#16A34A" }} />}
                 </div>
                 <h3 style={{ margin: "0 0 6px", fontSize: "16px", fontWeight: 700, color: "var(--gb-text)" }}>
                     Importation en cours…
@@ -79,6 +80,7 @@ function UploadProgressOverlay({ step, fileName }: { step: UploadStep; fileName?
                     {STEPS.map((s, idx) => {
                         const isDone = idx < currentIdx;
                         const isActive = idx === currentIdx;
+                        const StepIcon = s.Icon;
                         return (
                             <div
                                 key={s.key}
@@ -100,8 +102,8 @@ function UploadProgressOverlay({ step, fileName }: { step: UploadStep; fileName?
                                         background: isDone
                                             ? "#16A34A"
                                             : isActive
-                                              ? "transparent"
-                                              : "var(--gb-app-hover)",
+                                                ? "transparent"
+                                                : "var(--gb-app-hover)",
                                         border: isActive ? "2px solid #16A34A" : "none",
                                         display: "flex",
                                         alignItems: "center",
@@ -121,6 +123,7 @@ function UploadProgressOverlay({ step, fileName }: { step: UploadStep; fileName?
                                         />
                                     )}
                                 </div>
+                                <StepIcon size={14} style={{ color: isDone ? "#16A34A" : isActive ? "var(--gb-text)" : "var(--gb-muted)", flexShrink: 0 }} />
                                 <span
                                     style={{
                                         fontSize: "13px",
@@ -432,7 +435,7 @@ export default function CvCreatePage() {
                         } else {
                             alert(
                                 "Le fichier a bien été importé mais le remplissage automatique a échoué. " +
-                                    "Vous pourrez utiliser les boutons IA manuellement par la suite dans le formulaire.",
+                                "Vous pourrez utiliser les boutons IA manuellement par la suite dans le formulaire.",
                             );
                             console.warn("[create] extraction returned no meaningful data, using blank sections");
                         }

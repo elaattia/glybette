@@ -33,7 +33,10 @@ export async function forwardToService(
     if (injectHeaders && auth) {
         headers.set(AUTH_HEADER_USER_ID, auth.userId);
         headers.set(AUTH_HEADER_ROLES, auth.roles.join(","));
-        const secret = process.env.INTERNAL_SERVICE_SECRET ?? "dev-secret-ela";
+        const secret = process.env.INTERNAL_SERVICE_SECRET;
+        if (!secret) {
+            throw new Error("INTERNAL_SERVICE_SECRET environment variable is required");
+        }
         headers.set("x-internal-secret", secret);
     }
 
@@ -53,12 +56,11 @@ export async function forwardToService(
     }
 
     try {
-        console.log(" Forwarding to:", url);
         const res = await fetch(url, requestInit);
         const outHeaders = new Headers(res.headers);
         return new Response(res.body, { status: res.status, headers: outHeaders });
     } catch (err) {
-        console.error("Proxy request failed:", err);
+        console.error(`[api-gateway] Proxy request failed for ${c.req.method} ${pathWithQuery}:`, err instanceof Error ? err.message : err);
         throw new ServiceUnavailableError("Upstream service unavailable");
     } finally {
         clearTimeout(timeout);

@@ -6,6 +6,7 @@ import { serve } from "@hono/node-server";
 import { loadEnv } from "./config/env.js";
 import { internalAuthMiddleware } from "./middleware/internal-auth.middleware.js";
 import { cvRoutes } from "./routes/cv.routes.js";
+import { jobsRoutes } from "./routes/jobs.routes.js";
 import { pingOllama } from "./lib/ollama.js";
 
 const env = loadEnv();
@@ -16,16 +17,27 @@ app.use("*", cors({ origin: "*" }));
 
 app.get("/health", async (c) => {
     const ollamaOk = await pingOllama();
+    
+    if (env.AI_PROVIDER === "ollama" && !ollamaOk) {
+        return c.json({
+            status: "degraded",
+            service: "ai-service",
+            provider: env.AI_PROVIDER,
+            ollama: "unreachable",
+        }, 503);
+    }
+
     return c.json({
         status: "ok",
         service: "ai-service",
         provider: env.AI_PROVIDER,
-        ollama: ollamaOk ? "connected" : "unreachable",
+        ollama: ollamaOk ? "connected" : "not-configured",
     });
 });
 
 app.use("/ai/*", internalAuthMiddleware);
 app.route("/ai/cv", cvRoutes);
+app.route("/ai/jobs", jobsRoutes);
 
 app.onError((err, c) => {
     console.error("[ai-service error]", err);

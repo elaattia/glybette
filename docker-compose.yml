@@ -1,222 +1,247 @@
 services:
-  rabbitmq:
-    image: rabbitmq:3.13-management
-    ports:
-      - "5672:5672"
-      - "15672:15672"
-    environment:
-      RABBITMQ_DEFAULT_USER: guest
-      RABBITMQ_DEFAULT_PASS: guest
-    healthcheck:
-      test: ["CMD", "rabbitmq-diagnostics", "-q", "ping"]
-      interval: 10s
-      timeout: 5s
-      retries: 8
+    mongodb:
+        image: mongo:7
+        ports:
+            - "27017:27017"
+        volumes:
+            - mongodb_data:/data/db
+        healthcheck:
+            test: ["CMD", "mongosh", "--eval", "db.adminCommand('ping')"]
+            interval: 10s
+            timeout: 5s
+            retries: 5
+            start_period: 20s
+        restart: unless-stopped
 
-  api-gateway:
-    build:
-      context: .
-      dockerfile: Dockerfile
-      args:
-        APP_NAME: api-gateway
-    ports:
-      - "3000:3000"
-    env_file:
-      - .env
-    environment:
-      NODE_ENV: production
-      PORT_API_GATEWAY: 3000
-      USERS_SERVICE_URL: http://users-service:3001
-      SCRAPING_SERVICE_URL: http://scraping-service:3002
-      EMAIL_SERVICE_URL: http://email-service:3003
-      PORTFOLIO_SERVICE_URL: http://portfolio-service:3004
-      CV_SERVICE_URL: http://cv-service:3006
-      AI_SERVICE_URL: http://ai-service:3005
-    depends_on:
-      rabbitmq:
-        condition: service_healthy
-      users-service:
-        condition: service_started
-      scraping-service:
-        condition: service_started
-      email-service:
-        condition: service_started
-      portfolio-service:
-        condition: service_started
-      cv-service:
-        condition: service_started
-    healthcheck:
-      test:
-        [
-          "CMD",
-          "node",
-          "-e",
-          "fetch('http://localhost:3000/api/health').then(r=>process.exit(r.ok?0:1)).catch(()=>process.exit(1))",
-        ]
-      interval: 15s
-      timeout: 5s
-      retries: 8
+    redis:
+        image: redis:7-alpine
+        ports:
+            - "6379:6379"
+        volumes:
+            - redis_data:/data
+        healthcheck:
+            test: ["CMD", "redis-cli", "ping"]
+            interval: 10s
+            timeout: 5s
+            retries: 5
+        restart: unless-stopped
 
-  users-service:
-    build:
-      context: .
-      dockerfile: Dockerfile
-      args:
-        APP_NAME: users-service
-    ports:
-      - "3001:3001"
-    env_file:
-      - .env
-    environment:
-      NODE_ENV: production
-      PORT_USERS_SERVICE: 3001
-      RABBITMQ_URL: amqp://rabbitmq:5672
-    depends_on:
-      rabbitmq:
-        condition: service_healthy
-    healthcheck:
-      test:
-        [
-          "CMD",
-          "node",
-          "-e",
-          "fetch('http://localhost:3001/health').then(r=>process.exit(r.ok?0:1)).catch(()=>process.exit(1))",
-        ]
-      interval: 15s
-      timeout: 5s
-      retries: 8
+    rabbitmq:
+        image: rabbitmq:3.13-management
+        ports:
+            - "5672:5672"
+            - "15672:15672"
+        environment:
+            - RABBITMQ_DEFAULT_USER=guest
+            - RABBITMQ_DEFAULT_PASS=guest
+        healthcheck:
+            test: ["CMD", "rabbitmq-diagnostics", "-q", "ping"]
+            interval: 10s
+            timeout: 5s
+            retries: 8
 
-  email-service:
-    build:
-      context: .
-      dockerfile: Dockerfile
-      args:
-        APP_NAME: email-service
-    ports:
-      - "3003:3003"
-    env_file:
-      - .env
-    environment:
-      NODE_ENV: production
-      PORT_EMAIL_SERVICE: 3003
-      RABBITMQ_URL: amqp://rabbitmq:5672
-      EMAIL_PROVIDER: ${EMAIL_PROVIDER:-mock}
-      EMAIL_FROM: ${EMAIL_FROM:-no-reply@glybette.dev}
-      RESEND_API_KEY: ${RESEND_API_KEY:-}
-    depends_on:
-      rabbitmq:
-        condition: service_healthy
-    healthcheck:
-      test:
-        [
-          "CMD",
-          "node",
-          "-e",
-          "fetch('http://localhost:3003/health').then(r=>process.exit(r.ok?0:1)).catch(()=>process.exit(1))",
-        ]
-      interval: 15s
-      timeout: 5s
-      retries: 8
+    api-gateway:
+        build:
+            context: .
+            dockerfile: Dockerfile
+            args:
+                APP_NAME: api-gateway
+        ports:
+            - "3000:3000"
+        environment:
+            - PORT=3000
+            - NODE_ENV=production
+            - USERS_SERVICE_URL=http://users-service:3001
+            - SCRAPING_SERVICE_URL=http://scraping-service:3002
+            - EMAIL_SERVICE_URL=http://email-service:3003
+            - PORTFOLIO_SERVICE_URL=http://portfolio-service:3004
+            - AI_SERVICE_URL=http://ai-service:3007
+            - CV_SERVICE_URL=http://cv-service:3006
+            - JOBS_SERVICE_URL=http://jobs-service:3005
+            - INTERNAL_SERVICE_SECRET=${INTERNAL_SERVICE_SECRET}
+        env_file:
+            - .env
+        depends_on:
+            - rabbitmq
+            - users-service
+            - scraping-service
+            - email-service
+            - portfolio-service
+            - cv-service
+            - ai-service
+            - jobs-service
 
-  portfolio-service:
-    build:
-      context: .
-      dockerfile: Dockerfile
-      args:
-        APP_NAME: portfolio-service
-    ports:
-      - "3004:3004"
-    env_file:
-      - .env
-    environment:
-      NODE_ENV: production
-      PORT_PORTFOLIO_SERVICE: 3004
-    healthcheck:
-      test:
-        [
-          "CMD",
-          "node",
-          "-e",
-          "fetch('http://localhost:3004/health').then(r=>process.exit(r.ok?0:1)).catch(()=>process.exit(1))",
-        ]
-      interval: 15s
-      timeout: 5s
-      retries: 8
+    users-service:
+        build:
+            context: .
+            dockerfile: Dockerfile
+            args:
+                APP_NAME: users-service
+        ports:
+            - "3001:3001"
+        environment:
+            - PORT=3001
+            - PORT_USERS_SERVICE=3001
+            - NODE_ENV=production
+            - RABBITMQ_URL=amqp://rabbitmq:5672
+            - INTERNAL_SERVICE_SECRET=${INTERNAL_SERVICE_SECRET}
+        env_file:
+            - .env
+        depends_on:
+            - rabbitmq
 
-  scraping-service:
-    build:
-      context: ./apps/scraping-service
-      dockerfile: Dockerfile
-    ports:
-      - "3002:3002"
-    env_file:
-      - .env
-    environment:
-      PORT_SCRAPING_SERVICE: 3002
-      HOST: 0.0.0.0
-    healthcheck:
-      test:
-        [
-          "CMD",
-          "python",
-          "-c",
-          "import urllib.request,sys;sys.exit(0 if urllib.request.urlopen('http://localhost:3002/health').status==200 else 1)",
-        ]
-      interval: 20s
-      timeout: 5s
-      retries: 8
+    email-service:
+        build:
+            context: .
+            dockerfile: Dockerfile
+            args:
+                APP_NAME: email-service
+        ports:
+            - "3003:3003"
+        environment:
+            - PORT=3003
+            - PORT_EMAIL_SERVICE=3003
+            - NODE_ENV=production
+            - RABBITMQ_URL=amqp://rabbitmq:5672
+            - EMAIL_PROVIDER=${EMAIL_PROVIDER:-mock}
+            - EMAIL_FROM=${EMAIL_FROM:-no-reply@glybette.dev}
+            - RESEND_API_KEY=${RESEND_API_KEY:-}
+            - INTERNAL_SERVICE_SECRET=${INTERNAL_SERVICE_SECRET}
+        env_file:
+            - .env
+        depends_on:
+            - rabbitmq
 
-  cv-service:
-    build:
-      context: .
-      dockerfile: Dockerfile
-      args:
-        APP_NAME: cv-service
-    ports:
-      - "3006:3006"
-    env_file:
-      - .env
-    environment:
-      NODE_ENV: production
-      PORT_CV_SERVICE: 3006
-      AI_SERVICE_URL: http://ai-service:3005
-    healthcheck:
-      test:
-        [
-          "CMD",
-          "node",
-          "-e",
-          "fetch('http://localhost:3006/health').then(r=>process.exit(r.ok?0:1)).catch(()=>process.exit(1))",
-        ]
-      interval: 15s
-      timeout: 5s
-      retries: 8
+    portfolio-service:
+        build:
+            context: .
+            dockerfile: Dockerfile
+            args:
+                APP_NAME: portfolio-service
+        ports:
+            - "3004:3004"
+        environment:
+            - PORT=3004
+            - PORT_PORTFOLIO_SERVICE=3004
+            - NODE_ENV=production
+            - INTERNAL_SERVICE_SECRET=${INTERNAL_SERVICE_SECRET}
+        env_file:
+            - .env
+        depends_on:
+            - rabbitmq
 
-  ai-service:
-    profiles: ["ai"]
-    build:
-      context: .
-      dockerfile: Dockerfile
-      args:
-        APP_NAME: ai-service
-    ports:
-      - "3005:3005"
-    env_file:
-      - .env
-    environment:
-      NODE_ENV: production
-      PORT_AI_SERVICE: 3005
-      OLLAMA_BASE_URL: ${OLLAMA_BASE_URL:-http://host.docker.internal:11434}
-    extra_hosts:
-      - "host.docker.internal:host-gateway"
-    healthcheck:
-      test:
-        [
-          "CMD",
-          "node",
-          "-e",
-          "fetch('http://localhost:3005/health').then(r=>process.exit(r.ok?0:1)).catch(()=>process.exit(1))",
-        ]
-      interval: 20s
-      timeout: 5s
-      retries: 8
+    scraping-service:
+        build:
+            context: .
+            dockerfile: apps/scraping-service/Dockerfile
+        ports:
+            - "3002:3002"
+        environment:
+            - PORT=3002
+            - PORT_SCRAPING_SERVICE=3002
+            - NODE_ENV=production
+            - RABBITMQ_URL=amqp://rabbitmq:5672
+            - REDIS_HOST=redis
+            - REDIS_PORT=6379
+            - MONGODB_URI=${MONGODB_URI}
+            - SCRAPING_MONGODB_NAME=${SCRAPING_MONGODB_NAME}
+            - SCRAPE_DELAY_MIN=${SCRAPE_DELAY_MIN}
+            - SCRAPE_DELAY_MAX=${SCRAPE_DELAY_MAX}
+            - SCHEDULE_INDEED=${SCHEDULE_INDEED}
+            - SCHEDULE_WTTJ=${SCHEDULE_WTTJ}
+            - SCHEDULE_LINKEDIN=${SCHEDULE_LINKEDIN}
+            - SCHEDULE_PFEBOOKS=${SCHEDULE_PFEBOOKS}
+            - ARCHIVE_AFTER_DAYS=${ARCHIVE_AFTER_DAYS}
+            - SCRAPING_LOG_LEVEL=${SCRAPING_LOG_LEVEL}
+            - INTERNAL_SERVICE_SECRET=${INTERNAL_SERVICE_SECRET}
+        env_file:
+            - .env
+        depends_on:
+            mongodb:
+                condition: service_healthy
+            redis:
+                condition: service_healthy
+            rabbitmq:
+                condition: service_healthy
+        restart: unless-stopped
+
+    ai-service:
+        build:
+            context: .
+            dockerfile: Dockerfile
+            args:
+                APP_NAME: ai-service
+        ports:
+            - "3007:3007"
+        environment:
+            - PORT=3007
+            - PORT_AI_SERVICE=3007
+            - NODE_ENV=production
+            - AI_PROVIDER=${AI_PROVIDER}
+            - OLLAMA_BASE_URL=${OLLAMA_BASE_URL}
+            - OLLAMA_MODEL=${OLLAMA_MODEL}
+            - ANTHROPIC_API_KEY=${ANTHROPIC_API_KEY}
+            - GEMINI_API_KEY=${GEMINI_API_KEY}
+            - INTERNAL_SERVICE_SECRET=${INTERNAL_SERVICE_SECRET}
+        env_file:
+            - .env
+        depends_on:
+            mongodb:
+                condition: service_healthy
+        restart: unless-stopped
+
+    cv-service:
+        build:
+            context: .
+            dockerfile: Dockerfile
+            args:
+                APP_NAME: cv-service
+        ports:
+            - "3006:3006"
+        environment:
+            - PORT=3006
+            - PORT_CV_SERVICE=3006
+            - NODE_ENV=production
+            - MONGODB_URI=${MONGODB_URI}
+            - AI_SERVICE_URL=http://ai-service:3007
+            - INTERNAL_SERVICE_SECRET=${INTERNAL_SERVICE_SECRET}
+            - ALLOWED_ORIGINS=${ALLOWED_ORIGINS}
+        env_file:
+            - .env
+        depends_on:
+            mongodb:
+                condition: service_healthy
+            ai-service:
+                condition: service_started
+        restart: unless-stopped
+
+    jobs-service:
+        build:
+            context: .
+            dockerfile: Dockerfile
+            args:
+                APP_NAME: jobs-service
+        ports:
+            - "3005:3005"
+        environment:
+            - PORT=3005
+            - PORT_JOBS_SERVICE=3005
+            - NODE_ENV=production
+            - MONGODB_URI=${MONGODB_URI}
+            - RABBITMQ_URL=amqp://rabbitmq:5672
+            - AI_SERVICE_URL=http://ai-service:3007
+            - INTERNAL_SERVICE_SECRET=${INTERNAL_SERVICE_SECRET}
+            - ALLOWED_ORIGINS=${ALLOWED_ORIGINS}
+        env_file:
+            - .env
+        depends_on:
+            rabbitmq:
+                condition: service_healthy
+            mongodb:
+                condition: service_healthy
+            ai-service:
+                condition: service_started
+        restart: unless-stopped
+volumes:
+    mongodb_data:
+    redis_data:
