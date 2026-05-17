@@ -18,6 +18,14 @@ export interface SelfResponse {
     user: UserDTO;
 }
 
+export interface PublicUserSummaryDTO {
+    id: string;
+    displayName: string;
+    avatarUrl?: string;
+    isPremium: boolean;
+    roles: string[];
+}
+
 export interface AuthRedirectResponse {
     redirectUrl: string;
 }
@@ -40,6 +48,19 @@ export interface OtpRequestResponse {
 export interface OtpVerifyResponse {
     ok: true;
     verified: boolean;
+}
+
+export interface UpdateOwnProfileRequest {
+    displayName: string;
+    avatarUrl?: string;
+}
+
+export interface ResolveUsersRequest {
+    userIds: string[];
+}
+
+export interface ResolveUsersResponse {
+    users: PublicUserSummaryDTO[];
 }
 
 export const PORTFOLIO_TEMPLATE_IDS = ["atelier", "signal", "folio", "mono"] as const;
@@ -134,3 +155,43 @@ export interface SavePortfolioRequest {
     style: PortfolioStyle;
     tabs: PortfolioTab[];
 }
+
+export {
+    PROJECT_STATUSES,
+    PROJECT_DIFFICULTIES,
+    PROJECT_WORK_MODES,
+    PROJECT_DOMAINS,
+    PROJECT_MEMBERSHIP_ROLES,
+    PROJECT_JOIN_REQUEST_STATUSES,
+    PROJECT_COMMENT_STATUSES,
+    type ProjectStatus,
+    type ProjectDifficulty,
+    type ProjectWorkMode,
+    type ProjectDomain,
+    type ProjectMembershipRole,
+    type ProjectJoinRequestStatus,
+    type ProjectCommentStatus,
+    type UploadedAssetDTO,
+    type ProjectUserSummaryDTO,
+    type ProjectRoleRequirementDTO,
+    type ProjectRoleRequirementInput,
+    type ProjectMilestoneDTO,
+    type ProjectMilestoneInput,
+    type ProjectEngagementDTO,
+    type ProjectMemberDTO,
+    type ProjectSummaryDTO,
+    type ProjectDTO,
+    type ProjectCommentDTO,
+    type ProjectCommentThreadDTO,
+    type ProjectsListResponse,
+    type ProjectResponse,
+    type ProjectCommentsResponse,
+    type ProjectJoinRequestsResponse,
+    type ProjectJoinRequestDTO,
+    type UpsertProjectRequest,
+    type CreateProjectRequest,
+    type UpdateProjectRequest,
+    type CreateJoinRequestRequest,
+    type DecideJoinRequestRequest,
+    type CreateProjectCommentRequest,
+} from "./projects.js";

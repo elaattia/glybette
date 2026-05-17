@@ -11,3 +11,4 @@ export { apiErrorJson, type ApiErrorBody } from "./api-error.js";
 export { parseBearerToken } from "./bearer.js";
 export { resolveJwtSecret } from "./jwt-secret.js";
 export { sanitizeProxyHeaders, type SanitizeProxyHeadersOptions } from "./proxy-headers.js";
+export { internalRequestJson, InternalHttpError, type InternalRequestOptions } from "./internal-http.js";

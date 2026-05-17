@@ -8,6 +8,7 @@ export const gatewayEnvSchema = baseEnvSchema.extend({
     EMAIL_SERVICE_URL: z.string().url().optional(),
     PORTFOLIO_SERVICE_URL: z.string().url().optional(),
     JOBS_SERVICE_URL: z.string().url().optional(),
+    PROJECTS_SERVICE_URL: z.string().url().optional(),
     /** Comma-separated origins; defaults to local Vite dev URLs if unset. */
     CORS_ORIGINS: z.string().optional(),
     PROXY_TIMEOUT_MS: z.coerce.number().min(1000).default(30_000),

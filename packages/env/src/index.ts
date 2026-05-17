@@ -55,6 +55,7 @@ export const baseEnvSchema = z.object({
     PORT_JOBS_SERVICE: z.coerce.number().default(3005),
     PORT_CV_SERVICE: z.coerce.number().default(3006),
     PORT_AI_SERVICE: z.coerce.number().default(3007),
+    PORT_PROJECTS_SERVICE: z.coerce.number().default(3008),
 });
 
 export type BaseEnv = z.infer<typeof baseEnvSchema>;

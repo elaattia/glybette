@@ -6,12 +6,21 @@ import {
     AUTH_EMAIL_QUEUE_DLQ,
     AUTH_EXCHANGE,
     AUTH_EXCHANGE_TYPE,
+    PROJECTS_EXCHANGE,
+    PROJECTS_EXCHANGE_TYPE,
+    PROJECTS_USER_PROJECTION_QUEUE,
+    PROJECTS_USER_PROJECTION_QUEUE_DLX,
+    PROJECTS_USER_PROJECTION_QUEUE_DLQ,
     ROUTING_KEY_AUTH_OTP_SEND,
+    ROUTING_KEY_USERS_PROFILE_UPSERTED,
+    USERS_EXCHANGE,
+    USERS_EXCHANGE_TYPE,
 } from "./topology.js";
 
 export interface RabbitMqClient {
     readonly channel: Channel;
     publishJson: <T>(routingKey: string, payload: T, headers?: Record<string, unknown>) => void;
+    publishJsonTo: <T>(exchange: string, routingKey: string, payload: T, headers?: Record<string, unknown>) => void;
     consumeJson: <T>(queue: string, onMessage: (payload: T, raw: ConsumeMessage) => Promise<void>) => Promise<void>;
     close: () => Promise<void>;
 }
@@ -20,14 +29,21 @@ export async function connectRabbitMq(url: string): Promise<RabbitMqClient> {
     const connection = await amqp.connect(url);
     const channel = await connection.createChannel();
 
-    const publishJson = <T>(routingKey: string, payload: T, headers: Record<string, unknown> = {}) => {
+    const publishJsonTo = <T>(
+        exchange: string,
+        routingKey: string,
+        payload: T,
+        headers: Record<string, unknown> = {},
+    ) => {
         const buffer = Buffer.from(JSON.stringify(payload));
-        channel.publish(AUTH_EXCHANGE, routingKey, buffer, {
+        channel.publish(exchange, routingKey, buffer, {
             contentType: "application/json",
             persistent: true,
             headers,
         });
     };
+    const publishJson = <T>(routingKey: string, payload: T, headers: Record<string, unknown> = {}) =>
+        publishJsonTo(AUTH_EXCHANGE, routingKey, payload, headers);
 
     const consumeJson = async <T>(queue: string, onMessage: (payload: T, raw: ConsumeMessage) => Promise<void>) => {
         await channel.consume(queue, async (message) => {
@@ -54,6 +70,7 @@ export async function connectRabbitMq(url: string): Promise<RabbitMqClient> {
     return {
         channel,
         publishJson,
+        publishJsonTo,
         consumeJson,
         close,
     };
@@ -70,4 +87,30 @@ export async function ensureAuthEmailTopology(channel: Channel): Promise<void> {
         deadLetterExchange: AUTH_EMAIL_QUEUE_DLX,
     });
     await channel.bindQueue(AUTH_EMAIL_QUEUE, AUTH_EXCHANGE, ROUTING_KEY_AUTH_OTP_SEND);
+}
+
+export async function ensureProjectsTopology(channel: Channel): Promise<void> {
+    await channel.assertExchange(PROJECTS_EXCHANGE, PROJECTS_EXCHANGE_TYPE, { durable: true });
+}
+
+export async function ensureUsersTopology(channel: Channel): Promise<void> {
+    await channel.assertExchange(USERS_EXCHANGE, USERS_EXCHANGE_TYPE, { durable: true });
+}
+
+export async function ensureProjectsUserProjectionTopology(channel: Channel): Promise<void> {
+    await ensureUsersTopology(channel);
+
+    await channel.assertExchange(PROJECTS_USER_PROJECTION_QUEUE_DLX, USERS_EXCHANGE_TYPE, { durable: true });
+    await channel.assertQueue(PROJECTS_USER_PROJECTION_QUEUE_DLQ, { durable: true });
+    await channel.bindQueue(
+        PROJECTS_USER_PROJECTION_QUEUE_DLQ,
+        PROJECTS_USER_PROJECTION_QUEUE_DLX,
+        ROUTING_KEY_USERS_PROFILE_UPSERTED,
+    );
+
+    await channel.assertQueue(PROJECTS_USER_PROJECTION_QUEUE, {
+        durable: true,
+        deadLetterExchange: PROJECTS_USER_PROJECTION_QUEUE_DLX,
+    });
+    await channel.bindQueue(PROJECTS_USER_PROJECTION_QUEUE, USERS_EXCHANGE, ROUTING_KEY_USERS_PROFILE_UPSERTED);
 }

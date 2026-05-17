@@ -6,7 +6,7 @@ import { createAuth } from "./config/auth.js";
 import { AuthController } from "./controllers/auth.controller.js";
 import { OtpController } from "./controllers/otp.controller.js";
 import { UserController } from "./controllers/user.controller.js";
-import { connectRabbitMq, ensureAuthEmailTopology } from "@glybette/messaging";
+import { connectRabbitMq, ensureAuthEmailTopology, ensureUsersTopology } from "@glybette/messaging";
 import { OtpService } from "./services/otp.service.js";
 import { UserService } from "./services/user.service.js";
 import { registerAuthRoutes } from "./routes/auth.routes.js";
@@ -14,11 +14,13 @@ import { registerOtpRoutes } from "./routes/otp.routes.js";
 import { registerUserRoutes } from "./routes/user.routes.js";
 import { errorHandler } from "./middleware/error-handler.js";
 
-async function connectRabbitMqWithWarnings(otpService: OtpService, rabbitMqUrl: string): Promise<void> {
+async function connectRabbitMqWithWarnings(otpService: OtpService, userService: UserService, rabbitMqUrl: string): Promise<void> {
     try {
         const rabbit = await connectRabbitMq(rabbitMqUrl);
         await ensureAuthEmailTopology(rabbit.channel);
+        await ensureUsersTopology(rabbit.channel);
         otpService.setRabbitClient(rabbit);
+        userService.setRabbitClient(rabbit);
         console.warn("[users-service] RabbitMQ connection established.");
     } catch (error) {
         const message = error instanceof Error ? error.message : "unknown connection error";
@@ -33,17 +35,16 @@ async function main() {
     await connectDb(env);
 
     const auth = createAuth(env);
-    const userService = new UserService();
+    const userService = new UserService(null);
     const otpService = new OtpService(env, null);
     await otpService.ensureIndexes();
-    if (env.EMAIL_DELIVERY_MODE === "service") {
-        await connectRabbitMqWithWarnings(otpService, env.RABBITMQ_URL);
-    } else {
+    await connectRabbitMqWithWarnings(otpService, userService, env.RABBITMQ_URL);
+    if (env.EMAIL_DELIVERY_MODE === "file") {
         console.warn(`[users-service] EMAIL_DELIVERY_MODE=file. OTP emails will be written to ${env.EMAIL_LOG_DIR}.`);
     }
 
     const authController = new AuthController(auth);
-    const userController = new UserController(userService);
+    const userController = new UserController(userService, env.INTERNAL_SERVICE_SECRET);
     const otpController = new OtpController(otpService, userService);
 
     const app = new Hono();

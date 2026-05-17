@@ -58,6 +58,7 @@ services:
             - AI_SERVICE_URL=http://ai-service:3007
             - CV_SERVICE_URL=http://cv-service:3006
             - JOBS_SERVICE_URL=http://jobs-service:3005
+            - PROJECTS_SERVICE_URL=http://projects-service:3008
             - INTERNAL_SERVICE_SECRET=${INTERNAL_SERVICE_SECRET}
         env_file:
             - .env
@@ -70,6 +71,7 @@ services:
             - cv-service
             - ai-service
             - jobs-service
+            - projects-service
 
     users-service:
         build:
@@ -129,6 +131,39 @@ services:
             - .env
         depends_on:
             - rabbitmq
+
+    projects-service:
+        build:
+            context: .
+            dockerfile: Dockerfile
+            args:
+                APP_NAME: projects-service
+        ports:
+            - "3008:3008"
+        environment:
+            - PORT=3008
+            - PORT_PROJECTS_SERVICE=3008
+            - NODE_ENV=production
+            - MONGODB_URI=${MONGODB_URI}
+            - PROJECTS_SERVICE_MONGODB_DB_NAME=glybette_projects
+            - UPLOAD_PROVIDER=disk
+            - PROJECTS_UPLOAD_DISK_DIR=/app/.data/projects-uploads
+            - PROJECTS_UPLOAD_PUBLIC_BASE_URL=/api/projects/media
+            - PROJECTS_UPLOAD_MAX_MB=5
+            - USERS_SERVICE_URL=http://users-service:3001
+            - RABBITMQ_URL=amqp://rabbitmq:5672
+            - INTEROP_SYNC_TIMEOUT_MS=7000
+            - INTERNAL_SERVICE_SECRET=${INTERNAL_SERVICE_SECRET}
+        env_file:
+            - .env
+        depends_on:
+            mongodb:
+                condition: service_healthy
+            rabbitmq:
+                condition: service_healthy
+            users-service:
+                condition: service_started
+        restart: unless-stopped
 
     scraping-service:
         build:

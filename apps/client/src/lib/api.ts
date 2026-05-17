@@ -24,7 +24,7 @@ function isJsonResponse(response: Response) {
 export async function apiRequest<T>(path: string, options: ApiRequestOptions = {}): Promise<T> {
     const headers = new Headers(options.headers);
 
-    if (options.body && !headers.has("content-type")) {
+    if (options.body && !(options.body instanceof FormData) && !headers.has("content-type")) {
         headers.set("content-type", "application/json");
     }
 

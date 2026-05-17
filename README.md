@@ -11,6 +11,11 @@ pnpm monorepo with apps (client, api-gateway, users-service) and shared packages
 - **packages/env** – Config and schema validation (Zod)
 - **packages/utils** – Shared utilities
 
+## Architecture docs
+
+- `docs/INTEROP.md` – Project-wide sync/async service communication standard
+- `docs/RABBITMQ.md` – RabbitMQ topology and eventing patterns
+
 ## Setup
 
 ```bash

@@ -1,0 +1,5 @@
+- Fix OTP handling; file delivery not working; setup Resend
+- Project creation
+  - error should render as a toast and not in the hidden pages
+  - prevent project creation on form error
+  - wire more user info to team info
