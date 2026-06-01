@@ -5,6 +5,7 @@ import { CvService } from "../services/cv.service.js";
 import { CV_TEMPLATE_IDS } from "@glybette/types";
 
 const svc = new CvService();
+export const cvService = svc;
 export const cvController = new Hono();
 
 function uid(c: { get: (k: string) => unknown }): string {
@@ -13,10 +14,17 @@ function uid(c: { get: (k: string) => unknown }): string {
     return id;
 }
 
+function requireAdmin(c: { get: (k: string) => unknown }): void {
+    if (!Boolean(c.get("isAdmin"))) {
+        throw Object.assign(new Error("Forbidden"), { status: 403 });
+    }
+}
+
 function shape(doc: any) {
     return {
         _id: String(doc._id),
         userId: doc.userId,
+        owner: doc.owner,
         title: doc.title,
         template: doc.template,
         sections: doc.sections ?? [],
@@ -61,6 +69,25 @@ cvController.post(
         return c.json(await svc.suggestSkills(role, existingSkills));
     },
 );
+
+cvController.get("/admin/list", async (c) => {
+    requireAdmin(c);
+    const limit = Number(c.req.query("limit") ?? "100");
+    const docs = await svc.adminListCvs(Number.isFinite(limit) ? limit : 100);
+    return c.json({ cvs: docs.map(shape) });
+});
+
+cvController.get("/admin/:id", async (c) => {
+    requireAdmin(c);
+    const doc = await svc.adminGetCv(c.req.param("id"));
+    return c.json({ cv: shape(doc) });
+});
+
+cvController.delete("/admin/:id", async (c) => {
+    requireAdmin(c);
+    await svc.adminDeleteCv(c.req.param("id"));
+    return c.json({ ok: true });
+});
 
 cvController.get("/", async (c) => {
     const docs = await svc.getUserCvs(uid(c));

@@ -1,7 +1,12 @@
 import mongoose from "mongoose";
 import {
+    ACCOUNT_STATUSES,
     AUTH_PROVIDERS,
+    BASE_ROLES,
+    type AccountStatus,
+    type AdminUsersListResponse,
     type AuthProvider,
+    type BaseRole,
     type PublicUserSummaryDTO,
     type UpdateOwnProfileRequest,
     type UserDTO,
@@ -22,6 +27,10 @@ type BetterAuthUserDocument = mongoose.Document & {
     name?: string;
     image?: string;
     isPremium?: boolean;
+    baseRole?: BaseRole;
+    isAdmin?: boolean;
+    accountStatus?: AccountStatus;
+    emailVerified?: boolean;
 };
 
 type BetterAuthAccountDocument = {
@@ -33,7 +42,29 @@ function isAuthProvider(value: string | undefined): value is AuthProvider {
     return Boolean(value && AUTH_PROVIDERS.includes(value as AuthProvider));
 }
 
+function isBaseRole(value: string | undefined): value is BaseRole {
+    return Boolean(value && BASE_ROLES.includes(value as BaseRole));
+}
+
+function isAccountStatus(value: string | undefined): value is AccountStatus {
+    return Boolean(value && ACCOUNT_STATUSES.includes(value as AccountStatus));
+}
+
+function normalizeRoleContext(user: BetterAuthUserDocument): {
+    baseRole: BaseRole;
+    isAdmin: boolean;
+    accountStatus: AccountStatus;
+    roles: string[];
+} {
+    const baseRole = isBaseRole(user.baseRole) ? user.baseRole : "student";
+    const isAdmin = Boolean(user.isAdmin);
+    const accountStatus = isAccountStatus(user.accountStatus) ? user.accountStatus : "active";
+    const roles = isAdmin ? [baseRole, "admin"] : [baseRole];
+    return { baseRole, isAdmin, accountStatus, roles };
+}
+
 export function toUserDTO(user: BetterAuthUserDocument, account: BetterAuthAccountDocument | null): UserDTO {
+    const roleContext = normalizeRoleContext(user);
     return {
         id: user._id.toString(),
         email: user.email,
@@ -41,7 +72,10 @@ export function toUserDTO(user: BetterAuthUserDocument, account: BetterAuthAccou
         displayName: user.name ?? "User",
         avatarUrl: user.image,
         isPremium: Boolean(user.isPremium),
-        roles: ["user"],
+        baseRole: roleContext.baseRole,
+        isAdmin: roleContext.isAdmin,
+        accountStatus: roleContext.accountStatus,
+        roles: roleContext.roles,
         provider: isAuthProvider(account?.providerId) ? account.providerId : "google",
     };
 }
@@ -52,6 +86,9 @@ export function toPublicUserSummary(user: UserDTO): PublicUserSummaryDTO {
         displayName: user.displayName,
         avatarUrl: user.avatarUrl,
         isPremium: user.isPremium,
+        baseRole: user.baseRole,
+        isAdmin: user.isAdmin,
+        accountStatus: user.accountStatus,
         roles: user.roles,
     };
 }
@@ -177,6 +214,133 @@ export class UserService {
         const user = await this.getById(userId);
         await this.publishUserProfileUpserted(user);
         return user;
+    }
+
+    async listUsers(limit = 100): Promise<AdminUsersListResponse> {
+        const db = mongoose.connection.db;
+        if (!db) {
+            throw new Error("Mongoose database connection is not initialized");
+        }
+        const safeLimit = Math.max(1, Math.min(250, limit));
+        const users = await db
+            .collection<BetterAuthUserDocument>("users")
+            .find({})
+            .sort({ createdAt: -1 })
+            .limit(safeLimit)
+            .toArray();
+        const userIds = users.map((user) => user._id.toString());
+        const accounts = await db
+            .collection<BetterAuthAccountDocument>("auth_accounts")
+            .find({ userId: { $in: userIds } })
+            .sort({ createdAt: 1 })
+            .toArray();
+        const accountByUserId = new Map<string, BetterAuthAccountDocument>();
+        for (const account of accounts) {
+            if (!accountByUserId.has(account.userId)) {
+                accountByUserId.set(account.userId, account);
+            }
+        }
+        return {
+            users: users.map((user) => toUserDTO(user, accountByUserId.get(user._id.toString()) ?? null)),
+        };
+    }
+
+    async updateAccountStatus(targetUserId: string, status: AccountStatus): Promise<UserDTO> {
+        const db = mongoose.connection.db;
+        if (!db) {
+            throw new Error("Mongoose database connection is not initialized");
+        }
+        const _id = new mongoose.Types.ObjectId(targetUserId);
+        const now = new Date();
+        await db.collection<BetterAuthUserDocument>("users").updateOne(
+            { _id },
+            {
+                $set: {
+                    accountStatus: status,
+                    updatedAt: now,
+                },
+            },
+        );
+        if (status === "banned") {
+            await db.collection("auth_sessions").deleteMany({ userId: targetUserId });
+        }
+        const user = await this.getById(targetUserId);
+        await this.publishUserProfileUpserted(user);
+        return user;
+    }
+
+    async setEmailVerification(targetUserId: string, emailVerified: boolean): Promise<UserDTO> {
+        const db = mongoose.connection.db;
+        if (!db) {
+            throw new Error("Mongoose database connection is not initialized");
+        }
+        const _id = new mongoose.Types.ObjectId(targetUserId);
+        const now = new Date();
+        await db.collection<BetterAuthUserDocument>("users").updateOne(
+            { _id },
+            {
+                $set: {
+                    emailVerifiedAt: emailVerified ? now : null,
+                    emailVerified,
+                    updatedAt: now,
+                },
+            },
+        );
+        const user = await this.getById(targetUserId);
+        await this.publishUserProfileUpserted(user);
+        return user;
+    }
+
+    async setBaseRole(targetUserId: string, baseRole: BaseRole): Promise<UserDTO> {
+        const db = mongoose.connection.db;
+        if (!db) {
+            throw new Error("Mongoose database connection is not initialized");
+        }
+        await db.collection<BetterAuthUserDocument>("users").updateOne(
+            { _id: new mongoose.Types.ObjectId(targetUserId) },
+            {
+                $set: {
+                    baseRole,
+                    updatedAt: new Date(),
+                },
+            },
+        );
+        const user = await this.getById(targetUserId);
+        await this.publishUserProfileUpserted(user);
+        return user;
+    }
+
+    async setAdminElevation(targetUserId: string, isAdmin: boolean): Promise<UserDTO> {
+        const db = mongoose.connection.db;
+        if (!db) {
+            throw new Error("Mongoose database connection is not initialized");
+        }
+        await db.collection<BetterAuthUserDocument>("users").updateOne(
+            { _id: new mongoose.Types.ObjectId(targetUserId) },
+            {
+                $set: {
+                    isAdmin,
+                    updatedAt: new Date(),
+                },
+            },
+        );
+        const user = await this.getById(targetUserId);
+        await this.publishUserProfileUpserted(user);
+        return user;
+    }
+
+    async deleteUser(targetUserId: string): Promise<void> {
+        const db = mongoose.connection.db;
+        if (!db) {
+            throw new Error("Mongoose database connection is not initialized");
+        }
+        const _id = new mongoose.Types.ObjectId(targetUserId);
+        await Promise.all([
+            db.collection<BetterAuthUserDocument>("users").deleteOne({ _id }),
+            db.collection("auth_accounts").deleteMany({ userId: targetUserId }),
+            db.collection("auth_sessions").deleteMany({ userId: targetUserId }),
+            db.collection("auth_verifications").deleteMany({ identifier: targetUserId }),
+        ]);
     }
 
     async publishUserProfileUpserted(user: UserDTO): Promise<void> {

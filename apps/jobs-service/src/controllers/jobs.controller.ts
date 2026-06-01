@@ -35,6 +35,14 @@ const EXPERIENCE_PATTERNS: Record<string, string> = {
 };
 
 export const jobsController = new Hono();
+export const jobsAdminController = new Hono();
+
+function requireAdmin(c: any): void {
+    const isAdmin = Boolean(c.get("isAdmin"));
+    if (!isAdmin) {
+        throw Object.assign(new Error("Admin role required"), { status: 403 });
+    }
+}
 
 jobsController.get("/offres", async (c) => {
     const {
@@ -121,5 +129,39 @@ jobsController.get("/stats", async (c) => {
 
 jobsController.post("/offres/:id/click", async (c) => {
     await OffreModel.findByIdAndUpdate(c.req.param("id"), { $inc: { nb_clics: 1 } });
+    return c.json({ ok: true });
+});
+
+jobsAdminController.get("/admin/offres", async (c) => {
+    requireAdmin(c);
+    const limit = Math.min(Math.max(1, Number(c.req.query("limit") ?? "100")), 250);
+    const offres = await OffreModel.find({})
+        .sort({ date_scraped: -1 })
+        .limit(limit)
+        .lean();
+    return c.json({ offres });
+});
+
+jobsAdminController.patch("/admin/offres/:id/status", async (c) => {
+    requireAdmin(c);
+    const body = (await c.req.json().catch(() => null)) as { status?: "active" | "archivee" } | null;
+    if (!body?.status || !["active", "archivee"].includes(body.status)) {
+        return c.json({ error: "Invalid status" }, 400);
+    }
+    const offre = await OffreModel.findByIdAndUpdate(
+        c.req.param("id"),
+        { $set: { status: body.status, date_updated: new Date() } },
+        { new: true },
+    ).lean();
+    if (!offre) return c.json({ error: "Offre not found" }, 404);
+    return c.json({ offre });
+});
+
+jobsAdminController.delete("/admin/offres/:id", async (c) => {
+    requireAdmin(c);
+    const result = await OffreModel.deleteOne({ _id: c.req.param("id") });
+    if (!result.deletedCount) {
+        return c.json({ error: "Offre not found" }, 404);
+    }
     return c.json({ ok: true });
 });

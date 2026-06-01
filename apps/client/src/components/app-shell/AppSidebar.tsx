@@ -1,4 +1,4 @@
-import { NavLink } from "react-router-dom";
+import { NavLink, useLocation } from "react-router-dom";
 import {
     BriefcaseBusiness,
     ChartColumnIncreasing,
@@ -10,14 +10,17 @@ import {
     PanelLeft,
     PanelLeftClose,
     Settings,
+    Shield,
+    Users,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
 import { cn } from "@/lib/utils";
 import { useLocalPreference } from "@/hooks/useLocalPreference";
+import { useUser } from "@/hooks/useUser";
 import logo from "@/assets/gyblette.png";
 
-const navItems = [
+const studentNavItems = [
     { to: "/app/dashboard", label: "Dashboard", icon: Gauge },
     { to: "/app/insights", label: "Career Insights", icon: ChartColumnIncreasing },
     { to: "/app/cv", label: "CV Builder", icon: FileUser },
@@ -25,7 +28,21 @@ const navItems = [
     { to: "/app/opportunities", label: "Opportunities", icon: BriefcaseBusiness },
     { to: "/app/projects", label: "Projects", icon: Handshake },
     { to: "/app/settings", label: "Settings", icon: Settings },
-];
+] as const;
+const enterpriseNavItems = [
+    { to: "/app/enterprise", label: "Enterprise", icon: BriefcaseBusiness },
+    { to: "/app/settings", label: "Settings", icon: Settings },
+] as const;
+const adminNavItems = [
+    { to: "/app/admin", label: "Overview", icon: Shield, end: true },
+    { to: "/app/admin/users", label: "Users", icon: Users },
+    { to: "/app/admin/projects", label: "Projects", icon: Handshake },
+    { to: "/app/admin/jobs", label: "Jobs", icon: BriefcaseBusiness },
+    { to: "/app/admin/portfolio", label: "Portfolio", icon: FolderKanban },
+    { to: "/app/admin/cv", label: "CV", icon: FileUser },
+    { to: "/app/admin/scraping", label: "Scraping", icon: ChartColumnIncreasing },
+    { to: "/app/admin/notifications", label: "Notifications", icon: Settings },
+] as const;
 
 type AppSidebarProps = {
     onNavigate?: () => void;
@@ -35,7 +52,16 @@ type AppSidebarProps = {
 
 export default function AppSidebar({ onNavigate, layout = "desktop" }: AppSidebarProps) {
     const [compact, setCompact] = useLocalPreference("app:sidebar-compact", false);
+    const location = useLocation();
+    const { user } = useUser();
     const isCompact = layout === "drawer" ? false : compact;
+    const isAdminRoute = location.pathname.startsWith("/app/admin");
+    const navItems = isAdminRoute
+        ? adminNavItems
+        : user?.baseRole === "enterprise"
+          ? enterpriseNavItems
+          : studentNavItems;
+    const homeLink = isAdminRoute ? "/app/admin" : user?.baseRole === "enterprise" ? "/app/enterprise" : "/app/dashboard";
 
     return (
         <aside
@@ -49,7 +75,7 @@ export default function AppSidebar({ onNavigate, layout = "desktop" }: AppSideba
                     isCompact ? "flex flex-col items-center gap-2" : "flex items-center justify-between gap-2",
                 )}>
                 <NavLink
-                    to="/app/dashboard"
+                    to={homeLink}
                     className={cn(
                         "flex min-w-0 items-center gap-2 rounded-xl py-1.5 transition-opacity duration-300",
                         isCompact ? "w-full justify-center px-0" : "min-w-0 flex-1 px-2",
@@ -90,6 +116,7 @@ export default function AppSidebar({ onNavigate, layout = "desktop" }: AppSideba
                         <NavLink
                             key={item.to}
                             to={item.to}
+                            end={item.end}
                             title={item.label}
                             aria-label={item.label}
                             onClick={onNavigate}

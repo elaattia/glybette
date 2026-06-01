@@ -5,7 +5,8 @@
         "dev": "tsx watch src/index.ts",
         "build": "tsc",
         "start": "node dist/index.js",
-        "test": "tsx --test src/**/*.test.ts"
+        "test": "tsx --test src/**/*.test.ts",
+        "promote-admin": "node scripts/promote-admin.mjs"
     },
     "dependencies": {
         "@glybette/contracts": "workspace:*",

@@ -2,6 +2,10 @@ import type { Hono } from "hono";
 import type { ProjectsController } from "../controllers/projects.controller.js";
 
 export function registerProjectsRoutes(app: Hono, controller: ProjectsController): void {
+    app.get("/projects/admin/list", (c) => controller.adminList(c));
+    app.get("/projects/admin/:id", (c) => controller.adminGet(c));
+    app.delete("/projects/admin/:id", (c) => controller.adminDelete(c));
+
     app.get("/projects/media/*", (c) => controller.serveMedia(c));
 
     app.get("/projects", (c) => controller.list(c));

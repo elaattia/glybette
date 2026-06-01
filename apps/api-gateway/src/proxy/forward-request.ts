@@ -1,5 +1,13 @@
 import type { Context } from "hono";
-import { sanitizeProxyHeaders, AUTH_HEADER_USER_ID, AUTH_HEADER_ROLES, ServiceUnavailableError } from "@glybette/utils";
+import {
+    sanitizeProxyHeaders,
+    AUTH_HEADER_ACCOUNT_STATUS,
+    AUTH_HEADER_BASE_ROLE,
+    AUTH_HEADER_IS_ADMIN,
+    AUTH_HEADER_USER_ID,
+    AUTH_HEADER_ROLES,
+    ServiceUnavailableError,
+} from "@glybette/utils";
 
 type HttpMethod = "GET" | "POST" | "PUT" | "DELETE" | "PATCH";
 
@@ -32,6 +40,9 @@ export async function forwardToService(
 
     if (injectHeaders && auth) {
         headers.set(AUTH_HEADER_USER_ID, auth.userId);
+        headers.set(AUTH_HEADER_BASE_ROLE, auth.baseRole);
+        headers.set(AUTH_HEADER_IS_ADMIN, String(auth.isAdmin));
+        headers.set(AUTH_HEADER_ACCOUNT_STATUS, auth.accountStatus);
         headers.set(AUTH_HEADER_ROLES, auth.roles.join(","));
         const secret = process.env.INTERNAL_SERVICE_SECRET;
         if (!secret) {

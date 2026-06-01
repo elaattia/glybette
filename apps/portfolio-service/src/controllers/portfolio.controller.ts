@@ -61,10 +61,37 @@ export class PortfolioController {
         return c.json(response, 200);
     }
 
+    async adminList(c: Context): Promise<Response> {
+        this.requireAdmin(c);
+        const limit = Number(c.req.query("limit") ?? "100");
+        const portfolios = await this.portfolioService.adminList(Number.isFinite(limit) ? limit : 100);
+        return c.json({ portfolios }, 200);
+    }
+
+    async adminGet(c: Context): Promise<Response> {
+        this.requireAdmin(c);
+        const portfolio = await this.portfolioService.adminGetById(c.req.param("id"));
+        return c.json({ portfolio }, 200);
+    }
+
+    async adminDelete(c: Context): Promise<Response> {
+        this.requireAdmin(c);
+        const response = await this.portfolioService.adminDeleteById(c.req.param("id"));
+        return c.json(response, 200);
+    }
+
     private requireAuth(c: Context) {
         const auth = getUserFromHeaders(c.req.raw.headers);
         if (!auth) {
             throw new UnauthorizedError("Missing auth context");
+        }
+        return auth;
+    }
+
+    private requireAdmin(c: Context) {
+        const auth = this.requireAuth(c);
+        if (!auth.isAdmin && !auth.roles.includes("admin")) {
+            throw new UnauthorizedError("Admin role required");
         }
         return auth;
     }

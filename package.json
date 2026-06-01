@@ -10,6 +10,7 @@
         "clean:host": "powershell -NoProfile -ExecutionPolicy Bypass -File scripts/clean-host-modules.ps1",
         "format": "prettier --write . --ignore-path .gitignore",
         "install:all": "pnpm -r install",
+        "users:promote-admin": "pnpm --filter @glybette/users-service run promote-admin",
         "docker:env:check": "node scripts/check-docker-env.js",
         "docker:env:check:ai": "node scripts/check-docker-env.js --ai",
         "docker:up": "pnpm docker:env:check && docker compose up -d",

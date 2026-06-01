@@ -13,3 +13,5 @@ logs/
 .venv/
 .pnpm-store/
 .data/
+docs/*
+*.zip

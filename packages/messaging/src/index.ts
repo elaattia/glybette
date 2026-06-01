@@ -24,6 +24,12 @@ export {
     PROJECTS_USER_PROJECTION_QUEUE,
     PROJECTS_USER_PROJECTION_QUEUE_DLX,
     PROJECTS_USER_PROJECTION_QUEUE_DLQ,
+    PORTFOLIO_USER_PROJECTION_QUEUE,
+    PORTFOLIO_USER_PROJECTION_QUEUE_DLX,
+    PORTFOLIO_USER_PROJECTION_QUEUE_DLQ,
+    CV_USER_PROJECTION_QUEUE,
+    CV_USER_PROJECTION_QUEUE_DLX,
+    CV_USER_PROJECTION_QUEUE_DLQ,
 } from "./topology.js";
 export {
     connectRabbitMq,
@@ -31,6 +37,8 @@ export {
     ensureProjectsTopology,
     ensureUsersTopology,
     ensureProjectsUserProjectionTopology,
+    ensurePortfolioUserProjectionTopology,
+    ensureCvUserProjectionTopology,
     type RabbitMqClient,
 } from "./rabbit.js";
 export { PROJECT_EVENT_NAMES, type ProjectEventName, type ProjectDomainEvent, isProjectDomainEvent } from "./projects-contracts.js";

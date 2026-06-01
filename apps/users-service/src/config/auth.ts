@@ -44,6 +44,24 @@ export function createAuth(env: UsersServiceEnv) {
                     defaultValue: false,
                     input: false,
                 },
+                baseRole: {
+                    type: "string",
+                    required: false,
+                    defaultValue: "student",
+                    input: false,
+                },
+                isAdmin: {
+                    type: "boolean",
+                    required: false,
+                    defaultValue: false,
+                    input: false,
+                },
+                accountStatus: {
+                    type: "string",
+                    required: false,
+                    defaultValue: "active",
+                    input: false,
+                },
             },
         },
         session: {

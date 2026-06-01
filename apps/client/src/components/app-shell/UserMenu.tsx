@@ -1,5 +1,6 @@
 import { useId } from "react";
-import { ChevronDown, LogOut, MoonIcon, SunIcon } from "lucide-react";
+import { ChevronDown, LogOut, MoonIcon, Shield, SunIcon } from "lucide-react";
+import { Link } from "react-router-dom";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import { Switch } from "@/components/ui/switch";
@@ -13,11 +14,13 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { useTheme } from "@/hooks/useTheme";
 import { useAuth } from "@/hooks/useAuth";
+import { useUser } from "@/hooks/useUser";
 
 export default function UserMenu() {
     const switchId = useId();
     const { theme, setTheme } = useTheme();
     const auth = useAuth();
+    const { user } = useUser();
     const userLabel = auth.user?.name ?? auth.user?.email ?? "Unknown";
     const userEmail = auth.user?.email ?? "No email available";
     const fallback = userLabel.slice(0, 2).toUpperCase();
@@ -84,6 +87,17 @@ export default function UserMenu() {
                 </DropdownMenuItem>
 
                 <DropdownMenuSeparator />
+                {user?.isAdmin ? (
+                    <>
+                        <DropdownMenuItem asChild>
+                            <Link to="/app/admin" className="cursor-pointer">
+                                <Shield className="h-4 w-4" />
+                                Admin dashboard
+                            </Link>
+                        </DropdownMenuItem>
+                        <DropdownMenuSeparator />
+                    </>
+                ) : null}
                 <DropdownMenuItem
                     disabled={auth.logoutMutation.isPending}
                     onSelect={() => {

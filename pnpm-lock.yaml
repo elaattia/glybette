@@ -215,6 +215,9 @@ importers:
       '@glybette/env':
         specifier: workspace:*
         version: link:../../packages/env
+      '@glybette/messaging':
+        specifier: workspace:*
+        version: link:../../packages/messaging
       '@glybette/types':
         specifier: workspace:*
         version: link:../../packages/types
@@ -344,6 +347,9 @@ importers:
       '@glybette/env':
         specifier: workspace:*
         version: link:../../packages/env
+      '@glybette/messaging':
+        specifier: workspace:*
+        version: link:../../packages/messaging
       '@glybette/utils':
         specifier: workspace:*
         version: link:../../packages/utils

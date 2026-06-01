@@ -1,13 +1,16 @@
 import mongoose from "mongoose";
 import { randomUUID } from "node:crypto";
 import type {
+    AdminPortfolioDocumentDTO,
     PortfolioDocumentDTO,
     PortfolioResponse,
     PortfolioSlugAvailabilityResponse,
+    PublicUserSummaryDTO,
     PublicPortfolioResponse,
     SavePortfolioRequest,
 } from "@glybette/contracts";
 import { BadRequestError, NotFoundError, ServiceUnavailableError } from "@glybette/utils";
+import type { UserProfileUpsertedEvent } from "@glybette/messaging";
 import { validatePortfolioSlug } from "./portfolio.validation.js";
 
 type PortfolioDocument = {
@@ -23,6 +26,17 @@ type PortfolioDocument = {
         locked: true;
     };
     createdAt: Date;
+    updatedAt: Date;
+};
+
+type UserProfileSnapshotDocument = {
+    _id: mongoose.Types.ObjectId;
+    userId: string;
+    displayName: string;
+    avatarUrl?: string;
+    isPremium: boolean;
+    roles: string[];
+    sourceUpdatedAt: Date;
     updatedAt: Date;
 };
 
@@ -103,7 +117,24 @@ function toDTO(document: PortfolioDocument): PortfolioDocumentDTO {
     };
 }
 
+function toOwnerSummary(document: UserProfileSnapshotDocument): PublicUserSummaryDTO {
+    const isAdmin = document.roles.includes("admin");
+    const baseRole = document.roles.includes("enterprise") ? "enterprise" : "student";
+    return {
+        id: document.userId,
+        displayName: document.displayName,
+        avatarUrl: document.avatarUrl,
+        isPremium: document.isPremium,
+        baseRole,
+        isAdmin,
+        accountStatus: "active",
+        roles: document.roles,
+    };
+}
+
 export class PortfolioService {
+    constructor(private readonly resolveUsers?: (userIds: string[]) => Promise<PublicUserSummaryDTO[]>) {}
+
     private collection() {
         const db = mongoose.connection.db;
         if (!db) {
@@ -112,11 +143,46 @@ export class PortfolioService {
         return db.collection<PortfolioDocument>("portfolios");
     }
 
+    private userProfilesCollection() {
+        const db = mongoose.connection.db;
+        if (!db) {
+            throw new ServiceUnavailableError("Portfolio database is not initialized");
+        }
+        return db.collection<UserProfileSnapshotDocument>("portfolio_user_profiles");
+    }
+
     async ensureIndexes(): Promise<void> {
         const collection = this.collection();
         await collection.createIndex({ slug: 1 }, { unique: true });
         await collection.createIndex({ userId: 1 }, { unique: true });
         await collection.createIndex({ updatedAt: -1 });
+        await this.userProfilesCollection().createIndexes([{ key: { userId: 1 }, unique: true }, { key: { updatedAt: -1 } }]);
+    }
+
+    async applyUserProfileUpsertedEvent(event: UserProfileUpsertedEvent): Promise<void> {
+        const sourceUpdatedAt = new Date(event.occurredAtIso);
+        const profile = event.profile;
+        await this.userProfilesCollection().updateOne(
+            {
+                userId: profile.userId,
+                $or: [{ sourceUpdatedAt: { $exists: false } }, { sourceUpdatedAt: { $lte: sourceUpdatedAt } }],
+            },
+            {
+                $set: {
+                    displayName: profile.displayName,
+                    avatarUrl: profile.avatarUrl,
+                    isPremium: profile.isPremium,
+                    roles: profile.roles,
+                    sourceUpdatedAt,
+                    updatedAt: new Date(),
+                },
+                $setOnInsert: {
+                    _id: new mongoose.Types.ObjectId(),
+                    userId: profile.userId,
+                },
+            },
+            { upsert: true },
+        );
     }
 
     async getCurrent(userId: string): Promise<PortfolioResponse> {
@@ -198,10 +264,103 @@ export class PortfolioService {
         };
     }
 
+    async adminList(limit = 100): Promise<AdminPortfolioDocumentDTO[]> {
+        const safeLimit = Math.max(1, Math.min(250, limit));
+        const portfolios = await this.collection().find({}).sort({ updatedAt: -1 }).limit(safeLimit).toArray();
+        const owners = await this.getUserSummariesByIds(portfolios.map((portfolio) => portfolio.userId));
+        return portfolios.map((portfolio) => ({
+            ...toDTO(portfolio),
+            owner: owners.get(portfolio.userId) ?? this.fallbackUserSummary(portfolio.userId),
+        }));
+    }
+
+    async adminGetById(id: string): Promise<AdminPortfolioDocumentDTO> {
+        if (!/^[0-9a-fA-F]{24}$/.test(id)) {
+            throw new BadRequestError("Invalid portfolio id.");
+        }
+        const portfolio = await this.collection().findOne({ _id: new mongoose.Types.ObjectId(id) });
+        if (!portfolio) {
+            throw new NotFoundError("Portfolio not found");
+        }
+        const owners = await this.getUserSummariesByIds([portfolio.userId]);
+        return {
+            ...toDTO(portfolio),
+            owner: owners.get(portfolio.userId) ?? this.fallbackUserSummary(portfolio.userId),
+        };
+    }
+
+    async adminDeleteById(id: string): Promise<{ ok: true }> {
+        if (!/^[0-9a-fA-F]{24}$/.test(id)) {
+            throw new BadRequestError("Invalid portfolio id.");
+        }
+        await this.collection().deleteOne({ _id: new mongoose.Types.ObjectId(id) });
+        return { ok: true };
+    }
+
     private async assertSlugAvailableForUser(slug: string, userId: string): Promise<void> {
         const existing = await this.collection().findOne({ slug }, { projection: { userId: 1 } });
         if (existing && existing.userId !== userId) {
             throw new BadRequestError("This portfolio URL name is already taken.");
         }
+    }
+
+    private async getUserSummariesByIds(userIds: string[]): Promise<Map<string, PublicUserSummaryDTO>> {
+        const ids = [...new Set(userIds.map((id) => id?.trim()).filter(Boolean) as string[])];
+        if (ids.length === 0) {
+            return new Map();
+        }
+
+        const existing = await this.userProfilesCollection().find({ userId: { $in: ids } }).toArray();
+        const result = new Map<string, PublicUserSummaryDTO>();
+        for (const profile of existing) {
+            result.set(profile.userId, toOwnerSummary(profile));
+        }
+
+        const missingIds = ids.filter((id) => !result.has(id));
+        if (missingIds.length > 0 && this.resolveUsers) {
+            const resolvedUsers = await this.resolveUsers(missingIds).catch(() => []);
+            if (resolvedUsers.length > 0) {
+                await Promise.all(
+                    resolvedUsers.map((user) =>
+                        this.userProfilesCollection().updateOne(
+                            { userId: user.id },
+                            {
+                                $set: {
+                                    displayName: user.displayName,
+                                    avatarUrl: user.avatarUrl,
+                                    isPremium: user.isPremium,
+                                    roles: user.roles,
+                                    updatedAt: new Date(),
+                                },
+                                $setOnInsert: {
+                                    _id: new mongoose.Types.ObjectId(),
+                                    userId: user.id,
+                                    sourceUpdatedAt: new Date(),
+                                },
+                            },
+                            { upsert: true },
+                        ),
+                    ),
+                );
+                for (const user of resolvedUsers) {
+                    result.set(user.id, user);
+                }
+            }
+        }
+
+        return result;
+    }
+
+    private fallbackUserSummary(userId: string): PublicUserSummaryDTO {
+        return {
+            id: userId,
+            displayName: "User",
+            avatarUrl: undefined,
+            isPremium: false,
+            baseRole: "student",
+            isAdmin: false,
+            accountStatus: "active",
+            roles: ["student"],
+        };
     }
 }

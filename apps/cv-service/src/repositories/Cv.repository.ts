@@ -101,4 +101,17 @@ export class CvRepository {
             { new: true },
         ).lean();
     }
+
+    adminList(limit: number) {
+        return CvModel.find({}).sort({ updatedAt: -1 }).limit(limit).lean();
+    }
+
+    adminFindById(id: string) {
+        return CvModel.findById(id).lean();
+    }
+
+    async adminDelete(id: string) {
+        const r = await CvModel.deleteOne({ _id: id });
+        return r.deletedCount > 0;
+    }
 }

@@ -9,6 +9,7 @@ import { startOffreConsumer } from "./consumers/offre.consumer.js";
 import { publicRoutes, protectedRoutes } from "./routes/jobs.routes.js";
 import { errorMiddleware } from "./middleware/error.middleware.js";
 import { OffreModel } from "./models/Offre.model.js";
+import { bootstrapOffresFromScrapingDb } from "./services/bootstrap-offres.service.js";
 
 const env = loadEnv();
 const app = new Hono();
@@ -70,6 +71,7 @@ app.onError((err, c) => errorMiddleware(err as Error & { status?: number }, c));
 
 connectDb()
     .then(async () => {
+        await bootstrapOffresFromScrapingDb();
         serve({ fetch: app.fetch, port: env.PORT_JOBS_SERVICE });
 
         console.log(`[jobs-service]  running on port ${env.PORT_JOBS_SERVICE}`);

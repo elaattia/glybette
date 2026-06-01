@@ -6,6 +6,12 @@ import {
     AUTH_EMAIL_QUEUE_DLQ,
     AUTH_EXCHANGE,
     AUTH_EXCHANGE_TYPE,
+    CV_USER_PROJECTION_QUEUE,
+    CV_USER_PROJECTION_QUEUE_DLQ,
+    CV_USER_PROJECTION_QUEUE_DLX,
+    PORTFOLIO_USER_PROJECTION_QUEUE,
+    PORTFOLIO_USER_PROJECTION_QUEUE_DLQ,
+    PORTFOLIO_USER_PROJECTION_QUEUE_DLX,
     PROJECTS_EXCHANGE,
     PROJECTS_EXCHANGE_TYPE,
     PROJECTS_USER_PROJECTION_QUEUE,
@@ -113,4 +119,36 @@ export async function ensureProjectsUserProjectionTopology(channel: Channel): Pr
         deadLetterExchange: PROJECTS_USER_PROJECTION_QUEUE_DLX,
     });
     await channel.bindQueue(PROJECTS_USER_PROJECTION_QUEUE, USERS_EXCHANGE, ROUTING_KEY_USERS_PROFILE_UPSERTED);
+}
+
+export async function ensurePortfolioUserProjectionTopology(channel: Channel): Promise<void> {
+    await ensureUsersTopology(channel);
+
+    await channel.assertExchange(PORTFOLIO_USER_PROJECTION_QUEUE_DLX, USERS_EXCHANGE_TYPE, { durable: true });
+    await channel.assertQueue(PORTFOLIO_USER_PROJECTION_QUEUE_DLQ, { durable: true });
+    await channel.bindQueue(
+        PORTFOLIO_USER_PROJECTION_QUEUE_DLQ,
+        PORTFOLIO_USER_PROJECTION_QUEUE_DLX,
+        ROUTING_KEY_USERS_PROFILE_UPSERTED,
+    );
+
+    await channel.assertQueue(PORTFOLIO_USER_PROJECTION_QUEUE, {
+        durable: true,
+        deadLetterExchange: PORTFOLIO_USER_PROJECTION_QUEUE_DLX,
+    });
+    await channel.bindQueue(PORTFOLIO_USER_PROJECTION_QUEUE, USERS_EXCHANGE, ROUTING_KEY_USERS_PROFILE_UPSERTED);
+}
+
+export async function ensureCvUserProjectionTopology(channel: Channel): Promise<void> {
+    await ensureUsersTopology(channel);
+
+    await channel.assertExchange(CV_USER_PROJECTION_QUEUE_DLX, USERS_EXCHANGE_TYPE, { durable: true });
+    await channel.assertQueue(CV_USER_PROJECTION_QUEUE_DLQ, { durable: true });
+    await channel.bindQueue(CV_USER_PROJECTION_QUEUE_DLQ, CV_USER_PROJECTION_QUEUE_DLX, ROUTING_KEY_USERS_PROFILE_UPSERTED);
+
+    await channel.assertQueue(CV_USER_PROJECTION_QUEUE, {
+        durable: true,
+        deadLetterExchange: CV_USER_PROJECTION_QUEUE_DLX,
+    });
+    await channel.bindQueue(CV_USER_PROJECTION_QUEUE, USERS_EXCHANGE, ROUTING_KEY_USERS_PROFILE_UPSERTED);
 }

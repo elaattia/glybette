@@ -1,6 +1,9 @@
 import { CvRepository } from "../repositories/Cv.repository.js";
 import { AiClient } from "./ai.client.js";
 import { PdfService } from "./pdf.service.js";
+import mongoose from "mongoose";
+import type { PublicUserSummaryDTO } from "@glybette/contracts";
+import type { UserProfileUpsertedEvent } from "@glybette/messaging";
 import type {
     PersonalInfoData,
     ExperienceItem,
@@ -15,6 +18,17 @@ const aiClient = new AiClient();
 const pdfService = new PdfService();
 
 const MAX_CVS = 20;
+type UserResolver = (userIds: string[]) => Promise<PublicUserSummaryDTO[]>;
+type UserProfileSnapshotDocument = {
+    _id: mongoose.Types.ObjectId;
+    userId: string;
+    displayName: string;
+    avatarUrl?: string;
+    isPremium: boolean;
+    roles: string[];
+    sourceUpdatedAt: Date;
+    updatedAt: Date;
+};
 
 function cvToText(cv: { title: string; sections: Array<{ type: string; data: unknown }> }): string {
     const lines: string[] = [`CV: ${cv.title}\n`];
@@ -114,6 +128,42 @@ function err429() {
 }
 
 export class CvService {
+    private resolveUsers?: UserResolver;
+
+    setUserResolver(resolver: UserResolver): void {
+        this.resolveUsers = resolver;
+    }
+
+    async ensureUserProjectionIndexes(): Promise<void> {
+        await this.userProfilesCollection().createIndexes([{ key: { userId: 1 }, unique: true }, { key: { updatedAt: -1 } }]);
+    }
+
+    async applyUserProfileUpsertedEvent(event: UserProfileUpsertedEvent): Promise<void> {
+        const sourceUpdatedAt = new Date(event.occurredAtIso);
+        const profile = event.profile;
+        await this.userProfilesCollection().updateOne(
+            {
+                userId: profile.userId,
+                $or: [{ sourceUpdatedAt: { $exists: false } }, { sourceUpdatedAt: { $lte: sourceUpdatedAt } }],
+            },
+            {
+                $set: {
+                    displayName: profile.displayName,
+                    avatarUrl: profile.avatarUrl,
+                    isPremium: profile.isPremium,
+                    roles: profile.roles,
+                    sourceUpdatedAt,
+                    updatedAt: new Date(),
+                },
+                $setOnInsert: {
+                    _id: new mongoose.Types.ObjectId(),
+                    userId: profile.userId,
+                },
+            },
+            { upsert: true },
+        );
+    }
+
     getUserCvs(userId: string) {
         return repo.findAllByUser(userId);
     }
@@ -216,5 +266,104 @@ export class CvService {
 
     suggestSkills(role: string, existingSkills: string[]) {
         return aiClient.suggestSkills(role, existingSkills);
+    }
+
+    async adminListCvs(limit = 100) {
+        const docs = await repo.adminList(Math.max(1, Math.min(250, limit)));
+        const users = await this.getUserSummariesByIds(docs.map((doc: any) => String(doc.userId)));
+        return docs.map((doc: any) => ({
+            ...doc,
+            owner: users.get(String(doc.userId)) ?? this.fallbackUserSummary(String(doc.userId)),
+        }));
+    }
+
+    async adminGetCv(id: string) {
+        const cv = await repo.adminFindById(id);
+        if (!cv) throw err404();
+        const users = await this.getUserSummariesByIds([String((cv as any).userId)]);
+        return {
+            ...(cv as any),
+            owner: users.get(String((cv as any).userId)) ?? this.fallbackUserSummary(String((cv as any).userId)),
+        };
+    }
+
+    async adminDeleteCv(id: string) {
+        if (!(await repo.adminDelete(id))) throw err404();
+    }
+
+    private userProfilesCollection() {
+        const db = mongoose.connection.db;
+        if (!db) throw new Error("CV database is not initialized");
+        return db.collection<UserProfileSnapshotDocument>("cv_user_profiles");
+    }
+
+    private async getUserSummariesByIds(userIds: string[]): Promise<Map<string, PublicUserSummaryDTO>> {
+        const ids = [...new Set(userIds.map((id) => id?.trim()).filter(Boolean) as string[])];
+        if (ids.length === 0) {
+            return new Map();
+        }
+        const existing = await this.userProfilesCollection().find({ userId: { $in: ids } }).toArray();
+        const result = new Map<string, PublicUserSummaryDTO>();
+        for (const profile of existing) {
+            const isAdmin = profile.roles.includes("admin");
+            const baseRole = profile.roles.includes("enterprise") ? "enterprise" : "student";
+            result.set(profile.userId, {
+                id: profile.userId,
+                displayName: profile.displayName,
+                avatarUrl: profile.avatarUrl,
+                isPremium: profile.isPremium,
+                baseRole,
+                isAdmin,
+                accountStatus: "active",
+                roles: profile.roles,
+            });
+        }
+
+        const missingIds = ids.filter((id) => !result.has(id));
+        if (missingIds.length > 0 && this.resolveUsers) {
+            const resolvedUsers = await this.resolveUsers(missingIds).catch(() => []);
+            if (resolvedUsers.length > 0) {
+                await Promise.all(
+                    resolvedUsers.map((user) =>
+                        this.userProfilesCollection().updateOne(
+                            { userId: user.id },
+                            {
+                                $set: {
+                                    displayName: user.displayName,
+                                    avatarUrl: user.avatarUrl,
+                                    isPremium: user.isPremium,
+                                    roles: user.roles,
+                                    updatedAt: new Date(),
+                                },
+                                $setOnInsert: {
+                                    _id: new mongoose.Types.ObjectId(),
+                                    userId: user.id,
+                                    sourceUpdatedAt: new Date(),
+                                },
+                            },
+                            { upsert: true },
+                        ),
+                    ),
+                );
+                for (const user of resolvedUsers) {
+                    result.set(user.id, user);
+                }
+            }
+        }
+
+        return result;
+    }
+
+    private fallbackUserSummary(userId: string): PublicUserSummaryDTO {
+        return {
+            id: userId,
+            displayName: "User",
+            avatarUrl: undefined,
+            isPremium: false,
+            baseRole: "student",
+            isAdmin: false,
+            accountStatus: "active",
+            roles: ["student"],
+        };
     }
 }

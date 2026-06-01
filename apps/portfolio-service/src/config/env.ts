@@ -10,6 +10,10 @@ const portfolioServiceEnvSchema = baseEnvSchema.extend({
         ),
     PORTFOLIO_SERVICE_MONGODB_DB_NAME: z.string().min(1).default("glybette_portfolios"),
     PORTFOLIO_PUBLIC_ROOT_DOMAIN: z.string().min(1).default("glybette.com"),
+    RABBITMQ_URL: z.string().optional(),
+    USERS_SERVICE_URL: z.string().url().optional(),
+    INTERNAL_SERVICE_SECRET: z.string().min(1).default("dev-secret-change-in-prod"),
+    INTEROP_SYNC_TIMEOUT_MS: z.coerce.number().min(1000).max(60000).default(7000),
 });
 
 export type PortfolioServiceEnv = z.infer<typeof portfolioServiceEnvSchema>;

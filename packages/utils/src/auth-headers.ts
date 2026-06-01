@@ -4,9 +4,15 @@
  */
 export const AUTH_HEADER_USER_ID = "x-user-id";
 export const AUTH_HEADER_ROLES = "x-user-roles";
+export const AUTH_HEADER_BASE_ROLE = "x-user-base-role";
+export const AUTH_HEADER_IS_ADMIN = "x-user-is-admin";
+export const AUTH_HEADER_ACCOUNT_STATUS = "x-user-account-status";
 
 export interface AuthContext {
     userId: string;
+    baseRole: string;
+    isAdmin: boolean;
+    accountStatus: string;
     roles: string[];
 }
 
@@ -17,12 +23,18 @@ export interface AuthContext {
 export function getUserFromHeaders(headers: Headers): AuthContext | null {
     const userId = headers.get(AUTH_HEADER_USER_ID);
     if (!userId) return null;
+    const baseRole = headers.get(AUTH_HEADER_BASE_ROLE)?.trim() || "student";
+    const isAdminHeader = headers.get(AUTH_HEADER_IS_ADMIN)?.toLowerCase() || "";
+    const isAdmin = isAdminHeader === "1" || isAdminHeader === "true";
+    const accountStatus = headers.get(AUTH_HEADER_ACCOUNT_STATUS)?.trim() || "active";
     const rolesHeader = headers.get(AUTH_HEADER_ROLES);
-    const roles = rolesHeader
+    const explicitRoles = rolesHeader
         ? rolesHeader
               .split(",")
               .map((r) => r.trim())
               .filter(Boolean)
         : [];
-    return { userId, roles };
+    const inferredRoles = isAdmin ? [baseRole, "admin"] : [baseRole];
+    const roles = [...new Set((explicitRoles.length > 0 ? explicitRoles : inferredRoles).filter(Boolean))];
+    return { userId, baseRole, isAdmin, accountStatus, roles };
 }

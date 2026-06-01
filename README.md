@@ -13,6 +13,9 @@ pnpm monorepo with apps (client, api-gateway, users-service) and shared packages
 
 ## Architecture docs
 
+- `docs/architecture/OVERVIEW.md` – Platform overview (lanes, messaging catalog, LaTeX mapping)
+- `docs/services/v2/` – **Primary** thesis-style service documentation (functional analysis / design / implementation)
+- `docs/services/` – v1 draft service docs (superseded for paper)
 - `docs/INTEROP.md` – Project-wide sync/async service communication standard
 - `docs/RABBITMQ.md` – RabbitMQ topology and eventing patterns
 
@@ -29,6 +32,24 @@ pnpm dev
 ```
 
 Runs all workspace `dev` scripts in parallel. Run apps on different ports (e.g. client 5173, api-gateway 3000, users-service 3001) by setting `PORT` in each app’s env.
+
+## Role system (MVP)
+
+- `baseRole`: `student` or `enterprise`
+- `isAdmin`: boolean elevation on top of base role
+- `accountStatus`: `active` or `banned` (banned users are blocked immediately and active sessions are revoked)
+
+New signups default to `student` + non-admin.
+
+### Local admin promotion script
+
+Use the local script to grant admin elevation for an existing account:
+
+```bash
+pnpm users:promote-admin -- --email=user@example.com
+# or
+pnpm users:promote-admin -- --userId=665aad7dd3588045f3123456
+```
 
 ## Environment
 

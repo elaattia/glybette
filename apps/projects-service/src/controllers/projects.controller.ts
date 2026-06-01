@@ -176,10 +176,36 @@ export class ProjectsController {
         return c.json(await this.projectsService.decideJoinRequest(projectId, requestId, auth.userId, approved, payload), 200);
     }
 
+    async adminList(c: Context): Promise<Response> {
+        this.requireAdmin(c);
+        const limit = Number(c.req.query("limit") ?? "100");
+        return c.json(await this.projectsService.adminListProjects(Number.isFinite(limit) ? limit : 100), 200);
+    }
+
+    async adminGet(c: Context): Promise<Response> {
+        this.requireAdmin(c);
+        const projectId = validateObjectIdParam(c.req.param("id"), "project id");
+        return c.json(await this.projectsService.adminGetProject(projectId), 200);
+    }
+
+    async adminDelete(c: Context): Promise<Response> {
+        this.requireAdmin(c);
+        const projectId = validateObjectIdParam(c.req.param("id"), "project id");
+        return c.json(await this.projectsService.adminDeleteProject(projectId), 200);
+    }
+
     private requireAuth(c: Context) {
         const auth = getUserFromHeaders(c.req.raw.headers);
         if (!auth?.userId) {
             throw new UnauthorizedError("Missing auth context");
+        }
+        return auth;
+    }
+
+    private requireAdmin(c: Context) {
+        const auth = this.requireAuth(c);
+        if (!auth.isAdmin && !auth.roles.includes("admin")) {
+            throw new UnauthorizedError("Admin role required");
         }
         return auth;
     }

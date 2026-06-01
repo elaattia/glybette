@@ -19,3 +19,11 @@ export const ROUTING_KEY_USERS_PROFILE_UPSERTED = "users.profile.upserted";
 export const PROJECTS_USER_PROJECTION_QUEUE = "glybette.projects.user_projection";
 export const PROJECTS_USER_PROJECTION_QUEUE_DLX = "glybette.projects.user_projection.dlx";
 export const PROJECTS_USER_PROJECTION_QUEUE_DLQ = "glybette.projects.user_projection.dlq";
+
+export const PORTFOLIO_USER_PROJECTION_QUEUE = "glybette.portfolio.user_projection";
+export const PORTFOLIO_USER_PROJECTION_QUEUE_DLX = "glybette.portfolio.user_projection.dlx";
+export const PORTFOLIO_USER_PROJECTION_QUEUE_DLQ = "glybette.portfolio.user_projection.dlq";
+
+export const CV_USER_PROJECTION_QUEUE = "glybette.cv.user_projection";
+export const CV_USER_PROJECTION_QUEUE_DLX = "glybette.cv.user_projection.dlx";
+export const CV_USER_PROJECTION_QUEUE_DLQ = "glybette.cv.user_projection.dlq";

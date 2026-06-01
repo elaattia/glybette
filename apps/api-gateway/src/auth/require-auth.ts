@@ -1,10 +1,21 @@
 import { createMiddleware } from "hono/factory";
-import { AUTH_HEADER_ROLES, AUTH_HEADER_USER_ID, sanitizeProxyHeaders, ServiceUnavailableError } from "@glybette/utils";
+import {
+    AUTH_HEADER_ACCOUNT_STATUS,
+    AUTH_HEADER_BASE_ROLE,
+    AUTH_HEADER_IS_ADMIN,
+    AUTH_HEADER_ROLES,
+    AUTH_HEADER_USER_ID,
+    sanitizeProxyHeaders,
+    ServiceUnavailableError,
+} from "@glybette/utils";
 import type { GatewayEnv } from "../config/env.js";
 import type { ServiceRegistry } from "../config/services.js";
 
 export type GatewayAuthPayload = {
     userId: string;
+    baseRole: string;
+    isAdmin: boolean;
+    accountStatus: string;
     roles: string[];
     requiresEmailVerification: boolean;
 };
@@ -21,6 +32,17 @@ export function requireBetterAuthSession(env: GatewayEnv, services: ServiceRegis
                     },
                 },
                 401,
+            );
+        }
+        if (auth.accountStatus === "banned") {
+            return c.json(
+                {
+                    error: {
+                        code: "ACCOUNT_BANNED",
+                        message: "This account has been suspended",
+                    },
+                },
+                403,
             );
         }
         if (auth.requiresEmailVerification && !isVerificationAllowlisted(new URL(c.req.url).pathname)) {
@@ -56,6 +78,9 @@ async function fetchVerificationState(
     const timeout = setTimeout(() => controller.abort(), env.PROXY_TIMEOUT_MS);
     const headers = sanitizeProxyHeaders(requestHeaders);
     headers.set(AUTH_HEADER_USER_ID, userId);
+    headers.set(AUTH_HEADER_BASE_ROLE, "student");
+    headers.set(AUTH_HEADER_IS_ADMIN, "false");
+    headers.set(AUTH_HEADER_ACCOUNT_STATUS, "active");
     headers.set(AUTH_HEADER_ROLES, roles.join(","));
 
     try {
@@ -111,7 +136,13 @@ export async function fetchGatewayAuthFromSession(
         const payload =
             raw !== null && typeof raw === "object"
                 ? (raw as {
-                      user?: { id?: string; role?: string | string[] };
+                      user?: {
+                          id?: string;
+                          role?: string | string[];
+                          baseRole?: string;
+                          isAdmin?: boolean;
+                          accountStatus?: string;
+                      };
                       session?: unknown;
                   })
                 : null;
@@ -119,11 +150,15 @@ export async function fetchGatewayAuthFromSession(
             return null;
         }
 
-        const roles = Array.isArray(payload.user.role)
+        const sessionRoles = Array.isArray(payload.user.role)
             ? payload.user.role
             : typeof payload.user.role === "string"
               ? [payload.user.role]
               : [];
+        const baseRole = payload.user.baseRole === "enterprise" ? "enterprise" : "student";
+        const isAdmin = Boolean(payload.user.isAdmin);
+        const accountStatus = payload.user.accountStatus === "banned" ? "banned" : "active";
+        const roles = [...new Set([...(sessionRoles.length > 0 ? sessionRoles : [baseRole]), ...(isAdmin ? ["admin"] : [])])];
         const requiresEmailVerification = await fetchVerificationState(
             env,
             services,
@@ -134,6 +169,9 @@ export async function fetchGatewayAuthFromSession(
 
         return {
             userId: payload.user.id,
+            baseRole,
+            isAdmin,
+            accountStatus,
             roles,
             requiresEmailVerification,
         };
@@ -160,6 +198,17 @@ export function tryResolveBetterAuthSession(env: GatewayEnv, services: ServiceRe
 
         const auth = await fetchGatewayAuthFromSession(env, services, c.req.raw.headers);
         if (auth) {
+            if (auth.accountStatus === "banned") {
+                return c.json(
+                    {
+                        error: {
+                            code: "ACCOUNT_BANNED",
+                            message: "This account has been suspended",
+                        },
+                    },
+                    403,
+                );
+            }
             if (auth.requiresEmailVerification && !isVerificationAllowlisted(new URL(c.req.url).pathname)) {
                 return c.json(
                     {

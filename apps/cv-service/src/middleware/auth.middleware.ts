@@ -2,6 +2,7 @@ import type { Context, Next } from "hono";
 
 export async function authMiddleware(c: Context, next: Next) {
     const userId = c.req.header("x-user-id");
+    const rolesHeader = c.req.header("x-user-roles") ?? "";
 
     const secret = c.req.header("x-internal-secret") ?? c.req.header("x-inter-secret");
 
@@ -18,5 +19,11 @@ export async function authMiddleware(c: Context, next: Next) {
         return c.json({ error: "Unauthorized" }, 401);
     }
     c.set("userId", userId);
+    const roles = rolesHeader
+        .split(",")
+        .map((role) => role.trim())
+        .filter(Boolean);
+    c.set("roles", roles);
+    c.set("isAdmin", roles.includes("admin") || c.req.header("x-user-is-admin") === "true");
     await next();
 }

@@ -26,6 +26,8 @@ export interface GatewayProxyRoute {
     upstream: UpstreamSpec;
     session: SessionMode;
     injectGatewayAuth: boolean;
+    requiredAdmin?: boolean;
+    allowedBaseRoles?: readonly ("student" | "enterprise")[];
     /** `"all"` uses a catch-all sub-app; otherwise `api.on(methods, mount/*, ...)`. */
     methods: MethodsSpec;
 }
@@ -41,6 +43,7 @@ export const gatewayProxyRoutes: readonly GatewayProxyRoute[] = [
         upstream: { kind: "rewrite", upstreamPrefix: "/users" },
         session: "optional",
         injectGatewayAuth: true,
+        allowedBaseRoles: ["student", "enterprise"],
         methods: "all",
     },
     {
@@ -75,8 +78,9 @@ export const gatewayProxyRoutes: readonly GatewayProxyRoute[] = [
         service: "scraping",
         mount: "/scraping",
         upstream: { kind: "rewrite", upstreamPrefix: "" },
-        session: "none",
-        injectGatewayAuth: false,
+        session: "optional",
+        injectGatewayAuth: true,
+        allowedBaseRoles: ["student"],
         methods: "all",
     },
     {
@@ -86,6 +90,7 @@ export const gatewayProxyRoutes: readonly GatewayProxyRoute[] = [
         upstream: { kind: "rewrite", upstreamPrefix: "/api/cvs" },
         session: "optional",
         injectGatewayAuth: true,
+        allowedBaseRoles: ["student"],
         methods: "all",
     },
     {
@@ -95,6 +100,7 @@ export const gatewayProxyRoutes: readonly GatewayProxyRoute[] = [
         upstream: { kind: "rewrite", upstreamPrefix: "/portfolio" },
         session: "optional",
         injectGatewayAuth: true,
+        allowedBaseRoles: ["student"],
         methods: "all",
     },
     {
@@ -104,6 +110,7 @@ export const gatewayProxyRoutes: readonly GatewayProxyRoute[] = [
         upstream: { kind: "rewrite", upstreamPrefix: "/projects" },
         session: "optional",
         injectGatewayAuth: true,
+        allowedBaseRoles: ["student"],
         methods: "all",
     },
     {
@@ -113,6 +120,7 @@ export const gatewayProxyRoutes: readonly GatewayProxyRoute[] = [
         upstream: { kind: "rewrite", upstreamPrefix: "/api" },
         session: "optional",
         injectGatewayAuth: true,
+        allowedBaseRoles: ["student"],
         methods: "all",
     },
 ];

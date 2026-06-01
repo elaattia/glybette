@@ -2,6 +2,10 @@
 
 export const AUTH_PROVIDERS = ["google", "github", "linkedin"] as const;
 export type AuthProvider = (typeof AUTH_PROVIDERS)[number];
+export const BASE_ROLES = ["student", "enterprise"] as const;
+export type BaseRole = (typeof BASE_ROLES)[number];
+export const ACCOUNT_STATUSES = ["active", "banned"] as const;
+export type AccountStatus = (typeof ACCOUNT_STATUSES)[number];
 
 export interface UserDTO {
     id: string;
@@ -10,6 +14,9 @@ export interface UserDTO {
     displayName: string;
     avatarUrl?: string;
     isPremium: boolean;
+    baseRole: BaseRole;
+    isAdmin: boolean;
+    accountStatus: AccountStatus;
     roles: string[];
     provider: AuthProvider;
 }
@@ -23,7 +30,14 @@ export interface PublicUserSummaryDTO {
     displayName: string;
     avatarUrl?: string;
     isPremium: boolean;
+    baseRole: BaseRole;
+    isAdmin: boolean;
+    accountStatus: AccountStatus;
     roles: string[];
+}
+
+export interface AdminUsersListResponse {
+    users: UserDTO[];
 }
 
 export interface AuthRedirectResponse {
@@ -131,12 +145,20 @@ export interface PortfolioDocumentDTO {
     updatedAt: string;
 }
 
+export interface AdminPortfolioDocumentDTO extends PortfolioDocumentDTO {
+    owner?: PublicUserSummaryDTO;
+}
+
 export interface PortfolioResponse {
     portfolio: PortfolioDocumentDTO | null;
 }
 
 export interface PublicPortfolioResponse {
     portfolio: PortfolioDocumentDTO;
+}
+
+export interface AdminPortfolioListResponse {
+    portfolios: AdminPortfolioDocumentDTO[];
 }
 
 export interface PortfolioSlugAvailabilityResponse {
@@ -154,6 +176,25 @@ export interface SavePortfolioRequest {
     templateId: PortfolioTemplateId;
     style: PortfolioStyle;
     tabs: PortfolioTab[];
+}
+
+export interface AdminCvSummaryDTO {
+    _id: string;
+    userId: string;
+    owner?: PublicUserSummaryDTO;
+    title: string;
+    template: string;
+    sections: unknown[];
+    atsScore?: number;
+    pdfUrl?: string;
+    shareToken?: string;
+    isPublic: boolean;
+    createdAt: string;
+    updatedAt: string;
+}
+
+export interface AdminCvListResponse {
+    cvs: AdminCvSummaryDTO[];
 }
 
 export {

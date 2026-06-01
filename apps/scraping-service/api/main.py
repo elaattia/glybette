@@ -55,6 +55,14 @@ def _serialize(doc: dict) -> dict:
     return doc
 
 
+def _require_admin(request: Request) -> None:
+    roles_header = request.headers.get("x-user-roles", "")
+    roles = [item.strip() for item in roles_header.split(",") if item.strip()]
+    is_admin = "admin" in roles or request.headers.get("x-user-is-admin", "").lower() == "true"
+    if not is_admin:
+        raise HTTPException(403, "Admin role required")
+
+
 def _build_date_filter(date_posted: str) -> dict | None:
     """
     Retourne un filtre MongoDB pour la date.
@@ -421,6 +429,18 @@ def scrape_now(source: str, background_tasks: BackgroundTasks):
 @app.post("/trigger")
 def trigger_scrape(body: TriggerScrapeBody, background_tasks: BackgroundTasks):
     """JSON body alias for clients that call `/trigger` via the API gateway."""
+    return _enqueue_scrape(body.source, background_tasks)
+
+
+@app.get("/admin/stats")
+def get_admin_stats(request: Request):
+    _require_admin(request)
+    return get_stats()
+
+
+@app.post("/admin/trigger")
+def trigger_scrape_admin(body: TriggerScrapeBody, background_tasks: BackgroundTasks, request: Request):
+    _require_admin(request)
     return _enqueue_scrape(body.source, background_tasks)
 
 

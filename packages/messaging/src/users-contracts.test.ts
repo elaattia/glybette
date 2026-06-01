@@ -13,7 +13,7 @@ test("isUserProfileUpsertedEvent validates event payload", () => {
             displayName: "Rayen",
             avatarUrl: "https://example.com/avatar.png",
             isPremium: false,
-            roles: ["user"],
+            roles: ["student"],
         },
     };
     assert.equal(isUserProfileUpsertedEvent(valid), true);

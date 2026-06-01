@@ -11,7 +11,10 @@ describe("user service mappers", () => {
             displayName: "Rayen",
             avatarUrl: "https://example.com/avatar.png",
             isPremium: true,
-            roles: ["user"],
+            baseRole: "student",
+            isAdmin: false,
+            accountStatus: "active",
+            roles: ["student"],
             provider: "google",
         });
 
@@ -20,7 +23,10 @@ describe("user service mappers", () => {
             displayName: "Rayen",
             avatarUrl: "https://example.com/avatar.png",
             isPremium: true,
-            roles: ["user"],
+            baseRole: "student",
+            isAdmin: false,
+            accountStatus: "active",
+            roles: ["student"],
         });
     });
 });

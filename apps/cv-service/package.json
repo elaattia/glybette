@@ -10,6 +10,7 @@
     "dependencies": {
         "@glybette/contracts": "workspace:*",
         "@glybette/env": "workspace:*",
+        "@glybette/messaging": "workspace:*",
         "@glybette/types": "workspace:*",
         "@glybette/utils": "workspace:*",
         "@hono/node-server": "^1.19.9",

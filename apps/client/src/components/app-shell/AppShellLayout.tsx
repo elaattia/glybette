@@ -40,6 +40,42 @@ const routeMeta: Record<string, { title: string; subtitle: string }> = {
         title: "Settings",
         subtitle: "Control account preferences and workspace personalization.",
     },
+    "/app/enterprise": {
+        title: "Enterprise",
+        subtitle: "Enterprise-facing features are being prepared.",
+    },
+    "/app/admin": {
+        title: "Admin Dashboard",
+        subtitle: "Monitor platform health and access management operations.",
+    },
+    "/app/admin/users": {
+        title: "Admin · Users",
+        subtitle: "Moderate accounts, roles, status, and verification.",
+    },
+    "/app/admin/projects": {
+        title: "Admin · Projects",
+        subtitle: "Inspect and moderate projects across the platform.",
+    },
+    "/app/admin/jobs": {
+        title: "Admin · Jobs",
+        subtitle: "Manage opportunities visibility and lifecycle.",
+    },
+    "/app/admin/portfolio": {
+        title: "Admin · Portfolio",
+        subtitle: "Review and moderate portfolio pages.",
+    },
+    "/app/admin/cv": {
+        title: "Admin · CV",
+        subtitle: "Review and moderate CV content.",
+    },
+    "/app/admin/scraping": {
+        title: "Admin · Scraping",
+        subtitle: "Control scraping operations and monitor feed stats.",
+    },
+    "/app/admin/notifications": {
+        title: "Admin · Notifications",
+        subtitle: "Notifications administration stub.",
+    },
 };
 
 export default function AppShellLayout() {

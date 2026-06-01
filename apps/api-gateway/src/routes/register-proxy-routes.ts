@@ -39,6 +39,41 @@ export function registerProxyRoutes(
     for (const route of routes) {
         const baseUrl = services[route.service].baseUrl;
         const forward = async (c: Context) => {
+            const auth = c.get("gatewayAuth");
+            const requiresRoleChecks = Boolean(route.requiredAdmin || route.allowedBaseRoles?.length);
+            if (requiresRoleChecks && !auth?.userId) {
+                return c.json(
+                    {
+                        error: {
+                            code: "UNAUTHORIZED",
+                            message: "Authentication required",
+                        },
+                    },
+                    401,
+                );
+            }
+            if (route.requiredAdmin && !auth?.isAdmin && !auth?.roles?.includes("admin")) {
+                return c.json(
+                    {
+                        error: {
+                            code: "FORBIDDEN",
+                            message: "Admin role required",
+                        },
+                    },
+                    403,
+                );
+            }
+            if (route.allowedBaseRoles?.length && auth && !route.allowedBaseRoles.includes(auth.baseRole as "student" | "enterprise")) {
+                return c.json(
+                    {
+                        error: {
+                            code: "FORBIDDEN",
+                            message: "Role is not allowed to access this resource",
+                        },
+                    },
+                    403,
+                );
+            }
             const pathWithQuery = buildUpstreamPath(route, c);
             return forwardToService(c, baseUrl, pathWithQuery, {
                 timeoutMs,

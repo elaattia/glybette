@@ -687,6 +687,70 @@ export class ProjectsService {
         return { ok: true };
     }
 
+    async adminListProjects(limit = 100): Promise<ProjectsListResponse> {
+        const safeLimit = Math.max(1, Math.min(250, limit));
+        const items = await this.projectsCollection().find({}).sort({ updatedAt: -1 }).limit(safeLimit).toArray();
+        const ids = items.map((item) => item._id);
+        const [memberCounts, commentCounts, pendingCounts] = await Promise.all([
+            this.aggregateCounts(this.membershipsCollection(), ids, "memberCount"),
+            this.aggregateCounts(this.commentsCollection(), ids, "commentCount", { status: "active" }),
+            this.aggregateCounts(this.joinRequestsCollection(), ids, "pendingCount", { status: "pending" }),
+        ]);
+        const ownerProfiles = await this.getUserSummariesByIds(items.map((item) => item.ownerId));
+        return {
+            items: items.map((item) =>
+                this.toSummaryDto(item, {
+                    memberCount: memberCounts.get(item._id.toString()) ?? 0,
+                    commentCount: commentCounts.get(item._id.toString()) ?? 0,
+                    pendingJoinRequestCount: pendingCounts.get(item._id.toString()) ?? 0,
+                    owner: ownerProfiles.get(item.ownerId),
+                }),
+            ),
+            page: 1,
+            pageSize: safeLimit,
+            total: items.length,
+        };
+    }
+
+    async adminGetProject(projectId: string): Promise<ProjectResponse> {
+        const projectObjectId = new mongoose.Types.ObjectId(projectId);
+        const project = await this.projectsCollection().findOne({ _id: projectObjectId });
+        if (!project) {
+            throw new NotFoundError("Project not found.");
+        }
+        const [members, commentCount, pendingJoinCount] = await Promise.all([
+            this.membershipsCollection().find({ projectId: projectObjectId }).sort({ createdAt: 1 }).toArray(),
+            this.commentsCollection().countDocuments({ projectId: projectObjectId, status: "active" }),
+            this.joinRequestsCollection().countDocuments({ projectId: projectObjectId, status: "pending" }),
+        ]);
+        const users = await this.getUserSummariesByIds([project.ownerId, ...members.map((member) => member.userId)]);
+        return {
+            project: this.toProjectDto(project, {
+                memberCount: members.length,
+                commentCount,
+                pendingJoinRequestCount: pendingJoinCount,
+                members: members.map((member) => ({
+                    userId: member.userId,
+                    role: member.role,
+                    joinedAt: member.createdAt.toISOString(),
+                    user: users.get(member.userId) ?? this.fallbackUserSummary(member.userId),
+                })),
+                owner: users.get(project.ownerId) ?? this.fallbackUserSummary(project.ownerId),
+            }),
+        };
+    }
+
+    async adminDeleteProject(projectId: string): Promise<{ ok: true }> {
+        const projectObjectId = new mongoose.Types.ObjectId(projectId);
+        await Promise.all([
+            this.projectsCollection().deleteOne({ _id: projectObjectId }),
+            this.membershipsCollection().deleteMany({ projectId: projectObjectId }),
+            this.joinRequestsCollection().deleteMany({ projectId: projectObjectId }),
+            this.commentsCollection().deleteMany({ projectId: projectObjectId }),
+        ]);
+        return { ok: true };
+    }
+
     private async ensureOwnerAccess(projectId: string, ownerId: string): Promise<ProjectDocument> {
         const project = await this.projectsCollection().findOne({ _id: new mongoose.Types.ObjectId(projectId) });
         if (!project) {
@@ -884,7 +948,7 @@ export class ProjectsService {
             displayName: "User",
             avatarUrl: undefined,
             isPremium: false,
-            roles: ["user"],
+            roles: ["student"],
         };
     }
 
