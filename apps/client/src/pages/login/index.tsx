@@ -1,7 +1,9 @@
-import { Navigate, useSearchParams } from "react-router-dom";
+import { Navigate, useLocation, useSearchParams } from "react-router-dom";
 import { useState } from "react";
 import { useAuth } from "@/hooks/useAuth";
 import { useEmailVerification } from "@/hooks/useEmailVerification";
+import { useUser } from "@/hooks/useUser";
+import { resolveAuthenticatedDestination } from "@/lib/auth-return-path";
 import { LoginCard } from "@/components/auth/LoginCard";
 import { AuthButton } from "@/components/auth/AuthButton";
 import { GoogleIcon, LinkedInIcon, GitHubIcon } from "@/components/auth/AuthProviderIcons";
@@ -13,9 +15,11 @@ const errorMessages: Record<string, string> = {
 };
 
 export default function LoginPage() {
+    const location = useLocation();
     const [searchParams] = useSearchParams();
     const auth = useAuth();
     const verification = useEmailVerification();
+    const { user } = useUser();
     const [email, setEmail] = useState("");
     const [password, setPassword] = useState("");
     const [passwordError, setPasswordError] = useState<string | null>(null);
@@ -30,7 +34,8 @@ export default function LoginPage() {
         if (verification.requiresEmailVerification) {
             return <Navigate to="/verify-email" replace />;
         }
-        return <Navigate to="/dashboard" replace />;
+        const from = (location.state as { from?: string } | null)?.from;
+        return <Navigate to={resolveAuthenticatedDestination(from, user)} replace />;
     }
 
     return (

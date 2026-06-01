@@ -1,4 +1,5 @@
 import { Navigate, Outlet, useLocation } from "react-router-dom";
+import { AuthGateSpinner } from "@/components/auth/AuthGateSpinner";
 import { useAuth } from "@/hooks/useAuth";
 import { useEmailVerification } from "@/hooks/useEmailVerification";
 
@@ -8,13 +9,7 @@ export function RequireAuth() {
     const location = useLocation();
 
     if (auth.isChecking || (auth.isAuthenticated && verification.isPending)) {
-        return (
-            <main className="min-h-screen flex items-center justify-center px-6">
-                <div className="w-full max-w-md rounded-2xl border border-[var(--gb-border)] bg-[var(--gb-surface)] p-6 text-center">
-                    <p className="text-sm text-[var(--gb-muted)]">Checking your session...</p>
-                </div>
-            </main>
-        );
+        return <AuthGateSpinner />;
     }
 
     if (!auth.isAuthenticated) {

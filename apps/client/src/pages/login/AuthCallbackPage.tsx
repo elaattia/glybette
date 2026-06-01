@@ -1,12 +1,16 @@
 import { useEffect } from "react";
-import { useNavigate } from "react-router-dom";
+import { useLocation, useNavigate } from "react-router-dom";
 import { useAuth } from "@/hooks/useAuth";
 import { useEmailVerification } from "@/hooks/useEmailVerification";
+import { useUser } from "@/hooks/useUser";
+import { resolveAuthenticatedDestination } from "@/lib/auth-return-path";
 
 export function AuthCallbackPage() {
     const navigate = useNavigate();
+    const location = useLocation();
     const auth = useAuth();
     const verification = useEmailVerification();
+    const { user } = useUser();
 
     useEffect(() => {
         if (auth.isChecking || (auth.isAuthenticated && verification.isPending)) {
@@ -18,7 +22,8 @@ export function AuthCallbackPage() {
                 navigate("/verify-email", { replace: true });
                 return;
             }
-            navigate("/app/dashboard", { replace: true });
+            const from = (location.state as { from?: string } | null)?.from;
+            navigate(resolveAuthenticatedDestination(from, user), { replace: true });
             return;
         }
 
@@ -26,7 +31,9 @@ export function AuthCallbackPage() {
     }, [
         auth.isAuthenticated,
         auth.isChecking,
+        location.state,
         navigate,
+        user,
         verification.isPending,
         verification.requiresEmailVerification,
     ]);

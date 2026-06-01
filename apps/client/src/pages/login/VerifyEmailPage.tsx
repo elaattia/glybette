@@ -1,16 +1,20 @@
 import { useEffect, useMemo, useState } from "react";
-import { Navigate, useNavigate } from "react-router-dom";
+import { Navigate, useLocation, useNavigate } from "react-router-dom";
 import { REGEXP_ONLY_DIGITS } from "input-otp";
 import { useAuth } from "@/hooks/useAuth";
 import { useEmailVerification } from "@/hooks/useEmailVerification";
+import { useUser } from "@/hooks/useUser";
+import { resolveAuthenticatedDestination } from "@/lib/auth-return-path";
 import { ApiError } from "@/lib/api";
 import { InputOTP, InputOTPGroup, InputOTPSlot } from "@/components/ui/input-otp";
 import "./login.css";
 
 export function VerifyEmailPage() {
     const navigate = useNavigate();
+    const location = useLocation();
     const auth = useAuth();
     const verification = useEmailVerification();
+    const { user } = useUser();
     const [code, setCode] = useState("");
     const [requestMessage, setRequestMessage] = useState<string | null>(null);
     const [errorMessage, setErrorMessage] = useState<string | null>(null);
@@ -35,11 +39,14 @@ export function VerifyEmailPage() {
         }
 
         if (!verification.requiresEmailVerification) {
-            navigate("/app/dashboard", { replace: true });
+            const from = (location.state as { from?: string } | null)?.from;
+            navigate(resolveAuthenticatedDestination(from, user), { replace: true });
         }
     }, [
         auth.isAuthenticated,
+        location.state,
         navigate,
+        user,
         verification.isError,
         verification.isPending,
         verification.requiresEmailVerification,
@@ -64,7 +71,8 @@ export function VerifyEmailPage() {
         setRequestMessage(null);
         try {
             await verification.verifyOtp(code.trim());
-            navigate("/app/dashboard", { replace: true });
+            const from = (location.state as { from?: string } | null)?.from;
+            navigate(resolveAuthenticatedDestination(from, user), { replace: true });
         } catch (error) {
             const message = error instanceof ApiError ? error.message : "Unable to verify OTP code";
             setErrorMessage(message);

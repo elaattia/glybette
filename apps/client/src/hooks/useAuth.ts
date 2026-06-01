@@ -4,7 +4,6 @@ import { useEffect } from "react";
 import {
     authSessionAtom,
     setAuthenticatedSessionAtom,
-    setAuthCheckingAtom,
     setUnauthenticatedSessionAtom,
 } from "@/state/auth/auth.atoms";
 import { authClient } from "@/lib/auth-client";
@@ -23,37 +22,35 @@ function assertNoAuthError(result: BetterAuthMaybeError, fallbackMessage: string
 }
 
 export function useAuthBootstrap() {
-    const setChecking = useSetAtom(setAuthCheckingAtom);
     const setAuthenticated = useSetAtom(setAuthenticatedSessionAtom);
     const setUnauthenticated = useSetAtom(setUnauthenticatedSessionAtom);
     const sessionQuery = authClient.useSession();
 
     useEffect(() => {
-        if (sessionQuery.data !== undefined) {
-            return;
-        }
-        if (sessionQuery.isPending || sessionQuery.isRefetching) {
-            setChecking();
-        }
-    }, [sessionQuery.data, sessionQuery.isPending, sessionQuery.isRefetching, setChecking]);
-
-    useEffect(() => {
-        if (!sessionQuery.data?.session) {
+        if (sessionQuery.isPending) {
             return;
         }
 
-        setAuthenticated(sessionQuery.data);
-    }, [sessionQuery.data, setAuthenticated]);
-
-    useEffect(() => {
-        if (sessionQuery.data === undefined) {
+        if (sessionQuery.data?.session) {
+            setAuthenticated(sessionQuery.data);
             return;
         }
 
-        if (!sessionQuery.data?.session) {
+        if (sessionQuery.isFetching) {
+            return;
+        }
+
+        if (sessionQuery.isFetched) {
             setUnauthenticated();
         }
-    }, [sessionQuery.data, setUnauthenticated]);
+    }, [
+        sessionQuery.data,
+        sessionQuery.isPending,
+        sessionQuery.isFetching,
+        sessionQuery.isFetched,
+        setAuthenticated,
+        setUnauthenticated,
+    ]);
 
     return sessionQuery;
 }
@@ -75,13 +72,14 @@ export function useAuth() {
         },
     });
 
+    const isChecking = !authSession.bootstrapped || authSession.status === "checking";
+    const isAuthenticated = authSession.bootstrapped && authSession.status === "authenticated";
+
     return {
         ...authSession,
         session: sessionQuery.data?.session ?? null,
-        isAuthenticated: authSession.status === "authenticated" && Boolean(sessionQuery.data?.session),
-        isChecking:
-            authSession.status === "checking" ||
-            (sessionQuery.data === undefined && (sessionQuery.isPending || sessionQuery.isRefetching)),
+        isAuthenticated,
+        isChecking,
         startGoogleSignIn: async () => {
             const result = (await authClient.signIn.social({
                 provider: "google",
