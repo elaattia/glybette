@@ -27,12 +27,8 @@ const studentNavItems = [
     { to: "/app/portfolio", label: "Portfolio", icon: FolderKanban },
     { to: "/app/opportunities", label: "Opportunities", icon: BriefcaseBusiness },
     { to: "/app/projects", label: "Projects", icon: Handshake },
-    { to: "/app/settings", label: "Settings", icon: Settings },
 ] as const;
-const enterpriseNavItems = [
-    { to: "/app/enterprise", label: "Enterprise", icon: BriefcaseBusiness },
-    { to: "/app/settings", label: "Settings", icon: Settings },
-] as const;
+const enterpriseNavItems = [{ to: "/app/enterprise", label: "Enterprise", icon: BriefcaseBusiness }] as const;
 const adminNavItems = [
     { to: "/app/admin", label: "Overview", icon: Shield, end: true },
     { to: "/app/admin/users", label: "Users", icon: Users },

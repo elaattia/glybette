@@ -5,6 +5,9 @@ import { ACCOUNT_STATUSES, BASE_ROLES, type AccountStatus, type BaseRole } from 
 import { BadRequestError, NotFoundError, UnauthorizedError } from "@glybette/utils";
 import type {
     AdminUsersListResponse,
+    OwnAccountResponse,
+    OwnProfileResponse,
+    UpdateOwnAccountRequest,
     ResolveUsersRequest,
     ResolveUsersResponse,
     UpdateOwnProfileRequest,
@@ -43,18 +46,46 @@ export class UserController {
     }
 
     /** PUT /users/me/profile - update current user profile and emit profile event. */
+    async getOwnProfile(c: Context): Promise<Response> {
+        const auth = getUserFromHeaders(c.req.raw.headers);
+        if (!auth) {
+            throw new UnauthorizedError("Missing auth context");
+        }
+        const profile = await this.userService.getOwnProfile(auth.userId);
+        const response: OwnProfileResponse = { profile };
+        return c.json(response, 200);
+    }
+
+    /** PUT /users/me/profile - update current user profile. */
     async updateOwnProfile(c: Context): Promise<Response> {
         const auth = getUserFromHeaders(c.req.raw.headers);
         if (!auth) {
             throw new UnauthorizedError("Missing auth context");
         }
         const body = (await c.req.json().catch(() => null)) as UpdateOwnProfileRequest | null;
-        if (!body || typeof body.displayName !== "string") {
+        if (!body || !body.profile || typeof body.profile !== "object") {
             throw new BadRequestError("Invalid profile payload.");
         }
 
-        const user = await this.userService.updateOwnProfile(auth.userId, body);
-        return c.json({ user }, 200);
+        const profile = await this.userService.updateOwnProfile(auth.userId, body);
+        const response: OwnProfileResponse = { profile };
+        return c.json(response, 200);
+    }
+
+    /** PUT /users/me/account - update current account identity fields. */
+    async updateOwnAccount(c: Context): Promise<Response> {
+        const auth = getUserFromHeaders(c.req.raw.headers);
+        if (!auth) {
+            throw new UnauthorizedError("Missing auth context");
+        }
+        const body = (await c.req.json().catch(() => null)) as UpdateOwnAccountRequest | null;
+        if (!body || typeof body.firstName !== "string" || typeof body.lastName !== "string" || typeof body.email !== "string") {
+            throw new BadRequestError("Invalid account payload.");
+        }
+
+        const account = await this.userService.updateOwnAccount(auth.userId, body);
+        const response: OwnAccountResponse = account;
+        return c.json(response, 200);
     }
 
     /** POST /users/resolve - internal API to resolve public summaries for multiple users. */

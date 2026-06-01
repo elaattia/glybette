@@ -16,6 +16,8 @@ describe("user service mappers", () => {
             accountStatus: "active",
             roles: ["student"],
             provider: "google",
+            hasPassword: false,
+            connectedProviders: ["google"],
         });
 
         assert.deepEqual(summary, {

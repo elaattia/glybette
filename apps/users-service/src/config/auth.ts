@@ -37,6 +37,9 @@ export function createAuth(env: UsersServiceEnv) {
         },
         user: {
             modelName: "users",
+            deleteUser: {
+                enabled: true,
+            },
             additionalFields: {
                 isPremium: {
                     type: "boolean",

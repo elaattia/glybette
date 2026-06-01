@@ -1,0 +1,466 @@
+import { type ReactNode, useEffect, useMemo, useState } from "react";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { useNavigate } from "react-router-dom";
+import { CheckCircle2 } from "lucide-react";
+import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { Input } from "@/components/ui/input";
+import { GitHubIcon, GoogleIcon, LinkedInIcon } from "@/components/auth/AuthProviderIcons";
+import { useAuth } from "@/hooks/useAuth";
+import { useEmailVerification, verificationQueryKeys } from "@/hooks/useEmailVerification";
+import { useUser, userQueryKeys } from "@/hooks/useUser";
+import { ApiError, apiRequest } from "@/lib/api";
+import { cn } from "@/lib/utils";
+import type { AuthProvider, OwnAccountResponse, OwnProfileResponse } from "@glybette/contracts";
+
+const ACCOUNT_DELETE_PHRASE = "DELETE MY ACCOUNT";
+
+const PROVIDER_BUTTON_BASE =
+    "inline-flex h-auto min-h-12 w-full items-center justify-start gap-3 rounded-xl border px-4 py-3 text-sm font-medium transition-[background-color,border-color,box-shadow] duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--gb-app-ring)] disabled:cursor-default";
+
+const CONNECTED_PROVIDER_BUTTON =
+    "border-emerald-700 bg-emerald-600 text-white shadow-sm disabled:opacity-90 disabled:hover:border-emerald-700 disabled:hover:bg-emerald-600 dark:border-emerald-500 dark:bg-emerald-600 dark:text-emerald-50 dark:disabled:hover:border-emerald-500 dark:disabled:hover:bg-emerald-600";
+
+const CONNECTABLE_PROVIDERS: Array<{
+    provider: Extract<AuthProvider, "google" | "github" | "linkedin">;
+    label: string;
+    icon: ReactNode;
+    disconnectClassName: string;
+}> = [
+    {
+        provider: "google",
+        label: "Google",
+        icon: <GoogleIcon />,
+        disconnectClassName:
+            "border-[#dadce0] bg-white text-[#1f1f1f] hover:border-[#aecbfa] hover:bg-[#f8f9fa] hover:shadow-[0_1px_2px_rgba(66,133,244,0.2)] dark:border-[var(--gb-border)] dark:bg-[var(--gb-surface2)] dark:text-[var(--gb-text)] dark:hover:border-[#4285f4]/45 dark:hover:bg-[#4285f4]/10",
+    },
+    {
+        provider: "github",
+        label: "GitHub",
+        icon: <GitHubIcon />,
+        disconnectClassName:
+            "border-[#30363d] bg-[#0d1117] text-[#f0f6fc] hover:border-[#8b949e] hover:bg-[#161b22] hover:shadow-[0_1px_2px_rgba(0,0,0,0.35)] dark:border-[#30363d] dark:bg-[#0d1117] dark:text-[#f0f6fc] dark:hover:border-[#8b949e] dark:hover:bg-[#161b22]",
+    },
+    {
+        provider: "linkedin",
+        label: "LinkedIn",
+        icon: <LinkedInIcon />,
+        disconnectClassName:
+            "border-[#0a66c2] bg-[#0a66c2] text-white hover:border-[#004182] hover:bg-[#004182] hover:shadow-[0_1px_2px_rgba(0,65,130,0.35)] dark:border-[#0a66c2] dark:bg-[#0a66c2] dark:text-white dark:hover:border-[#93c5fd] dark:hover:bg-[#004182]",
+    },
+];
+
+export default function SettingsPage() {
+    const navigate = useNavigate();
+    const queryClient = useQueryClient();
+    const auth = useAuth();
+    const verification = useEmailVerification();
+    const { user } = useUser();
+
+    const [accountForm, setAccountForm] = useState({ firstName: "", lastName: "", email: "" });
+    const [profileForm, setProfileForm] = useState({ phone: "", location: "" });
+    const [passwordForm, setPasswordForm] = useState({ currentPassword: "", newPassword: "", confirmPassword: "" });
+    const [deleteOpen, setDeleteOpen] = useState(false);
+    const [deleteForm, setDeleteForm] = useState({ password: "", confirmText: "" });
+    const [accountFeedback, setAccountFeedback] = useState<string | null>(null);
+    const [profileFeedback, setProfileFeedback] = useState<string | null>(null);
+    const [passwordFeedback, setPasswordFeedback] = useState<string | null>(null);
+    const [deleteFeedback, setDeleteFeedback] = useState<string | null>(null);
+
+    const requiresPasswordForDelete = user?.provider === "email";
+    const hasPasswordCredentials = user?.hasPassword ?? user?.provider === "email";
+    const connectedProviderList =
+        user?.connectedProviders && user.connectedProviders.length > 0
+            ? user.connectedProviders
+            : user?.provider
+              ? [user.provider]
+              : [];
+    const connectedProviders = new Set(connectedProviderList);
+
+    useEffect(() => {
+        if (!user) return;
+        setAccountForm((prev) => ({
+            firstName: prev.firstName || user.firstName || user.displayName.split(/\s+/)[0] || "",
+            lastName: prev.lastName || user.lastName || user.displayName.split(/\s+/).slice(1).join(" ") || "",
+            email: prev.email || user.email || "",
+        }));
+    }, [user]);
+
+    const profileQuery = useQuery({
+        queryKey: ["user", "settings-profile"],
+        enabled: auth.isAuthenticated,
+        queryFn: () => apiRequest<OwnProfileResponse>("/api/users/me/profile"),
+    });
+
+    useEffect(() => {
+        if (!profileQuery.data?.profile) return;
+        setProfileForm({
+            phone: profileQuery.data.profile.phone ?? "",
+            location: profileQuery.data.profile.location ?? "",
+        });
+    }, [profileQuery.data]);
+
+    const accountMutation = useMutation({
+        mutationFn: (payload: { firstName: string; lastName: string; email: string }) =>
+            apiRequest<OwnAccountResponse>("/api/users/me/account", {
+                method: "PUT",
+                body: JSON.stringify(payload),
+            }),
+        onSuccess: async (result) => {
+            await queryClient.invalidateQueries({ queryKey: userQueryKeys.me });
+            await queryClient.invalidateQueries({ queryKey: verificationQueryKeys.status });
+            setAccountFeedback("Account details updated.");
+
+            if (result.requiresEmailVerification) {
+                try {
+                    await verification.requestOtp();
+                } catch {
+                    // Gate will still force verification; OTP can be retried on verify page.
+                }
+                navigate("/verify-email", { replace: true, state: { from: "/app/settings" } });
+            }
+        },
+    });
+
+    const profileMutation = useMutation({
+        mutationFn: (payload: { phone?: string; location?: string }) =>
+            apiRequest<OwnProfileResponse>("/api/users/me/profile", {
+                method: "PUT",
+                body: JSON.stringify({ profile: payload }),
+            }),
+        onSuccess: () => {
+            setProfileFeedback("Contact information updated.");
+            void queryClient.invalidateQueries({ queryKey: ["user", "settings-profile"] });
+        },
+    });
+
+    const passwordMutation = useMutation({
+        mutationFn: async (payload: { currentPassword?: string; newPassword: string }) => {
+            await auth.changePassword({
+                currentPassword: payload.currentPassword,
+                newPassword: payload.newPassword,
+            });
+        },
+        onSuccess: async () => {
+            setPasswordFeedback(hasPasswordCredentials ? "Password updated successfully." : "Password set successfully.");
+            setPasswordForm({ currentPassword: "", newPassword: "", confirmPassword: "" });
+            await queryClient.invalidateQueries({ queryKey: userQueryKeys.me });
+        },
+    });
+
+    const deleteMutation = useMutation({
+        mutationFn: async (payload: { password?: string }) => {
+            await auth.deleteAccount(payload.password);
+        },
+        onSuccess: () => {
+            navigate("/", { replace: true });
+        },
+    });
+
+    const accountNamePreview = useMemo(
+        () => `${accountForm.firstName.trim()} ${accountForm.lastName.trim()}`.trim(),
+        [accountForm.firstName, accountForm.lastName],
+    );
+
+    const handleApiError = (error: unknown, fallback: string) => {
+        if (error instanceof ApiError) return error.message;
+        if (error instanceof Error && error.message) return error.message;
+        return fallback;
+    };
+
+    return (
+        <div className="mx-auto max-w-4xl space-y-4">
+            <Card className="border-[var(--gb-border)] bg-[var(--gb-app-panel-bg)]">
+                <CardHeader className="px-5 pt-5 md:px-6">
+                    <CardTitle className="text-base text-[var(--gb-text)]">Account</CardTitle>
+                    <CardDescription>Update your identity and email address.</CardDescription>
+                </CardHeader>
+                <CardContent className="px-5 pb-5 md:px-6 md:pb-6">
+                    <form
+                        className="space-y-3"
+                        onSubmit={(event) => {
+                            event.preventDefault();
+                            setAccountFeedback(null);
+                            const run = async () => {
+                                try {
+                                    await accountMutation.mutateAsync({
+                                        firstName: accountForm.firstName.trim(),
+                                        lastName: accountForm.lastName.trim(),
+                                        email: accountForm.email.trim(),
+                                    });
+                                } catch (error) {
+                                    setAccountFeedback(handleApiError(error, "Unable to update account."));
+                                }
+                            };
+                            void run();
+                        }}>
+                        <div className="grid gap-3 sm:grid-cols-2">
+                            <Input
+                                value={accountForm.firstName}
+                                onChange={(event) => setAccountForm((prev) => ({ ...prev, firstName: event.target.value }))}
+                                placeholder="First name"
+                                required
+                            />
+                            <Input
+                                value={accountForm.lastName}
+                                onChange={(event) => setAccountForm((prev) => ({ ...prev, lastName: event.target.value }))}
+                                placeholder="Last name"
+                                required
+                            />
+                        </div>
+                        <Input
+                            type="email"
+                            value={accountForm.email}
+                            onChange={(event) => setAccountForm((prev) => ({ ...prev, email: event.target.value }))}
+                            placeholder="Email"
+                            required
+                        />
+                        <div className="flex flex-wrap items-center gap-2">
+                            <Badge variant="outline" tone={user?.emailVerified ? "success" : "warning"}>
+                                {user?.emailVerified ? "Verified email" : "Email verification required"}
+                            </Badge>
+                            {accountNamePreview ? (
+                                <Badge variant="outline" tone="neutral">
+                                    Full Name: {accountNamePreview}
+                                </Badge>
+                            ) : null}
+                        </div>
+                        {accountFeedback ? <p className="text-sm text-[var(--gb-muted)]">{accountFeedback}</p> : null}
+                        <Button type="submit" disabled={accountMutation.isPending}>
+                            {accountMutation.isPending ? "Saving..." : "Save account"}
+                        </Button>
+                    </form>
+                </CardContent>
+            </Card>
+
+            <Card className="border-[var(--gb-border)] bg-[var(--gb-app-panel-bg)]">
+                <CardHeader className="px-5 pt-5 md:px-6">
+                    <CardTitle className="text-base text-[var(--gb-text)]">Contact profile</CardTitle>
+                    <CardDescription>Manage phone and location used across your account.</CardDescription>
+                </CardHeader>
+                <CardContent className="px-5 pb-5 md:px-6 md:pb-6">
+                    <form
+                        className="space-y-3"
+                        onSubmit={(event) => {
+                            event.preventDefault();
+                            setProfileFeedback(null);
+                            const run = async () => {
+                                try {
+                                    await profileMutation.mutateAsync({
+                                        phone: profileForm.phone.trim() || undefined,
+                                        location: profileForm.location.trim() || undefined,
+                                    });
+                                } catch (error) {
+                                    setProfileFeedback(handleApiError(error, "Unable to update profile."));
+                                }
+                            };
+                            void run();
+                        }}>
+                        <Input
+                            value={profileForm.phone}
+                            onChange={(event) => setProfileForm((prev) => ({ ...prev, phone: event.target.value }))}
+                            placeholder="Phone number"
+                        />
+                        <Input
+                            value={profileForm.location}
+                            onChange={(event) => setProfileForm((prev) => ({ ...prev, location: event.target.value }))}
+                            placeholder="Location"
+                        />
+                        {profileQuery.isPending ? <p className="text-sm text-[var(--gb-muted)]">Loading contact profile...</p> : null}
+                        {profileFeedback ? <p className="text-sm text-[var(--gb-muted)]">{profileFeedback}</p> : null}
+                        <Button type="submit" disabled={profileMutation.isPending}>
+                            {profileMutation.isPending ? "Saving..." : "Save contact profile"}
+                        </Button>
+                    </form>
+                </CardContent>
+            </Card>
+
+            <Card className="border-[var(--gb-border)] bg-[var(--gb-app-panel-bg)]">
+                <CardHeader className="px-5 pt-5 md:px-6">
+                    <CardTitle className="text-base text-[var(--gb-text)]">Security</CardTitle>
+                    <CardDescription>
+                        {hasPasswordCredentials
+                            ? "Change your password for email/password sign-in."
+                            : "Set a password to enable email/password sign-in for this account."}
+                    </CardDescription>
+                </CardHeader>
+                <CardContent className="px-5 pb-5 md:px-6 md:pb-6">
+                    <form
+                        className="space-y-3"
+                        onSubmit={(event) => {
+                            event.preventDefault();
+                            setPasswordFeedback(null);
+                            if (passwordForm.newPassword !== passwordForm.confirmPassword) {
+                                setPasswordFeedback("New password and confirmation must match.");
+                                return;
+                            }
+                            const run = async () => {
+                                try {
+                                    await passwordMutation.mutateAsync({
+                                        currentPassword: hasPasswordCredentials ? passwordForm.currentPassword : undefined,
+                                        newPassword: passwordForm.newPassword,
+                                    });
+                                } catch (error) {
+                                    setPasswordFeedback(
+                                        handleApiError(
+                                            error,
+                                            hasPasswordCredentials ? "Unable to change password." : "Unable to set password.",
+                                        ),
+                                    );
+                                }
+                            };
+                            void run();
+                        }}>
+                        {hasPasswordCredentials ? (
+                            <Input
+                                type="password"
+                                value={passwordForm.currentPassword}
+                                onChange={(event) =>
+                                    setPasswordForm((prev) => ({ ...prev, currentPassword: event.target.value }))
+                                }
+                                placeholder="Current password"
+                                required
+                            />
+                        ) : null}
+                        <Input
+                            type="password"
+                            value={passwordForm.newPassword}
+                            onChange={(event) => setPasswordForm((prev) => ({ ...prev, newPassword: event.target.value }))}
+                            placeholder="New password"
+                            required
+                        />
+                        <Input
+                            type="password"
+                            value={passwordForm.confirmPassword}
+                            onChange={(event) =>
+                                setPasswordForm((prev) => ({ ...prev, confirmPassword: event.target.value }))
+                            }
+                            placeholder="Confirm new password"
+                            required
+                        />
+                        {passwordFeedback ? <p className="text-sm text-[var(--gb-muted)]">{passwordFeedback}</p> : null}
+                        <Button type="submit" disabled={passwordMutation.isPending}>
+                            {passwordMutation.isPending ? "Updating..." : hasPasswordCredentials ? "Change password" : "Set password"}
+                        </Button>
+                    </form>
+                </CardContent>
+            </Card>
+
+            <Card className="border-[var(--gb-border)] bg-[var(--gb-app-panel-bg)]">
+                <CardHeader className="px-5 pt-5 md:px-6">
+                    <CardTitle className="text-base text-[var(--gb-text)]">Connected accounts</CardTitle>
+                    <CardDescription>Manage sign-in providers linked to your account.</CardDescription>
+                </CardHeader>
+                <CardContent className="grid gap-3 px-5 pb-5 md:grid-cols-2 md:px-6 md:pb-6">
+                    {CONNECTABLE_PROVIDERS.map((providerItem) => {
+                        const isConnected = connectedProviders.has(providerItem.provider);
+                        return (
+                            <button
+                                key={providerItem.provider}
+                                type="button"
+                                disabled={isConnected}
+                                className={cn(
+                                    PROVIDER_BUTTON_BASE,
+                                    isConnected ? CONNECTED_PROVIDER_BUTTON : providerItem.disconnectClassName,
+                                )}>
+                                <span className="flex h-5 w-5 shrink-0 items-center justify-center">{providerItem.icon}</span>
+                                {isConnected ? (
+                                    <span className="inline-flex items-center gap-1.5">
+                                        <CheckCircle2 className="h-4 w-4 shrink-0 text-white dark:text-emerald-50" aria-hidden />
+                                        <span>{`Connected to ${providerItem.label}`}</span>
+                                    </span>
+                                ) : (
+                                    <span>{`Connect to ${providerItem.label}`}</span>
+                                )}
+                            </button>
+                        );
+                    })}
+                </CardContent>
+            </Card>
+
+            <Card className="border-red-500/30 bg-[var(--gb-app-panel-bg)]">
+                <CardHeader className="px-5 pt-5 md:px-6">
+                    <CardTitle className="text-base text-red-400">Danger zone</CardTitle>
+                    <CardDescription>Permanently delete your account and all active sessions.</CardDescription>
+                </CardHeader>
+                <CardContent className="px-5 pb-5 md:px-6 md:pb-6">
+                    <Button type="button" variant="destructive" onClick={() => setDeleteOpen(true)}>
+                        Delete account
+                    </Button>
+                </CardContent>
+            </Card>
+
+            <Dialog
+                open={deleteOpen}
+                onOpenChange={(open) => {
+                    setDeleteOpen(open);
+                    if (!open) {
+                        setDeleteFeedback(null);
+                        setDeleteForm({ password: "", confirmText: "" });
+                    }
+                }}>
+                <DialogContent showCloseButton={false}>
+                    <DialogHeader>
+                        <DialogTitle className="text-2xl">Delete account</DialogTitle>
+                        <DialogDescription>
+                            Type <span className="font-semibold">{ACCOUNT_DELETE_PHRASE}</span> to confirm.
+                            {requiresPasswordForDelete ? " Enter your current password to continue." : " Password is optional for this provider."}
+                        </DialogDescription>
+                    </DialogHeader>
+
+                    <div className="space-y-3">
+                        <Input
+                            value={deleteForm.confirmText}
+                            onChange={(event) =>
+                                setDeleteForm((prev) => ({ ...prev, confirmText: event.target.value }))
+                            }
+                            placeholder={ACCOUNT_DELETE_PHRASE}
+                        />
+                        <Input
+                            type="password"
+                            value={deleteForm.password}
+                            onChange={(event) => setDeleteForm((prev) => ({ ...prev, password: event.target.value }))}
+                            placeholder={requiresPasswordForDelete ? "Current password (required)" : "Current password (optional)"}
+                        />
+                        {deleteFeedback ? <p className="text-sm text-red-300">{deleteFeedback}</p> : null}
+                    </div>
+
+                    <DialogFooter>
+                        <Button type="button" variant="outline" onClick={() => setDeleteOpen(false)} disabled={deleteMutation.isPending}>
+                            Cancel
+                        </Button>
+                        <Button
+                            type="button"
+                            variant="destructive"
+                            disabled={deleteMutation.isPending}
+                            onClick={() => {
+                                setDeleteFeedback(null);
+                                if (deleteForm.confirmText.trim() !== ACCOUNT_DELETE_PHRASE) {
+                                    setDeleteFeedback(`Please type exactly: ${ACCOUNT_DELETE_PHRASE}`);
+                                    return;
+                                }
+                                if (requiresPasswordForDelete && !deleteForm.password) {
+                                    setDeleteFeedback("Current password is required for email/password accounts.");
+                                    return;
+                                }
+                                const run = async () => {
+                                    try {
+                                        await deleteMutation.mutateAsync({
+                                            password: deleteForm.password.trim() || undefined,
+                                        });
+                                    } catch (error) {
+                                        setDeleteFeedback(handleApiError(error, "Unable to delete account."));
+                                    }
+                                };
+                                void run();
+                            }}>
+                            {deleteMutation.isPending ? "Deleting..." : "Delete permanently"}
+                        </Button>
+                    </DialogFooter>
+                </DialogContent>
+            </Dialog>
+        </div>
+    );
+}

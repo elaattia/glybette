@@ -9,7 +9,6 @@ import { useAuthBootstrap } from "@/hooks/useAuth";
 import { useUser } from "@/hooks/useUser";
 import AppShellLayout from "@/components/app-shell";
 import DashboardPage from "@/pages/app/dashboard";
-import AppSectionPlaceholder from "@/pages/app/AppSectionPlaceholder";
 import CvListPage from "@/pages/app/cv-builder";
 import CvCreatePage from "@/pages/app/cv-builder/create";
 import CvEditorPage from "@/pages/app/cv-builder/[id]";
@@ -22,6 +21,7 @@ import ProjectCreatePage from "@/pages/app/projects/create";
 import ProjectDetailPage from "@/pages/app/projects/[id]";
 import { PublicPortfolioPage } from "@/pages/portfolio/PublicPortfolioPage";
 import { PortfolioRoot } from "@/pages/portfolio/PortfolioRoot";
+import SettingsPage from "@/pages/app/settings";
 import EnterpriseDashboardPage from "@/pages/app/enterprise";
 import AdminDashboardPage from "@/pages/app/admin";
 import AdminUsersManagementPage from "@/pages/app/admin/users";
@@ -58,7 +58,7 @@ function App() {
                 <Route path="/app" element={<AppShellLayout />}>
                     <Route index element={<AppHomeRedirect />} />
                     <Route path="enterprise" element={<EnterpriseDashboardPage />} />
-                    <Route path="settings" element={<AppSectionPlaceholder sectionName="Settings" />} />
+                    <Route path="settings" element={<SettingsPage />} />
 
                     <Route element={<RequireBaseRole allowed={["student"]} redirectTo="/app/enterprise" />}>
                         <Route path="dashboard" element={<DashboardPage />} />

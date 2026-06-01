@@ -11,6 +11,7 @@ import {
     type UpdateOwnProfileRequest,
     type UserDTO,
     type UsersAdminOverviewStatsResponse,
+    type UpdateOwnAccountRequest,
 } from "@glybette/contracts";
 import {
     ROUTING_KEY_USERS_PROFILE_UPSERTED,
@@ -32,15 +33,73 @@ type BetterAuthUserDocument = mongoose.Document & {
     isAdmin?: boolean;
     accountStatus?: AccountStatus;
     emailVerified?: boolean;
+    firstName?: string;
+    lastName?: string;
+    phone?: string;
+    location?: string;
 };
 
 type BetterAuthAccountDocument = {
     userId: string;
     providerId?: string;
+    createdAt?: Date;
 };
 
 function isAuthProvider(value: string | undefined): value is AuthProvider {
     return Boolean(value && AUTH_PROVIDERS.includes(value as AuthProvider));
+}
+
+function normalizeProvider(value: string | undefined): AuthProvider {
+    if (value === "credential") {
+        return "email";
+    }
+    if (isAuthProvider(value)) {
+        return value;
+    }
+    return "google";
+}
+
+function buildAuthCapabilities(accounts: BetterAuthAccountDocument[]): {
+    provider: AuthProvider;
+    hasPassword: boolean;
+    connectedProviders: AuthProvider[];
+} {
+    const connectedProviders = new Set<AuthProvider>();
+    let hasPassword = false;
+
+    for (const account of accounts) {
+        const provider = normalizeProvider(account.providerId);
+        connectedProviders.add(provider);
+        if (provider === "email") {
+            hasPassword = true;
+        }
+    }
+
+    const sortedAccounts = [...accounts].sort((a, b) => {
+        const left = a.createdAt ? new Date(a.createdAt).getTime() : Number.MAX_SAFE_INTEGER;
+        const right = b.createdAt ? new Date(b.createdAt).getTime() : Number.MAX_SAFE_INTEGER;
+        return left - right;
+    });
+
+    const primaryProvider = sortedAccounts[0]?.providerId
+        ? normalizeProvider(sortedAccounts[0].providerId)
+        : hasPassword
+          ? "email"
+          : "google";
+
+    const providerOrder = ["google", "github", "linkedin", "email"] as const;
+    const orderedProviders: AuthProvider[] = providerOrder.filter((provider) =>
+        connectedProviders.has(provider),
+    );
+    if (orderedProviders.length === 0) {
+        orderedProviders.push(primaryProvider);
+    }
+
+    return {
+        provider: primaryProvider,
+        hasPassword,
+        connectedProviders: orderedProviders,
+    };
 }
 
 function isBaseRole(value: string | undefined): value is BaseRole {
@@ -64,12 +123,26 @@ function normalizeRoleContext(user: BetterAuthUserDocument): {
     return { baseRole, isAdmin, accountStatus, roles };
 }
 
-export function toUserDTO(user: BetterAuthUserDocument, account: BetterAuthAccountDocument | null): UserDTO {
+export function toUserDTO(user: BetterAuthUserDocument, accounts: BetterAuthAccountDocument[]): UserDTO {
     const roleContext = normalizeRoleContext(user);
+    const authCapabilities = buildAuthCapabilities(accounts);
+    const firstName = user.firstName?.trim();
+    const lastName = user.lastName?.trim();
+    const derivedFirstName = !firstName && user.name ? user.name.trim().split(/\s+/)[0] : undefined;
+    const derivedLastName =
+        !lastName && user.name
+            ? user
+                  .name.trim()
+                  .split(/\s+/)
+                  .slice(1)
+                  .join(" ") || undefined
+            : undefined;
     return {
         id: user._id.toString(),
         email: user.email,
         emailVerified: Boolean(user.emailVerifiedAt),
+        firstName: firstName || derivedFirstName,
+        lastName: lastName || derivedLastName,
         displayName: user.name ?? "User",
         avatarUrl: user.image,
         isPremium: Boolean(user.isPremium),
@@ -77,7 +150,9 @@ export function toUserDTO(user: BetterAuthUserDocument, account: BetterAuthAccou
         isAdmin: roleContext.isAdmin,
         accountStatus: roleContext.accountStatus,
         roles: roleContext.roles,
-        provider: isAuthProvider(account?.providerId) ? account.providerId : "google",
+        provider: authCapabilities.provider,
+        hasPassword: authCapabilities.hasPassword,
+        connectedProviders: authCapabilities.connectedProviders,
     };
 }
 
@@ -136,11 +211,13 @@ export class UserService {
             throw new NotFoundError("User not found");
         }
 
-        const account = await db
+        const accounts = await db
             .collection<BetterAuthAccountDocument>("auth_accounts")
-            .findOne({ userId }, { sort: { createdAt: 1 } });
+            .find({ userId })
+            .sort({ createdAt: 1 })
+            .toArray();
 
-        return toUserDTO(user, account);
+        return toUserDTO(user, accounts);
     }
 
     async resolvePublicByIds(userIds: string[]): Promise<PublicUserSummaryDTO[]> {
@@ -170,30 +247,47 @@ export class UserService {
             .find({ userId: { $in: validIds } })
             .sort({ createdAt: 1 })
             .toArray();
-        const accountByUserId = new Map<string, BetterAuthAccountDocument>();
+        const accountsByUserId = new Map<string, BetterAuthAccountDocument[]>();
         for (const account of accounts) {
-            if (!accountByUserId.has(account.userId)) {
-                accountByUserId.set(account.userId, account);
-            }
+            const existing = accountsByUserId.get(account.userId) ?? [];
+            existing.push(account);
+            accountsByUserId.set(account.userId, existing);
         }
 
         return users.map((user) => {
-            const dto = toUserDTO(user, accountByUserId.get(user._id.toString()) ?? null);
+            const dto = toUserDTO(user, accountsByUserId.get(user._id.toString()) ?? []);
             return toPublicUserSummary(dto);
         });
     }
 
-    async updateOwnProfile(userId: string, payload: UpdateOwnProfileRequest): Promise<UserDTO> {
-        const displayName = payload.displayName?.trim();
-        const avatarUrl = payload.avatarUrl?.trim();
-        if (!displayName || displayName.length < 2) {
-            throw new BadRequestError("Display name must be at least 2 characters.");
+    async getOwnProfile(userId: string): Promise<{ phone?: string; location?: string }> {
+        const db = mongoose.connection.db;
+        if (!db) {
+            throw new Error("Mongoose database connection is not initialized");
         }
-        if (displayName.length > 80) {
-            throw new BadRequestError("Display name cannot exceed 80 characters.");
+        const user = await db
+            .collection<BetterAuthUserDocument>("users")
+            .findOne(
+                { _id: new mongoose.Types.ObjectId(userId) },
+                { projection: { phone: 1, location: 1 } },
+            );
+        if (!user) {
+            throw new NotFoundError("User not found");
         }
-        if (avatarUrl && avatarUrl.length > 1000) {
-            throw new BadRequestError("Avatar URL is too long.");
+        return {
+            phone: user.phone?.trim() || undefined,
+            location: user.location?.trim() || undefined,
+        };
+    }
+
+    async updateOwnProfile(userId: string, payload: UpdateOwnProfileRequest): Promise<{ phone?: string; location?: string }> {
+        const phone = payload.profile?.phone?.trim();
+        const location = payload.profile?.location?.trim();
+        if (phone && phone.length > 40) {
+            throw new BadRequestError("Phone number cannot exceed 40 characters.");
+        }
+        if (location && location.length > 120) {
+            throw new BadRequestError("Location cannot exceed 120 characters.");
         }
 
         const db = mongoose.connection.db;
@@ -201,20 +295,99 @@ export class UserService {
             throw new Error("Mongoose database connection is not initialized");
         }
 
-        await db.collection<BetterAuthUserDocument>("users").updateOne(
+        const result = await db.collection<BetterAuthUserDocument>("users").updateOne(
             { _id: new mongoose.Types.ObjectId(userId) },
             {
                 $set: {
-                    name: displayName,
-                    image: avatarUrl || undefined,
+                    phone: phone || undefined,
+                    location: location || undefined,
                     updatedAt: new Date(),
                 },
             },
         );
+        if (result.matchedCount === 0) {
+            throw new NotFoundError("User not found");
+        }
 
-        const user = await this.getById(userId);
-        await this.publishUserProfileUpserted(user);
-        return user;
+        return {
+            phone: phone || undefined,
+            location: location || undefined,
+        };
+    }
+
+    async updateOwnAccount(
+        userId: string,
+        payload: UpdateOwnAccountRequest,
+    ): Promise<{ user: UserDTO; requiresEmailVerification: boolean }> {
+        const firstName = payload.firstName?.trim();
+        const lastName = payload.lastName?.trim();
+        const email = payload.email?.trim().toLowerCase();
+
+        if (!firstName || firstName.length < 2 || firstName.length > 40) {
+            throw new BadRequestError("First name must be between 2 and 40 characters.");
+        }
+        if (!lastName || lastName.length < 2 || lastName.length > 40) {
+            throw new BadRequestError("Last name must be between 2 and 40 characters.");
+        }
+        if (!email || email.length > 255 || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+            throw new BadRequestError("A valid email is required.");
+        }
+
+        const db = mongoose.connection.db;
+        if (!db) {
+            throw new Error("Mongoose database connection is not initialized");
+        }
+
+        const user = await db
+            .collection<BetterAuthUserDocument>("users")
+            .findOne({ _id: new mongoose.Types.ObjectId(userId) }, { projection: { email: 1 } });
+        if (!user) {
+            throw new NotFoundError("User not found");
+        }
+
+        const currentEmail = user.email?.trim().toLowerCase();
+        const emailChanged = currentEmail !== email;
+        const displayName = `${firstName} ${lastName}`.trim();
+
+        try {
+            const result = await db.collection<BetterAuthUserDocument>("users").updateOne(
+                { _id: new mongoose.Types.ObjectId(userId) },
+                {
+                    $set: {
+                        firstName,
+                        lastName,
+                        name: displayName,
+                        email,
+                        ...(emailChanged ? { emailVerifiedAt: null, emailVerified: false } : {}),
+                        updatedAt: new Date(),
+                    },
+                },
+            );
+            if (result.matchedCount === 0) {
+                throw new NotFoundError("User not found");
+            }
+        } catch (error) {
+            if (
+                typeof error === "object" &&
+                error !== null &&
+                "code" in error &&
+                (error as { code?: number }).code === 11000
+            ) {
+                throw new BadRequestError("Email is already in use.");
+            }
+            throw error;
+        }
+
+        if (emailChanged) {
+            await db.collection("auth_email_otps").deleteMany({ userId, purpose: "email_verification" });
+        }
+
+        const updatedUser = await this.getById(userId);
+        await this.publishUserProfileUpserted(updatedUser);
+        return {
+            user: updatedUser,
+            requiresEmailVerification: emailChanged,
+        };
     }
 
     async listUsers(limit = 100): Promise<AdminUsersListResponse> {
@@ -235,14 +408,14 @@ export class UserService {
             .find({ userId: { $in: userIds } })
             .sort({ createdAt: 1 })
             .toArray();
-        const accountByUserId = new Map<string, BetterAuthAccountDocument>();
+        const accountsByUserId = new Map<string, BetterAuthAccountDocument[]>();
         for (const account of accounts) {
-            if (!accountByUserId.has(account.userId)) {
-                accountByUserId.set(account.userId, account);
-            }
+            const existing = accountsByUserId.get(account.userId) ?? [];
+            existing.push(account);
+            accountsByUserId.set(account.userId, existing);
         }
         return {
-            users: users.map((user) => toUserDTO(user, accountByUserId.get(user._id.toString()) ?? null)),
+            users: users.map((user) => toUserDTO(user, accountsByUserId.get(user._id.toString()) ?? [])),
         };
     }
 

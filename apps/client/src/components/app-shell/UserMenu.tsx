@@ -1,5 +1,5 @@
 import { useId } from "react";
-import { ChevronDown, LogOut, MoonIcon, Shield, SunIcon } from "lucide-react";
+import { ChevronDown, LogOut, MoonIcon, Settings, Shield, SunIcon } from "lucide-react";
 import { Link } from "react-router-dom";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
@@ -86,6 +86,13 @@ export default function UserMenu() {
                     </div>
                 </DropdownMenuItem>
 
+                <DropdownMenuSeparator />
+                <DropdownMenuItem asChild>
+                    <Link to="/app/settings" className="cursor-pointer">
+                        <Settings className="h-4 w-4" />
+                        Settings
+                    </Link>
+                </DropdownMenuItem>
                 <DropdownMenuSeparator />
                 {user?.isAdmin ? (
                     <>

@@ -1,6 +1,6 @@
 // Auth & user types for API responses and requests
 
-export const AUTH_PROVIDERS = ["google", "github", "linkedin"] as const;
+export const AUTH_PROVIDERS = ["google", "github", "linkedin", "email"] as const;
 export type AuthProvider = (typeof AUTH_PROVIDERS)[number];
 export const BASE_ROLES = ["student", "enterprise"] as const;
 export type BaseRole = (typeof BASE_ROLES)[number];
@@ -11,6 +11,8 @@ export interface UserDTO {
     id: string;
     email?: string;
     emailVerified: boolean;
+    firstName?: string;
+    lastName?: string;
     displayName: string;
     avatarUrl?: string;
     isPremium: boolean;
@@ -19,6 +21,8 @@ export interface UserDTO {
     accountStatus: AccountStatus;
     roles: string[];
     provider: AuthProvider;
+    hasPassword: boolean;
+    connectedProviders: AuthProvider[];
 }
 
 export interface SelfResponse {
@@ -74,8 +78,38 @@ export interface OtpVerifyResponse {
 }
 
 export interface UpdateOwnProfileRequest {
-    displayName: string;
-    avatarUrl?: string;
+    profile: {
+        phone?: string;
+        location?: string;
+    };
+}
+
+export interface OwnProfileResponse {
+    profile: {
+        phone?: string;
+        location?: string;
+    };
+}
+
+export interface UpdateOwnAccountRequest {
+    firstName: string;
+    lastName: string;
+    email: string;
+}
+
+export interface OwnAccountResponse {
+    user: UserDTO;
+    requiresEmailVerification: boolean;
+}
+
+export interface ChangeOwnPasswordRequest {
+    currentPassword: string;
+    newPassword: string;
+}
+
+export interface DeleteOwnAccountRequest {
+    confirmText: string;
+    currentPassword?: string;
 }
 
 export interface ResolveUsersRequest {

@@ -10,6 +10,18 @@ import { authClient } from "@/lib/auth-client";
 import { ApiError } from "@/lib/api";
 
 type BetterAuthMaybeError = { error?: { message?: string } | null } | null | undefined;
+type BetterAuthApiClient = {
+    changePassword: (payload: {
+        currentPassword: string;
+        newPassword: string;
+        revokeOtherSessions?: boolean;
+    }) => Promise<BetterAuthMaybeError>;
+    setPassword?: (payload: {
+        newPassword: string;
+        revokeOtherSessions?: boolean;
+    }) => Promise<BetterAuthMaybeError>;
+    deleteUser: (payload?: { password?: string }) => Promise<BetterAuthMaybeError>;
+};
 
 function assertNoAuthError(result: BetterAuthMaybeError, fallbackMessage: string): void {
     const message = result?.error?.message;
@@ -74,6 +86,7 @@ export function useAuth() {
 
     const isChecking = !authSession.bootstrapped || authSession.status === "checking";
     const isAuthenticated = authSession.bootstrapped && authSession.status === "authenticated";
+    const authApi = authClient as unknown as BetterAuthApiClient;
 
     return {
         ...authSession,
@@ -94,6 +107,35 @@ export function useAuth() {
                 callbackURL: `${window.location.origin}/auth/callback`,
             })) as BetterAuthMaybeError;
             assertNoAuthError(result, "Email sign-in failed");
+        },
+        changePassword: async (payload: { newPassword: string; currentPassword?: string }) => {
+            if (payload.currentPassword) {
+                const result = await authApi.changePassword({
+                    currentPassword: payload.currentPassword,
+                    newPassword: payload.newPassword,
+                    revokeOtherSessions: true,
+                });
+                assertNoAuthError(result, "Password change failed");
+                return;
+            }
+
+            if (typeof authApi.setPassword !== "function") {
+                throw new ApiError("Password setup is unavailable for this account.", 400, "PASSWORD_SETUP_UNAVAILABLE");
+            }
+
+            const result = await authApi.setPassword({
+                newPassword: payload.newPassword,
+                revokeOtherSessions: true,
+            });
+            assertNoAuthError(result, "Password setup failed");
+        },
+        deleteAccount: async (password?: string) => {
+            const result = await authApi.deleteUser(password ? { password } : undefined);
+            assertNoAuthError(result, "Account deletion failed");
+            setUnauthenticated();
+            queryClient.removeQueries({ queryKey: ["user", "me"] });
+            queryClient.removeQueries({ queryKey: ["auth", "verification-status"] });
+            queryClient.removeQueries({ queryKey: ["user", "profile"] });
         },
         logout: logoutMutation.mutateAsync,
         logoutMutation,
