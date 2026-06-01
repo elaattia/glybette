@@ -6,6 +6,7 @@ import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { ConfirmActionDialog, type ConfirmActionTone } from "@/components/ui/confirm-action-dialog";
 import { Input } from "@/components/ui/input";
+import { AdminTableSkeleton } from "@/pages/app/admin/components/admin-skeletons";
 
 type JobRow = {
     _id: string;
@@ -78,7 +79,9 @@ export default function AdminJobsManagementPage() {
                             </tr>
                         </thead>
                         <tbody>
-                            {filteredJobs.map((job) => (
+                            {query.isPending ? <AdminTableSkeleton columns={4} /> : null}
+                            {!query.isPending
+                                ? filteredJobs.map((job) => (
                                 <tr key={job._id} className="border-t border-[var(--gb-border)] text-[var(--gb-text)]">
                                     <td className="px-3 py-2">
                                         <p className="font-medium">{job.titre}</p>
@@ -135,8 +138,9 @@ export default function AdminJobsManagementPage() {
                                         </div>
                                     </td>
                                 </tr>
-                            ))}
-                            {filteredJobs.length === 0 ? (
+                            ))
+                                : null}
+                            {!query.isPending && filteredJobs.length === 0 ? (
                                 <tr>
                                     <td colSpan={4} className="px-3 py-6 text-center text-sm text-[var(--gb-muted)]">
                                         No jobs found for this search.

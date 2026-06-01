@@ -3,6 +3,7 @@ import { useQuery } from "@tanstack/react-query";
 import { Shield } from "lucide-react";
 import { apiRequest } from "@/lib/api";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { AdminStatCardSkeleton } from "@/pages/app/admin/components/admin-skeletons";
 
 type UsersPreviewResponse = { users: Array<{ id: string }> };
 type ProjectsPreviewResponse = { items: Array<{ id: string }> };
@@ -34,13 +35,24 @@ export default function AdminDashboardPage() {
 
     const stats = useMemo(
         () => [
-            { label: "Accounts", value: usersQuery.data?.users.length ?? 0 },
-            { label: "Projects", value: projectsQuery.data?.items.length ?? 0 },
-            { label: "Jobs", value: jobsQuery.data?.offres.length ?? 0 },
-            { label: "Portfolios", value: portfoliosQuery.data?.portfolios.length ?? 0 },
-            { label: "CVs", value: cvsQuery.data?.cvs.length ?? 0 },
+            { label: "Accounts", value: usersQuery.data?.users.length ?? 0, isLoading: usersQuery.isPending },
+            { label: "Projects", value: projectsQuery.data?.items.length ?? 0, isLoading: projectsQuery.isPending },
+            { label: "Jobs", value: jobsQuery.data?.offres.length ?? 0, isLoading: jobsQuery.isPending },
+            { label: "Portfolios", value: portfoliosQuery.data?.portfolios.length ?? 0, isLoading: portfoliosQuery.isPending },
+            { label: "CVs", value: cvsQuery.data?.cvs.length ?? 0, isLoading: cvsQuery.isPending },
         ],
-        [cvsQuery.data, jobsQuery.data, portfoliosQuery.data, projectsQuery.data, usersQuery.data],
+        [
+            cvsQuery.data,
+            cvsQuery.isPending,
+            jobsQuery.data,
+            jobsQuery.isPending,
+            portfoliosQuery.data,
+            portfoliosQuery.isPending,
+            projectsQuery.data,
+            projectsQuery.isPending,
+            usersQuery.data,
+            usersQuery.isPending,
+        ],
     );
 
     return (
@@ -58,14 +70,18 @@ export default function AdminDashboardPage() {
             </Card>
 
             <div className="grid gap-3 md:grid-cols-2 xl:grid-cols-5">
-                {stats.map((stat) => (
-                    <Card key={stat.label} className="border-[var(--gb-border)] bg-[var(--gb-app-panel-bg)]">
-                        <CardContent className="space-y-1 px-4 py-4">
-                            <p className="text-xs uppercase tracking-[0.08em] text-[var(--gb-muted)]">{stat.label}</p>
-                            <p className="text-2xl font-bold text-[var(--gb-text)]">{stat.value}</p>
-                        </CardContent>
-                    </Card>
-                ))}
+                {stats.map((stat) =>
+                    stat.isLoading ? (
+                        <AdminStatCardSkeleton key={stat.label} />
+                    ) : (
+                        <Card key={stat.label} className="border-[var(--gb-border)] bg-[var(--gb-app-panel-bg)]">
+                            <CardContent className="space-y-1 px-4 py-4">
+                                <p className="text-xs uppercase tracking-[0.08em] text-[var(--gb-muted)]">{stat.label}</p>
+                                <p className="text-2xl font-bold text-[var(--gb-text)]">{stat.value}</p>
+                            </CardContent>
+                        </Card>
+                    ),
+                )}
             </div>
         </div>
     );

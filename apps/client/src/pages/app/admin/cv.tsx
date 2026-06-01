@@ -6,6 +6,7 @@ import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { ConfirmActionDialog } from "@/components/ui/confirm-action-dialog";
 import { Input } from "@/components/ui/input";
+import { AdminTableSkeleton } from "@/pages/app/admin/components/admin-skeletons";
 
 type CvRow = {
     _id: string;
@@ -63,7 +64,11 @@ export default function AdminCvManagementPage() {
                             </tr>
                         </thead>
                         <tbody>
-                            {filteredCvs.map((cv) => (
+                            {query.isPending ? (
+                                <AdminTableSkeleton columns={5} />
+                            ) : null}
+                            {!query.isPending
+                                ? filteredCvs.map((cv) => (
                                 <tr key={cv._id} className="border-t border-[var(--gb-border)] text-[var(--gb-text)]">
                                     <td className="px-3 py-2 text-[var(--gb-muted)]">
                                         <Badge variant="outline" appearance="metadata">
@@ -96,8 +101,9 @@ export default function AdminCvManagementPage() {
                                         </Button>
                                     </td>
                                 </tr>
-                            ))}
-                            {filteredCvs.length === 0 ? (
+                            ))
+                                : null}
+                            {!query.isPending && filteredCvs.length === 0 ? (
                                 <tr>
                                     <td colSpan={5} className="px-3 py-6 text-center text-sm text-[var(--gb-muted)]">
                                         No CVs found for this search.

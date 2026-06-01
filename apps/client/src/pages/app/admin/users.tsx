@@ -6,6 +6,7 @@ import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { ConfirmActionDialog, type ConfirmActionTone } from "@/components/ui/confirm-action-dialog";
 import { Input } from "@/components/ui/input";
+import { AdminTableSkeleton } from "@/pages/app/admin/components/admin-skeletons";
 
 type AdminUser = {
     id: string;
@@ -123,7 +124,9 @@ export default function AdminUsersManagementPage() {
                             </tr>
                         </thead>
                         <tbody>
-                            {filteredUsers.map((user) => (
+                            {usersQuery.isPending ? <AdminTableSkeleton columns={7} /> : null}
+                            {!usersQuery.isPending
+                                ? filteredUsers.map((user) => (
                                 <tr key={user.id} className="border-t border-[var(--gb-border)] text-[var(--gb-text)]">
                                     <td className="px-3 py-2">
                                         <p className="font-medium">{user.displayName}</p>
@@ -253,8 +256,9 @@ export default function AdminUsersManagementPage() {
                                         </div>
                                     </td>
                                 </tr>
-                            ))}
-                            {filteredUsers.length === 0 ? (
+                            ))
+                                : null}
+                            {!usersQuery.isPending && filteredUsers.length === 0 ? (
                                 <tr>
                                     <td colSpan={7} className="px-3 py-6 text-center text-sm text-[var(--gb-muted)]">
                                         No users found for this search.

@@ -6,6 +6,7 @@ import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { ConfirmActionDialog } from "@/components/ui/confirm-action-dialog";
 import { Input } from "@/components/ui/input";
+import { AdminTableSkeleton } from "@/pages/app/admin/components/admin-skeletons";
 
 type AdminProjectsResponse = {
     items: Array<{
@@ -64,7 +65,9 @@ export default function AdminProjectsManagementPage() {
                             </tr>
                         </thead>
                         <tbody>
-                            {filteredItems.map((item) => (
+                            {query.isPending ? <AdminTableSkeleton columns={5} /> : null}
+                            {!query.isPending
+                                ? filteredItems.map((item) => (
                                 <tr key={item.id} className="border-t border-[var(--gb-border)] text-[var(--gb-text)]">
                                     <td className="px-3 py-2 text-[var(--gb-muted)]">
                                         <Badge variant="outline" appearance="metadata">
@@ -101,8 +104,9 @@ export default function AdminProjectsManagementPage() {
                                         </Button>
                                     </td>
                                 </tr>
-                            ))}
-                            {filteredItems.length === 0 ? (
+                            ))
+                                : null}
+                            {!query.isPending && filteredItems.length === 0 ? (
                                 <tr>
                                     <td colSpan={5} className="px-3 py-6 text-center text-sm text-[var(--gb-muted)]">
                                         No projects found for this search.

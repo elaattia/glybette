@@ -6,6 +6,7 @@ import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { ConfirmActionDialog } from "@/components/ui/confirm-action-dialog";
 import { Input } from "@/components/ui/input";
+import { AdminTableSkeleton } from "@/pages/app/admin/components/admin-skeletons";
 
 type ScrapingStats = {
     total_actives: number;
@@ -66,7 +67,9 @@ export default function AdminScrapingManagementPage() {
                             </tr>
                         </thead>
                         <tbody>
-                            {filteredMetricRows.map((row) => (
+                            {statsQuery.isPending ? <AdminTableSkeleton columns={3} rows={3} /> : null}
+                            {!statsQuery.isPending
+                                ? filteredMetricRows.map((row) => (
                                 <tr key={row.metric} className="border-t border-[var(--gb-border)] text-[var(--gb-text)]">
                                     <td className="px-3 py-2">
                                         <Badge variant="secondary" tone="neutral">
@@ -92,8 +95,9 @@ export default function AdminScrapingManagementPage() {
                                         </div>
                                     </td>
                                 </tr>
-                            ))}
-                            {filteredMetricRows.length === 0 ? (
+                            ))
+                                : null}
+                            {!statsQuery.isPending && filteredMetricRows.length === 0 ? (
                                 <tr>
                                     <td colSpan={3} className="px-3 py-6 text-center text-sm text-[var(--gb-muted)]">
                                         No metrics found for this search.
