@@ -10,6 +10,7 @@ import {
     type PublicUserSummaryDTO,
     type UpdateOwnProfileRequest,
     type UserDTO,
+    type UsersAdminOverviewStatsResponse,
 } from "@glybette/contracts";
 import {
     ROUTING_KEY_USERS_PROFILE_UPSERTED,
@@ -17,7 +18,7 @@ import {
     type RabbitMqClient,
     type UserProfileUpsertedEvent,
 } from "@glybette/messaging";
-import { BadRequestError, NotFoundError } from "@glybette/utils";
+import { BadRequestError, NotFoundError, fillDailyCounts, overviewGrowthStartDate } from "@glybette/utils";
 import { randomUUID } from "node:crypto";
 
 type BetterAuthUserDocument = mongoose.Document & {
@@ -327,6 +328,58 @@ export class UserService {
         const user = await this.getById(targetUserId);
         await this.publishUserProfileUpserted(user);
         return user;
+    }
+
+    async getAdminOverviewStats(): Promise<UsersAdminOverviewStatsResponse> {
+        const db = mongoose.connection.db;
+        if (!db) {
+            throw new Error("Mongoose database connection is not initialized");
+        }
+        const col = db.collection<BetterAuthUserDocument & { createdAt?: Date }>("users");
+        const growthStart = overviewGrowthStartDate();
+
+        const [total, roleRows, verified, banned, admins, dayRows] = await Promise.all([
+            col.countDocuments({}),
+            col
+                .aggregate<{ _id: string; count: number }>([
+                    { $group: { _id: { $ifNull: ["$baseRole", "student"] }, count: { $sum: 1 } } },
+                ])
+                .toArray(),
+            col.countDocuments({
+                $or: [{ emailVerified: true }, { emailVerifiedAt: { $ne: null } }],
+            }),
+            col.countDocuments({ accountStatus: "banned" }),
+            col.countDocuments({ isAdmin: true }),
+            col
+                .aggregate<{ _id: string; count: number }>([
+                    { $match: { createdAt: { $gte: growthStart } } },
+                    {
+                        $group: {
+                            _id: { $dateToString: { format: "%Y-%m-%d", date: "$createdAt", timezone: "UTC" } },
+                            count: { $sum: 1 },
+                        },
+                    },
+                    { $sort: { _id: 1 } },
+                ])
+                .toArray(),
+        ]);
+
+        const byBaseRole = Object.fromEntries(roleRows.map((row) => [String(row._id), row.count]));
+        for (const role of BASE_ROLES) {
+            if (byBaseRole[role] === undefined) {
+                byBaseRole[role] = 0;
+            }
+        }
+
+        return {
+            total,
+            byBaseRole,
+            verified,
+            unverified: Math.max(0, total - verified),
+            banned,
+            admins,
+            byDay: fillDailyCounts(dayRows.map((row) => ({ date: String(row._id), count: row.count }))),
+        };
     }
 
     async deleteUser(targetUserId: string): Promise<void> {

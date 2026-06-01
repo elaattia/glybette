@@ -1,8 +1,10 @@
 import { CvRepository } from "../repositories/Cv.repository.js";
+import { CvModel } from "../models/CV.model.js";
 import { AiClient } from "./ai.client.js";
 import { PdfService } from "./pdf.service.js";
 import mongoose from "mongoose";
-import type { PublicUserSummaryDTO } from "@glybette/contracts";
+import type { ContentAdminOverviewStatsResponse, PublicUserSummaryDTO } from "@glybette/contracts";
+import { fillDailyCounts, overviewGrowthStartDate } from "@glybette/utils";
 import type { UserProfileUpsertedEvent } from "@glybette/messaging";
 import type {
     PersonalInfoData,
@@ -266,6 +268,29 @@ export class CvService {
 
     suggestSkills(role: string, existingSkills: string[]) {
         return aiClient.suggestSkills(role, existingSkills);
+    }
+
+    async getAdminOverviewStats(): Promise<ContentAdminOverviewStatsResponse> {
+        const growthStart = overviewGrowthStartDate();
+
+        const [total, dayRows] = await Promise.all([
+            CvModel.countDocuments({}),
+            CvModel.aggregate<{ _id: string; count: number }>([
+                { $match: { createdAt: { $gte: growthStart } } },
+                {
+                    $group: {
+                        _id: { $dateToString: { format: "%Y-%m-%d", date: "$createdAt", timezone: "UTC" } },
+                        count: { $sum: 1 },
+                    },
+                },
+                { $sort: { _id: 1 } },
+            ]),
+        ]);
+
+        return {
+            total,
+            byDay: fillDailyCounts(dayRows.map((row) => ({ date: String(row._id), count: row.count }))),
+        };
     }
 
     async adminListCvs(limit = 100) {

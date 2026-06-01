@@ -2,6 +2,7 @@ import mongoose from "mongoose";
 import { randomUUID } from "node:crypto";
 import type {
     AdminPortfolioDocumentDTO,
+    ContentAdminOverviewStatsResponse,
     PortfolioDocumentDTO,
     PortfolioResponse,
     PortfolioSlugAvailabilityResponse,
@@ -9,7 +10,7 @@ import type {
     PublicPortfolioResponse,
     SavePortfolioRequest,
 } from "@glybette/contracts";
-import { BadRequestError, NotFoundError, ServiceUnavailableError } from "@glybette/utils";
+import { BadRequestError, NotFoundError, ServiceUnavailableError, fillDailyCounts, overviewGrowthStartDate } from "@glybette/utils";
 import type { UserProfileUpsertedEvent } from "@glybette/messaging";
 import { validatePortfolioSlug } from "./portfolio.validation.js";
 
@@ -261,6 +262,32 @@ export class PortfolioService {
 
         return {
             portfolio: toDTO(portfolio),
+        };
+    }
+
+    async getAdminOverviewStats(): Promise<ContentAdminOverviewStatsResponse> {
+        const growthStart = overviewGrowthStartDate();
+        const col = this.collection();
+
+        const [total, dayRows] = await Promise.all([
+            col.countDocuments({}),
+            col
+                .aggregate<{ _id: string; count: number }>([
+                    { $match: { createdAt: { $gte: growthStart } } },
+                    {
+                        $group: {
+                            _id: { $dateToString: { format: "%Y-%m-%d", date: "$createdAt", timezone: "UTC" } },
+                            count: { $sum: 1 },
+                        },
+                    },
+                    { $sort: { _id: 1 } },
+                ])
+                .toArray(),
+        ]);
+
+        return {
+            total,
+            byDay: fillDailyCounts(dayRows.map((row) => ({ date: String(row._id), count: row.count }))),
         };
     }
 

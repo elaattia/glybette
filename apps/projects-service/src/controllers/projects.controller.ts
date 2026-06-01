@@ -176,6 +176,11 @@ export class ProjectsController {
         return c.json(await this.projectsService.decideJoinRequest(projectId, requestId, auth.userId, approved, payload), 200);
     }
 
+    async adminOverviewStats(c: Context): Promise<Response> {
+        this.requireAdmin(c);
+        return c.json(await this.projectsService.getAdminOverviewStats(), 200);
+    }
+
     async adminList(c: Context): Promise<Response> {
         this.requireAdmin(c);
         const limit = Number(c.req.query("limit") ?? "100");

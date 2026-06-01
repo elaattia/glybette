@@ -40,6 +40,15 @@ export interface AdminUsersListResponse {
     users: UserDTO[];
 }
 
+export type {
+    AdminOverviewStats,
+    DailyCountPoint,
+    UsersAdminOverviewStatsResponse,
+    ProjectsAdminOverviewStatsResponse,
+    ContentAdminOverviewStatsResponse,
+    ScrapingAdminStatsResponse,
+} from "./admin-overview.js";
+
 export interface AuthRedirectResponse {
     redirectUrl: string;
 }

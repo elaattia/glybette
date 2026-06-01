@@ -6,6 +6,7 @@ export function registerUserRoutes(app: Hono, controller: UserController): void 
     app.put("/users/me/profile", (c) => controller.updateOwnProfile(c));
     app.get("/users/verification-state", (c) => controller.getVerificationState(c));
     app.post("/users/resolve", (c) => controller.resolveUsers(c));
+    app.get("/users/admin/overview-stats", (c) => controller.getAdminOverviewStats(c));
     app.get("/users/admin/accounts", (c) => controller.listAccounts(c));
     app.patch("/users/admin/accounts/:id/status", (c) => controller.setAccountStatus(c));
     app.patch("/users/admin/accounts/:id/verification", (c) => controller.setVerification(c));

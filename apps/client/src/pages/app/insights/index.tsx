@@ -19,28 +19,8 @@ import {
     Database,
 } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { BarRow, ChartSection, fmt, fmtPct, topEntries } from "@/components/charts";
 import { useOffres } from "@/hooks/useJobs";
-
-
-function fmt(n: number) {
-    return new Intl.NumberFormat("fr-FR").format(n);
-}
-
-function fmtPct(n: number) {
-    return `${n.toFixed(1)} %`;
-}
-
-function topEntries(values: string[] = [], limit = 8) {
-    const counts = values.reduce<Record<string, number>>((acc, v) => {
-        if (!v) return acc;
-        acc[v] = (acc[v] ?? 0) + 1;
-        return acc;
-    }, {});
-    return Object.entries(counts)
-        .sort((a, b) => b[1] - a[1])
-        .slice(0, limit)
-        .map(([label, count]) => ({ label, count }));
-}
 
 function parseSalary(value: unknown): number | null {
     if (!value || typeof value !== "string") return null;
@@ -95,53 +75,6 @@ function StatCard({
         </Card>
     );
 }
-
-function BarRow({
-    label,
-    count,
-    max,
-    pct,
-    accent,
-}: {
-    label: string;
-    count: number;
-    max: number;
-    pct?: number;
-    accent: string;
-}) {
-    const width = max ? (count / max) * 100 : 0;
-    return (
-        <div className="space-y-1">
-            <div className="flex items-center justify-between gap-2 text-sm">
-                <span className="text-[var(--gb-text)] truncate max-w-[60%]">{label}</span>
-                <span className="text-[var(--gb-text-off)] tabular-nums flex-shrink-0">
-                    {fmt(count)}
-                    {pct !== undefined && (
-                        <span className="ml-1 text-xs opacity-60">({fmtPct(pct)})</span>
-                    )}
-                </span>
-            </div>
-            <div className="h-1.5 w-full rounded-full bg-[var(--gb-border)]">
-                <div
-                    className="h-1.5 rounded-full transition-all duration-500"
-                    style={{ width: `${width}%`, background: accent }}
-                />
-            </div>
-        </div>
-    );
-}
-
-function SectionHeader({ title, icon: Icon, accent }: { title: string; icon: React.ElementType; accent: string }) {
-    return (
-        <div className="flex items-center gap-2 mb-4">
-            <div className="h-6 w-6 rounded-md flex items-center justify-center" style={{ background: `${accent}18` }}>
-                <Icon className="h-3.5 w-3.5" style={{ color: accent }} />
-            </div>
-            <h2 className="text-sm font-medium text-[var(--gb-text)]">{title}</h2>
-        </div>
-    );
-}
-
 
 export default function CareerInsightsPage() {
     const { data, loading, error } = useOffres({ page: 1, limit: 500 });
@@ -280,7 +213,7 @@ export default function CareerInsightsPage() {
 
                 <Card className="border-[var(--gb-border)] bg-[var(--gb-app-panel-bg)] shadow-none">
                     <CardHeader className="px-5 pt-5 md:px-6 pb-3">
-                        <SectionHeader title="Fraîcheur des offres" icon={Clock} accent="#14b8a6" />
+                        <ChartSection title="Fraîcheur des offres" icon={Clock} accent="#14b8a6" />
                     </CardHeader>
                     <CardContent className="px-5 pb-5 md:px-6 space-y-3">
                         {[
@@ -303,7 +236,7 @@ export default function CareerInsightsPage() {
 
                 <Card className="border-[var(--gb-border)] bg-[var(--gb-app-panel-bg)] shadow-none">
                     <CardHeader className="px-5 pt-5 md:px-6 pb-3">
-                        <SectionHeader title="Données salariales" icon={TrendingUp} accent="#f59e0b" />
+                        <ChartSection title="Données salariales" icon={TrendingUp} accent="#f59e0b" />
                     </CardHeader>
                     <CardContent className="px-5 pb-5 md:px-6">
                         {stats.salaryCount === 0 ? (
@@ -344,7 +277,7 @@ export default function CareerInsightsPage() {
 
             <Card className="border-[var(--gb-border)] bg-[var(--gb-app-panel-bg)] shadow-none">
                 <CardHeader className="px-5 pt-5 md:px-6 pb-3">
-                    <SectionHeader title="Complétude des données" icon={Activity} accent="#6366f1" />
+                    <ChartSection title="Complétude des données" icon={Activity} accent="#6366f1" />
                 </CardHeader>
                 <CardContent className="px-5 pb-5 md:px-6">
                     <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
@@ -381,7 +314,7 @@ export default function CareerInsightsPage() {
             <section className="grid gap-4 lg:grid-cols-2">
                 <Card className="border-[var(--gb-border)] bg-[var(--gb-app-panel-bg)] shadow-none">
                     <CardHeader className="px-5 pt-5 md:px-6 pb-3">
-                        <SectionHeader title="Sources de scraping" icon={Globe2} accent="#14b8a6" />
+                        <ChartSection title="Sources de scraping" icon={Globe2} accent="#14b8a6" />
                     </CardHeader>
                     <CardContent className="px-5 pb-5 md:px-6 space-y-3">
                         {stats.topSources.length === 0 ? (
@@ -403,7 +336,7 @@ export default function CareerInsightsPage() {
 
                 <Card className="border-[var(--gb-border)] bg-[var(--gb-app-panel-bg)] shadow-none">
                     <CardHeader className="px-5 pt-5 md:px-6 pb-3">
-                        <SectionHeader title="Types d'offres" icon={Briefcase} accent="#8b5cf6" />
+                        <ChartSection title="Types d'offres" icon={Briefcase} accent="#8b5cf6" />
                     </CardHeader>
                     <CardContent className="px-5 pb-5 md:px-6 space-y-3">
                         {stats.topTypes.length === 0 ? (
@@ -427,7 +360,7 @@ export default function CareerInsightsPage() {
             <section className="grid gap-4 lg:grid-cols-2">
                 <Card className="border-[var(--gb-border)] bg-[var(--gb-app-panel-bg)] shadow-none">
                     <CardHeader className="px-5 pt-5 md:px-6 pb-3">
-                        <SectionHeader title="Types de contrat" icon={Layers} accent="#f97316" />
+                        <ChartSection title="Types de contrat" icon={Layers} accent="#f97316" />
                     </CardHeader>
                     <CardContent className="px-5 pb-5 md:px-6 space-y-3">
                         {stats.topContracts.length === 0 ? (
@@ -449,7 +382,7 @@ export default function CareerInsightsPage() {
 
                 <Card className="border-[var(--gb-border)] bg-[var(--gb-app-panel-bg)] shadow-none">
                     <CardHeader className="px-5 pt-5 md:px-6 pb-3">
-                        <SectionHeader title="Niveaux d'expérience" icon={Target} accent="#16a34a" />
+                        <ChartSection title="Niveaux d'expérience" icon={Target} accent="#16a34a" />
                     </CardHeader>
                     <CardContent className="px-5 pb-5 md:px-6 space-y-3">
                         {stats.topExpLevels.length === 0 ? (
@@ -472,7 +405,7 @@ export default function CareerInsightsPage() {
 
             <Card className="border-[var(--gb-border)] bg-[var(--gb-app-panel-bg)] shadow-none">
                 <CardHeader className="px-5 pt-5 md:px-6 pb-3">
-                    <SectionHeader title="Répartition télétravail" icon={Monitor} accent="#2563eb" />
+                    <ChartSection title="Répartition télétravail" icon={Monitor} accent="#2563eb" />
                 </CardHeader>
                 <CardContent className="px-5 pb-5 md:px-6">
                     {stats.remoteBreakdown.length === 0 ? (
@@ -496,7 +429,7 @@ export default function CareerInsightsPage() {
 
             <Card className="border-[var(--gb-border)] bg-[var(--gb-app-panel-bg)] shadow-none">
                 <CardHeader className="px-5 pt-5 md:px-6 pb-3">
-                    <SectionHeader title="Principales localisations" icon={MapPin} accent="#f97316" />
+                    <ChartSection title="Principales localisations" icon={MapPin} accent="#f97316" />
                 </CardHeader>
                 <CardContent className="px-5 pb-5 md:px-6 space-y-3">
                     {stats.topLocations.length === 0 ? (
@@ -519,7 +452,7 @@ export default function CareerInsightsPage() {
             <section className="grid gap-4 lg:grid-cols-[1.2fr_0.8fr]">
                 <Card className="border-[var(--gb-border)] bg-[var(--gb-app-panel-bg)] shadow-none">
                     <CardHeader className="px-5 pt-5 md:px-6 pb-3">
-                        <SectionHeader title="Compétences les plus demandées" icon={Zap} accent="#f59e0b" />
+                        <ChartSection title="Compétences les plus demandées" icon={Zap} accent="#f59e0b" />
                     </CardHeader>
                     <CardContent className="px-5 pb-5 md:px-6 space-y-3">
                         {stats.topSkills.length === 0 ? (
@@ -540,7 +473,7 @@ export default function CareerInsightsPage() {
 
                 <Card className="border-[var(--gb-border)] bg-[var(--gb-app-panel-bg)] shadow-none">
                     <CardHeader className="px-5 pt-5 md:px-6 pb-3">
-                        <SectionHeader title="Domaines en vogue" icon={Sparkles} accent="#16a34a" />
+                        <ChartSection title="Domaines en vogue" icon={Sparkles} accent="#16a34a" />
                     </CardHeader>
                     <CardContent className="px-5 pb-5 md:px-6 space-y-3">
                         {stats.topDomains.length === 0 ? (

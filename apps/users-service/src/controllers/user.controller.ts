@@ -83,6 +83,12 @@ export class UserController {
         return c.json(response, 200);
     }
 
+    /** GET /users/admin/overview-stats - aggregated metrics for admin dashboard. */
+    async getAdminOverviewStats(c: Context): Promise<Response> {
+        this.requireAdmin(c);
+        return c.json(await this.userService.getAdminOverviewStats(), 200);
+    }
+
     /** PATCH /users/admin/accounts/:id/status - ban/unban account and revoke sessions on ban. */
     async setAccountStatus(c: Context): Promise<Response> {
         const auth = this.requireAdmin(c);

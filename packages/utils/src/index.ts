@@ -20,3 +20,12 @@ export { parseBearerToken } from "./bearer.js";
 export { resolveJwtSecret } from "./jwt-secret.js";
 export { sanitizeProxyHeaders, type SanitizeProxyHeadersOptions } from "./proxy-headers.js";
 export { internalRequestJson, InternalHttpError, type InternalRequestOptions } from "./internal-http.js";
+export {
+    OVERVIEW_GROWTH_DAYS,
+    overviewGrowthStartDate,
+    buildUtcDaySeries,
+    fillDailyCounts,
+    sumDailyCounts,
+    countLastDays,
+    type DailyCount,
+} from "./daily-stats.js";

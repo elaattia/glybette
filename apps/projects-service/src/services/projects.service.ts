@@ -1,29 +1,38 @@
 import { randomUUID } from "node:crypto";
 import mongoose from "mongoose";
-import type {
-    CreateJoinRequestRequest,
-    CreateProjectCommentRequest,
-    CreateProjectRequest,
-    DecideJoinRequestRequest,
-    ProjectCommentDTO,
-    ProjectCommentStatus,
-    ProjectCommentsResponse,
-    ProjectDTO,
-    ProjectDomain,
-    ProjectJoinRequestDTO,
-    ProjectJoinRequestsResponse,
-    ProjectMembershipRole,
-    ProjectResponse,
-    ProjectStatus,
-    ProjectSummaryDTO,
-    ProjectsListResponse,
-    ProjectUserSummaryDTO,
-    UpdateProjectRequest,
-    UploadedAssetDTO,
+import {
+    PROJECT_STATUSES,
+    type CreateJoinRequestRequest,
+    type CreateProjectCommentRequest,
+    type CreateProjectRequest,
+    type DecideJoinRequestRequest,
+    type ProjectCommentDTO,
+    type ProjectCommentStatus,
+    type ProjectCommentsResponse,
+    type ProjectDTO,
+    type ProjectDomain,
+    type ProjectJoinRequestDTO,
+    type ProjectJoinRequestsResponse,
+    type ProjectMembershipRole,
+    type ProjectResponse,
+    type ProjectStatus,
+    type ProjectSummaryDTO,
+    type ProjectsAdminOverviewStatsResponse,
+    type ProjectsListResponse,
+    type ProjectUserSummaryDTO,
+    type UpdateProjectRequest,
+    type UploadedAssetDTO,
 } from "@glybette/contracts";
 import type { ProjectEventName } from "@glybette/messaging";
 import type { UserProfileUpsertedEvent } from "@glybette/messaging";
-import { BadRequestError, NotFoundError, ServiceUnavailableError, UnauthorizedError } from "@glybette/utils";
+import {
+    BadRequestError,
+    NotFoundError,
+    ServiceUnavailableError,
+    UnauthorizedError,
+    fillDailyCounts,
+    overviewGrowthStartDate,
+} from "@glybette/utils";
 import type { ListProjectsQuery } from "./projects.validation.js";
 
 type ProjectRoleNeedDocument = {
@@ -685,6 +694,54 @@ export class ProjectsService {
         );
 
         return { ok: true };
+    }
+
+    async getAdminOverviewStats(): Promise<ProjectsAdminOverviewStatsResponse> {
+        const growthStart = overviewGrowthStartDate();
+        const projectsCol = this.projectsCollection();
+        const joinCol = this.joinRequestsCollection();
+
+        const [total, statusRows, pendingJoinRequests, projectsWithPendingRows, dayRows] = await Promise.all([
+            projectsCol.countDocuments({}),
+            projectsCol
+                .aggregate<{ _id: string; count: number }>([{ $group: { _id: "$status", count: { $sum: 1 } } }])
+                .toArray(),
+            joinCol.countDocuments({ status: "pending" }),
+            joinCol
+                .aggregate<{ count: number }>([
+                    { $match: { status: "pending" } },
+                    { $group: { _id: "$projectId" } },
+                    { $count: "count" },
+                ])
+                .toArray(),
+            projectsCol
+                .aggregate<{ _id: string; count: number }>([
+                    { $match: { createdAt: { $gte: growthStart } } },
+                    {
+                        $group: {
+                            _id: { $dateToString: { format: "%Y-%m-%d", date: "$createdAt", timezone: "UTC" } },
+                            count: { $sum: 1 },
+                        },
+                    },
+                    { $sort: { _id: 1 } },
+                ])
+                .toArray(),
+        ]);
+
+        const byStatus = Object.fromEntries(statusRows.map((row) => [String(row._id), row.count]));
+        for (const status of PROJECT_STATUSES) {
+            if (byStatus[status] === undefined) {
+                byStatus[status] = 0;
+            }
+        }
+
+        return {
+            total,
+            byStatus,
+            pendingJoinRequests,
+            projectsWithPending: projectsWithPendingRows[0]?.count ?? 0,
+            byDay: fillDailyCounts(dayRows.map((row) => ({ date: String(row._id), count: row.count }))),
+        };
     }
 
     async adminListProjects(limit = 100): Promise<ProjectsListResponse> {

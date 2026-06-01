@@ -61,6 +61,11 @@ export class PortfolioController {
         return c.json(response, 200);
     }
 
+    async adminOverviewStats(c: Context): Promise<Response> {
+        this.requireAdmin(c);
+        return c.json(await this.portfolioService.getAdminOverviewStats(), 200);
+    }
+
     async adminList(c: Context): Promise<Response> {
         this.requireAdmin(c);
         const limit = Number(c.req.query("limit") ?? "100");

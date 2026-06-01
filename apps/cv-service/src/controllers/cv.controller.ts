@@ -70,6 +70,11 @@ cvController.post(
     },
 );
 
+cvController.get("/admin/overview-stats", async (c) => {
+    requireAdmin(c);
+    return c.json(await svc.getAdminOverviewStats());
+});
+
 cvController.get("/admin/list", async (c) => {
     requireAdmin(c);
     const limit = Number(c.req.query("limit") ?? "100");
