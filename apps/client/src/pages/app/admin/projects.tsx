@@ -2,6 +2,7 @@ import { useMemo, useState } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { apiRequest } from "@/lib/api";
 import { Button } from "@/components/ui/button";
+import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { ConfirmActionDialog } from "@/components/ui/confirm-action-dialog";
 import { Input } from "@/components/ui/input";
@@ -46,7 +47,7 @@ export default function AdminProjectsManagementPage() {
                 <div className="mb-3">
                     <Input
                         value={search}
-                        onChange={(event: Event) => setSearch((event.currentTarget as HTMLInputElement).value)}
+                        onChange={(event) => setSearch(event.currentTarget.value)}
                         placeholder="Search by title, user, status, or project id"
                         className="max-w-xl"
                     />
@@ -65,10 +66,35 @@ export default function AdminProjectsManagementPage() {
                         <tbody>
                             {filteredItems.map((item) => (
                                 <tr key={item.id} className="border-t border-[var(--gb-border)] text-[var(--gb-text)]">
-                                    <td className="px-3 py-2 text-[var(--gb-muted)]">{item.id}</td>
+                                    <td className="px-3 py-2 text-[var(--gb-muted)]">
+                                        <Badge variant="outline" appearance="metadata">
+                                            {item.id}
+                                        </Badge>
+                                    </td>
                                     <td className="px-3 py-2 font-medium">{item.title}</td>
-                                    <td className="px-3 py-2">{item.status}</td>
-                                    <td className="px-3 py-2">{item.owner?.displayName ?? item.ownerId}</td>
+                                    <td className="px-3 py-2">
+                                        <Badge
+                                            variant="outline"
+                                            tone={
+                                                item.status === "published" || item.status === "active"
+                                                    ? "success"
+                                                    : item.status === "draft" || item.status === "archived"
+                                                      ? "warning"
+                                                      : "neutral"
+                                            }>
+                                            {item.status}
+                                        </Badge>
+                                    </td>
+                                    <td className="px-3 py-2">
+                                        <div className="flex flex-wrap items-center gap-1.5">
+                                            <Badge variant="secondary" tone="neutral">
+                                                {item.owner?.displayName ?? "Unknown owner"}
+                                            </Badge>
+                                            <Badge variant="outline" appearance="metadata">
+                                                {item.owner?.id ?? item.ownerId}
+                                            </Badge>
+                                        </div>
+                                    </td>
                                     <td className="px-3 py-2">
                                         <Button size="sm" variant="destructive" onClick={() => setTargetProject(item)}>
                                             Delete

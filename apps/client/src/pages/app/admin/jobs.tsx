@@ -2,6 +2,7 @@ import { useMemo, useState } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { apiRequest } from "@/lib/api";
 import { Button } from "@/components/ui/button";
+import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { ConfirmActionDialog, type ConfirmActionTone } from "@/components/ui/confirm-action-dialog";
 import { Input } from "@/components/ui/input";
@@ -61,7 +62,7 @@ export default function AdminJobsManagementPage() {
                 <div className="mb-3">
                     <Input
                         value={search}
-                        onChange={(event: Event) => setSearch((event.currentTarget as HTMLInputElement).value)}
+                        onChange={(event) => setSearch(event.currentTarget.value)}
                         placeholder="Search by title, company, status, or job id"
                         className="max-w-xl"
                     />
@@ -79,9 +80,25 @@ export default function AdminJobsManagementPage() {
                         <tbody>
                             {filteredJobs.map((job) => (
                                 <tr key={job._id} className="border-t border-[var(--gb-border)] text-[var(--gb-text)]">
-                                    <td className="px-3 py-2 font-medium">{job.titre}</td>
-                                    <td className="px-3 py-2 text-[var(--gb-muted)]">{job.entreprise ?? "Unknown company"}</td>
-                                    <td className="px-3 py-2">{job.status}</td>
+                                    <td className="px-3 py-2">
+                                        <p className="font-medium">{job.titre}</p>
+                                        <Badge variant="outline" appearance="metadata" className="mt-1">
+                                            {job._id}
+                                        </Badge>
+                                    </td>
+                                    <td className="px-3 py-2 text-[var(--gb-muted)]">
+                                        <Badge
+                                            variant={job.entreprise ? "secondary" : "outline"}
+                                            tone={job.entreprise ? "neutral" : undefined}
+                                            appearance={job.entreprise ? undefined : "metadata"}>
+                                            {job.entreprise ?? "Unknown company"}
+                                        </Badge>
+                                    </td>
+                                    <td className="px-3 py-2">
+                                        <Badge variant="outline" tone={job.status === "active" ? "success" : "warning"}>
+                                            {job.status === "archivee" ? "archived" : job.status}
+                                        </Badge>
+                                    </td>
                                     <td className="px-3 py-2">
                                         <div className="flex flex-wrap gap-2">
                                             <Button

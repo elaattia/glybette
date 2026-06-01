@@ -276,7 +276,7 @@ export default function ProjectsListPage() {
                                 </div>
 
                                 <div className="flex items-center justify-between gap-2">
-                                    <Badge variant="secondary" className="bg-[var(--gb-app-hover)] text-[var(--gb-text-off)]">
+                                    <Badge variant="secondary" tone="neutral">
                                         {project.difficulty}
                                     </Badge>
                                     <Button

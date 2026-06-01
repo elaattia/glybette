@@ -2,6 +2,7 @@ import { useMemo, useState } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { apiRequest } from "@/lib/api";
 import { Button } from "@/components/ui/button";
+import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { ConfirmActionDialog, type ConfirmActionTone } from "@/components/ui/confirm-action-dialog";
 import { Input } from "@/components/ui/input";
@@ -103,7 +104,7 @@ export default function AdminUsersManagementPage() {
                 <div className="mb-3">
                     <Input
                         value={search}
-                        onChange={(event: Event) => setSearch((event.currentTarget as HTMLInputElement).value)}
+                        onChange={(event) => setSearch(event.currentTarget.value)}
                         placeholder="Search by name, email, role, status, or user id"
                         className="max-w-xl"
                     />
@@ -124,12 +125,45 @@ export default function AdminUsersManagementPage() {
                         <tbody>
                             {filteredUsers.map((user) => (
                                 <tr key={user.id} className="border-t border-[var(--gb-border)] text-[var(--gb-text)]">
-                                    <td className="px-3 py-2 font-medium">{user.displayName}</td>
-                                    <td className="px-3 py-2 text-[var(--gb-muted)]">{user.email ?? "No email"}</td>
-                                    <td className="px-3 py-2">{user.baseRole}</td>
-                                    <td className="px-3 py-2">{user.isAdmin ? "yes" : "no"}</td>
-                                    <td className="px-3 py-2">{user.accountStatus}</td>
-                                    <td className="px-3 py-2">{user.emailVerified ? "yes" : "no"}</td>
+                                    <td className="px-3 py-2">
+                                        <p className="font-medium">{user.displayName}</p>
+                                        <Badge variant="outline" appearance="metadata" className="mt-1">
+                                            {user.id}
+                                        </Badge>
+                                    </td>
+                                    <td className="px-3 py-2 text-[var(--gb-muted)]">
+                                        {user.email ? (
+                                            user.email
+                                        ) : (
+                                            <Badge variant="outline" className="border-[var(--gb-border)] text-[var(--gb-muted)]">
+                                                No email
+                                            </Badge>
+                                        )}
+                                    </td>
+                                    <td className="px-3 py-2">
+                                        <Badge variant="outline" tone={user.baseRole === "enterprise" ? "info" : "neutral"}>
+                                            {user.baseRole}
+                                        </Badge>
+                                    </td>
+                                    <td className="px-3 py-2">
+                                        <Badge
+                                            variant={user.isAdmin ? "default" : "secondary"}
+                                            tone={user.isAdmin ? "warning" : "neutral"}>
+                                            {user.isAdmin ? "Admin" : "Member"}
+                                        </Badge>
+                                    </td>
+                                    <td className="px-3 py-2">
+                                        <Badge variant="outline" tone={user.accountStatus === "banned" ? "error" : "success"}>
+                                            {user.accountStatus}
+                                        </Badge>
+                                    </td>
+                                    <td className="px-3 py-2">
+                                        <Badge
+                                            variant={user.emailVerified ? "default" : "outline"}
+                                            tone={user.emailVerified ? "success" : "neutral"}>
+                                            {user.emailVerified ? "Verified" : "Unverified"}
+                                        </Badge>
+                                    </td>
                                     <td className="px-3 py-2">
                                         <div className="flex flex-wrap gap-2">
                                             <Button

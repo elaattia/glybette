@@ -17,26 +17,127 @@ const badgeVariants = cva(
                 ghost: "hover:bg-muted hover:text-muted-foreground dark:hover:bg-muted/50",
                 link: "text-primary underline-offset-4 hover:underline",
             },
+            appearance: {
+                default: "",
+                metadata:
+                    "border-[var(--gb-border)] font-mono text-[10px] text-[var(--gb-muted)]",
+            },
         },
         defaultVariants: {
             variant: "default",
+            appearance: "default",
         },
     },
 );
 
+const LOW_CONTRAST_SHADE_RE = /^text-([a-z]+)-(50|100|200|300|400)$/;
+const ACCENT_TOKEN_RE = /^(?:bg|border|ring)-([a-z]+)-\d{2,3}(?:\/\d+)?$/;
+const CHROMATIC_TEXT_RE = /^(?:dark:)?text-[a-z]+-\d{2,3}$/;
+const ARBITRARY_TEXT_RE = /^(?:dark:)?text-\[[^\]]+\]$/;
+const DYNAMIC_BADGE_TEXT_CLASS = "text-[var(--gb-badge-light-fg)] dark:text-[var(--gb-badge-dark-fg)]";
+const EXTRA_DARK_ON_LIGHT = new Set(["amber", "yellow", "lime"]);
+
+type BadgeTone = "neutral" | "info" | "success" | "warning" | "error";
+
+const BADGE_TONE_CLASS: Record<BadgeTone, string> = {
+    neutral:
+        "!border-[var(--gb-badge-neutral-border)] !bg-[var(--gb-badge-neutral-bg)] !text-[var(--gb-badge-neutral-fg)]",
+    info: "!border-[var(--gb-badge-info-border)] !bg-[var(--gb-badge-info-bg)] !text-[var(--gb-badge-info-fg)]",
+    success:
+        "!border-[var(--gb-badge-success-border)] !bg-[var(--gb-badge-success-bg)] !text-[var(--gb-badge-success-fg)]",
+    warning:
+        "!border-[var(--gb-badge-warning-border)] !bg-[var(--gb-badge-warning-bg)] !text-[var(--gb-badge-warning-fg)]",
+    error: "!border-[var(--gb-badge-error-border)] !bg-[var(--gb-badge-error-bg)] !text-[var(--gb-badge-error-fg)]",
+};
+
+function getReadableLightShade(color: string): number {
+    return EXTRA_DARK_ON_LIGHT.has(color) ? 900 : 800;
+}
+
+type BadgeNormalizationResult = {
+    className: string;
+    style?: React.CSSProperties;
+};
+
+function normalizeBadgeClassName(className?: string): BadgeNormalizationResult {
+    if (!className) return { className: "" };
+
+    const tokens = className.split(/\s+/).filter(Boolean);
+    let lightTextVar: string | undefined;
+    let darkTextVar: string | undefined;
+
+    const accentColor = tokens
+        .map((token) => {
+            const match = ACCENT_TOKEN_RE.exec(token);
+            return match ? match[1] : null;
+        })
+        .find((color): color is string => Boolean(color));
+
+    const normalizedTokens = tokens.map((token) => {
+        const match = LOW_CONTRAST_SHADE_RE.exec(token);
+        if (!match) return token;
+
+        const color = match[1];
+        const originalShade = match[2];
+        lightTextVar = `var(--color-${color}-${getReadableLightShade(color)})`;
+        darkTextVar = `var(--color-${color}-${originalShade})`;
+        return DYNAMIC_BADGE_TEXT_CLASS;
+    });
+
+    const hasChromaticTextClass = normalizedTokens.some(
+        (token) => CHROMATIC_TEXT_RE.test(token) || ARBITRARY_TEXT_RE.test(token),
+    );
+    if (!lightTextVar && !darkTextVar && !hasChromaticTextClass && accentColor) {
+        lightTextVar = `var(--color-${accentColor}-${getReadableLightShade(accentColor)})`;
+        darkTextVar = `var(--color-${accentColor}-200)`;
+        normalizedTokens.push(DYNAMIC_BADGE_TEXT_CLASS);
+    }
+
+    const dedupedTokens = Array.from(new Set(normalizedTokens));
+    const style =
+        lightTextVar && darkTextVar
+            ? ({
+                  "--gb-badge-light-fg": lightTextVar,
+                  "--gb-badge-dark-fg": darkTextVar,
+              } as React.CSSProperties)
+            : undefined;
+
+    return {
+        className: dedupedTokens.join(" "),
+        style,
+    };
+}
+
 function Badge({
     className,
+    style,
     variant = "default",
+    appearance = "default",
+    tone,
     asChild = false,
     ...props
-}: React.ComponentProps<"span"> & VariantProps<typeof badgeVariants> & { asChild?: boolean }) {
+}: React.ComponentProps<"span"> &
+    VariantProps<typeof badgeVariants> & {
+        asChild?: boolean;
+        tone?: BadgeTone;
+    }) {
     const Comp = asChild ? Slot.Root : "span";
+    const normalized = normalizeBadgeClassName(className);
+    const mergedStyle = {
+        ...(normalized.style ?? {}),
+        ...(style ?? {}),
+    } as React.CSSProperties;
 
     return (
         <Comp
             data-slot="badge"
             data-variant={variant}
-            className={cn(badgeVariants({ variant }), className)}
+            className={cn(
+                badgeVariants({ variant, appearance }),
+                normalized.className,
+                tone ? BADGE_TONE_CLASS[tone] : undefined,
+            )}
+            style={mergedStyle}
             {...props}
         />
     );
@@ -44,4 +145,4 @@ function Badge({
 
 // CVA variants are consumed by other modules; not a second component.
 // eslint-disable-next-line react-refresh/only-export-components -- variant helper export
-export { Badge, badgeVariants };
+export { Badge, badgeVariants, type BadgeTone };

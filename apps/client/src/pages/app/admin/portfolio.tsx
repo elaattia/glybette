@@ -2,6 +2,7 @@ import { useMemo, useState } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { apiRequest } from "@/lib/api";
 import { Button } from "@/components/ui/button";
+import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { ConfirmActionDialog } from "@/components/ui/confirm-action-dialog";
 import { Input } from "@/components/ui/input";
@@ -45,7 +46,7 @@ export default function AdminPortfolioManagementPage() {
                 <div className="mb-3">
                     <Input
                         value={search}
-                        onChange={(event: Event) => setSearch((event.currentTarget as HTMLInputElement).value)}
+                        onChange={(event) => setSearch(event.currentTarget.value)}
                         placeholder="Search by slug, user, or portfolio id"
                         className="max-w-xl"
                     />
@@ -64,11 +65,30 @@ export default function AdminPortfolioManagementPage() {
                         <tbody>
                             {filteredPortfolios.map((portfolio) => (
                                 <tr key={portfolio.id} className="border-t border-[var(--gb-border)] text-[var(--gb-text)]">
-                                    <td className="px-3 py-2 text-[var(--gb-muted)]">{portfolio.id}</td>
-                                    <td className="px-3 py-2 font-medium">{portfolio.slug}</td>
-                                    <td className="px-3 py-2">{portfolio.owner?.displayName ?? portfolio.userId}</td>
                                     <td className="px-3 py-2 text-[var(--gb-muted)]">
-                                        {new Date(portfolio.updatedAt).toLocaleString()}
+                                        <Badge variant="outline" appearance="metadata">
+                                            {portfolio.id}
+                                        </Badge>
+                                    </td>
+                                    <td className="px-3 py-2 font-medium">
+                                        <Badge variant="secondary" tone="neutral">
+                                            {portfolio.slug}
+                                        </Badge>
+                                    </td>
+                                    <td className="px-3 py-2">
+                                        <div className="flex flex-wrap items-center gap-1.5">
+                                            <Badge variant="secondary" tone="neutral">
+                                                {portfolio.owner?.displayName ?? "Unknown owner"}
+                                            </Badge>
+                                            <Badge variant="outline" appearance="metadata">
+                                                {portfolio.owner?.id ?? portfolio.userId}
+                                            </Badge>
+                                        </div>
+                                    </td>
+                                    <td className="px-3 py-2 text-[var(--gb-muted)]">
+                                        <Badge variant="outline" className="border-[var(--gb-border)] text-[var(--gb-muted)]">
+                                            {new Date(portfolio.updatedAt).toLocaleString()}
+                                        </Badge>
                                     </td>
                                     <td className="px-3 py-2">
                                         <Button size="sm" variant="destructive" onClick={() => setTargetPortfolio(portfolio)}>

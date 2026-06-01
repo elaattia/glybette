@@ -2,6 +2,9 @@
 @import "tailwindcss";
 @import "tw-animate-css";
 
+@custom-variant dark (&:where([data-theme="dark"], [data-theme="dark"] *));
+@custom-variant light (&:where([data-theme="light"], [data-theme="light"] *));
+
 :root {
     --primary-from: #16a34a;
     --primary-to: #0284c7;
@@ -147,6 +150,22 @@
     --ob-icon-bg-purple: rgba(147, 51, 234, 0.15);
     --ob-icon-bg-teal: rgba(13, 148, 136, 0.15);
     --ob-icon-bg-red: rgba(220, 38, 38, 0.15);
+
+    --gb-badge-neutral-bg: #0f172a;
+    --gb-badge-neutral-border: #334155;
+    --gb-badge-neutral-fg: #e2e8f0;
+    --gb-badge-info-bg: #082f49;
+    --gb-badge-info-border: #0369a1;
+    --gb-badge-info-fg: #bae6fd;
+    --gb-badge-success-bg: #022c22;
+    --gb-badge-success-border: #047857;
+    --gb-badge-success-fg: #a7f3d0;
+    --gb-badge-warning-bg: #451a03;
+    --gb-badge-warning-border: #b45309;
+    --gb-badge-warning-fg: #fde68a;
+    --gb-badge-error-bg: #450a0a;
+    --gb-badge-error-border: #b91c1c;
+    --gb-badge-error-fg: #fecaca;
 }
 
 /* LIGHT MODE */
@@ -246,6 +265,22 @@
     --ob-icon-bg-purple: #f3e8ff;
     --ob-icon-bg-teal: #ccfbf1;
     --ob-icon-bg-red: #fee2e2;
+
+    --gb-badge-neutral-bg: #f1f5f9;
+    --gb-badge-neutral-border: #cbd5e1;
+    --gb-badge-neutral-fg: #1e293b;
+    --gb-badge-info-bg: #e0f2fe;
+    --gb-badge-info-border: #7dd3fc;
+    --gb-badge-info-fg: #075985;
+    --gb-badge-success-bg: #d1fae5;
+    --gb-badge-success-border: #6ee7b7;
+    --gb-badge-success-fg: #065f46;
+    --gb-badge-warning-bg: #fef3c7;
+    --gb-badge-warning-border: #fcd34d;
+    --gb-badge-warning-fg: #78350f;
+    --gb-badge-error-bg: #fee2e2;
+    --gb-badge-error-border: #fca5a5;
+    --gb-badge-error-fg: #991b1b;
 }
 
 /*  GLOBAL RESETS  */

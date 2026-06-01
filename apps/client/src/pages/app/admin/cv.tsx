@@ -2,6 +2,7 @@ import { useMemo, useState } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { apiRequest } from "@/lib/api";
 import { Button } from "@/components/ui/button";
+import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { ConfirmActionDialog } from "@/components/ui/confirm-action-dialog";
 import { Input } from "@/components/ui/input";
@@ -45,7 +46,7 @@ export default function AdminCvManagementPage() {
                 <div className="mb-3">
                     <Input
                         value={search}
-                        onChange={(event: Event) => setSearch((event.currentTarget as HTMLInputElement).value)}
+                        onChange={(event) => setSearch(event.currentTarget.value)}
                         placeholder="Search by title, user, or CV id"
                         className="max-w-xl"
                     />
@@ -64,10 +65,31 @@ export default function AdminCvManagementPage() {
                         <tbody>
                             {filteredCvs.map((cv) => (
                                 <tr key={cv._id} className="border-t border-[var(--gb-border)] text-[var(--gb-text)]">
-                                    <td className="px-3 py-2 text-[var(--gb-muted)]">{cv._id}</td>
-                                    <td className="px-3 py-2 font-medium">{cv.title}</td>
-                                    <td className="px-3 py-2">{cv.owner?.displayName ?? cv.userId}</td>
-                                    <td className="px-3 py-2 text-[var(--gb-muted)]">{new Date(cv.updatedAt).toLocaleString()}</td>
+                                    <td className="px-3 py-2 text-[var(--gb-muted)]">
+                                        <Badge variant="outline" appearance="metadata">
+                                            {cv._id}
+                                        </Badge>
+                                    </td>
+                                    <td className="px-3 py-2 font-medium">
+                                        <Badge variant="secondary" tone="neutral">
+                                            {cv.title}
+                                        </Badge>
+                                    </td>
+                                    <td className="px-3 py-2">
+                                        <div className="flex flex-wrap items-center gap-1.5">
+                                            <Badge variant="secondary" tone="neutral">
+                                                {cv.owner?.displayName ?? "Unknown owner"}
+                                            </Badge>
+                                            <Badge variant="outline" appearance="metadata">
+                                                {cv.owner?.id ?? cv.userId}
+                                            </Badge>
+                                        </div>
+                                    </td>
+                                    <td className="px-3 py-2 text-[var(--gb-muted)]">
+                                        <Badge variant="outline" className="border-[var(--gb-border)] text-[var(--gb-muted)]">
+                                            {new Date(cv.updatedAt).toLocaleString()}
+                                        </Badge>
+                                    </td>
                                     <td className="px-3 py-2">
                                         <Button size="sm" variant="destructive" onClick={() => setTargetCv(cv)}>
                                             Delete

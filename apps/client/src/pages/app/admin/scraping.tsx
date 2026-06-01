@@ -2,6 +2,7 @@ import { useMemo, useState } from "react";
 import { useMutation, useQuery } from "@tanstack/react-query";
 import { apiRequest } from "@/lib/api";
 import { Button } from "@/components/ui/button";
+import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { ConfirmActionDialog } from "@/components/ui/confirm-action-dialog";
 import { Input } from "@/components/ui/input";
@@ -50,7 +51,7 @@ export default function AdminScrapingManagementPage() {
                 <div className="mb-3">
                     <Input
                         value={search}
-                        onChange={(event: Event) => setSearch((event.currentTarget as HTMLInputElement).value)}
+                        onChange={(event) => setSearch(event.currentTarget.value)}
                         placeholder="Search metrics"
                         className="max-w-xl"
                     />
@@ -67,8 +68,16 @@ export default function AdminScrapingManagementPage() {
                         <tbody>
                             {filteredMetricRows.map((row) => (
                                 <tr key={row.metric} className="border-t border-[var(--gb-border)] text-[var(--gb-text)]">
-                                    <td className="px-3 py-2">{row.metric}</td>
-                                    <td className="px-3 py-2">{row.value}</td>
+                                    <td className="px-3 py-2">
+                                        <Badge variant="secondary" tone="neutral">
+                                            {row.metric}
+                                        </Badge>
+                                    </td>
+                                    <td className="px-3 py-2">
+                                        <Badge variant="outline" tone={row.value > 0 ? "success" : "neutral"}>
+                                            {row.value}
+                                        </Badge>
+                                    </td>
                                     <td className="px-3 py-2">
                                         <div className="flex flex-wrap gap-2">
                                             <Button size="sm" variant="outline" onClick={() => setTargetSource("all")}>
