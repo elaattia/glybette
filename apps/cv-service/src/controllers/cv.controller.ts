@@ -29,6 +29,7 @@ function shape(doc: any) {
         template: doc.template,
         sections: doc.sections ?? [],
         atsScore: doc.atsScore?.score,
+        atsScoreCvOnly: doc.atsScoreCvOnly?.score,   
         pdfUrl: doc.pdfUrl,
         shareToken: doc.shareToken,
         isPublic: doc.isPublic ?? false,
@@ -137,6 +138,11 @@ cvController.post("/:id/share", async (c) => {
 cvController.delete("/:id/share", async (c) => {
     const doc = await svc.revokeShare(c.req.param("id"), uid(c));
     return c.json({ cv: shape(doc) });
+});
+
+cvController.post("/:id/ats-score-cv", async (c) => {
+    const result = await svc.scoreAtsCvOnly(c.req.param("id"), uid(c));
+    return c.json(result);
 });
 
 cvController.post("/:id/ats-score", zValidator("json", z.object({ jobDescription: z.string().min(1) })), async (c) => {

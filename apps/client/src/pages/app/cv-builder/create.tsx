@@ -283,8 +283,8 @@ function extractResultToSections(result: ExtractResult, templateId?: string) {
     }
 
     const skillsSection = sections.find((s) => s.type === "skills");
-    if (result.skills?.length) {
-        const filteredSkills = result.skills.filter((g) => g.skills?.length > 0);
+    if ((result.skills || []).length > 0) {
+        const filteredSkills = result.skills!.filter((g) => g.skills?.length > 0);
         if (filteredSkills.length > 0) {
             if (skillsSection) {
                 skillsSection.data = filteredSkills.map((g) => ({
@@ -296,10 +296,10 @@ function extractResultToSections(result: ExtractResult, templateId?: string) {
         }
     }
 
-    if (result.projects?.filter((p) => p.name).length > 0) {
+    if ((result.projects || []).filter((p) => p.name).length > 0) {
         const existing = sections.find((s) => s.type === "projects");
         if (existing) {
-            existing.data = result.projects
+            existing.data = result.projects!
                 .filter((p) => p.name)
                 .map((p) => ({
                     id: crypto.randomUUID(),
@@ -327,10 +327,10 @@ function extractResultToSections(result: ExtractResult, templateId?: string) {
         }
     }
 
-    if (result.languages?.filter((l) => l.language).length > 0) {
+    if ((result.languages || []).filter((l) => l.language).length > 0) {
         const existing = sections.find((s) => s.type === "languages");
         if (existing) {
-            existing.data = result.languages
+            existing.data = result.languages!
                 .filter((l) => l.language)
                 .map((l) => ({
                     id: crypto.randomUUID(),
@@ -341,7 +341,7 @@ function extractResultToSections(result: ExtractResult, templateId?: string) {
             sections.push({
                 type: "languages",
                 order: sections.length,
-                data: result.languages
+                data: result.languages!
                     .filter((l) => l.language)
                     .map((l) => ({
                         id: crypto.randomUUID(),
@@ -352,10 +352,10 @@ function extractResultToSections(result: ExtractResult, templateId?: string) {
         }
     }
 
-    if (result.certifications?.filter((c) => c.name).length > 0) {
+    if ((result.certifications || []).filter((c) => c.name).length > 0) {
         const existing = sections.find((s) => s.type === "certifications");
         if (existing) {
-            existing.data = result.certifications
+            existing.data = result.certifications!
                 .filter((c) => c.name)
                 .map((c) => ({
                     id: crypto.randomUUID(),
@@ -392,13 +392,18 @@ export default function CvCreatePage() {
 
     const handleReady = async (template: TemplateInfo, mode: "blank" | "upload", file?: File) => {
         if (mode === "blank") {
-            const { cv } = await cvApi.create({
-                title: "Mon nouveau CV",
-                template: template.id,
-                sections: makeDefaultSections(template.id),
-            });
-            qc.invalidateQueries({ queryKey: CV_LIST_KEY });
-            navigate(`/app/cv/${cv._id}`);
+            try {
+                const { cv } = await cvApi.create({
+                    title: "Mon nouveau CV",
+                    template: template.id,
+                    sections: makeDefaultSections(template.id),
+                });
+                qc.invalidateQueries({ queryKey: CV_LIST_KEY });
+                navigate(`/app/cv/${cv._id}`);
+            } catch (err) {
+                console.error("[create] Failed to create blank CV", err);
+                alert("Erreur lors de la création du CV. Veuillez réessayer.");
+            }
             return;
         }
 

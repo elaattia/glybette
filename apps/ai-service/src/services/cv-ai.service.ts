@@ -5,6 +5,9 @@ export interface AtsScoreResult {
     missingKeywords: string[];
     matchedKeywords: string[];
     suggestions: string[];
+    strengths: string[];
+    weaknesses: string[];
+    tips: string[];
     breakdown: { keywordMatch: number; formatting: number; completeness: number; relevance: number };
 }
 export interface SuggestionsResult {
@@ -58,6 +61,56 @@ export interface ExtractResult {
 }
 
 export class CvAiService {
+    async scoreAtsCvOnly(cvText: string): Promise<AtsScoreResult> {
+        const prompt = `You are an ATS (Applicant Tracking System) expert.
+Analyze ONLY the CV below. Do NOT compare it to any job description.
+Evaluate how well-structured and ATS-readable the CV is based on:
+1. Presence of key sections (Experience, Education, Skills, Contact info)
+2. ATS-compatible formatting (no complex tables, no columns, no graphics described)
+3. Text readability and appropriate length
+4. Use of generic industry action verbs and keywords
+5. Overall document structure and completeness
+
+Scoring guide:
+- 90-100: Excellent ATS compatibility, all sections present, strong keywords
+- 75-89:  Good structure, minor improvements possible
+- 60-74:  Acceptable but missing some important elements
+- 40-59:  Needs significant improvement
+- 0-39:   Poor ATS compatibility
+
+Return ONLY this JSON object, no explanation, no markdown fences:
+{
+  "score": 78,
+  "missingKeywords": ["quantified results", "action verbs"],
+  "matchedKeywords": ["experience", "education", "skills", "contact"],
+  "suggestions": [
+    "Structure looks good, but lacks quantifiable achievements."
+  ],
+  "strengths": [
+    "Clear separation of sections",
+    "Good use of professional keywords in the summary"
+  ],
+  "weaknesses": [
+    "No metrics or numbers to back up experience",
+    "Missing some basic contact information"
+  ],
+  "tips": [
+    "Add 2-3 bullet points with percentages or numbers in your most recent role to show impact.",
+    "Ensure your LinkedIn URL is clickable and professional."
+  ],
+  "breakdown": {
+    "keywordMatch": 70,
+    "formatting": 85,
+    "completeness": 75,
+    "relevance": 80
+  }
+}
+
+=== CV TEXT ===
+${cvText.slice(0, 4000)}`;
+        return callOllamaJson<AtsScoreResult>(prompt, { maxTokens: 1200 });
+    }
+
     async scoreAts(cvText: string, jobDescription: string): Promise<AtsScoreResult> {
         const prompt = `You are an ATS expert. Analyze the CV against the job description.
 
@@ -72,10 +125,13 @@ Return ONLY this JSON object, no explanation, no markdown:
   "score": 75,
   "missingKeywords": ["keyword1", "keyword2"],
   "matchedKeywords": ["keyword3", "keyword4"],
-  "suggestions": ["suggestion 1", "suggestion 2", "suggestion 3"],
+  "suggestions": ["General suggestion"],
+  "strengths": ["Matches required domain experience"],
+  "weaknesses": ["Lacks mentioning specific CRM software requested"],
+  "tips": ["Add the specific CRM tools you used in your past roles."],
   "breakdown": { "keywordMatch": 70, "formatting": 80, "completeness": 75, "relevance": 75 }
 }`;
-        return callOllamaJson<AtsScoreResult>(prompt, { maxTokens: 800 });
+        return callOllamaJson<AtsScoreResult>(prompt, { maxTokens: 1200 });
     }
 
     async suggestImprovements(cvText: string): Promise<SuggestionsResult> {
@@ -171,7 +227,6 @@ Return ONLY the letter text, no subject line, no markdown.`;
         const text = rawText.slice(0, 3000);
         console.log("[extractFromText] text length:", text.length);
 
-        
         const prompt1 = `Extract personal information and professional summary from this CV text.
 Return ONLY valid JSON matching this exact structure:
 {
@@ -193,7 +248,6 @@ Use empty string "" for any missing field. No explanation, no markdown fences.
 CV TEXT:
 ${text}`;
 
-        
         const prompt2 = `Extract work experience and education from this CV text.
 Return ONLY valid JSON matching this exact structure:
 {
@@ -224,7 +278,6 @@ Use empty arrays [] if none found. No explanation, no markdown fences.
 CV TEXT:
 ${text}`;
 
-        
         const prompt3 = `Extract skills, projects, languages and certifications from this CV text.
 Return ONLY valid JSON matching this exact structure:
 {
@@ -256,30 +309,24 @@ ${text}`;
         } | null = null;
 
         try {
-            console.log("[extractFromText] step 1: personal info + summary");
             p1 = await callOllamaJson(prompt1, { maxTokens: 600 });
-            console.log("[extractFromText] step 1 ok:", JSON.stringify(p1?.personalInfo?.firstName));
         } catch (e) {
             console.error("[extractFromText] step 1 failed:", e);
         }
 
         try {
-            console.log("[extractFromText] step 2: experience + education");
             p2 = await callOllamaJson(prompt2, { maxTokens: 1200 });
-            console.log("[extractFromText] step 2 ok, exp count:", p2?.experience?.length);
         } catch (e) {
             console.error("[extractFromText] step 2 failed:", e);
         }
 
         try {
-            console.log("[extractFromText] step 3: skills + projects + languages + certs");
             p3 = await callOllamaJson(prompt3, { maxTokens: 1000 });
-            console.log("[extractFromText] step 3 ok, skills count:", p3?.skills?.length);
         } catch (e) {
             console.error("[extractFromText] step 3 failed:", e);
         }
 
-        const result: ExtractResult = {
+        return {
             personalInfo: p1?.personalInfo ?? emptyPersonal(),
             summary: p1?.summary ?? "",
             experience: p2?.experience ?? [],
@@ -289,15 +336,6 @@ ${text}`;
             languages: p3?.languages ?? [],
             certifications: p3?.certifications ?? [],
         };
-
-        console.log("[extractFromText] result:", {
-            hasPersonal: !!result.personalInfo.firstName,
-            expCount: result.experience.length,
-            eduCount: result.education.length,
-            skillCount: result.skills.length,
-        });
-
-        return result;
     }
 
     async suggestSkills(role: string, existingSkills: string[]): Promise<string[]> {

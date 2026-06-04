@@ -17,6 +17,9 @@ const AtsScoreSchema = new Schema(
         missingKeywords: [String],
         matchedKeywords: [String],
         suggestions: [String],
+        strengths: [String],
+        weaknesses: [String],
+        tips: [String],
         breakdown: {
             keywordMatch: Number,
             formatting: Number,
@@ -31,12 +34,30 @@ export interface CvDoc extends Document {
     userId: string;
     title: string;
     template: string;
+    theme?: {
+        accentColor?: string;
+        fontFamily?: string;
+        fontSize?: string;
+    };
     sections: Array<{ type: string; order: number; label?: string; data: unknown }>;
     atsScore?: {
         score: number;
         missingKeywords: string[];
         matchedKeywords: string[];
         suggestions: string[];
+        strengths?: string[];
+        weaknesses?: string[];
+        tips?: string[];
+        breakdown: { keywordMatch: number; formatting: number; completeness: number; relevance: number };
+    };
+    atsScoreCvOnly?: {
+        score: number;
+        missingKeywords: string[];
+        matchedKeywords: string[];
+        suggestions: string[];
+        strengths?: string[];
+        weaknesses?: string[];
+        tips?: string[];
         breakdown: { keywordMatch: number; formatting: number; completeness: number; relevance: number };
     };
     pdfUrl?: string;
@@ -51,8 +72,14 @@ const CvSchema = new Schema<CvDoc>(
         userId: { type: String, required: true, index: true },
         title: { type: String, required: true, trim: true, maxlength: 120, default: "Mon CV" },
         template: { type: String, required: true, enum: CV_TEMPLATE_IDS, default: "modern-strategy" },
+        theme: {
+            accentColor: String,
+            fontFamily: String,
+            fontSize: { type: String, enum: ["small", "medium", "large"] },
+        },
         sections: { type: [CvSectionSchema], default: [] },
         atsScore: { type: AtsScoreSchema },
+        atsScoreCvOnly: { type: AtsScoreSchema },
         pdfUrl: { type: String },
         shareToken: { type: String, sparse: true, index: true },
         isPublic: { type: Boolean, default: false },

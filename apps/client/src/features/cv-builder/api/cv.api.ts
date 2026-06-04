@@ -11,19 +11,10 @@ import type {
     ExtractResult,
 } from "../types/cv.types";
 
-interface CvListResponse {
-    cvs: CvDTO[];
-}
-interface CvResponse {
-    cv: CvDTO;
-}
-interface PdfResponse {
-    pdfUrl: string;
-}
-interface ShareResponse {
-    shareToken: string;
-    shareUrl: string;
-}
+interface CvListResponse { cvs: CvDTO[] }
+interface CvResponse { cv: CvDTO }
+interface PdfResponse { pdfUrl: string }
+interface ShareResponse { shareToken: string; shareUrl: string }
 
 export const cvApi = {
     list(): Promise<CvListResponse> {
@@ -75,6 +66,9 @@ export const cvApi = {
         return apiRequest<CvResponse>(`/api/share/${token}`);
     },
 
+    scoreAtsCvOnly(id: string): Promise<AtsScoreResult> {
+        return apiRequest<AtsScoreResult>(`/api/cvs/${id}/ats-score-cv`, { method: "POST" });
+    },
     scoreAts(id: string, jobDescription: string): Promise<AtsScoreResult> {
         return apiRequest<AtsScoreResult>(`/api/cvs/${id}/ats-score`, {
             method: "POST",

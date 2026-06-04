@@ -21,7 +21,7 @@ services:
             RABBITMQ_DEFAULT_USER: guest
             RABBITMQ_DEFAULT_PASS: guest
         healthcheck:
-            test: ["CMD", "rabbitmq-diagnostics", "-q", "ping"]
+            test: [ "CMD", "rabbitmq-diagnostics", "-q", "ping" ]
             interval: 10s
             timeout: 5s
             retries: 8
@@ -74,13 +74,7 @@ services:
             cv-service:
                 condition: service_started
         healthcheck:
-            test:
-                [
-                    "CMD",
-                    "node",
-                    "-e",
-                    "fetch('http://localhost:3000/api/health').then(r=>process.exit(r.ok?0:1)).catch(()=>process.exit(1))",
-                ]
+            test: [ "CMD", "node", "-e", "fetch('http://localhost:3000/api/health').then(r=>process.exit(r.ok?0:1)).catch(()=>process.exit(1))" ]
             interval: 15s
             timeout: 5s
             retries: 8
@@ -110,13 +104,7 @@ services:
             api-gateway:
                 condition: service_started
         healthcheck:
-            test:
-                [
-                    "CMD",
-                    "node",
-                    "-e",
-                    "fetch('http://localhost:5173').then(r=>process.exit(r.ok?0:1)).catch(()=>process.exit(1))",
-                ]
+            test: [ "CMD", "node", "-e", "fetch('http://localhost:5173').then(r=>process.exit(r.ok?0:1)).catch(()=>process.exit(1))" ]
             interval: 20s
             timeout: 5s
             retries: 8
@@ -148,13 +136,7 @@ services:
             rabbitmq:
                 condition: service_healthy
         healthcheck:
-            test:
-                [
-                    "CMD",
-                    "node",
-                    "-e",
-                    "fetch('http://localhost:3001/health').then(r=>process.exit(r.ok?0:1)).catch(()=>process.exit(1))",
-                ]
+            test: [ "CMD", "node", "-e", "fetch('http://localhost:3001/health').then(r=>process.exit(r.ok?0:1)).catch(()=>process.exit(1))" ]
             interval: 15s
             timeout: 5s
             retries: 8
@@ -186,13 +168,7 @@ services:
             rabbitmq:
                 condition: service_healthy
         healthcheck:
-            test:
-                [
-                    "CMD",
-                    "node",
-                    "-e",
-                    "fetch('http://localhost:3003/health').then(r=>process.exit(r.ok?0:1)).catch(()=>process.exit(1))",
-                ]
+            test: [ "CMD", "node", "-e", "fetch('http://localhost:3003/health').then(r=>process.exit(r.ok?0:1)).catch(()=>process.exit(1))" ]
             interval: 15s
             timeout: 5s
             retries: 8
@@ -221,13 +197,7 @@ services:
             workspace-deps:
                 condition: service_completed_successfully
         healthcheck:
-            test:
-                [
-                    "CMD",
-                    "node",
-                    "-e",
-                    "fetch('http://localhost:3004/health').then(r=>process.exit(r.ok?0:1)).catch(()=>process.exit(1))",
-                ]
+            test: [ "CMD", "node", "-e", "fetch('http://localhost:3004/health').then(r=>process.exit(r.ok?0:1)).catch(()=>process.exit(1))" ]
             interval: 15s
             timeout: 5s
             retries: 8
@@ -248,13 +218,7 @@ services:
         volumes:
             - ./:/workspace
         healthcheck:
-            test:
-                [
-                    "CMD",
-                    "python",
-                    "-c",
-                    "import urllib.request,sys;sys.exit(0 if urllib.request.urlopen('http://localhost:3002/health').status==200 else 1)",
-                ]
+            test: [ "CMD", "python", "-c", "import urllib.request,sys;sys.exit(0 if urllib.request.urlopen('http://localhost:3002/health').status==200 else 1)" ]
             interval: 20s
             timeout: 5s
             retries: 8
@@ -284,13 +248,7 @@ services:
             workspace-deps:
                 condition: service_completed_successfully
         healthcheck:
-            test:
-                [
-                    "CMD",
-                    "node",
-                    "-e",
-                    "fetch('http://localhost:3006/health').then(r=>process.exit(r.ok?0:1)).catch(()=>process.exit(1))",
-                ]
+            test: [ "CMD", "node", "-e", "fetch('http://localhost:3006/health').then(r=>process.exit(r.ok?0:1)).catch(()=>process.exit(1))" ]
             interval: 15s
             timeout: 5s
             retries: 8
@@ -368,19 +326,13 @@ services:
             workspace-deps:
                 condition: service_completed_successfully
         healthcheck:
-            test:
-                [
-                    "CMD",
-                    "node",
-                    "-e",
-                    "fetch('http://localhost:3008/health').then(r=>process.exit(r.ok?0:1)).catch(()=>process.exit(1))",
-                ]
+            test: [ "CMD", "node", "-e", "fetch('http://localhost:3008/health').then(r=>process.exit(r.ok?0:1)).catch(()=>process.exit(1))" ]
             interval: 15s
             timeout: 5s
             retries: 8
 
     ai-service:
-        profiles: ["ai"]
+        profiles: [ "ai" ]
         build:
             context: .
             dockerfile: Dockerfile.dev
@@ -407,13 +359,7 @@ services:
             workspace-deps:
                 condition: service_completed_successfully
         healthcheck:
-            test:
-                [
-                    "CMD",
-                    "node",
-                    "-e",
-                    "fetch('http://localhost:3007/health').then(r=>process.exit(r.ok?0:1)).catch(()=>process.exit(1))",
-                ]
+            test: [ "CMD", "node", "-e", "fetch('http://localhost:3007/health').then(r=>process.exit(r.ok?0:1)).catch(()=>process.exit(1))" ]
             interval: 20s
             timeout: 5s
             retries: 8

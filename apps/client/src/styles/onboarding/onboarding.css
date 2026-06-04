@@ -88,6 +88,7 @@
         color 0.2s,
         background 0.2s;
 }
+
 .ob-back-btn:hover {
     color: var(--ob-text-primary);
     background: var(--ob-surface);
@@ -96,6 +97,7 @@
 .ob-card-body {
     padding: 48px 48px 40px 48px;
 }
+
 .ob-card-body--with-back {
     padding: 24px 48px 40px 48px;
 }
@@ -116,6 +118,7 @@
     cursor: pointer;
     transition: color 0.2s;
 }
+
 .ob-why-wrap:hover {
     color: var(--ob-text-primary);
 }
@@ -183,6 +186,7 @@
     padding: 4px;
     transition: color 0.2s;
 }
+
 .ob-modal-close:hover {
     color: var(--ob-text-primary);
 }
@@ -226,6 +230,7 @@
     padding: 8px 0;
     transition: color 0.2s;
 }
+
 .ob-btn-skip:hover {
     color: var(--ob-text-primary);
 }
@@ -245,10 +250,12 @@
     color: #ffffff;
     box-shadow: 0 4px 20px rgba(22, 163, 74, 0.3);
 }
+
 .ob-btn-continue:hover:not(:disabled) {
     transform: translateY(-1px);
     box-shadow: 0 8px 28px rgba(22, 163, 74, 0.45);
 }
+
 .ob-btn-continue:disabled {
     background: var(--ob-surface);
     color: var(--ob-text-secondary);
@@ -263,6 +270,7 @@
     text-align: center;
     margin-bottom: 32px;
 }
+
 .ob-step-head--tight {
     margin-bottom: 28px;
 }
@@ -300,9 +308,11 @@
     transition: all 0.2s;
     box-shadow: 0 1px 4px rgba(0, 0, 0, 0.06);
 }
+
 .ob-journey-card:hover {
     border-color: var(--ob-border-active);
 }
+
 .ob-journey-card--selected {
     border-color: var(--ob-border-active);
     background: var(--ob-surface-hover);
@@ -349,6 +359,7 @@
     text-align: left;
     box-shadow: 0 1px 3px rgba(0, 0, 0, 0.06);
 }
+
 .ob-looking-row--selected {
     border-color: var(--ob-border-active);
     background: var(--ob-surface-hover);
@@ -390,6 +401,7 @@
     justify-content: center;
     transition: all 0.2s;
 }
+
 .ob-looking-row--selected .ob-looking-check {
     border-color: var(--ob-border-active);
     background: var(--ob-border-active);
@@ -443,6 +455,7 @@
     background: var(--ob-input-bg);
     color: var(--ob-text-primary);
 }
+
 .ob-select option:disabled {
     color: var(--ob-text-secondary);
 }
@@ -595,6 +608,7 @@
     transition: all 0.2s;
     box-shadow: 0 1px 4px rgba(0, 0, 0, 0.06);
 }
+
 .ob-bg-card--selected {
     border-color: var(--ob-border-active);
     background: var(--ob-surface-hover);
@@ -625,20 +639,25 @@
     .ob-journey-grid {
         grid-template-columns: 1fr;
     }
+
     .ob-bg-grid {
         grid-template-columns: 1fr;
     }
+
     .ob-looking-grid {
         grid-template-columns: 1fr;
     }
+
     .ob-header {
         padding-left: 20px;
         padding-right: 20px;
     }
+
     .ob-footer-actions {
         padding-left: 20px;
         padding-right: 20px;
     }
+
     .ob-card-body,
     .ob-card-body--with-back {
         padding-left: 24px;

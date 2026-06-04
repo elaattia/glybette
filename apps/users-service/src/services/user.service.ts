@@ -37,6 +37,15 @@ type BetterAuthUserDocument = mongoose.Document & {
     lastName?: string;
     phone?: string;
     location?: string;
+    country?: string;
+    university?: string;
+    degree?: string;
+    specialization?: string;
+    graduationYear?: string;
+    journey?: string;
+    opportunities?: string[];
+    domain?: string;
+    companyName?: string;
 };
 
 type BetterAuthAccountDocument = {
@@ -84,8 +93,8 @@ function buildAuthCapabilities(accounts: BetterAuthAccountDocument[]): {
     const primaryProvider = sortedAccounts[0]?.providerId
         ? normalizeProvider(sortedAccounts[0].providerId)
         : hasPassword
-          ? "email"
-          : "google";
+            ? "email"
+            : "google";
 
     const providerOrder = ["google", "github", "linkedin", "email"] as const;
     const orderedProviders: AuthProvider[] = providerOrder.filter((provider) =>
@@ -132,10 +141,10 @@ export function toUserDTO(user: BetterAuthUserDocument, accounts: BetterAuthAcco
     const derivedLastName =
         !lastName && user.name
             ? user
-                  .name.trim()
-                  .split(/\s+/)
-                  .slice(1)
-                  .join(" ") || undefined
+                .name.trim()
+                .split(/\s+/)
+                .slice(1)
+                .join(" ") || undefined
             : undefined;
     return {
         id: user._id.toString(),
@@ -153,6 +162,7 @@ export function toUserDTO(user: BetterAuthUserDocument, accounts: BetterAuthAcco
         provider: authCapabilities.provider,
         hasPassword: authCapabilities.hasPassword,
         connectedProviders: authCapabilities.connectedProviders,
+        companyName: user.companyName,
     };
 }
 
@@ -170,7 +180,7 @@ export function toPublicUserSummary(user: UserDTO): PublicUserSummaryDTO {
 }
 
 export class UserService {
-    constructor(private rabbit: RabbitMqClient | null = null) {}
+    constructor(private rabbit: RabbitMqClient | null = null) { }
 
     setRabbitClient(client: RabbitMqClient): void {
         this.rabbit = client;
@@ -260,7 +270,7 @@ export class UserService {
         });
     }
 
-    async getOwnProfile(userId: string): Promise<{ phone?: string; location?: string }> {
+    async getOwnProfile(userId: string): Promise<UpdateOwnProfileRequest["profile"]> {
         const db = mongoose.connection.db;
         if (!db) {
             throw new Error("Mongoose database connection is not initialized");
@@ -269,7 +279,7 @@ export class UserService {
             .collection<BetterAuthUserDocument>("users")
             .findOne(
                 { _id: new mongoose.Types.ObjectId(userId) },
-                { projection: { phone: 1, location: 1 } },
+                { projection: { phone: 1, location: 1, country: 1, university: 1, degree: 1, specialization: 1, graduationYear: 1, journey: 1, opportunities: 1, domain: 1, companyName: 1 } },
             );
         if (!user) {
             throw new NotFoundError("User not found");
@@ -277,12 +287,30 @@ export class UserService {
         return {
             phone: user.phone?.trim() || undefined,
             location: user.location?.trim() || undefined,
+            country: user.country?.trim() || undefined,
+            university: user.university?.trim() || undefined,
+            degree: user.degree?.trim() || undefined,
+            specialization: user.specialization?.trim() || undefined,
+            graduationYear: user.graduationYear?.trim() || undefined,
+            journey: user.journey?.trim() || undefined,
+            opportunities: user.opportunities ?? [],
+            domain: user.domain?.trim() || undefined,
+            companyName: user.companyName?.trim() || undefined,
         };
     }
 
-    async updateOwnProfile(userId: string, payload: UpdateOwnProfileRequest): Promise<{ phone?: string; location?: string }> {
+    async updateOwnProfile(userId: string, payload: UpdateOwnProfileRequest): Promise<UpdateOwnProfileRequest["profile"]> {
         const phone = payload.profile?.phone?.trim();
         const location = payload.profile?.location?.trim();
+        const country = payload.profile?.country?.trim();
+        const university = payload.profile?.university?.trim();
+        const degree = payload.profile?.degree?.trim();
+        const specialization = payload.profile?.specialization?.trim();
+        const graduationYear = payload.profile?.graduationYear?.trim();
+        const journey = payload.profile?.journey?.trim();
+        const opportunities = payload.profile?.opportunities ?? [];
+        const domain = payload.profile?.domain?.trim();
+        const companyName = payload.profile?.companyName?.trim();
         if (phone && phone.length > 40) {
             throw new BadRequestError("Phone number cannot exceed 40 characters.");
         }
@@ -301,6 +329,15 @@ export class UserService {
                 $set: {
                     phone: phone || undefined,
                     location: location || undefined,
+                    country: country || undefined,
+                    university: university || undefined,
+                    degree: degree || undefined,
+                    specialization: specialization || undefined,
+                    graduationYear: graduationYear || undefined,
+                    journey: journey || undefined,
+                    opportunities: opportunities.length ? opportunities : undefined,
+                    domain: domain || undefined,
+                    companyName: companyName || undefined,
                     updatedAt: new Date(),
                 },
             },
@@ -312,7 +349,41 @@ export class UserService {
         return {
             phone: phone || undefined,
             location: location || undefined,
+            country: country || undefined,
+            university: university || undefined,
+            degree: degree || undefined,
+            specialization: specialization || undefined,
+            graduationYear: graduationYear || undefined,
+            journey: journey || undefined,
+            opportunities: opportunities,
+            domain: domain || undefined,
+            companyName: companyName || undefined,
         };
+    }
+
+    async completeOnboarding(userId: string, role: "student" | "enterprise", companyName?: string): Promise<UserDTO> {
+        const db = mongoose.connection.db;
+        if (!db) {
+            throw new Error("Mongoose database connection is not initialized");
+        }
+        
+        const updateDoc: any = {
+            baseRole: role,
+            updatedAt: new Date(),
+        };
+        
+        if (role === "enterprise" && companyName) {
+            updateDoc.companyName = companyName.trim();
+        }
+
+        await db.collection<BetterAuthUserDocument>("users").updateOne(
+            { _id: new mongoose.Types.ObjectId(userId) },
+            { $set: updateDoc }
+        );
+
+        const user = await this.getById(userId);
+        await this.publishUserProfileUpserted(user);
+        return user;
     }
 
     async updateOwnAccount(

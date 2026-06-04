@@ -7,6 +7,21 @@ const svc = new CvAiService();
 export const cvRoutes = new Hono();
 
 cvRoutes.post(
+    "/ats-score-cv",
+    zValidator(
+        "json",
+        z.object({
+            cvText: z.string().min(1),
+        }),
+    ),
+    async (c) => {
+        const { cvText } = c.req.valid("json");
+        const result = await svc.scoreAtsCvOnly(cvText);
+        return c.json(result);
+    },
+);
+
+cvRoutes.post(
     "/ats-score",
     zValidator(
         "json",

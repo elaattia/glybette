@@ -1,5 +1,7 @@
 import { useOnboarding } from "@/hooks/useOnboarding";
 import { OnboardingLayout } from "@/components/onboarding/OnboardingLayout";
+import { StepRoleSelect } from "@/components/onboarding/StepRoleSelect";
+import { StepEnterpriseInfo } from "@/components/onboarding/StepEnterpriseInfo";
 import { StepPersonalInfo } from "@/components/onboarding/StepPersonalInfo";
 import { StepAcademicBackground } from "@/components/onboarding/StepAcademicBackground";
 import { StepJourney } from "@/components/onboarding/StepJourney";
@@ -16,6 +18,8 @@ export function OnboardingPage() {
         data,
         goBack,
         skip,
+        saveRole,
+        saveEnterpriseInfo,
         savePersonalInfo,
         saveAcademicBackground,
         saveJourney,
@@ -32,7 +36,7 @@ export function OnboardingPage() {
         return (
             <OnboardingLayout currentStep={totalSteps} totalSteps={totalSteps} progress={100}>
                 <StepComplete
-                    name={data.personalInfo?.firstName ?? "there"}
+                    name={data.role === "enterprise" ? data.companyName ?? "there" : data.personalInfo?.firstName ?? "there"}
                     domain={data.background?.domain}
                     lookingFor={data.lookingFor?.opportunities}
                     onFinish={handleFinish}
@@ -48,6 +52,12 @@ export function OnboardingPage() {
             progress={progress}
             showBack={currentIndex > 0}
             onBack={goBack}>
+            {currentStep === "role-select" && (
+                <StepRoleSelect onNext={saveRole} />
+            )}
+            {currentStep === "enterprise-info" && (
+                <StepEnterpriseInfo onNext={saveEnterpriseInfo} />
+            )}
             {currentStep === "personal-info" && (
                 <StepPersonalInfo onNext={savePersonalInfo} onSkip={skip} />
             )}

@@ -3,6 +3,9 @@ from utils.repo_env import load_root_env
 load_root_env()
 
 import os
+import re
+import hashlib
+import json as _json
 from contextlib import asynccontextmanager
 from datetime import datetime, timezone, timedelta
 from typing import Optional, Literal
@@ -44,7 +47,6 @@ app.add_middleware(
 
 
 def _serialize(doc: dict) -> dict:
-    """Convertit un document MongoDB en dict JSON-sérialisable."""
     doc["_id"] = str(doc["_id"])
     for key in ["date_publication", "date_scraped", "date_updated", "date_archivage"]:
         val = doc.get(key)
@@ -64,16 +66,6 @@ def _require_admin(request: Request) -> None:
 
 
 def _build_date_filter(date_posted: str) -> dict | None:
-    """
-    Retourne un filtre MongoDB pour la date.
-
-    Priorité : date_publication (date réelle de publication sur le site source)
-    Fallback  : date_scraped (date à laquelle on a scrappé l'offre)
-
-    On utilise $or pour couvrir les deux cas :
-      - offre avec date_publication connue → filtrer dessus
-      - offre sans date_publication → utiliser date_scraped
-    """
     now = datetime.now(timezone.utc)
     delta_map = {
         "this_hour": timedelta(hours=1),
@@ -99,78 +91,84 @@ def _build_date_filter(date_posted: str) -> dict | None:
     }
 
 
-def _calculate_matching_score(offre: dict, user_skills: list[str] = None, user_experience: str = None) -> int:
-    """
-    Calcule le score de recommandation d'une offre pour un profil utilisateur.
-    Score de 0 à 100 basé sur :
-      - Match de compétences (0-50)
-      - Match d'expérience (0-30)
-      - Autres facteurs (0-20)
-    
-    Retourne 0 si pas de profil utilisateur fourni (aucun tri recommandation).
-    """
-    if not user_skills and not user_experience:
-        return 0  
-    
-    score = 0
-    
+_score_cache: dict[tuple[str, str], int] = {}
+_MAX_CACHE = 2000
+
+
+def _profile_hash(user_skills: list[str] | None, user_experience: str | None) -> str:
+    key = _json.dumps({"s": sorted(user_skills or []), "e": user_experience or ""}, sort_keys=True)
+    return hashlib.md5(key.encode()).hexdigest()
+
+
+def _build_offre_text(offre: dict) -> str:
+    parts = [
+        f"Titre: {offre.get('titre', '')}",
+        f"Entreprise: {offre.get('entreprise', '')}" if offre.get("entreprise") else "",
+        f"Description: {offre.get('description', '')}" if offre.get("description") else "",
+        f"Compétences requises: {', '.join(offre.get('competences', []))}" if offre.get("competences") else "",
+        f"Localisation: {offre.get('localisation', '')}" if offre.get("localisation") else "",
+        f"Niveau: {offre.get('niveau_experience', '')}" if offre.get("niveau_experience") else "",
+        f"Contrat: {offre.get('type_contrat', '')}" if offre.get("type_contrat") else "",
+    ]
+    return "\n".join(p for p in parts if p)
+
+
+def _build_profile_text(user_skills: list[str] | None, user_experience: str | None) -> str:
+    parts = []
     if user_skills:
-        offre_skills = offre.get("competences", [])
-        if offre_skills:
-            matches = sum(1 for skill in user_skills 
-                         if any(s.lower() in skill.lower() or skill.lower() in s.lower() 
-                               for s in offre_skills))
-            if matches > 0:
-                match_ratio = min(matches / len(user_skills), 1.0)
-                score += int(match_ratio * 50)
-        else:
-            pass
-    
+        parts.append(f"Compétences: {', '.join(user_skills)}")
     if user_experience:
-        offre_exp = offre.get("niveau_experience", "").lower()
-        user_exp_lower = user_experience.lower()
-        
-        exp_levels = {
-            "junior":  (0, 1),
-            "mid":     (1, 3),
-            "senior":  (3, 10),
-            "confirmé": (1, 10),
-            "expert":  (5, 10),
-        }
-        
-        if any(exp_type in offre_exp for exp_type in ["junior", "débutant", "entry"]):
-            if user_exp_lower in ["junior", "débutant"]:
-                score += 30
-            elif user_exp_lower == "mid":
-                score += 20
-        elif any(exp_type in offre_exp for exp_type in ["mid", "intermédiaire", "confirmé"]):
-            if user_exp_lower in ["mid", "intermédiaire", "confirmé"]:
-                score += 30
-            elif user_exp_lower == "junior":
-                score += 15
-            elif user_exp_lower == "senior":
-                score += 20
-        elif any(exp_type in offre_exp for exp_type in ["senior", "expert", "lead"]):
-            if user_exp_lower in ["senior", "expert", "lead"]:
-                score += 30
-            elif user_exp_lower == "mid":
-                score += 15
-    
-    if offre.get("description"):
-        score += 10
-    
-    if offre.get("company_about"):
-        score += 10
-    
-    return min(score, 100)  
+        parts.append(f"Niveau d'expérience: {user_experience}")
+    return "\n".join(parts)
+
+
+def _call_ai_matching(profile_text: str, offre_text: str) -> int:
+    ai_url = os.getenv("AI_SERVICE_URL", "http://localhost:3007")
+    secret = os.getenv("INTERNAL_SERVICE_SECRET", "")
+    try:
+        resp = requests.post(
+            f"{ai_url}/ai/jobs/matching",
+            json={"profileText": profile_text, "offreText": offre_text},
+            headers={"x-internal-secret": secret, "Content-Type": "application/json"},
+            timeout=10,
+        )
+        if resp.status_code == 200:
+            data = resp.json()
+            return int(data.get("score", 0))
+    except Exception as e:
+        logger.warning(f"[scraping-service] ai-service matching failed: {e}")
+    return 0
+
+
+def _calculate_matching_score(
+    offre: dict,
+    user_skills: list[str] | None = None,
+    user_experience: str | None = None,
+) -> int:
+    if not user_skills and not user_experience:
+        return 0
+
+    offre_id = str(offre.get("_id", ""))
+    ph = _profile_hash(user_skills, user_experience)
+    cache_key = (ph, offre_id)
+
+    if cache_key in _score_cache:
+        return _score_cache[cache_key]
+
+    profile_text = _build_profile_text(user_skills, user_experience)
+    offre_text = _build_offre_text(offre)
+
+    score = _call_ai_matching(profile_text, offre_text)
+
+    if len(_score_cache) >= _MAX_CACHE:
+        for k in list(_score_cache.keys())[:200]:
+            del _score_cache[k]
+
+    _score_cache[cache_key] = score
+    return score
 
 
 def _fetch_user_profile(request: Request) -> tuple[list[str] | None, str | None]:
-    """
-    Tente de récupérer le profil utilisateur (skills, experience) depuis les services internes.
-    Priorité : portfolio-service (/portfolio/me) via l'entête Authorization.
-    Retourne (skills_list or None, experience or None).
-    """
     headers = {}
     auth = request.headers.get("authorization") or request.headers.get("Authorization")
     if auth:
@@ -235,18 +233,6 @@ def get_offres(
     user_experience:   Optional[str] = Query(None),
     request:           Request        = None,
 ):
-    """
-    Récupère les offres d'emploi avec support optionnel du scoring de recommandation.
-    
-    Paramètres additionnels pour recommandation :
-      - user_skills: CSV des compétences de l'utilisateur (ex: "Python,React,SQL")
-      - user_experience: niveau d'expérience de l'utilisateur (junior|mid|senior)
-    
-    Comportement :
-      - Avec profil: Affiche d'abord les offres recommandées (score > 60),
-        puis les autres offres, chacun trié par date
-      - Sans profil: Tri classique par date de publication
-    """
     filtre: dict = {"status": "active"}
 
     if type_offre:
@@ -293,7 +279,7 @@ def get_offres(
                 profile_experience = prof_exp
         except Exception:
             pass
-    
+
     sort_map = {
         "recent": [("date_publication", -1), ("date_scraped", -1)],
         "vues":   [("nb_vues", -1)],
@@ -302,30 +288,29 @@ def get_offres(
 
     col   = col_offres()
     total = col.count_documents(filtre)
-    
+
     projection = None if (profile_skills or profile_experience) else {"description": 0, "company_about": 0}
     all_docs = list(
         col.find(filtre, projection)
            .sort(sort)
     )
-    
+
     if profile_skills or profile_experience:
         for doc in all_docs:
             doc["_matching_score"] = _calculate_matching_score(
                 doc, profile_skills, profile_experience
             )
-        
 
-        all_docs.sort(
-            key=lambda x: (
-                0 if x["_matching_score"] > 0 else 1,
-                -x["_matching_score"],
-                -(x.get("date_publication") or x.get("date_scraped") or datetime.now(timezone.utc)).timestamp()
-            )
-        )
-    
+        def _sort_key(x):
+            score = x.get("_matching_score", 0)
+            dt = x.get("date_publication") or x.get("date_scraped")
+            ts = dt.timestamp() if isinstance(dt, datetime) else 0
+            return (-score, -ts)
+
+        all_docs.sort(key=_sort_key)
+
     docs = all_docs[(page - 1) * limit : page * limit]
-    
+
     serialized_offres = []
     for d in docs:
         serialized = _serialize(d)
@@ -428,7 +413,6 @@ def scrape_now(source: str, background_tasks: BackgroundTasks):
 
 @app.post("/trigger")
 def trigger_scrape(body: TriggerScrapeBody, background_tasks: BackgroundTasks):
-    """JSON body alias for clients that call `/trigger` via the API gateway."""
     return _enqueue_scrape(body.source, background_tasks)
 
 
@@ -458,6 +442,3 @@ def health():
         "status":    "ok" if test_connection() else "degraded",
         "timestamp": datetime.now(timezone.utc).isoformat(),
     }
-
-
-import re

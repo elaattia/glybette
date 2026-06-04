@@ -13,6 +13,33 @@ export function PersonalInfoSection({ data, onChange }: PersonalInfoProps) {
 
     return (
         <div style={{ display: "flex", flexDirection: "column", gap: "11px" }}>
+            <Field label="Photo de profil">
+                <div style={{ display: "flex", alignItems: "center", gap: "10px" }}>
+                    <div style={{ width: 44, height: 44, borderRadius: "50%", background: "var(--gb-app-hover)", border: "1px solid var(--gb-border)", overflow: "hidden", display: "flex", alignItems: "center", justifyContent: "center" }}>
+                        {data.photo ? <img src={data.photo} alt="Profil" style={{ width: "100%", height: "100%", objectFit: "cover" }} /> : <span style={{ fontSize: "20px", color: "var(--gb-muted)" }}>👤</span>}
+                    </div>
+                    <label style={{ fontSize: "11px", fontWeight: 600, color: "var(--gb-text)", cursor: "pointer", background: "var(--gb-app-hover)", border: "1px solid var(--gb-border)", padding: "5px 10px", borderRadius: "6px" }}>
+                        Importer
+                        <input
+                            type="file"
+                            accept="image/*"
+                            style={{ display: "none" }}
+                            onChange={(e) => {
+                                const file = e.target.files?.[0];
+                                if (!file) return;
+                                const reader = new FileReader();
+                                reader.onload = (ev) => onChange({ ...data, photo: ev.target?.result as string });
+                                reader.readAsDataURL(file);
+                            }}
+                        />
+                    </label>
+                    {data.photo && (
+                        <button onClick={() => onChange({ ...data, photo: undefined })} style={{ border: "none", background: "none", color: "#dc2626", fontSize: "11px", cursor: "pointer", fontWeight: 600 }}>
+                            Supprimer
+                        </button>
+                    )}
+                </div>
+            </Field>
             <div style={grid2}>
                 <Field label="Prénom">
                     <Input placeholder="Alex" value={data.firstName} onChange={set("firstName")} />

@@ -3,8 +3,8 @@ import type { Offre } from "@glybette/types";
 export type { Offre };
 
 export interface OffreWithScore extends Offre {
-    _matchScore?: number;
-    _localScore?: number;
+    _sortScore?: number;
+    _isRecommended?: boolean;
 }
 
 export interface Matching {

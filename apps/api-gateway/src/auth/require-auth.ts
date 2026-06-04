@@ -61,7 +61,7 @@ export function requireBetterAuthSession(env: GatewayEnv, services: ServiceRegis
     });
 }
 
-const VERIFICATION_ALLOWLIST = ["/api/auth/otp", "/api/auth/verification-status", "/api/portfolio/public"];
+const VERIFICATION_ALLOWLIST = ["/api/auth/otp", "/api/auth/verification-status", "/api/portfolio/public", "/api/users/me/profile",];
 
 function isVerificationAllowlisted(pathname: string): boolean {
     return VERIFICATION_ALLOWLIST.some((prefix) => pathname === prefix || pathname.startsWith(`${prefix}/`));
@@ -195,32 +195,34 @@ export function tryResolveBetterAuthSession(env: GatewayEnv, services: ServiceRe
             await next();
             return;
         }
-
-        const auth = await fetchGatewayAuthFromSession(env, services, c.req.raw.headers);
-        if (auth) {
-            if (auth.accountStatus === "banned") {
-                return c.json(
-                    {
-                        error: {
-                            code: "ACCOUNT_BANNED",
-                            message: "This account has been suspended",
+        try {    
+            const auth = await fetchGatewayAuthFromSession(env, services, c.req.raw.headers);
+            if (auth) {
+                if (auth.accountStatus === "banned") {
+                    return c.json(
+                        {
+                            error: {
+                                code: "ACCOUNT_BANNED",
+                                message: "This account has been suspended",
+                            },
                         },
-                    },
-                    403,
-                );
-            }
-            if (auth.requiresEmailVerification && !isVerificationAllowlisted(new URL(c.req.url).pathname)) {
-                return c.json(
-                    {
-                        error: {
-                            code: "EMAIL_VERIFICATION_REQUIRED",
-                            message: "Email verification is required before accessing this resource",
+                        403,
+                    );
+                }
+                if (auth.requiresEmailVerification && !isVerificationAllowlisted(new URL(c.req.url).pathname)) {
+                    return c.json(
+                        {
+                            error: {
+                                code: "EMAIL_VERIFICATION_REQUIRED",
+                                message: "Email verification is required before accessing this resource",
+                            },
                         },
-                    },
-                    403,
-                );
+                        403,
+                    );
+                }
+                c.set("gatewayAuth", auth);
             }
-            c.set("gatewayAuth", auth);
+        } catch {
         }
         await next();
     });

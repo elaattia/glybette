@@ -1,6 +1,6 @@
 export type TypeOffre = "emploi" | "stage" | "pfe" | "opportunite";
 
-export type SourceSite = "indeed" | "welcometothejungle" | "linkedin" | "pfebooks.com";
+export type SourceSite = "indeed" | "welcometothejungle" | "linkedin" | "pfebooks.com" | "entreprise_partenaire";
 
 export interface Offre {
     _id: string;
@@ -51,7 +51,7 @@ export interface OffresResponse {
 
 export interface OffresFilters {
     type_offre?: TypeOffre;
-    source?: SourceSite;
+    source?: SourceSite | "scraped";
     localisation?: string;
     search?: string;
     page?: number;

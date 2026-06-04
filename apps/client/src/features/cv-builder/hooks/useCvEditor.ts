@@ -17,7 +17,7 @@ export function useCvEditor(initial: CvEditorState) {
             setState((prev) => ({ ...prev, isSaving: true }));
 
             try {
-                const payload = { title: s.title, template: s.template, sections: s.sections };
+                const payload = { title: s.title, template: s.template, theme: s.theme, sections: s.sections };
 
                 if (s.id) {
                     await cvApi.update(s.id, payload);
@@ -58,6 +58,11 @@ export function useCvEditor(initial: CvEditorState) {
         [],
     );
 
+    const setTheme = useCallback(
+        (theme: NonNullable<CvEditorState["theme"]>) => setState((prev) => ({ ...prev, theme, isDirty: true })),
+        [],
+    );
+
     const updateSection = useCallback(
         (type: string, data: CvSection["data"]) =>
             setState((prev) => ({
@@ -95,6 +100,11 @@ export function useCvEditor(initial: CvEditorState) {
 
     const setAtsScore = useCallback((score: number) => setState((prev) => ({ ...prev, atsScore: score })), []);
 
+    const setAtsCvOnlyScore = useCallback(
+        (score: number) => setState((prev) => ({ ...prev, atsScoreCvOnly: score })),
+        [],
+    );
+
     const setPdfUrl = useCallback((pdfUrl: string) => setState((prev) => ({ ...prev, pdfUrl })), []);
 
     const setShareInfo = useCallback(
@@ -111,11 +121,13 @@ export function useCvEditor(initial: CvEditorState) {
         state,
         setTitle,
         setTemplate,
+        setTheme,
         updateSection,
         addSection,
         removeSection,
         reorderSections,
         setAtsScore,
+        setAtsCvOnlyScore,   
         setPdfUrl,
         setShareInfo,
         saveNow,

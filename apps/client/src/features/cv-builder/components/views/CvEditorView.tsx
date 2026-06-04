@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import {
     ArrowLeft, Save, Download, Sparkles, LayoutTemplate,
     Check, Loader, Eye, Edit3, Plus, ChevronDown, ChevronRight,
@@ -6,6 +6,7 @@ import {
 
 import { CvPreview } from "../CvPreview/CvPreview";
 import { AtsScorePanel } from "../AtsScorePanel";
+import { AtsScoreCvOnlyPanel } from "../AtsScoreCvOnlyPanel";  
 import { AiSuggestionsPanel } from "../ai/AiSuggestionsPanel";
 import { ResizeHandle } from "./ResizableSplit";
 import { CustomSectionModal } from "./CustomSectionModal";
@@ -17,15 +18,15 @@ import { useAiFeatures } from "../../hooks/useAiFeatures";
 import { TEMPLATES, getTemplate } from "../../templates";
 import { SECTION_DEFS } from "./sectionDefs";
 
-import type { CvEditorState, CvSection, CvTemplate, EditorView } from "../../types/cv.types";
-import type { ExperienceItem } from "../../types/cv.types";
+import type { CvEditorState, CvSection, CvTemplate, EditorView, ThemeSettings } from "../../types/cv.types";
 
 interface CvEditorViewProps {
     initialState: CvEditorState;
     onBack: () => void;
+    defaultOpenAts?: boolean;
 }
 
-export function CvEditorView({ initialState, onBack }: CvEditorViewProps) {
+export function CvEditorView({ initialState, onBack, defaultOpenAts }: CvEditorViewProps) {
     const editor = useCvEditor(initialState);
     const ai = useAiFeatures(editor.state.id);
     const { exportPdf, exportLoading } = useExportPdf(editor);
@@ -40,6 +41,14 @@ export function CvEditorView({ initialState, onBack }: CvEditorViewProps) {
     const { state } = editor;
     const activeSectionTypes = new Set(state.sections.map((s) => s.type));
     const currentTpl = getTemplate(state.template);
+
+    useEffect(() => {
+        if (defaultOpenAts && state.id && !ai.atsCvOnlyResult && !ai.loadingAtsCvOnly && state.atsScoreCvOnly == null) {
+            ai.checkAtsCvOnly()?.then((r) => {
+                if (r) editor.setAtsCvOnlyScore(r.score);
+            });
+        }
+    }, [defaultOpenAts, state.id]);
 
     const toggleExpanded = (type: string) =>
         setExpanded((prev) => {
@@ -72,6 +81,20 @@ export function CvEditorView({ initialState, onBack }: CvEditorViewProps) {
     const saveStatusColor = !state.isDirty && state.lastSaved ? "#16A34A" : "var(--gb-muted)";
     const saveBtnLabel = state.isSaving ? "Sauvegarde..." : state.isDirty ? "Sauvegarder" : "Sauvegardé";
 
+    const FONTS = [
+        { label: "Inter", value: "Inter, sans-serif" },
+        { label: "Roboto", value: "Roboto, sans-serif" },
+        { label: "Playfair Display", value: "'Playfair Display', serif" },
+        { label: "Merriweather", value: "Merriweather, serif" },
+        { label: "Outfit", value: "Outfit, sans-serif" },
+    ];
+
+    const FONT_SIZES = [
+        { label: "Petit", value: "small" },
+        { label: "Moyen", value: "medium" },
+        { label: "Grand", value: "large" },
+    ];
+
     return (
         <div style={{ height: "100vh", display: "flex", flexDirection: "column", margin: "-24px", overflow: "hidden" }}>
 
@@ -99,6 +122,19 @@ export function CvEditorView({ initialState, onBack }: CvEditorViewProps) {
                 {view === "edit" && (
                     <div style={{ width: `${formWidth}px`, flexShrink: 0, overflowY: "auto", background: "var(--gb-bg)" }}>
                         <div style={{ padding: "14px 18px 0" }}>
+                            <AtsScoreCvOnlyPanel
+                                savedScore={state.atsScoreCvOnly}
+                                result={ai.atsCvOnlyResult}
+                                isLoading={ai.loadingAtsCvOnly}
+                                hasCvId={!!state.id}
+                                defaultExpanded={defaultOpenAts}
+                                onCheck={() => {
+                                    ai.checkAtsCvOnly()?.then((r) => {
+                                        if (r) editor.setAtsCvOnlyScore(r.score);
+                                    });
+                                }}
+                            />
+
                             <AtsScorePanel
                                 score={state.atsScore}
                                 result={ai.atsResult}
@@ -108,6 +144,96 @@ export function CvEditorView({ initialState, onBack }: CvEditorViewProps) {
                                     ai.checkAts(jd)?.then((r) => { if (r) editor.setAtsScore(r.score); });
                                 }}
                             />
+
+                            <div style={{ marginBottom: "10px", border: "1px solid var(--gb-border)", borderRadius: "12px", overflow: "hidden", background: "var(--gb-app-panel-bg)" }}>
+                                <div onClick={() => toggleExpanded("design-settings")} style={{ display: "flex", alignItems: "center", gap: "9px", padding: "11px 13px", cursor: "pointer", userSelect: "none" }}>
+                                    <span style={{ color: "#0284C7", display: "flex" }}><Sparkles style={{ width: 14, height: 14 }} /></span>
+                                    <span style={{ flex: 1, fontSize: "13px", fontWeight: 600, color: "var(--gb-text)" }}>Style & Design</span>
+                                    {expanded.has("design-settings") ? <ChevronDown style={{ width: 13, height: 13, color: "var(--gb-muted)" }} /> : <ChevronRight style={{ width: 13, height: 13, color: "var(--gb-muted)" }} />}
+                                </div>
+                                {expanded.has("design-settings") && (
+                                    <div style={{ padding: "13px", borderTop: "1px solid var(--gb-border)", display: "flex", flexDirection: "column", gap: "14px" }}>
+                                        <div>
+                                            <label style={{ display: "block", fontSize: "11px", fontWeight: 600, color: "var(--gb-muted)", marginBottom: "6px" }}>Couleur Template (Fond)</label>
+                                            <div style={{ display: "flex", gap: "8px", flexWrap: "wrap" }}>
+                                                {["#1a3a5c", "#f8f8f8", "#111827", "#0f172a", "#1e3a5f"].map((c) => (
+                                                    <button key={c}
+                                                        onClick={() => editor.setTheme({ ...state.theme, templateColor: c })}
+                                                        style={{ width: "24px", height: "24px", borderRadius: "50%", background: c, border: state.theme?.templateColor === c ? "2px solid var(--gb-text)" : "1px solid rgba(0,0,0,0.1)", cursor: "pointer", padding: 0 }}
+                                                    />
+                                                ))}
+                                                <input
+                                                    type="color"
+                                                    value={state.theme?.templateColor || currentTpl.previewBg}
+                                                    onChange={(e) => editor.setTheme({ ...state.theme, templateColor: e.target.value })}
+                                                    style={{ width: "24px", height: "24px", padding: 0, border: "none", borderRadius: "50%", cursor: "pointer", overflow: "hidden" }}
+                                                    title="Couleur personnalisée"
+                                                />
+                                            </div>
+                                        </div>
+                                        <div>
+                                            <label style={{ display: "block", fontSize: "11px", fontWeight: 600, color: "var(--gb-muted)", marginBottom: "6px" }}>Couleur des Titres (Accent)</label>
+                                            <div style={{ display: "flex", gap: "8px", flexWrap: "wrap" }}>
+                                                {["#2563EB", "#0ea5e9", "#16A34A", "#f97316", "#8b5cf6", "#ec4899", "#f59e0b", "#475569", "#000000"].map((c) => (
+                                                    <button key={c}
+                                                        onClick={() => editor.setTheme({ ...state.theme, titleColor: c, accentColor: c })}
+                                                        style={{ width: "24px", height: "24px", borderRadius: "50%", background: c, border: (state.theme?.titleColor || state.theme?.accentColor) === c ? "2px solid var(--gb-text)" : "1px solid rgba(0,0,0,0.1)", cursor: "pointer", padding: 0 }}
+                                                    />
+                                                ))}
+                                                <input
+                                                    type="color"
+                                                    value={state.theme?.titleColor || state.theme?.accentColor || currentTpl.accentColor}
+                                                    onChange={(e) => editor.setTheme({ ...state.theme, titleColor: e.target.value, accentColor: e.target.value })}
+                                                    style={{ width: "24px", height: "24px", padding: 0, border: "none", borderRadius: "50%", cursor: "pointer", overflow: "hidden" }}
+                                                    title="Couleur personnalisée"
+                                                />
+                                            </div>
+                                        </div>
+                                        <div>
+                                            <label style={{ display: "block", fontSize: "11px", fontWeight: 600, color: "var(--gb-muted)", marginBottom: "6px" }}>Style des Titres (Police)</label>
+                                            <select
+                                                value={state.theme?.titleFontFamily || state.theme?.fontFamily || FONTS[0].value}
+                                                onChange={(e) => editor.setTheme({ ...state.theme, titleFontFamily: e.target.value })}
+                                                style={{ width: "100%", padding: "8px 10px", borderRadius: "8px", border: "1px solid var(--gb-border)", background: "var(--gb-app-hover)", color: "var(--gb-text)", fontSize: "13px", outline: "none", cursor: "pointer" }}
+                                            >
+                                                {FONTS.map(f => <option key={f.value} value={f.value}>{f.label}</option>)}
+                                            </select>
+                                        </div>
+                                        <div>
+                                            <label style={{ display: "block", fontSize: "11px", fontWeight: 600, color: "var(--gb-muted)", marginBottom: "6px" }}>Style d'écriture (Police du corps)</label>
+                                            <select
+                                                value={state.theme?.bodyFontFamily || state.theme?.fontFamily || FONTS[0].value}
+                                                onChange={(e) => editor.setTheme({ ...state.theme, bodyFontFamily: e.target.value })}
+                                                style={{ width: "100%", padding: "8px 10px", borderRadius: "8px", border: "1px solid var(--gb-border)", background: "var(--gb-app-hover)", color: "var(--gb-text)", fontSize: "13px", outline: "none", cursor: "pointer" }}
+                                            >
+                                                {FONTS.map(f => <option key={f.value} value={f.value}>{f.label}</option>)}
+                                            </select>
+                                        </div>
+                                        <div style={{ display: "flex", gap: "10px" }}>
+                                            <div style={{ flex: 1 }}>
+                                                <label style={{ display: "block", fontSize: "11px", fontWeight: 600, color: "var(--gb-muted)", marginBottom: "6px" }}>Taille Titres</label>
+                                                <select
+                                                    value={state.theme?.titleFontSize || "medium"}
+                                                    onChange={(e) => editor.setTheme({ ...state.theme, titleFontSize: e.target.value as any })}
+                                                    style={{ width: "100%", padding: "8px 10px", borderRadius: "8px", border: "1px solid var(--gb-border)", background: "var(--gb-app-hover)", color: "var(--gb-text)", fontSize: "13px", outline: "none", cursor: "pointer" }}
+                                                >
+                                                    {FONT_SIZES.map(f => <option key={f.value} value={f.value}>{f.label}</option>)}
+                                                </select>
+                                            </div>
+                                            <div style={{ flex: 1 }}>
+                                                <label style={{ display: "block", fontSize: "11px", fontWeight: 600, color: "var(--gb-muted)", marginBottom: "6px" }}>Taille Corps</label>
+                                                <select
+                                                    value={state.theme?.bodyFontSize || "medium"}
+                                                    onChange={(e) => editor.setTheme({ ...state.theme, bodyFontSize: e.target.value as any })}
+                                                    style={{ width: "100%", padding: "8px 10px", borderRadius: "8px", border: "1px solid var(--gb-border)", background: "var(--gb-app-hover)", color: "var(--gb-text)", fontSize: "13px", outline: "none", cursor: "pointer" }}
+                                                >
+                                                    {FONT_SIZES.map(f => <option key={f.value} value={f.value}>{f.label}</option>)}
+                                                </select>
+                                            </div>
+                                        </div>
+                                    </div>
+                                )}
+                            </div>
                         </div>
 
                         <div style={{ padding: "8px 18px 20px" }}>
@@ -122,16 +248,17 @@ export function CvEditorView({ initialState, onBack }: CvEditorViewProps) {
                                             borderRadius: "12px",
                                             overflow: "hidden",
                                             background: "var(--gb-app-panel-bg)",
-                                        }}>
+                                        }}
+                                    >
                                         <div
                                             onClick={() => toggleExpanded(def.type)}
-                                            style={{ display: "flex", alignItems: "center", gap: "9px", padding: "11px 13px", cursor: "pointer", userSelect: "none" }}>
+                                            style={{ display: "flex", alignItems: "center", gap: "9px", padding: "11px 13px", cursor: "pointer", userSelect: "none" }}
+                                        >
                                             <span style={{ color: "#16A34A", display: "flex" }}>{def.icon}</span>
                                             <span style={{ flex: 1, fontSize: "13px", fontWeight: 600, color: "var(--gb-text)" }}>{def.label}</span>
                                             {isOpen
                                                 ? <ChevronDown style={{ width: 13, height: 13, color: "var(--gb-muted)" }} />
-                                                : <ChevronRight style={{ width: 13, height: 13, color: "var(--gb-muted)" }} />
-                                            }
+                                                : <ChevronRight style={{ width: 13, height: 13, color: "var(--gb-muted)" }} />}
                                         </div>
                                         {isOpen && (
                                             <div style={{ padding: "13px", borderTop: "1px solid var(--gb-border)" }}>
@@ -146,7 +273,8 @@ export function CvEditorView({ initialState, onBack }: CvEditorViewProps) {
                                 onClick={() => setShowModal(true)}
                                 style={addSectionBtnStyle}
                                 onMouseEnter={(e) => { e.currentTarget.style.borderColor = "rgba(22,163,74,0.4)"; e.currentTarget.style.color = "#16A34A"; }}
-                                onMouseLeave={(e) => { e.currentTarget.style.borderColor = "var(--gb-border2)"; e.currentTarget.style.color = "var(--gb-muted)"; }}>
+                                onMouseLeave={(e) => { e.currentTarget.style.borderColor = "var(--gb-border2)"; e.currentTarget.style.color = "var(--gb-muted)"; }}
+                            >
                                 <Plus style={{ width: 13, height: 13 }} /> Ajouter une section
                             </button>
                         </div>
@@ -159,7 +287,7 @@ export function CvEditorView({ initialState, onBack }: CvEditorViewProps) {
 
                 <div style={{ flex: 1, overflowY: "auto", background: "#e2e5e9", display: "flex", justifyContent: "center", padding: "28px" }}>
                     <div style={{ width: "100%", maxWidth: "680px", background: "#fff", boxShadow: "0 4px 40px rgba(0,0,0,0.14)", borderRadius: "3px", minHeight: "880px" }}>
-                        <CvPreview template={state.template} sections={state.sections} />
+                        <CvPreview template={state.template} sections={state.sections} theme={state.theme} />
                     </div>
                 </div>
             </div>
@@ -188,7 +316,6 @@ export function CvEditorView({ initialState, onBack }: CvEditorViewProps) {
         </div>
     );
 }
-
 
 interface TopBarProps {
     state: CvEditorState;
@@ -234,13 +361,13 @@ function TopBar({
                     {state.isSaving
                         ? <Loader style={{ width: 11, height: 11, animation: "spin 1s linear infinite" }} />
                         : !state.isDirty && state.lastSaved
-                            ? <Check style={{ width: 11, height: 11 }} />
-                            : null}
+                        ? <Check style={{ width: 11, height: 11 }} />
+                        : null}
                     {state.isSaving
                         ? "Sauvegarde…"
                         : state.lastSaved && !state.isDirty
-                            ? `Sauvegardé ${state.lastSaved.toLocaleTimeString("fr-FR", { hour: "2-digit", minute: "2-digit" })}`
-                            : state.isDirty ? "Non sauvegardé" : ""}
+                        ? `Sauvegardé ${state.lastSaved.toLocaleTimeString("fr-FR", { hour: "2-digit", minute: "2-digit" })}`
+                        : state.isDirty ? "Non sauvegardé" : ""}
                 </span>
             </div>
 
@@ -293,7 +420,6 @@ function TopBar({
         </div>
     );
 }
-
 
 const topBtnBase: React.CSSProperties = {
     display: "flex", alignItems: "center", gap: "6px",
