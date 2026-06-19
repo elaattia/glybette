@@ -29,6 +29,7 @@ export interface OffreDoc extends Document {
     nb_vues: number;
     nb_clics: number;
     date_updated: Date;
+    createdBy?: string;
 }
 
 const OffreSchema = new Schema<OffreDoc>(
@@ -59,12 +60,14 @@ const OffreSchema = new Schema<OffreDoc>(
         nb_vues: { type: Number, default: 0 },
         nb_clics: { type: Number, default: 0 },
         date_updated: { type: Date, default: Date.now },
+        createdBy: String,
     },
     { timestamps: true },
 );
 
 OffreSchema.index({ type_offre: 1 });
 OffreSchema.index({ source_site: 1 });
+OffreSchema.index({ createdBy: 1 });
 OffreSchema.index({ status: 1 });
 OffreSchema.index({ date_scraped: -1 });
 OffreSchema.index({ date_publication: -1 });

@@ -166,11 +166,26 @@ export type CvSection =
           data: CustomSectionData;
       };
 
+export interface ThemeSettings {
+    templateColor?: string; 
+    titleColor?: string; 
+    titleFontFamily?: string;
+    bodyFontFamily?: string;
+    titleFontSize?: "small" | "medium" | "large";
+    bodyFontSize?: "small" | "medium" | "large";
+    accentColor?: string;
+    fontFamily?: string;
+    fontSize?: "small" | "medium" | "large";
+}
+
 export interface AtsScoreData {
     score: number;
     missingKeywords: string[];
     matchedKeywords: string[];
     suggestions: string[];
+    strengths?: string[];
+    weaknesses?: string[];
+    tips?: string[];
     breakdown: {
         keywordMatch: number;
         formatting: number;
@@ -184,6 +199,7 @@ export interface CvDTO {
     userId: string;
     title: string;
     template: CvTemplate;
+    theme?: ThemeSettings;
     sections: CvSection[];
     pdfUrl?: string;
     shareToken?: string;

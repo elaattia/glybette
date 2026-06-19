@@ -2,6 +2,8 @@ export * from "./scraping.js";
 export * from "./cv.js";
 
 export type OnboardingStep =
+    | "role-select"
+    | "enterprise-info"
     | "personal-info"
     | "academic-background"
     | "journey"
@@ -48,6 +50,8 @@ export interface OnboardingStatus {
 }
 
 export interface OnboardingData {
+    role?: "student" | "enterprise";
+    companyName?: string;
     personalInfo?: PersonalInfoPayload;
     academicBackground?: AcademicBackgroundPayload;
     journey?: JourneyPayload;

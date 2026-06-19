@@ -23,6 +23,7 @@ export interface UserDTO {
     provider: AuthProvider;
     hasPassword: boolean;
     connectedProviders: AuthProvider[];
+    companyName?: string;
 }
 
 export interface SelfResponse {
@@ -81,6 +82,15 @@ export interface UpdateOwnProfileRequest {
     profile: {
         phone?: string;
         location?: string;
+        country?: string;
+        university?: string;
+        degree?: string;
+        specialization?: string;
+        graduationYear?: string;
+        journey?: string;
+        opportunities?: string[];
+        domain?: string;
+        companyName?: string;
     };
 }
 
@@ -88,6 +98,15 @@ export interface OwnProfileResponse {
     profile: {
         phone?: string;
         location?: string;
+        country?: string;
+        university?: string;
+        degree?: string;
+        specialization?: string;
+        graduationYear?: string;
+        journey?: string;
+        opportunities?: string[];
+        domain?: string;
+        companyName?: string;
     };
 }
 
@@ -118,6 +137,16 @@ export interface ResolveUsersRequest {
 
 export interface ResolveUsersResponse {
     users: PublicUserSummaryDTO[];
+}
+
+export interface CompleteOnboardingRequest {
+    role: "student" | "enterprise";
+    companyName?: string;
+}
+
+export interface CompleteOnboardingResponse {
+    ok: true;
+    baseRole: BaseRole;
 }
 
 export const PORTFOLIO_TEMPLATE_IDS = ["atelier", "signal", "folio", "mono"] as const;
@@ -279,3 +308,68 @@ export {
     type DecideJoinRequestRequest,
     type CreateProjectCommentRequest,
 } from "./projects.js";
+
+// Application/Candidature types
+export const APPLICATION_STATUSES = ["pending", "viewed", "accepted", "rejected"] as const;
+export type ApplicationStatus = (typeof APPLICATION_STATUSES)[number];
+
+export interface OffreDTO {
+    _id: string;
+    titre: string;
+    entreprise?: string;
+    description?: string;
+    competences: string[];
+    localisation?: string;
+    salaire?: string;
+    type_contrat?: string;
+    type_offre: string;
+    domaine?: string;
+    source_site: string;
+    date_publication?: string;
+    date_scraped: string;
+}
+
+export interface ApplicationDTO {
+    _id: string;
+    userId: string;
+    offreId: string;
+    status: ApplicationStatus;
+    appliedAt: string;
+    coverLetter: string;
+    resumeUrl?: string;
+    coverLetterUrl?: string;
+    recruiterNotes?: string;
+    rating?: number;
+    reviewedAt?: string;
+    reviewedBy?: string;
+}
+
+export interface ApplicationWithOffreDTO extends ApplicationDTO {
+    offre: OffreDTO;
+}
+
+export interface SubmitApplicationRequest {
+    offreId: string;
+    coverLetter: string;
+    resumeUrl?: string;
+}
+
+export interface UpdateApplicationStatusRequest {
+    status: ApplicationStatus;
+    recruiterNotes?: string;
+    rating?: number;
+}
+
+export interface ApplicationsResponse {
+    applications: ApplicationDTO[];
+}
+
+export interface ApplicationsWithOffreResponse {
+    applications: ApplicationWithOffreDTO[];
+}
+
+export interface EnterpriseApplicationsResponse {
+    applications: ApplicationWithOffreDTO[];
+    stats: Record<string, Record<string, number>>;
+}
+

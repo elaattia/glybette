@@ -1,5 +1,5 @@
 interface StepFooterProps {
-    onSkip: () => void;
+    onSkip?: () => void;
     onContinue: () => void;
     canContinue: boolean;
     skipLabel?: string;
@@ -15,9 +15,13 @@ export function StepFooter({
 }: StepFooterProps) {
     return (
         <div className="ob-step-footer">
-            <button type="button" className="ob-btn-skip" onClick={onSkip}>
-                {skipLabel}
-            </button>
+            {onSkip ? (
+                <button type="button" className="ob-btn-skip" onClick={onSkip}>
+                    {skipLabel}
+                </button>
+            ) : (
+                <div />
+            )}
 
             <button type="button" className="ob-btn-continue" onClick={onContinue} disabled={!canContinue}>
                 {continueLabel}

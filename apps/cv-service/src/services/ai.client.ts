@@ -2,23 +2,21 @@ import { internalRequestJson } from "@glybette/utils";
 
 function getBaseUrl() {
     const url = process.env.AI_SERVICE_URL;
-    if (!url) {
-        throw new Error("AI_SERVICE_URL environment variable is required");
-    }
+    if (!url) throw new Error("AI_SERVICE_URL environment variable is required");
     return url;
 }
 function getSecret() {
     const secret = process.env.INTERNAL_SERVICE_SECRET;
-    if (!secret) {
-        throw new Error("INTERNAL_SERVICE_SECRET environment variable is required");
-    }
+    if (!secret) throw new Error("INTERNAL_SERVICE_SECRET environment variable is required");
     return secret;
 }
 
-async function post<T>(path: string, body: object): Promise<T> {
+async function post<T>(path: string, body: object, timeoutMs?: number): Promise<T> {
+    const finalTimeout = timeoutMs ?? Number(process.env.INTEROP_SYNC_TIMEOUT_MS ?? 12_000);
+    console.log(`[ai.client] post to ${path} with timeout ${finalTimeout}ms (param was ${timeoutMs})`);
     return internalRequestJson<T>(`${getBaseUrl()}/ai/cv${path}`, {
         method: "POST",
-        timeoutMs: Number(process.env.INTEROP_SYNC_TIMEOUT_MS ?? 12_000),
+        timeoutMs: finalTimeout,
         internalSecret: getSecret(),
         body: JSON.stringify(body),
     });
@@ -36,47 +34,24 @@ export interface SuggestionsResult {
     suggestions: Array<{ section: string; issue: string; suggestion: string; priority: "high" | "medium" | "low" }>;
 }
 
-export interface EnhanceResult {
-    enhanced: string;
-}
-export interface TailorResult {
-    summary: string;
-    suggestedSkills: string[];
-    suggestedKeywords: string[];
-}
-export interface CoverLetterResult {
-    content: string;
-}
+export interface EnhanceResult { enhanced: string }
+export interface TailorResult { summary: string; suggestedSkills: string[]; suggestedKeywords: string[] }
+export interface CoverLetterResult { content: string }
 
 export interface ExtractResult {
     personalInfo: {
-        firstName: string;
-        lastName: string;
-        roleTitle: string;
-        email: string;
-        phone: string;
-        location: string;
-        linkedin: string;
-        github: string;
-        website: string;
+        firstName: string; lastName: string; roleTitle: string;
+        email: string; phone: string; location: string;
+        linkedin: string; github: string; website: string;
     };
     summary: string;
     experience: Array<{
-        company: string;
-        position: string;
-        startDate: string;
-        endDate: string;
-        current: boolean;
-        location: string;
-        description: string;
+        company: string; position: string; startDate: string;
+        endDate: string; current: boolean; location: string; description: string;
     }>;
     education: Array<{
-        institution: string;
-        degree: string;
-        field: string;
-        startDate: string;
-        endDate: string;
-        gpa: string;
+        institution: string; degree: string; field: string;
+        startDate: string; endDate: string; gpa: string;
     }>;
     skills: Array<{ category: string; skills: string[] }>;
     languages: Array<{ language: string; level: string }>;
@@ -84,6 +59,10 @@ export interface ExtractResult {
 }
 
 export class AiClient {
+    scoreAtsCvOnly(cvText: string) {
+        return post<AtsScoreResult>("/ats-score-cv", { cvText });
+    }
+
     scoreAts(cvText: string, jobDescription: string) {
         return post<AtsScoreResult>("/ats-score", { cvText, jobDescription });
     }
@@ -100,7 +79,7 @@ export class AiClient {
         return post<CoverLetterResult>("/cover-letter", { cvText, jobDescription, tone: tone ?? "professional" });
     }
     extractFromText(text: string) {
-        return post<ExtractResult>("/extract", { text });
+        return post<ExtractResult>("/extract", { text }, 60_000);
     }
     suggestSkills(role: string, existingSkills: string[]) {
         return post<{ skills: string[] }>("/suggest-skills", { role, existingSkills });

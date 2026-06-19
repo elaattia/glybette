@@ -4,11 +4,13 @@ import type { AtsScoreResult, SuggestionsResult, TailorResult, CoverLetterResult
 
 export function useAiFeatures(cvId: string | undefined) {
     const [atsResult, setAtsResult] = useState<AtsScoreResult | null>(null);
+    const [atsCvOnlyResult, setAtsCvOnlyResult] = useState<AtsScoreResult | null>(null); 
     const [suggestions, setSuggestions] = useState<SuggestionsResult["suggestions"]>([]);
     const [coverLetter, setCoverLetter] = useState<string>("");
     const [tailorResult, setTailorResult] = useState<TailorResult | null>(null);
 
     const [loadingAts, setLoadingAts] = useState(false);
+    const [loadingAtsCvOnly, setLoadingAtsCvOnly] = useState(false); 
     const [loadingSuggestions, setLoadingSuggestions] = useState(false);
     const [loadingCoverLetter, setLoadingCoverLetter] = useState(false);
     const [loadingTailor, setLoadingTailor] = useState(false);
@@ -32,6 +34,16 @@ export function useAiFeatures(cvId: string | undefined) {
                 .finally(() => setLoading(false));
         },
         [cvId],
+    );
+
+    const checkAtsCvOnly = useCallback(
+        () =>
+            guarded(setLoadingAtsCvOnly, async (id) => {
+                const result = await cvApi.scoreAtsCvOnly(id);
+                setAtsCvOnlyResult(result);
+                return result;
+            }),
+        [guarded],
     );
 
     const checkAts = useCallback(
@@ -75,15 +87,9 @@ export function useAiFeatures(cvId: string | undefined) {
     );
 
     const enhanceSection = useCallback(
-        async (text: string, sectionType: string, enhanceKey: string): Promise<string | undefined> => {
-            if (!cvId) {
-                setError("Sauvegardez d'abord votre CV.");
-                return undefined;
-            }
-            if (!text.trim()) {
-                setError("Le champ est vide.");
-                return undefined;
-            }
+        async (text: string, sectionType: string, enhanceKey: string): Promise<string | null> => {
+            if (!cvId) { setError("Sauvegardez d'abord votre CV."); return null; }
+            if (!text.trim()) { setError("Le champ est vide."); return null; }
             setEnhancingKey(enhanceKey);
             setError(null);
             try {
@@ -91,7 +97,7 @@ export function useAiFeatures(cvId: string | undefined) {
                 return result.enhanced;
             } catch (e: unknown) {
                 setError(e instanceof Error ? e.message : "Erreur AI");
-                return undefined;
+                return null;
             } finally {
                 setEnhancingKey(null);
             }
@@ -102,6 +108,7 @@ export function useAiFeatures(cvId: string | undefined) {
     const clearError = useCallback(() => setError(null), []);
     const clearResults = useCallback(() => {
         setAtsResult(null);
+        setAtsCvOnlyResult(null);
         setSuggestions([]);
         setCoverLetter("");
         setTailorResult(null);
@@ -110,18 +117,21 @@ export function useAiFeatures(cvId: string | undefined) {
 
     return {
         atsResult,
+        atsCvOnlyResult,       
         suggestions,
         coverLetter,
         tailorResult,
         error,
 
         loadingAts,
+        loadingAtsCvOnly,      
         loadingSuggestions,
         loadingCoverLetter,
         loadingTailor,
         enhancingKey,
 
         checkAts,
+        checkAtsCvOnly,       
         getSuggestions,
         tailorCv,
         generateCoverLetter,

@@ -45,21 +45,12 @@ export function useAuthBootstrap() {
 
         if (sessionQuery.data?.session) {
             setAuthenticated(sessionQuery.data);
-            return;
-        }
-
-        if (sessionQuery.isFetching) {
-            return;
-        }
-
-        if (sessionQuery.isFetched) {
+        } else {
             setUnauthenticated();
         }
     }, [
         sessionQuery.data,
         sessionQuery.isPending,
-        sessionQuery.isFetching,
-        sessionQuery.isFetched,
         setAuthenticated,
         setUnauthenticated,
     ]);

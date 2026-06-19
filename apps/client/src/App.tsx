@@ -23,6 +23,7 @@ import { PublicPortfolioPage } from "@/pages/portfolio/PublicPortfolioPage";
 import { PortfolioRoot } from "@/pages/portfolio/PortfolioRoot";
 import SettingsPage from "@/pages/app/settings";
 import EnterpriseDashboardPage from "@/pages/app/enterprise";
+import EnterpriseApplicationsPage from "@/pages/app/enterprise/applications";
 import AdminDashboardPage from "@/pages/app/admin";
 import AdminUsersManagementPage from "@/pages/app/admin/users";
 import AdminProjectsManagementPage from "@/pages/app/admin/projects";
@@ -58,6 +59,7 @@ function App() {
                 <Route path="/app" element={<AppShellLayout />}>
                     <Route index element={<AppHomeRedirect />} />
                     <Route path="enterprise" element={<EnterpriseDashboardPage />} />
+                    <Route path="enterprise/applications" element={<EnterpriseApplicationsPage />} />
                     <Route path="settings" element={<SettingsPage />} />
 
                     <Route element={<RequireBaseRole allowed={["student"]} redirectTo="/app/enterprise" />}>

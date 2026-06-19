@@ -1,5 +1,5 @@
 import type { ReactNode } from "react";
-import { Globe, Briefcase, BookOpen, Leaf } from "lucide-react";
+import { Globe, Briefcase, BookOpen, Leaf, Sparkles } from "lucide-react";
 import React from "react";
 
 export const API_BASE =
@@ -15,6 +15,7 @@ export const TYPE_COLORS: Record<string, { bg: string; text: string; dot: string
 export const FALLBACK_COLORS = { bg: "rgba(255,255,255,0.06)", text: "#94a3b8", dot: "#94a3b8", border: "rgba(255,255,255,0.1)" };
 
 export const SOURCE_ICONS: Record<string, ReactNode> = {
+    entreprise_partenaire: React.createElement(Sparkles, { size: 16, color: "#16A34A" }),
     indeed:            React.createElement(Globe, { size: 16 }),
     linkedin:          React.createElement(Briefcase, { size: 16 }),
     welcometothejungle: React.createElement(Leaf, { size: 16 }),
@@ -22,12 +23,12 @@ export const SOURCE_ICONS: Record<string, ReactNode> = {
 };
 
 export const SOURCE_LABELS: Record<string, string> = {
-    indeed: "Indeed", linkedin: "LinkedIn", welcometothejungle: "WTTJ", "pfebooks.com": "PFEBooks",
+    entreprise_partenaire: "Partenaire Glybette", indeed: "Indeed", linkedin: "LinkedIn", welcometothejungle: "WTTJ", "pfebooks.com": "PFEBooks",
 };
 
 export const FILTER_LABELS: Record<string, Record<string, string>> = {
     type_offre:        { emploi: "Emploi", stage: "Stage", pfe: "PFE", opportunite: "Opportunité" },
-    source:            { indeed: "Indeed", linkedin: "LinkedIn", welcometothejungle: "WTTJ", "pfebooks.com": "PFEBooks" },
+    source:            { entreprise_partenaire: "Partenaire Glybette", indeed: "Indeed", linkedin: "LinkedIn", welcometothejungle: "WTTJ", "pfebooks.com": "PFEBooks" },
     date_posted:       { today: "Aujourd'hui", this_week: "Cette semaine", "3days": "3 derniers jours", this_hour: "Cette heure" },
     teletravail:       { remote: "Full Remote", hybrid: "Hybride", onsite: "Présentiel" },
     niveau_experience: { junior: "Junior", mid: "Intermédiaire", senior: "Senior" },

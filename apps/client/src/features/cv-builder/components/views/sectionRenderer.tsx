@@ -17,7 +17,7 @@ import {
 export function renderSectionContent(
     sectionDef: { type: string; label?: string },
     sections: CvSection[],
-    editor: { updateSection: (type: string, data: unknown) => void },
+    editor: { updateSection: (type: string, data: CvSection["data"]) => void },
     ai: {
         enhancingKey: string | null;
         enhanceSection: (text: string, context: string, key: string) => Promise<string | null>;

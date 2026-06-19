@@ -12,6 +12,8 @@ import type {
     ResolveUsersResponse,
     UpdateOwnProfileRequest,
     VerificationStatusResponse,
+    CompleteOnboardingRequest,
+    CompleteOnboardingResponse,
 } from "@glybette/contracts";
 
 export class UserController {
@@ -85,6 +87,25 @@ export class UserController {
 
         const account = await this.userService.updateOwnAccount(auth.userId, body);
         const response: OwnAccountResponse = account;
+        return c.json(response, 200);
+    }
+
+    /** PUT /users/me/onboarding - Complete onboarding by setting role and optional companyName */
+    async completeOnboarding(c: Context): Promise<Response> {
+        const auth = getUserFromHeaders(c.req.raw.headers);
+        if (!auth) {
+            throw new UnauthorizedError("Missing auth context");
+        }
+        const body = (await c.req.json().catch(() => null)) as CompleteOnboardingRequest | null;
+        if (!body || !["student", "enterprise"].includes(body.role)) {
+            throw new BadRequestError("Invalid onboarding payload.");
+        }
+        if (body.role === "enterprise" && (!body.companyName || body.companyName.trim().length === 0)) {
+            throw new BadRequestError("Company name is required for enterprise role.");
+        }
+
+        const user = await this.userService.completeOnboarding(auth.userId, body.role, body.companyName);
+        const response: CompleteOnboardingResponse = { ok: true, baseRole: user.baseRole };
         return c.json(response, 200);
     }
 

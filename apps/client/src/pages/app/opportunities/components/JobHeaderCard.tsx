@@ -1,5 +1,5 @@
 import React from "react";
-import { MapPin, Briefcase, Globe, Star, BookOpen, Clock, ExternalLink } from "lucide-react";
+import { MapPin, Briefcase, Globe, Star, BookOpen, Clock, ArrowRight } from "lucide-react";
 import { detailStyles as styles } from "../styles";
 import { timeAgo, SOURCE_ICONS, TYPE_COLORS } from "../constants";
 import type { Offre } from "../types";
@@ -20,9 +20,10 @@ function Chip({ icon, children, accent, green }: { icon?: React.ReactNode; child
 
 interface JobHeaderCardProps {
     offre: Offre;
+    onApplyClick?: () => void;
 }
 
-export function JobHeaderCard({ offre }: JobHeaderCardProps) {
+export function JobHeaderCard({ offre, onApplyClick }: JobHeaderCardProps) {
     const typeColors = TYPE_COLORS[offre.type_offre] ?? TYPE_COLORS.emploi;
 
     return (
@@ -64,9 +65,30 @@ export function JobHeaderCard({ offre }: JobHeaderCardProps) {
                 </span>
             </div>
 
-            <a href={offre.lien_original} target="_blank" rel="noopener noreferrer" style={styles.applyBtn}>
-                Postuler maintenant <ExternalLink size={14} />
-            </a>
+            <div style={{ display: "flex", gap: "10px" }}>
+                {onApplyClick && (
+                    <button
+                        onClick={onApplyClick}
+                        style={{
+                            flex: 1,
+                            padding: "10px 16px",
+                            background: "#16a34a",
+                            color: "white",
+                            border: "none",
+                            borderRadius: "6px",
+                            fontSize: "13px",
+                            fontWeight: 600,
+                            cursor: "pointer",
+                            display: "flex",
+                            alignItems: "center",
+                            justifyContent: "center",
+                            gap: "8px",
+                        }}
+                    >
+                        Postuler maintenant <ArrowRight size={14} />
+                    </button>
+                )}
+            </div>
         </div>
     );
 }

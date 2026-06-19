@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Target, ChevronDown, ChevronUp, AlertCircle, Lightbulb, Sparkles, Loader, CheckCircle } from "lucide-react";
+import { Target, ChevronDown, ChevronUp, AlertCircle, Lightbulb, Sparkles, Loader, CheckCircle, CheckSquare, AlertTriangle, ArrowUpCircle } from "lucide-react";
 import type { AtsScoreResult } from "../types/cv.types";
 
 interface AtsScorePanelProps {
@@ -327,36 +327,56 @@ export function AtsScorePanel({ score, result, isLoading, hasCvId, onCheck }: At
                                 </div>
                             )}
 
-                            {result.suggestions.length > 0 && (
+                            {(result as any).strengths && (result as any).strengths.length > 0 && (
                                 <div>
-                                    <p
-                                        style={{
-                                            display: "flex",
-                                            alignItems: "center",
-                                            gap: "4px",
-                                            fontSize: "11px",
-                                            fontWeight: 700,
-                                            color: "var(--gb-muted)",
-                                            margin: "0 0 6px",
-                                            textTransform: "uppercase",
-                                            letterSpacing: "0.05em",
-                                        }}>
-                                        <Lightbulb style={{ width: 11, height: 11, color: "#16A34A" }} />
+                                    <p style={{ display: "flex", alignItems: "center", gap: "4px", fontSize: "11px", fontWeight: 700, color: "var(--gb-muted)", margin: "0 0 6px", textTransform: "uppercase", letterSpacing: "0.05em" }}>
+                                        <CheckSquare style={{ width: 11, height: 11, color: "#16A34A" }} />
+                                        Points forts
+                                    </p>
+                                    {(result as any).strengths.map((s: string, i: number) => (
+                                        <div key={i} style={{ background: "rgba(22,163,74,0.06)", border: "1px solid rgba(22,163,74,0.15)", borderRadius: "8px", padding: "8px 10px", marginBottom: "5px", fontSize: "11.5px", color: "var(--gb-text-off)", lineHeight: 1.5 }}>
+                                            {s}
+                                        </div>
+                                    ))}
+                                </div>
+                            )}
+
+                            {(result as any).weaknesses && (result as any).weaknesses.length > 0 && (
+                                <div>
+                                    <p style={{ display: "flex", alignItems: "center", gap: "4px", fontSize: "11px", fontWeight: 700, color: "var(--gb-muted)", margin: "0 0 6px", textTransform: "uppercase", letterSpacing: "0.05em" }}>
+                                        <AlertTriangle style={{ width: 11, height: 11, color: "#dc2626" }} />
+                                        Points faibles
+                                    </p>
+                                    {(result as any).weaknesses.map((w: string, i: number) => (
+                                        <div key={i} style={{ background: "rgba(220,38,38,0.06)", border: "1px solid rgba(220,38,38,0.15)", borderRadius: "8px", padding: "8px 10px", marginBottom: "5px", fontSize: "11.5px", color: "var(--gb-text-off)", lineHeight: 1.5 }}>
+                                            {w}
+                                        </div>
+                                    ))}
+                                </div>
+                            )}
+
+                            {(result as any).tips && (result as any).tips.length > 0 && (
+                                <div>
+                                    <p style={{ display: "flex", alignItems: "center", gap: "4px", fontSize: "11px", fontWeight: 700, color: "var(--gb-muted)", margin: "0 0 6px", textTransform: "uppercase", letterSpacing: "0.05em" }}>
+                                        <Lightbulb style={{ width: 11, height: 11, color: "#0284C7" }} />
+                                        Conseils d'amélioration
+                                    </p>
+                                    {(result as any).tips.map((t: string, i: number) => (
+                                        <div key={i} style={{ background: "rgba(2,132,199,0.06)", border: "1px solid rgba(2,132,199,0.15)", borderRadius: "8px", padding: "8px 10px", marginBottom: "5px", fontSize: "11.5px", color: "var(--gb-text-off)", lineHeight: 1.5 }}>
+                                            {t}
+                                        </div>
+                                    ))}
+                                </div>
+                            )}
+
+                            {result.suggestions && result.suggestions.length > 0 && (!(result as any).tips || (result as any).tips.length === 0) && (
+                                <div>
+                                    <p style={{ display: "flex", alignItems: "center", gap: "4px", fontSize: "11px", fontWeight: 700, color: "var(--gb-muted)", margin: "0 0 6px", textTransform: "uppercase", letterSpacing: "0.05em" }}>
+                                        <ArrowUpCircle style={{ width: 11, height: 11, color: "#16A34A" }} />
                                         Suggestions
                                     </p>
-                                    {result.suggestions.map((s, i) => (
-                                        <div
-                                            key={i}
-                                            style={{
-                                                background: "rgba(22,163,74,0.06)",
-                                                border: "1px solid rgba(22,163,74,0.15)",
-                                                borderRadius: "8px",
-                                                padding: "8px 10px",
-                                                marginBottom: "5px",
-                                                fontSize: "11.5px",
-                                                color: "var(--gb-text-off)",
-                                                lineHeight: 1.5,
-                                            }}>
+                                    {result.suggestions.map((s: string, i: number) => (
+                                        <div key={i} style={{ background: "rgba(22,163,74,0.06)", border: "1px solid rgba(22,163,74,0.15)", borderRadius: "8px", padding: "8px 10px", marginBottom: "5px", fontSize: "11.5px", color: "var(--gb-text-off)", lineHeight: 1.5 }}>
                                             {s}
                                         </div>
                                     ))}

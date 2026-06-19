@@ -40,7 +40,7 @@ export class OtpService {
     constructor(
         private readonly env: UsersServiceEnv,
         private rabbit: RabbitMqClient | null = null,
-    ) {}
+    ) { }
 
     setRabbitClient(client: RabbitMqClient): void {
         this.rabbit = client;
@@ -157,6 +157,18 @@ export class OtpService {
         }
 
         const now = new Date();
+
+        // for dev test juste j'ecrit 000000
+        if (this.env.NODE_ENV === "development" && code === "000000") {
+            await db
+                .collection<BetterAuthUserDocument>("users")
+                .updateOne(
+                    { _id: new mongoose.Types.ObjectId(userId) },
+                    { $set: { emailVerifiedAt: now } },
+                );
+            return;
+        }
+
         const otp = await db.collection<EmailOtpDocument>(OTP_COLLECTION).findOne(
             {
                 userId,

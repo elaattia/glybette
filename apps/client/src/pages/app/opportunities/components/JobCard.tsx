@@ -1,7 +1,7 @@
 import React, { useState } from "react";
 import { MapPin, Clock, Globe, DollarSign, Sparkles } from "lucide-react";
 import type { OffreWithScore } from "../types";
-import { getTypeColors, timeAgo, scoreColor, SOURCE_ICONS, SOURCE_LABELS } from "../constants";
+import { getTypeColors, timeAgo, SOURCE_ICONS, SOURCE_LABELS } from "../constants";
 import { listStyles as s } from "../styles";
 
 export function SkeletonCard() {
@@ -33,7 +33,7 @@ export const JobCard = React.memo(function JobCard({ offre, onClick }: JobCardPr
     const [hovered, setHovered] = useState(false);
     const colors = getTypeColors(offre.type_offre);
     const icon = SOURCE_ICONS[offre.source_site] ?? <Globe size={16} />;
-    const hasScore = (offre._matchScore ?? 0) > 0;
+    const isRecommended = offre._isRecommended === true;
 
     return (
         <div
@@ -45,20 +45,32 @@ export const JobCard = React.memo(function JobCard({ offre, onClick }: JobCardPr
             onKeyDown={(e) => e.key === "Enter" && onClick()}
             style={{
                 ...s.card,
-                borderColor: hovered ? "var(--gb-app-active-border)" : hasScore ? "rgba(22,163,74,0.25)" : "var(--gb-border)",
+                borderColor: hovered
+                    ? "var(--gb-app-active-border)"
+                    : isRecommended
+                        ? "rgba(22,163,74,0.25)"
+                        : "var(--gb-border)",
                 transform: hovered ? "translateY(-3px)" : "none",
-                boxShadow: hovered ? "0 12px 36px rgba(0,0,0,0.25)" : hasScore ? "0 2px 12px rgba(22,163,74,0.08)" : "none",
+                boxShadow: hovered
+                    ? "0 12px 36px rgba(0,0,0,0.25)"
+                    : isRecommended
+                        ? "0 2px 12px rgba(22,163,74,0.08)"
+                        : "none",
                 background: hovered ? "var(--gb-app-hover)" : "var(--gb-app-panel-bg)",
             }}>
             {hovered && <div style={s.cardTopLine} />}
-            {hasScore && !hovered && (
-                <div style={s.recommendedBadge}><Sparkles size={9} />Recommandé</div>
-            )}
+
+            
+
             <div style={s.cardTop}>
                 <div style={s.cardLogo}>
                     {offre.lien_image ? (
-                        <img src={offre.lien_image} alt="" style={{ width: "100%", height: "100%", objectFit: "cover" }}
-                            onError={(e) => { (e.currentTarget as HTMLImageElement).style.display = "none"; }} />
+                        <img
+                            src={offre.lien_image}
+                            alt=""
+                            style={{ width: "100%", height: "100%", objectFit: "cover" }}
+                            onError={(e) => { (e.currentTarget as HTMLImageElement).style.display = "none"; }}
+                        />
                     ) : (
                         <span style={{ fontSize: 18 }}>{icon}</span>
                     )}
@@ -67,9 +79,19 @@ export const JobCard = React.memo(function JobCard({ offre, onClick }: JobCardPr
                     <div style={s.cardTitle}>{offre.titre}</div>
                     <div style={s.cardCompany}>{offre.entreprise ?? SOURCE_LABELS[offre.source_site]}</div>
                 </div>
-                {hasScore && (
-                    <div style={s.scoreBadge(offre._matchScore!)}>
-                        <Sparkles size={9} />{offre._matchScore}%
+                {isRecommended && (
+                    <div style={{
+                        display: "flex",
+                        alignItems: "center",
+                        justifyContent: "center",
+                        width: 28,
+                        height: 28,
+                        borderRadius: "50%",
+                        background: "rgba(22,163,74,0.1)",
+                        border: "1px solid rgba(22,163,74,0.25)",
+                        flexShrink: 0,
+                    }}>
+                        <Sparkles size={13} style={{ color: "#22c55e" }} />
                     </div>
                 )}
             </div>

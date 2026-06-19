@@ -16,9 +16,9 @@ export type {
     AtsScoreResult,
     SuggestionsResult,
     EnhanceResult,
-    TailorResult,
     CoverLetterResult,
     ExtractResult,
+    ThemeSettings,
 } from "@glybette/types";
 
 import type { CvTemplate, CvTemplateCategory, CvTemplateDomain } from "@glybette/types";
@@ -34,17 +34,19 @@ export interface TemplateInfo {
     description: string;
 }
 
-import type { CvSection } from "@glybette/types";
+import type { CvSection, ThemeSettings } from "@glybette/types";
 
 export interface CvEditorState {
     id?: string;
     title: string;
     template: CvTemplate;
+    theme?: ThemeSettings;
     sections: CvSection[];
     isDirty: boolean;
     isSaving: boolean;
     lastSaved?: Date;
     atsScore?: number;
+    atsScoreCvOnly?: number;
     pdfUrl?: string;
     shareToken?: string;
     isPublic?: boolean;

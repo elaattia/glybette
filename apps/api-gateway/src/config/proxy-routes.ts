@@ -6,12 +6,12 @@ export type SessionMode = "none" | "optional";
 
 export type UpstreamSpec =
     | {
-          kind: "rewrite";
-          /** Prepended to the path after `publicPrefix` is stripped (e.g. `/users`). */
-          upstreamPrefix: string;
-          /** Full public pathname prefix to strip (default: `/api` + `mount`). */
-          publicPrefix?: string;
-      }
+        kind: "rewrite";
+        /** Prepended to the path after `publicPrefix` is stripped (e.g. `/users`). */
+        upstreamPrefix: string;
+        /** Full public pathname prefix to strip (default: `/api` + `mount`). */
+        publicPrefix?: string;
+    }
     | { kind: "requestPath" };
 
 export type MethodsSpec = "all" | readonly string[];
@@ -120,7 +120,7 @@ export const gatewayProxyRoutes: readonly GatewayProxyRoute[] = [
         upstream: { kind: "rewrite", upstreamPrefix: "/api" },
         session: "optional",
         injectGatewayAuth: true,
-        allowedBaseRoles: ["student"],
+        allowedBaseRoles: ["student", "enterprise"],
         methods: "all",
     },
 ];

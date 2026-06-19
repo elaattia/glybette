@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { apiRequest } from "@/lib/api";
+import { useNavigate } from "react-router-dom";
 import type {
     OnboardingStep,
     PersonalInfoPayload,
@@ -9,41 +10,20 @@ import type {
     BackgroundPayload,
     OnboardingData,
 } from "@glybette/types";
+import { useAuth } from "@/hooks/useAuth";
+import { resolveAuthenticatedDestination } from "@/lib/auth-return-path";
+import { useUser } from "@/hooks/useUser";
 
-const STEPS: OnboardingStep[] = [
-    "personal-info",
-    "academic-background",
-    "journey",
-    "looking-for",
-    "background",
-    "complete",
-];
-
-const STORAGE_KEY = "gb-onboarding-profile";
 export const ONBOARDING_DONE_KEY = "gb-onboarding-done";
 
 function persistProfile(data: OnboardingData) {
-    const flat = {
-        firstName: data.personalInfo?.firstName,
-        lastName: data.personalInfo?.lastName,
-        email: data.personalInfo?.email,
-        phone: data.personalInfo?.phone,
-        country: data.personalInfo?.country,
-        university: data.academicBackground?.university,
-        degree: data.academicBackground?.degree,
-        specialization: data.academicBackground?.specialization,
-        graduationYear: data.academicBackground?.graduationYear,
-        journey: data.journey?.journey,
-        opportunities: data.lookingFor?.opportunities ?? [],
-        domain: data.background?.domain,
-        lookingFor: data.lookingFor?.opportunities ?? [],
-    };
     try {
-        localStorage.setItem(STORAGE_KEY, JSON.stringify(flat));
-    } catch {}
+        localStorage.setItem("gb-onboarding-profile", JSON.stringify(data));
+    } catch { }
 }
 
-async function syncToServer(data: OnboardingData) {
+async function syncProfileToServer(data: OnboardingData, isAuthenticated: boolean) {
+    if (!isAuthenticated || data.role === "enterprise") return;
     try {
         const flat = {
             firstName: data.personalInfo?.firstName,
@@ -63,17 +43,23 @@ async function syncToServer(data: OnboardingData) {
             method: "PUT",
             body: JSON.stringify({ profile: flat }),
         });
-    } catch {
-    }
+    } catch { }
 }
 
 export function useOnboarding() {
-    const [currentStep, setCurrentStep] = useState<OnboardingStep>("personal-info");
+    const navigate = useNavigate();
+    const { isAuthenticated } = useAuth();
+    const { refetch } = useUser();
+    const [currentStep, setCurrentStep] = useState<OnboardingStep>("role-select");
     const [data, setData] = useState<OnboardingData>({});
 
-    const currentIndex = STEPS.indexOf(currentStep);
-    const totalSteps = STEPS.length - 1;
-    const progress = Math.round((currentIndex / totalSteps) * 100);
+    const STEPS: OnboardingStep[] = data.role === "enterprise"
+        ? ["role-select", "enterprise-info", "complete"]
+        : ["role-select", "personal-info", "academic-background", "journey", "looking-for", "background", "complete"];
+
+    const currentIndex = STEPS.indexOf(currentStep) === -1 ? 0 : STEPS.indexOf(currentStep);
+    const totalSteps = Math.max(1, STEPS.length - 1);
+    const progress = Math.min(100, Math.round(((currentIndex + 1) / totalSteps) * 100));
 
     function goNext() {
         const next = currentIndex + 1;
@@ -87,8 +73,24 @@ export function useOnboarding() {
 
     function updateAndPersist(newData: OnboardingData) {
         persistProfile(newData);
-        syncToServer(newData);
+        syncProfileToServer(newData, isAuthenticated);
         return newData;
+    }
+
+    function saveRole(role: "student" | "enterprise") {
+        const newData = { ...data, role };
+        setData(updateAndPersist(newData));
+        if (role === "enterprise") {
+            setCurrentStep("enterprise-info");
+        } else {
+            setCurrentStep("personal-info");
+        }
+    }
+
+    function saveEnterpriseInfo(companyName: string) {
+        const newData = { ...data, companyName };
+        setData(updateAndPersist(newData));
+        goNext();
     }
 
     function savePersonalInfo(payload: PersonalInfoPayload) {
@@ -125,11 +127,23 @@ export function useOnboarding() {
         goNext();
     }
 
-    
-    function markOnboardingDone() {
+    async function markOnboardingDone() {
         try {
+            if (isAuthenticated && data.role) {
+                await apiRequest("/api/users/me/onboarding", {
+                    method: "PUT",
+                    body: JSON.stringify({
+                        role: data.role,
+                        companyName: data.companyName,
+                    }),
+                });
+                await refetch();
+            }
             localStorage.setItem(ONBOARDING_DONE_KEY, "true");
-        } catch {}
+            navigate(resolveAuthenticatedDestination(null, { baseRole: data.role }, true), { replace: true });
+        } catch (error) {
+            console.error(error);
+        }
     }
 
     return {
@@ -140,6 +154,8 @@ export function useOnboarding() {
         data,
         goBack,
         skip,
+        saveRole,
+        saveEnterpriseInfo,
         savePersonalInfo,
         saveAcademicBackground,
         saveJourney,

@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, useCallback } from "react";
 import { useNavigate } from "react-router-dom";
 import { Sparkles, LayoutDashboard, Briefcase, FileText, Shield } from "lucide-react";
 
@@ -6,31 +6,30 @@ interface Props {
     name: string;
     domain?: string;
     lookingFor?: string[];
-    onFinish?: () => void; 
+    onFinish?: () => void;
 }
 
 export function StepComplete({ name, domain, lookingFor, onFinish }: Props) {
     const navigate = useNavigate();
     const [countdown, setCountdown] = useState(5);
 
-    function handleFinish() {
+    const handleFinish = useCallback(() => {
         onFinish?.();
         navigate("/app/dashboard");
-    }
+    }, [navigate, onFinish]);
 
     useEffect(() => {
-        const timer = setInterval(() => {
-            setCountdown((c) => {
-                if (c <= 1) {
-                    clearInterval(timer);
-                    handleFinish();
-                    return 0;
-                }
-                return c - 1;
-            });
+        if (countdown <= 0) {
+            handleFinish();
+            return;
+        }
+
+        const timer = setTimeout(() => {
+            setCountdown((c) => c - 1);
         }, 1000);
-        return () => clearInterval(timer);
-    }, []);
+
+        return () => clearTimeout(timer);
+    }, [countdown]);
 
     const profileSummary = [
         name,

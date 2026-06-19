@@ -2,9 +2,15 @@ import { useState } from "react";
 import { cvApi } from "../../api/cv.api";
 import { getTemplate } from "../../templates";
 
+const A4_W = 210;
+const A4_H = 297;
+
+
+const MARGIN_TOP = 0;
+const MARGIN_SIDE = 0;
 
 export function useExportPdf(editor: {
-    state: { id: string; title: string; template: string; isSaving?: boolean };
+    state: { id?: string; title: string; template: string; isSaving?: boolean };
     saveNow: () => Promise<void>;
     setPdfUrl: (url: string) => void;
 }) {
@@ -15,64 +21,115 @@ export function useExportPdf(editor: {
         if (!editor.state.id) return;
 
         setExportLoading(true);
+
+        const element = document.getElementById("cv-pdf-content");
+        if (!element) {
+            setExportLoading(false);
+            return;
+        }
+
+        const originalMinHeight = element.style.minHeight;
+        const originalOverflow = element.style.overflow;
+
         try {
             const html2pdf = (await import("html2pdf.js")).default;
-            const element = document.getElementById("cv-pdf-content");
-            if (!element) throw new Error("Preview element not found");
-
             const currentTpl = getTemplate(editor.state.template);
-            const pxPerMm = element.offsetWidth / 210;
-            const printableHeightPx = 267 * pxPerMm;
-            const totalPages = Math.max(1, Math.ceil(element.scrollHeight / printableHeightPx));
-            const originalMinHeight = element.style.minHeight;
-            element.style.minHeight = `${totalPages * 267}mm`;
+
+            element.style.minHeight = "";
+            element.style.overflow = "visible";
+
+            await new Promise((r) => setTimeout(r, 80));
 
             const opt = {
-                margin: [15, 0],
+                margin: [MARGIN_TOP, MARGIN_SIDE] as [number, number],
                 filename: `${editor.state.title || "cv"}.pdf`,
-                image: { type: "jpeg", quality: 0.98 },
-                html2canvas: { scale: 2, useCORS: true, logging: false },
-                jsPDF: { unit: "mm", format: "a4", orientation: "portrait" },
-                pagebreak: { mode: ["css", "legacy"], avoid: ".cv-section" },
+                image: { type: "jpeg" as const, quality: 0.98 },
+                html2canvas: {
+                    scale: 2,
+                    useCORS: true,
+                    logging: false,
+                    windowWidth: element.scrollWidth,
+                    windowHeight: element.scrollHeight,
+                },
+                jsPDF: {
+                    unit: "mm",
+                    format: "a4",
+                    orientation: "portrait" as const,
+                    compress: true,
+                },
+                pagebreak: {
+                    mode: ["css", "legacy"],
+                    avoid: [
+                        ".cv-section",
+                        ".avoid-break",
+                        "li",
+                        "h2",
+                        "h3",
+                        "h4",
+                        "p",
+                        ".experience-item",
+                        ".education-item",
+                    ],
+                },
             };
 
-            await html2pdf()
-                .set(opt)
-                .from(element)
-                .toPdf()
-                .get("pdf")
-                .then((pdf: any) => {
-                    const pages = pdf.internal.getNumberOfPages();
-                    for (let i = 1; i <= pages; i++) {
-                        pdf.setPage(i);
-                        if (editor.state.template === "creative") {
-                            pdf.setFillColor(currentTpl.previewBg || "#000000");
-                            pdf.rect(0, 0, 210 * 0.38, 15, "F");
-                            pdf.rect(0, 297 - 15, 210 * 0.38, 15, "F");
-                            pdf.setFillColor("#ffffff");
-                            pdf.rect(210 * 0.38, 0, 210 * 0.62, 15, "F");
-                            pdf.rect(210 * 0.38, 297 - 15, 210 * 0.62, 15, "F");
-                        } else {
-                            const bg = currentTpl.previewBg || "#ffffff";
-                            if (bg !== "#ffffff") {
-                                pdf.setFillColor(bg);
-                                pdf.rect(0, 0, 210, 15, "F");
-                                pdf.rect(0, 297 - 15, 210, 15, "F");
-                            }
-                        }
+            const worker = html2pdf().set(opt).from(element).toPdf();
+
+            await worker.get("pdf").then((pdf: any) => {
+                const pages = pdf.internal.getNumberOfPages();
+
+                const isTwoCol =
+                    editor.state.template === "creative" ||
+                    editor.state.template === "sidebar" ||
+                    editor.state.template === "modern";
+
+                const leftRatio = 0.38;
+                const leftW = A4_W * leftRatio;
+                const rightW = A4_W * (1 - leftRatio);
+
+                const sidebarBg = currentTpl.previewBg || "#1a3a5c";
+
+                const rightBg = "#ffffff";
+
+                for (let i = 1; i <= pages; i++) {
+                    pdf.setPage(i);
+
+                    if (isTwoCol) {
+                        pdf.setFillColor(sidebarBg);
+                        pdf.rect(0, 0, leftW, 1, "F");          
+                        pdf.setFillColor(rightBg);
+                        pdf.rect(leftW, 0, rightW, 1, "F");     
+
+                        pdf.setFillColor(sidebarBg);
+                        pdf.rect(0, A4_H - 1, leftW, 1, "F");   
+                        pdf.setFillColor(rightBg);
+                        pdf.rect(leftW, A4_H - 1, rightW, 1, "F"); 
+                    } else {
+                        const bg = currentTpl.previewBg || "#ffffff";
+                        pdf.setFillColor(bg);
+                        pdf.rect(0, 0, A4_W, 1, "F");           
+                        pdf.rect(0, A4_H - 1, A4_W, 1, "F");    
                     }
-                })
-                .save();
+                }
+            });
+
+            await worker.save();
 
             element.style.minHeight = originalMinHeight;
+            element.style.overflow = originalOverflow;
 
             cvApi
                 .generatePdf(editor.state.id)
-                .then((res) => { if (res?.pdfUrl) editor.setPdfUrl(res.pdfUrl); })
+                .then((res) => {
+                    if (res?.pdfUrl) editor.setPdfUrl(res.pdfUrl);
+                })
                 .catch((e) => console.warn("Background pdf save failed", e));
-
         } catch (e) {
             console.error("PDF Export failed", e);
+
+            element.style.minHeight = originalMinHeight;
+            element.style.overflow = originalOverflow;
+
             try {
                 const { pdfUrl } = await cvApi.generatePdf(editor.state.id);
                 editor.setPdfUrl(pdfUrl);

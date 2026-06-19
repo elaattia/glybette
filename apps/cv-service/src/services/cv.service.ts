@@ -19,7 +19,7 @@ const repo = new CvRepository();
 const aiClient = new AiClient();
 const pdfService = new PdfService();
 
-const MAX_CVS = 20;
+const MAX_CVS = 200;
 type UserResolver = (userIds: string[]) => Promise<PublicUserSummaryDTO[]>;
 type UserProfileSnapshotDocument = {
     _id: mongoose.Types.ObjectId;
@@ -31,6 +31,7 @@ type UserProfileSnapshotDocument = {
     sourceUpdatedAt: Date;
     updatedAt: Date;
 };
+
 
 function cvToText(cv: { title: string; sections: Array<{ type: string; data: unknown }> }): string {
     const lines: string[] = [`CV: ${cv.title}\n`];
@@ -47,7 +48,7 @@ function cvToText(cv: { title: string; sections: Array<{ type: string; data: unk
                 if (d.location) lines.push(`Location: ${d.location}`);
                 if (d.linkedin) lines.push(`LinkedIn: ${d.linkedin}`);
                 if (d.github) lines.push(`GitHub: ${d.github}`);
-                if (d.portfolio) lines.push(`portfolio: ${d.portfolio}`);
+                if (d.portfolio) lines.push(`Portfolio: ${d.portfolio}`);
                 break;
             }
             case "summary": {
@@ -226,10 +227,17 @@ export class CvService {
             await repo.update(id, userId, { pdfUrl });
             return { pdfUrl };
         } catch (err: any) {
-            console.error("[exportPdf] ERREUR COMPLETE:", err?.message);
-            console.error("[exportPdf] STACK:", err?.stack);
+            console.error("[exportPdf] ERREUR:", err?.message);
             throw err;
         }
+    }
+
+    async scoreAtsCvOnly(id: string, userId: string) {
+        const cv = await this.getCvById(id, userId);
+        const text = cvToText(cv as Parameters<typeof cvToText>[0]);
+        const result = await aiClient.scoreAtsCvOnly(text);
+        await repo.updateAtsScoreCvOnly(id, userId, result);
+        return result;
     }
 
     async scoreAts(id: string, userId: string, jobDescription: string) {
@@ -269,6 +277,7 @@ export class CvService {
     suggestSkills(role: string, existingSkills: string[]) {
         return aiClient.suggestSkills(role, existingSkills);
     }
+
 
     async getAdminOverviewStats(): Promise<ContentAdminOverviewStatsResponse> {
         const growthStart = overviewGrowthStartDate();
@@ -392,3 +401,4 @@ export class CvService {
         };
     }
 }
+

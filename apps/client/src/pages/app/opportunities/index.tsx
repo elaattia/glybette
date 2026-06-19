@@ -1,4 +1,4 @@
-import React, { useEffect, useState, useCallback, useRef } from "react";
+import React, { useState, useCallback } from "react";
 import { useNavigate } from "react-router-dom";
 import { useOffres } from "@/hooks/useJobs";
 import { useJobsRealtime } from "@/hooks/useJobsRealtime";
@@ -15,135 +15,64 @@ import { EmptyState } from "./components/EmptyState";
 import { listStyles as styles } from "./styles";
 import { timeAgo } from "./constants";
 import type { OffreWithScore } from "./types";
-
-const API_BASE = (import.meta as any).env?.VITE_API_URL ?? "http://localhost:3000/api";
-const SCORE_THRESHOLD = 15;
+import {
+    computeRecommendationScore,
+    RECOMMENDATION_THRESHOLD,
+    type UserProfileSignals,
+    type OffreSignals,
+} from "./utils/scoring";
 
 export default function OpportunitiesPage() {
     const navigate = useNavigate();
     const { isAuthenticated } = useAuth();
     const { profile } = useFullProfile();
 
-    const [filters, setFilters] = useState<OffresFilters>({ page: 1, limit: 18 });
+
+    const [filters, setFilters] = useState<OffresFilters>({ page: 1, limit: 100 });
     const [searchInput, setSearchInput] = useState("");
     const [showFilters, setShowFilters] = useState(false);
 
-    const [aiScoreMap, setAiScoreMap] = useState<Record<string, number>>({});
-    const [loadingScores, setLoadingScores] = useState(false);
-    const scoresFetchedRef = useRef(false);
+    const profileSignals: UserProfileSignals = {
+        skills: profile.skills ?? [],
+        domain: profile.domain ?? "",
+        journey: profile.journey ?? "",
+        opportunities: profile.opportunities ?? [],
+    };
 
-    const profileKey = JSON.stringify({
-        skills: profile.skills,
-        domain: profile.domain,
-        journey: profile.journey,
-        opportunities: profile.opportunities,
-    });
+    const hasUserProfile =
+        profileSignals.skills.length > 0 ||
+        !!profileSignals.domain ||
+        !!profileSignals.journey;
 
-    useEffect(() => {
-        scoresFetchedRef.current = false;
-        setAiScoreMap({});
-    }, [profileKey]);
-
-    const computeLocalScore = useCallback((offre: any): number => {
-        const userSkills: string[] = profile.skills ?? [];
-        const userDomain: string = profile.domain ?? "";
-        const userJourney: string = profile.journey ?? "";
-
-        if (!userSkills.length && !userDomain && !userJourney) return 0;
-
-        let score = 0;
-        const offreSkills: string[] = offre.competences ?? [];
-        const offreText = `${offre.titre ?? ""} ${offre.description ?? ""} ${offreSkills.join(" ")}`.toLowerCase();
-
-        if (userSkills.length > 0) {
-            let matches = 0;
-            for (const skill of userSkills) {
-                if (offreText.includes(skill.toLowerCase())) matches++;
-            }
-            score += Math.round((matches / userSkills.length) * 50);
-        }
-
-        if (userDomain) {
-            const domainWords = userDomain.toLowerCase().split(/[\s,/]+/).filter(Boolean);
-            const domainMatches = domainWords.filter((w) => w.length > 2 && offreText.includes(w));
-            if (domainMatches.length > 0) {
-                score += Math.min(30, Math.round((domainMatches.length / domainWords.length) * 30));
-            }
-        }
-
-        if (userJourney) {
-            const offreExp = (offre.niveau_experience ?? "").toLowerCase();
-            const journeyLower = userJourney.toLowerCase();
-            if (
-                (journeyLower.includes("student") && offreExp.match(/stage|intern|pfe|junior/)) ||
-                (journeyLower.includes("graduate") && offreExp.match(/junior|débutant|entry|pfe|stage/)) ||
-                (journeyLower.includes("job seeker") && offreExp.match(/junior|mid|confirmé|senior/))
-            ) {
-                score += 20;
-            } else if (!offreExp) {
-                score += 10;
-            }
-        }
-
-        return Math.min(score, 100);
-    }, [profileKey]); 
-
-    useEffect(() => {
-        if (!isAuthenticated || scoresFetchedRef.current) return;
-        const hasProfile = (profile.skills?.length ?? 0) > 0 || !!profile.domain;
-        if (!hasProfile) return;
-        scoresFetchedRef.current = true;
-        setLoadingScores(true);
-
-        const userProfile = {
-            summary: profile.summary ?? "",
-            skills: profile.skills ?? [],
-            experience: profile.experience ?? [],
-            education: profile.education ?? [],
-            languages: profile.languages ?? [],
-            lookingFor: profile.opportunities ?? [],
-            domain: profile.domain,
-            journey: profile.journey,
-        };
-
-        fetch(`${API_BASE}/jobs/matching/top`, {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            credentials: "include",
-            body: JSON.stringify({ userProfile, limit: 50 }),
-        })
-            .then((r) => r.json())
-            .then((data) => {
-                const map: Record<string, number> = {};
-                for (const item of data.matches ?? []) {
-                    if (item.offre?._id && item.match?.score) {
-                        map[item.offre._id] = item.match.score;
-                    }
-                }
-                setAiScoreMap(map);
-            })
-            .catch(() => {})
-            .finally(() => setLoadingScores(false));
-    }, [isAuthenticated, profileKey]);
+    const profileKey = JSON.stringify(profileSignals);
 
     const { data, loading, error, refetch } = useOffres(filters as Record<string, unknown>);
 
-    const hasUserProfile = (profile.skills?.length ?? 0) > 0 || !!profile.domain || !!profile.journey;
+    const offresRaw: OffreWithScore[] = React.useMemo(() => {
+        const rawOffres: any[] = data?.offres ?? [];
 
-    const offresRaw: OffreWithScore[] = (data?.offres ?? []).map((o: any) => {
-        const localScore = hasUserProfile ? computeLocalScore(o) : 0;
-        const aiScore = aiScoreMap[o._id] ?? 0;
-        const finalScore = aiScore > 0 ? Math.round((aiScore + localScore) / 2) : localScore;
-        return {
-            ...o,
-            _matchScore: finalScore > 0 ? finalScore : undefined,
-            _localScore: localScore,
-        };
-    });
+        if (!hasUserProfile) {
+            return rawOffres.map((o) => ({ ...o, _sortScore: 0, _isRecommended: false }));
+        }
 
-    const total = data?.total ?? 0;
-    const pages = data?.pages ?? 1;
-    const currentPage = filters.page ?? 1;
+        return rawOffres.map((o) => {
+            const offreSignals: OffreSignals = {
+                titre: o.titre ?? "",
+                competences: o.competences ?? [],
+                niveau_experience: o.niveau_experience ?? "",
+                type_offre: o.type_offre ?? "",
+                description: o.description,
+                domaine: o.domaine,
+            };
+
+            const sortScore = computeRecommendationScore(offreSignals, profileSignals);
+            return {
+                ...o,
+                _sortScore: sortScore,
+                _isRecommended: sortScore >= RECOMMENDATION_THRESHOLD,
+            };
+        });
+    }, [data?.offres, profileKey, hasUserProfile]);
 
     const getDateMs = (o: any): number => {
         const d = o.date_publication ?? o.date_scraped;
@@ -152,24 +81,24 @@ export default function OpportunitiesPage() {
         return isNaN(ms) ? 0 : ms;
     };
 
-    const offres = [...offresRaw].sort((a, b) => {
-        const sa = (a._matchScore ?? 0) >= SCORE_THRESHOLD ? a._matchScore! : 0;
-        const sb = (b._matchScore ?? 0) >= SCORE_THRESHOLD ? b._matchScore! : 0;
-        const aMatched = sa > 0;
-        const bMatched = sb > 0;
+    const offres = React.useMemo(() => {
+        return [...offresRaw].sort((a, b) => {
+            const aRec = a._isRecommended ? 1 : 0;
+            const bRec = b._isRecommended ? 1 : 0;
 
-        if (aMatched && !bMatched) return -1;
-        if (!aMatched && bMatched) return 1;
+            if (aRec !== bRec) return bRec - aRec;
 
-        if (aMatched && bMatched) {
-            if (sb !== sa) return sb - sa;
+            const sDiff = (b._sortScore ?? 0) - (a._sortScore ?? 0);
+            if (sDiff !== 0) return sDiff;
+
             return getDateMs(b) - getDateMs(a);
-        }
+        });
+    }, [offresRaw]);
 
-        return getDateMs(b) - getDateMs(a);
-    });
-
-    const scoredCount = offres.filter((o) => (o._matchScore ?? 0) >= SCORE_THRESHOLD).length;
+    const total = data?.total ?? 0;
+    const pages = data?.pages ?? 1;
+    const currentPage = filters.page ?? 1;
+    const recommendedCount = offres.filter((o) => o._isRecommended).length;
 
     const [newOffresCount, setNewOffresCount] = useState(0);
     const [showNewBanner, setShowNewBanner] = useState(false);
@@ -184,7 +113,7 @@ export default function OpportunitiesPage() {
     function handleRefreshNewOffres() {
         setShowNewBanner(false);
         setNewOffresCount(0);
-        setFilters({ page: 1, limit: 18, tri: "recent" as any });
+        setFilters({ page: 1, limit: 100 });
         refetch?.();
     }
 
@@ -213,7 +142,7 @@ export default function OpportunitiesPage() {
         window.scrollTo({ top: 0, behavior: "smooth" });
     }, []);
 
-    const resetAll = () => { setFilters({ page: 1, limit: 18 }); setSearchInput(""); };
+    const resetAll = () => { setFilters({ page: 1, limit: 100 }); setSearchInput(""); };
 
     return (
         <div style={styles.page}>
@@ -240,9 +169,9 @@ export default function OpportunitiesPage() {
                 <div style={styles.headerSub}>
                     <p style={{ color: "var(--gb-muted)", fontSize: 14, margin: 0 }}>
                         {loading ? "Chargement..." : `${total.toLocaleString("fr-FR")} offres disponibles`}
-                        {scoredCount > 0 && !loading && (
+                        {recommendedCount > 0 && !loading && (
                             <span style={{ marginLeft: 10, color: "#22c55e", fontWeight: 600 }}>
-                                · {scoredCount} matchées à votre profil
+                                · {recommendedCount} recommandées pour vous
                             </span>
                         )}
                     </p>
@@ -250,12 +179,6 @@ export default function OpportunitiesPage() {
                         <span style={styles.liveDot} />
                         LIVE
                     </span>
-                    {loadingScores && (
-                        <span style={{ fontSize: 11, color: "var(--gb-muted)", display: "flex", alignItems: "center", gap: 5 }}>
-                            <Sparkles size={11} style={{ color: "#a78bfa", animation: "pulse 1s infinite" }} />
-                            Calcul des scores...
-                        </span>
-                    )}
                     {lastPolledAt && (
                         <span
                             style={{ fontSize: 11, color: "var(--gb-muted)", cursor: "pointer", display: "flex", alignItems: "center", gap: 4 }}
@@ -266,6 +189,60 @@ export default function OpportunitiesPage() {
                         </span>
                     )}
                 </div>
+            </div>
+
+            <div style={{ display: "flex", gap: "8px", marginBottom: "16px", padding: "4px", background: "var(--gb-app-panel-bg)", borderRadius: "8px", border: "1px solid var(--gb-border)", width: "fit-content" }}>
+                <button
+                    onClick={() => setFilter("source", "")}
+                    style={{
+                        padding: "6px 12px",
+                        borderRadius: "6px",
+                        fontSize: "13px",
+                        fontWeight: !filters.source ? 600 : 500,
+                        background: !filters.source ? "var(--gb-surface)" : "transparent",
+                        color: !filters.source ? "var(--gb-text)" : "var(--gb-muted)",
+                        border: !filters.source ? "1px solid var(--gb-border)" : "1px solid transparent",
+                        cursor: "pointer",
+                        transition: "all 0.2s"
+                    }}
+                >
+                    Toutes les offres
+                </button>
+                <button
+                    onClick={() => setFilter("source", "entreprise_partenaire")}
+                    style={{
+                        padding: "6px 12px",
+                        borderRadius: "6px",
+                        fontSize: "13px",
+                        fontWeight: filters.source === "entreprise_partenaire" ? 600 : 500,
+                        background: filters.source === "entreprise_partenaire" ? "rgba(22,163,74,0.1)" : "transparent",
+                        color: filters.source === "entreprise_partenaire" ? "#16A34A" : "var(--gb-muted)",
+                        border: filters.source === "entreprise_partenaire" ? "1px solid rgba(22,163,74,0.3)" : "1px solid transparent",
+                        cursor: "pointer",
+                        display: "flex",
+                        alignItems: "center",
+                        gap: "6px",
+                        transition: "all 0.2s"
+                    }}
+                >
+                    <Sparkles size={14} /> Offres Partenaires
+                </button>
+                <button
+                    onClick={() => setFilter("source", "scraped")}
+                    style={{
+                        padding: "6px 12px",
+                        borderRadius: "6px",
+                        fontSize: "13px",
+                        fontWeight: filters.source === "scraped" ? 600 : 500,
+                        background: filters.source === "scraped" ? "var(--gb-surface)" : "transparent",
+                        color: filters.source === "scraped" ? "var(--gb-text)" : "var(--gb-muted)",
+                        border: filters.source === "scraped" ? "1px solid var(--gb-border)" : "1px solid transparent",
+                        cursor: "pointer",
+                        transition: "all 0.2s"
+                    }}
+                >
+                    Offres Scrapées
+                </button>
             </div>
 
             <FiltersPanel
@@ -285,7 +262,7 @@ export default function OpportunitiesPage() {
                 <StatsBar
                     visibleCount={offres.length}
                     total={total}
-                    scoredCount={scoredCount}
+                    recommendedCount={recommendedCount}
                 />
             )}
 
@@ -296,29 +273,30 @@ export default function OpportunitiesPage() {
                 </div>
             )}
 
-            {!loading && scoredCount > 0 && (
+            {!loading && recommendedCount > 0 && (
                 <div style={styles.sectionSeparator}>
                     <div style={styles.sectionSepLine} />
                     <span style={styles.sectionSepLabel}>
                         <Sparkles size={11} />
-                        Recommandées pour vous ({scoredCount})
+                        Recommandées pour vous ({recommendedCount})
                     </span>
                     <div style={styles.sectionSepLine} />
                 </div>
             )}
 
             <div style={styles.grid}>
-                {(loading || (isAuthenticated && loadingScores && offres.length === 0 && hasUserProfile))
-                    ? Array.from({ length: 9 }).map((_, i) => <SkeletonCard key={i} />)
-                    : offres.length === 0
-                    ? <EmptyState onReset={resetAll} />
-                    : offres.map((offre, idx) => (
+                {loading ? (
+                    Array.from({ length: 9 }).map((_, i) => <SkeletonCard key={i} />)
+                ) : offres.length === 0 ? (
+                    <EmptyState onReset={resetAll} />
+                ) : (
+                    offres.map((offre, idx) => (
                         <React.Fragment key={offre._id}>
-                            {idx === scoredCount && scoredCount > 0 && scoredCount < offres.length && (
+                            {idx === recommendedCount && recommendedCount > 0 && recommendedCount < offres.length && (
                                 <div style={{ gridColumn: "1 / -1", ...styles.sectionSeparator, margin: "4px 0" }}>
                                     <div style={styles.sectionSepLine} />
                                     <span style={{ ...styles.sectionSepLabel, color: "var(--gb-muted)" }}>
-                                        Autres offres ({offres.length - scoredCount})
+                                        Autres offres ({offres.length - recommendedCount})
                                     </span>
                                     <div style={styles.sectionSepLine} />
                                 </div>
@@ -329,7 +307,7 @@ export default function OpportunitiesPage() {
                             />
                         </React.Fragment>
                     ))
-                }
+                )}
             </div>
 
             {!loading && (

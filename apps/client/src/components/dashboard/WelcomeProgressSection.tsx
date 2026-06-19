@@ -5,7 +5,8 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "@/hooks/useAuth";
-import { useUserProfile, type UserProfileData } from "@/hooks/useUserProfile";
+import { useFullProfile } from "@/hooks/useUserProfile";
+import type { UserProfileData } from "@/hooks/useUserProfile";
 
 function computeCompletion(profile: UserProfileData) {
     const checks = [
@@ -22,7 +23,8 @@ function computeCompletion(profile: UserProfileData) {
 export default function WelcomeProgressSection() {
     const navigate = useNavigate();
     const auth = useAuth();
-    const { profile } = useUserProfile();
+    
+    const { profile } = useFullProfile();
 
     const displayName =
         (profile.firstName && `${profile.firstName}${profile.lastName ? ` ${profile.lastName}` : ""}`) ||

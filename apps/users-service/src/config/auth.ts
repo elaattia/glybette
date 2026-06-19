@@ -76,7 +76,7 @@ export function createAuth(env: UsersServiceEnv) {
         verification: {
             modelName: "auth_verifications",
         },
-        database: mongodbAdapter(db, { client }),
+        database: mongodbAdapter(db),
         emailAndPassword: {
             enabled: true,
         },

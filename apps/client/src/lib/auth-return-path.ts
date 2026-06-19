@@ -30,6 +30,12 @@ export function getDefaultAppHomePath(user?: AppHomeUser): string {
 export function resolveAuthenticatedDestination(
     from: unknown,
     user?: AppHomeUser,
+    isSecondaryOnboardingCheck?: boolean,
 ): string {
+    const onboardingDone = localStorage.getItem("gb-onboarding-done") === "true";
+    if (!onboardingDone && !isSecondaryOnboardingCheck) {
+        return "/onboarding";
+    }
+
     return getSafeReturnPath(from) ?? getDefaultAppHomePath(user);
 }

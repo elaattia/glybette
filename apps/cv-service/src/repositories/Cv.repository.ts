@@ -64,6 +64,14 @@ export class CvRepository {
         return CvModel.findOneAndUpdate({ _id: id, userId }, { $set: { atsScore } }, { new: true }).lean();
     }
 
+    updateAtsScoreCvOnly(id: string, userId: string, atsScore: AtsScoreData) {
+        return CvModel.findOneAndUpdate(
+            { _id: id, userId },
+            { $set: { atsScoreCvOnly: atsScore } },
+            { new: true },
+        ).lean();
+    }
+
     async delete(id: string, userId: string) {
         const r = await CvModel.deleteOne({ _id: id, userId });
         return r.deletedCount > 0;
@@ -102,6 +110,7 @@ export class CvRepository {
         ).lean();
     }
 
+
     adminList(limit: number) {
         return CvModel.find({}).sort({ updatedAt: -1 }).limit(limit).lean();
     }
@@ -115,3 +124,4 @@ export class CvRepository {
         return r.deletedCount > 0;
     }
 }
+
