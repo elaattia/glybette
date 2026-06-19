@@ -1,25 +1,7 @@
 import "@/styles/home/testimonials.css";
+import { useTranslation } from "react-i18next";
 
-const testimonials = [
-    {
-        initials: "YB",
-        name: "Yasmine Ben Ali",
-        role: "Software Engineering Student · ISSAT",
-        text: "I found my PFE placement in under a week. The AI matched me with a project that perfectly fit my React and Node.js skills. I didn't have to search it came to me.",
-    },
-    {
-        initials: "MA",
-        name: "Mohamed Ayari",
-        role: "Full-Stack Developer · 3 yrs experience",
-        text: "I was transitioning to DevOps and had no idea how to reposition my profile. Glybette restructured my experience and surfaced targeted roles I never would have found alone.",
-    },
-    {
-        initials: "IC",
-        name: "Ines Chaabane",
-        role: "Data Science Student · EPS",
-        text: "The AI optimized profile made me stand out. Recruiters started reaching out to me directly. Glybette completely changed how I approach job searching.",
-    },
-];
+const TESTIMONIAL_KEYS = ["yasmine", "mohamed", "ines"] as const;
 
 function useReveal() {
     return (el: HTMLElement | null) => {
@@ -39,33 +21,35 @@ function useReveal() {
 }
 
 export default function Testimonials() {
+    const { t } = useTranslation("landing");
     const reveal = useReveal();
+
     return (
         <section id="testimonials">
             <div className="gb-testimonials" ref={reveal}>
                 <div className="gb-test-header">
-                    <div className="gb-sec-label">Testimonials</div>
+                    <div className="gb-sec-label">{t("testimonials.label")}</div>
                     <h2>
-                        Loved by students
+                        {t("testimonials.titleLine1")}
                         <br />
-                        and professionals
+                        {t("testimonials.titleLine2")}
                     </h2>
-                    <p>Real stories from people who found their next opportunity with Glybette.</p>
+                    <p>{t("testimonials.subtitle")}</p>
                 </div>
                 <div className="gb-test-grid">
-                    {testimonials.map((t) => (
-                        <div key={t.initials} className="gb-tcard">
+                    {TESTIMONIAL_KEYS.map((key) => (
+                        <div key={key} className="gb-tcard">
                             <div className="gb-stars">
                                 {[...Array(5)].map((_, i) => (
                                     <div key={i} className="gb-star" />
                                 ))}
                             </div>
-                            <p className="gb-tcard-text">"{t.text}"</p>
+                            <p className="gb-tcard-text">"{t(`testimonials.items.${key}.text`)}"</p>
                             <div className="gb-tcard-author">
-                                <div className="gb-tcard-avatar">{t.initials}</div>
+                                <div className="gb-tcard-avatar">{t(`testimonials.items.${key}.initials`)}</div>
                                 <div>
-                                    <div className="gb-tcard-name">{t.name}</div>
-                                    <div className="gb-tcard-role">{t.role}</div>
+                                    <div className="gb-tcard-name">{t(`testimonials.items.${key}.name`)}</div>
+                                    <div className="gb-tcard-role">{t(`testimonials.items.${key}.role`)}</div>
                                 </div>
                             </div>
                         </div>

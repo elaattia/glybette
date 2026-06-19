@@ -1,7 +1,8 @@
-import React, { useState } from "react";
+import { useState } from "react";
 import { Globe, Mail, Phone, ChevronDown, ChevronUp } from "lucide-react";
+import { useLocale } from "@/hooks/useLocale";
 import { detailStyles as styles } from "../styles";
-import { SOURCE_ICONS } from "../constants";
+import { getFilterLabel, getSourceLabel } from "../constants";
 import type { Offre } from "../types";
 
 interface OverviewTabProps {
@@ -10,12 +11,22 @@ interface OverviewTabProps {
 
 export function OverviewTab({ offre }: OverviewTabProps) {
     const [descExpanded, setDescExpanded] = useState(false);
+    const { t } = useLocale("opportunities");
+
+    const infoItems = [
+        { label: t("detail.overview.fields.source"), value: getSourceLabel(t, offre.source_site) },
+        { label: t("detail.overview.fields.type"), value: getFilterLabel(t, "type_offre", offre.type_offre) },
+        offre.domaine           ? { label: t("detail.overview.fields.domain"), value: offre.domaine } : null,
+        offre.taille_entreprise ? { label: t("detail.overview.fields.size"), value: offre.taille_entreprise } : null,
+        offre.niveau_experience ? { label: t("detail.overview.fields.level"), value: getFilterLabel(t, "niveau_experience", offre.niveau_experience) } : null,
+        offre.type_contrat      ? { label: t("detail.overview.fields.contract"), value: offre.type_contrat } : null,
+    ].filter(Boolean);
 
     return (
         <div style={styles.tabContent}>
             {offre.competences.length > 0 && (
                 <div style={styles.section}>
-                    <div style={styles.sectionTitle}>Compétences requises</div>
+                    <div style={styles.sectionTitle}>{t("detail.overview.requiredSkills")}</div>
                     <div style={styles.skillsRow}>
                         {offre.competences.map((s, i) => (
                             <span key={i} style={styles.skillTagGreen}>{s}</span>
@@ -26,7 +37,7 @@ export function OverviewTab({ offre }: OverviewTabProps) {
 
             {offre.description && (
                 <div style={styles.section}>
-                    <div style={styles.sectionTitle}>Description du poste</div>
+                    <div style={styles.sectionTitle}>{t("detail.overview.description")}</div>
                     <div style={{
                         fontSize: 13.5, lineHeight: 1.8, color: "var(--gb-text-off)",
                         whiteSpace: "pre-line", maxHeight: descExpanded ? "none" : 260, overflow: "hidden",
@@ -35,8 +46,8 @@ export function OverviewTab({ offre }: OverviewTabProps) {
                     </div>
                     <button onClick={() => setDescExpanded(!descExpanded)} style={styles.expandBtn}>
                         {descExpanded
-                            ? <><ChevronUp size={13} /> Réduire</>
-                            : <><ChevronDown size={13} /> Voir plus</>
+                            ? <><ChevronUp size={13} /> {t("detail.overview.collapse")}</>
+                            : <><ChevronDown size={13} /> {t("detail.overview.expand")}</>
                         }
                     </button>
                 </div>
@@ -44,22 +55,15 @@ export function OverviewTab({ offre }: OverviewTabProps) {
 
             {offre.company_about && (
                 <div style={styles.section}>
-                    <div style={styles.sectionTitle}>À propos de l'entreprise</div>
+                    <div style={styles.sectionTitle}>{t("detail.overview.aboutCompany")}</div>
                     <div style={styles.companyAboutBox}>{offre.company_about}</div>
                 </div>
             )}
 
             <div style={styles.section}>
-                <div style={styles.sectionTitle}>Informations</div>
+                <div style={styles.sectionTitle}>{t("detail.overview.info")}</div>
                 <div style={styles.infoGrid}>
-                    {[
-                        { label: "Source",  value: offre.source_site },
-                        { label: "Type",    value: offre.type_offre },
-                        offre.domaine           ? { label: "Domaine",  value: offre.domaine }           : null,
-                        offre.taille_entreprise ? { label: "Taille",   value: offre.taille_entreprise } : null,
-                        offre.niveau_experience ? { label: "Niveau",   value: offre.niveau_experience } : null,
-                        offre.type_contrat      ? { label: "Contrat",  value: offre.type_contrat }      : null,
-                    ].filter(Boolean).map((item: any, i) => (
+                    {infoItems.map((item: any, i) => (
                         <div key={i} style={styles.infoCell}>
                             <div style={styles.infoLabel}>{item.label}</div>
                             <div style={styles.infoValue}>{item.value}</div>
@@ -70,7 +74,7 @@ export function OverviewTab({ offre }: OverviewTabProps) {
 
             {(offre.email_contact || offre.telephone || offre.site_web_entreprise) && (
                 <div style={styles.section}>
-                    <div style={styles.sectionTitle}>Contact</div>
+                    <div style={styles.sectionTitle}>{t("detail.overview.contact")}</div>
                     <div style={styles.contactList}>
                         {offre.email_contact && (
                             <a href={`mailto:${offre.email_contact}`} style={styles.contactItem}>

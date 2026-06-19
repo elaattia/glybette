@@ -5,8 +5,8 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { portfolioTemplates } from "@/components/portfolio/template-config";
-import { blockLibrary } from "@/lib/portfolio";
+import { getBlockLibrary, getLocalizedTemplates } from "@/components/portfolio/portfolio-i18n";
+import { useLocale } from "@/hooks/useLocale";
 import { cn } from "@/lib/utils";
 import { InspectorField } from "@/pages/app/portfolio/components/InspectorField";
 
@@ -41,14 +41,18 @@ export function PortfolioBuilderLeftPanel({
     deleteTab,
     addBlock,
 }: PortfolioBuilderLeftPanelProps) {
+    const { t } = useLocale("portfolio");
+    const portfolioTemplates = getLocalizedTemplates(t);
+    const blockLibrary = getBlockLibrary(t);
+
     return (
         <aside className="sticky top-24 max-h-[calc(100vh-7rem)] space-y-4 overflow-y-auto pr-1">
             <Card className="border-[var(--gb-border)] bg-[var(--gb-app-panel-bg)] py-0 shadow-none">
                 <CardHeader className="px-4 pt-4">
-                    <CardTitle className="text-sm">Identity and URL</CardTitle>
+                    <CardTitle className="text-sm">{t("builder.leftPanel.identityAndUrl")}</CardTitle>
                 </CardHeader>
                 <CardContent className="space-y-3 px-4 pb-4">
-                    <InspectorField label="Display name">
+                    <InspectorField label={t("builder.leftPanel.displayName")}>
                         <Input
                             value={draft.identity.displayName}
                             onChange={(event) =>
@@ -60,10 +64,10 @@ export function PortfolioBuilderLeftPanel({
                                     },
                                 }))
                             }
-                            placeholder="Your public name"
+                            placeholder={t("builder.leftPanel.displayNamePlaceholder")}
                         />
                     </InspectorField>
-                    <InspectorField label="Small custom text">
+                    <InspectorField label={t("builder.leftPanel.eyebrowText")}>
                         <Input
                             value={draft.identity.eyebrowText}
                             onChange={(event) =>
@@ -75,10 +79,10 @@ export function PortfolioBuilderLeftPanel({
                                     },
                                 }))
                             }
-                            placeholder="Available for product roles"
+                            placeholder={t("builder.leftPanel.eyebrowTextPlaceholder")}
                         />
                     </InspectorField>
-                    <InspectorField label="Text placement">
+                    <InspectorField label={t("builder.leftPanel.textPlacement")}>
                         <Select
                             value={draft.identity.eyebrowPlacement}
                             onValueChange={(value) =>
@@ -94,22 +98,22 @@ export function PortfolioBuilderLeftPanel({
                                 <SelectValue />
                             </SelectTrigger>
                             <SelectContent>
-                                <SelectItem value="above">Above name</SelectItem>
-                                <SelectItem value="below">Below name</SelectItem>
+                                <SelectItem value="above">{t("builder.leftPanel.aboveName")}</SelectItem>
+                                <SelectItem value="below">{t("builder.leftPanel.belowName")}</SelectItem>
                             </SelectContent>
                         </Select>
                     </InspectorField>
-                    <InspectorField label="URL slug">
+                    <InspectorField label={t("builder.leftPanel.urlSlug")}>
                         <Input
                             value={slugInput || draft.slug}
                             onChange={(event) => setSlugInput(event.target.value)}
                             onBlur={() => updateSlug(slugInput || draft.slug)}
-                            placeholder="your-name"
+                            placeholder={t("builder.leftPanel.urlSlugPlaceholder")}
                         />
                     </InspectorField>
                     {slugMessage ? <p className="text-xs text-destructive">{slugMessage}</p> : null}
                     <p className="rounded-xl border border-[var(--gb-border)] bg-[var(--gb-bg)] px-3 py-2 text-xs leading-5 text-[var(--gb-muted)]">
-                        Display name changes the visual portfolio title. Slug only changes the public URL.
+                        {t("builder.leftPanel.identityHint")}
                     </p>
                 </CardContent>
             </Card>
@@ -118,7 +122,7 @@ export function PortfolioBuilderLeftPanel({
                 <CardHeader className="px-4 pt-4">
                     <CardTitle className="flex items-center gap-2 text-sm">
                         <Sparkles className="size-4 text-[#16A34A]" />
-                        Templates
+                        {t("builder.leftPanel.templates")}
                     </CardTitle>
                 </CardHeader>
                 <CardContent className="space-y-2 px-4 pb-4">
@@ -155,7 +159,7 @@ export function PortfolioBuilderLeftPanel({
                 <CardHeader className="px-4 pt-4">
                     <CardTitle className="flex items-center gap-2 text-sm">
                         <LayoutTemplate className="size-4 text-[#16A34A]" />
-                        Tabs
+                        {t("builder.leftPanel.tabs")}
                     </CardTitle>
                 </CardHeader>
                 <CardContent className="space-y-2 px-4 pb-4">
@@ -173,7 +177,7 @@ export function PortfolioBuilderLeftPanel({
                                 onFocus={() => selectTab(tab)}
                                 onChange={(event) => updateTab(tab.id, event.target.value)}
                                 className="h-8 flex-1 border-transparent bg-transparent px-1 text-sm shadow-none focus-visible:border-[var(--gb-border)] focus-visible:bg-[var(--gb-bg)]"
-                                aria-label={`Rename ${tab.label} tab`}
+                                aria-label={t("builder.leftPanel.renameTabAria", { label: tab.label })}
                             />
                             <Button
                                 type="button"
@@ -181,14 +185,14 @@ export function PortfolioBuilderLeftPanel({
                                 size="icon-sm"
                                 onClick={() => deleteTab(tab.id)}
                                 disabled={draft.tabs.length <= 1}
-                                aria-label={`Delete ${tab.label} tab`}>
+                                aria-label={t("builder.leftPanel.deleteTabAria", { label: tab.label })}>
                                 <Trash2 className="size-3.5" />
                             </Button>
                         </div>
                     ))}
                     <Button variant="outline" className="w-full" onClick={addTab}>
                         <Plus />
-                        Add tab
+                        {t("builder.leftPanel.addTab")}
                     </Button>
                 </CardContent>
             </Card>
@@ -197,7 +201,7 @@ export function PortfolioBuilderLeftPanel({
                 <CardHeader className="px-4 pt-4">
                     <CardTitle className="flex items-center gap-2 text-sm">
                         <Plus className="size-4 text-[#0284C7]" />
-                        Blocks
+                        {t("builder.leftPanel.blocks")}
                     </CardTitle>
                 </CardHeader>
                 <CardContent className="space-y-2 px-4 pb-4">

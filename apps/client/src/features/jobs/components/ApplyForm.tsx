@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { applicationsApi } from "../api/applications.api";
+import { useLocale } from "@/hooks/useLocale";
 
 interface ApplyFormProps {
     offreId: string;
@@ -8,6 +9,7 @@ interface ApplyFormProps {
 }
 
 export function ApplyForm({ offreId, onSuccess, onClose }: ApplyFormProps) {
+    const { t } = useLocale("opportunities");
     const [resumeFile, setResumeFile] = useState<File | null>(null);
     const [coverLetterFile, setCoverLetterFile] = useState<File | null>(null);
     const [isLoading, setIsLoading] = useState(false);
@@ -20,7 +22,7 @@ export function ApplyForm({ offreId, onSuccess, onClose }: ApplyFormProps) {
         setError(null);
 
         if (!resumeFile || !coverLetterFile) {
-            setError("Veuillez télécharger votre CV et votre lettre de motivation au format PDF.");
+            setError(t("detail.applyForm.filesRequired"));
             setIsLoading(false);
             return;
         }
@@ -39,7 +41,7 @@ export function ApplyForm({ offreId, onSuccess, onClose }: ApplyFormProps) {
                 if (onClose) onClose();
             }, 1500);
         } catch (err) {
-            setError(err instanceof Error ? err.message : "Une erreur est survenue");
+            setError(err instanceof Error ? err.message : t("detail.applyForm.genericError"));
         } finally {
             setIsLoading(false);
         }
@@ -49,10 +51,10 @@ export function ApplyForm({ offreId, onSuccess, onClose }: ApplyFormProps) {
         return (
             <div style={{ padding: "24px", textAlign: "center", background: "#f0fdf4", borderRadius: "8px" }}>
                 <div style={{ fontSize: "14px", color: "#16a34a", fontWeight: 600 }}>
-                    ✓ Candidature envoyée avec succès !
+                    {t("detail.applyForm.successTitle")}
                 </div>
                 <div style={{ fontSize: "12px", color: "#6b7280", marginTop: "8px" }}>
-                    L'entreprise examinera votre candidature bientôt.
+                    {t("detail.applyForm.successSubtitle")}
                 </div>
             </div>
         );
@@ -62,7 +64,7 @@ export function ApplyForm({ offreId, onSuccess, onClose }: ApplyFormProps) {
         <form onSubmit={handleSubmit} style={{ display: "flex", flexDirection: "column", gap: "16px" }}>
             <div>
                 <label style={{ display: "block", fontSize: "13px", fontWeight: 600, marginBottom: "8px", color: "var(--gb-text)" }}>
-                    CV (PDF)
+                    {t("detail.applyForm.resumeLabel")}
                 </label>
                 <input
                     type="file"
@@ -75,7 +77,7 @@ export function ApplyForm({ offreId, onSuccess, onClose }: ApplyFormProps) {
 
             <div>
                 <label style={{ display: "block", fontSize: "13px", fontWeight: 600, marginBottom: "8px", color: "var(--gb-text)" }}>
-                    Lettre de motivation (PDF)
+                    {t("detail.applyForm.coverLetterLabel")}
                 </label>
                 <input
                     type="file"
@@ -110,7 +112,7 @@ export function ApplyForm({ offreId, onSuccess, onClose }: ApplyFormProps) {
                             opacity: isLoading ? 0.6 : 1,
                         }}
                     >
-                        Annuler
+                        {t("detail.applyForm.cancel")}
                     </button>
                 )}
                 <button
@@ -128,7 +130,7 @@ export function ApplyForm({ offreId, onSuccess, onClose }: ApplyFormProps) {
                         opacity: isLoading ? 0.6 : 1,
                     }}
                 >
-                    {isLoading ? "Envoi..." : "Postuler"}
+                    {isLoading ? t("detail.applyForm.submitting") : t("detail.applyForm.submit")}
                 </button>
             </div>
         </form>

@@ -1,0 +1,229 @@
+{
+    "builder": {
+        "loading": "Loading portfolio workspace...",
+        "topbar": {
+            "liveUrl": "Live URL",
+            "localAutosave": "Local autosave",
+            "localAutosaveAt": "Local autosave at {{time}}",
+            "localAutosaveReady": "Local autosave ready",
+            "open": "Open",
+            "openTitle": "Open public portfolio in a new tab",
+            "save": "Save"
+        },
+        "slugStep": {
+            "title": "Claim your portfolio URL",
+            "portfolioName": "Portfolio name",
+            "portfolioNamePlaceholder": "your-name",
+            "slugHint": "Letters, numbers, and hyphens only. You can change it later, but the link will change.",
+            "publicLink": "Your public link",
+            "proUrlPreview": "Pro URL preview",
+            "proUrlHint": "Upgrade to Pro for a professional portfolio URL.",
+            "continueToTemplates": "Continue to templates"
+        },
+        "templateStep": {
+            "sectionLabel": "Portfolio templates",
+            "title": "Pick a starting point",
+            "description": "Templates define layout rules, component styling, and the grid your blocks snap to."
+        },
+        "leftPanel": {
+            "identityAndUrl": "Identity and URL",
+            "displayName": "Display name",
+            "displayNamePlaceholder": "Your public name",
+            "eyebrowText": "Small custom text",
+            "eyebrowTextPlaceholder": "Available for product roles",
+            "textPlacement": "Text placement",
+            "aboveName": "Above name",
+            "belowName": "Below name",
+            "urlSlug": "URL slug",
+            "urlSlugPlaceholder": "your-name",
+            "identityHint": "Display name changes the visual portfolio title. Slug only changes the public URL.",
+            "templates": "Templates",
+            "tabs": "Tabs",
+            "renameTabAria": "Rename {{label}} tab",
+            "deleteTabAria": "Delete {{label}} tab",
+            "addTab": "Add tab",
+            "blocks": "Blocks"
+        },
+        "rightPanel": {
+            "templateStyle": "Template style",
+            "accent": "Accent",
+            "radius": "Radius",
+            "radiusSharp": "Sharp",
+            "radiusSoft": "Soft",
+            "radiusRound": "Round",
+            "selectedBlock": "Selected block",
+            "deleteSelectedBlockAria": "Delete selected block",
+            "title": "Title",
+            "blockWidth": "Block width",
+            "halfWidth": "Half width",
+            "fullWidth": "Full width",
+            "blockWidthHint": "Blocks snap to a two-column grid. Drag to reorder; use width for layout.",
+            "selectBlockHint": "Select a block in the preview to edit layout and content."
+        },
+        "saveSuccess": {
+            "sectionLabel": "Portfolio saved",
+            "title": "Your live portfolio is updated.",
+            "description": "Share this link anywhere. Visitors will see the latest saved version of your portfolio.",
+            "publicLink": "Public link",
+            "proUpgradeTitle": "Upgrade to Pro for a cleaner portfolio domain.",
+            "proUpgradeHint": "Your Pro URL would be {{url}}.",
+            "openPortfolio": "Open portfolio",
+            "share": "Share",
+            "copied": "Copied"
+        },
+        "sortableBlock": {
+            "dragAria": "Drag block to reorder"
+        }
+    },
+    "templates": {
+        "atelier": {
+            "name": "Atelier Ledger",
+            "tone": "Editorial, focused, quietly luxurious",
+            "description": "A magazine-like portfolio with generous type, calm panels, and sharp project storytelling."
+        },
+        "signal": {
+            "name": "Signal Grid",
+            "tone": "Industrial, technical, high-contrast",
+            "description": "A dense grid for builders who want the portfolio to feel like a control room."
+        },
+        "folio": {
+            "name": "Folio Bloom",
+            "tone": "Soft, warm, personable",
+            "description": "A lighter portfolio for profiles that need warmth, clarity, and an approachable rhythm."
+        },
+        "mono": {
+            "name": "Mono Dispatch",
+            "tone": "Brutalist, compact, sharply typographic",
+            "description": "A stripped-back profile for technical specialists who want proof, links, and signal fast."
+        }
+    },
+    "blocks": {
+        "library": {
+            "markdown": {
+                "label": "Markdown / About",
+                "description": "Rich text for introductions, essays, and case-study notes."
+            },
+            "socialLinks": {
+                "label": "Social links",
+                "description": "A compact row of profile links and contact destinations."
+            },
+            "projectList": {
+                "label": "Project cards",
+                "description": "Project summaries that open detailed modal views."
+            },
+            "experienceTimeline": {
+                "label": "Experience timeline",
+                "description": "Chronological roles, milestones, and highlights."
+            },
+            "skills": {
+                "label": "Skills badges",
+                "description": "Tagged capabilities grouped into a scannable block."
+            },
+            "contactCta": {
+                "label": "Contact CTA",
+                "description": "A prominent invitation to reach out."
+            },
+            "media": {
+                "label": "Image / media",
+                "description": "External image URL with caption support."
+            },
+            "customLink": {
+                "label": "Custom button",
+                "description": "A single link or download-style call to action."
+            }
+        },
+        "defaults": {
+            "tabAbout": "About",
+            "tabExperience": "Experience",
+            "tabCustom": "Custom tab",
+            "displayNameFallback": "Your Name",
+            "eyebrowText": "Independent portfolio",
+            "markdownTitle": "About me",
+            "markdownBody": "Write a concise intro. Mention your craft, the problems you like solving, and what makes your work distinct.",
+            "socialLinksTitle": "Find me",
+            "projectListTitle": "Selected projects",
+            "experienceTitle": "Experience",
+            "skillsTitle": "Skills",
+            "contactCtaTitle": "Work together",
+            "contactCtaHeading": "Have a role or project in mind?",
+            "contactCtaBody": "Send a note and I will reply with availability and next steps.",
+            "contactCtaLabel": "Contact me",
+            "mediaTitle": "Media",
+            "mediaCaption": "Add an external image URL that supports your story.",
+            "customLinkTitle": "Featured link",
+            "customLinkLabel": "View resume",
+            "newGroup": "New group",
+            "newSkill": "New skill",
+            "newLink": "New link",
+            "newProject": "New project",
+            "newProjectSummary": "Short outcome",
+            "newProjectDetail": "What changed?",
+            "newRole": "New role",
+            "newCompany": "Company",
+            "newPeriod": "Year",
+            "newImpact": "Impact"
+        },
+        "fields": {
+            "markdownText": "Markdown text",
+            "groupName": "Group name",
+            "groupNameAria": "Skill group name",
+            "deleteGroupAria": "Delete {{label}} group",
+            "skillsPlaceholder": "React, TypeScript, APIs",
+            "addSkillGroup": "Add skill group",
+            "heading": "Heading",
+            "body": "Body",
+            "buttonLabel": "Button label",
+            "buttonUrl": "Button URL",
+            "imageUrl": "Image URL",
+            "caption": "Caption",
+            "linkLabel": "Link label",
+            "url": "URL",
+            "labelPlaceholder": "Label",
+            "urlPlaceholder": "https://",
+            "addLink": "Add link",
+            "projectTitle": "Project title",
+            "shortSummary": "Short summary",
+            "modalDetail": "Modal detail",
+            "projectUrl": "Project URL",
+            "addProject": "Add project",
+            "role": "Role",
+            "company": "Company",
+            "period": "2024 - Present",
+            "whatYouDid": "What you did",
+            "addExperience": "Add experience"
+        }
+    },
+    "socialIcons": {
+        "website": "Website",
+        "github": "GitHub",
+        "linkedin": "LinkedIn",
+        "email": "Email",
+        "twitter": "Twitter / X",
+        "instagram": "Instagram",
+        "dribbble": "Dribbble"
+    },
+    "renderer": {
+        "contactFallback": "Contact",
+        "mediaAltFallback": "Portfolio media",
+        "openLinkFallback": "Open link",
+        "footer": "Powered by GLYBETTE",
+        "projectModal": {
+            "caseFile": "Case file",
+            "closeAria": "Close project detail",
+            "eyebrow": "Project details",
+            "openProject": "Open project",
+            "close": "Close"
+        }
+    },
+    "public": {
+        "loading": "Loading portfolio...",
+        "notFoundLabel": "Portfolio not found",
+        "notFoundTitle": "This portfolio is not live yet.",
+        "notFoundDescription": "The owner may still be building it, or the URL may have changed.",
+        "goToGlybette": "Go to Glybette"
+    },
+    "errors": {
+        "slugTooShort": "Portfolio URL name must be at least 3 characters.",
+        "slugTaken": "That portfolio URL is already taken."
+    }
+}

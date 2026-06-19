@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { useTranslation } from "react-i18next";
 import { cvApi } from "../../api/cv.api";
 import { getTemplate } from "../../templates";
 
@@ -14,6 +15,7 @@ export function useExportPdf(editor: {
     saveNow: () => Promise<void>;
     setPdfUrl: (url: string) => void;
 }) {
+    const { t } = useTranslation("cvBuilder");
     const [exportLoading, setExportLoading] = useState(false);
 
     const exportPdf = async () => {
@@ -138,7 +140,7 @@ export function useExportPdf(editor: {
                 a.download = `${editor.state.title || "cv"}.pdf`;
                 a.click();
             } catch {
-                alert("Erreur lors de l'export PDF. Veuillez réessayer.");
+                alert(t("editor.exportError"));
             }
         } finally {
             setExportLoading(false);

@@ -4,6 +4,7 @@ import { ExternalLink } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { getSocialIcon } from "@/components/portfolio/social-icons";
 import type { ProjectItem } from "@/components/portfolio/renderer-types";
+import { useLocale } from "@/hooks/useLocale";
 import { getObjectList, getSkillGroups, getText } from "@/lib/portfolio-block-data";
 
 function renderMarkdownText(markdown: string) {
@@ -23,6 +24,8 @@ export const PortfolioBlockContent = memo(function PortfolioBlockContent({
     block,
     onProjectClick,
 }: PortfolioBlockContentProps) {
+    const { t } = useLocale("portfolio");
+
     switch (block.type) {
         case "markdown":
             return (
@@ -142,7 +145,7 @@ export const PortfolioBlockContent = memo(function PortfolioBlockContent({
                     <Button
                         className="mt-5 rounded-[var(--portfolio-radius)] bg-[var(--portfolio-accent)] text-[var(--portfolio-accent-contrast)] hover:bg-[color-mix(in_srgb,var(--portfolio-accent)_84%,black)]"
                         asChild>
-                        <a href={getText(block.data, "url")}>{getText(block.data, "label", "Contact")}</a>
+                        <a href={getText(block.data, "url")}>{getText(block.data, "label", t("renderer.contactFallback"))}</a>
                     </Button>
                 </div>
             );
@@ -151,7 +154,7 @@ export const PortfolioBlockContent = memo(function PortfolioBlockContent({
                 <figure>
                     <img
                         src={getText(block.data, "imageUrl")}
-                        alt={getText(block.data, "caption", block.title ?? "Portfolio media")}
+                        alt={getText(block.data, "caption", block.title ?? t("renderer.mediaAltFallback"))}
                         className="aspect-[4/3] w-full rounded-[inherit] object-cover"
                     />
                     <figcaption className="mt-3 text-xs opacity-60">{getText(block.data, "caption")}</figcaption>
@@ -164,7 +167,7 @@ export const PortfolioBlockContent = memo(function PortfolioBlockContent({
                     target="_blank"
                     rel="noreferrer"
                     className="flex items-center justify-between gap-3 text-lg font-semibold text-[var(--portfolio-accent)]">
-                    {getText(block.data, "label", block.title ?? "Open link")}
+                    {getText(block.data, "label", block.title ?? t("renderer.openLinkFallback"))}
                     <ExternalLink className="size-4" />
                 </a>
             );

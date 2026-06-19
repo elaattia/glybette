@@ -7,22 +7,28 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { useProjectsList } from "@/features/projects";
-
-const difficulties = [
-    { value: "", label: "All levels" },
-    { value: "beginner", label: "Beginner" },
-    { value: "intermediate", label: "Intermediate" },
-    { value: "advanced", label: "Advanced" },
-] as const;
+import { useLocale } from "@/hooks/useLocale";
 
 export default function ProjectsListPage() {
+    const { t } = useLocale("projects");
     const navigate = useNavigate();
     const [search, setSearch] = useState("");
     const [domain, setDomain] = useState("");
-    const [difficulty, setDifficulty] = useState<(typeof difficulties)[number]["value"]>("");
+    const [difficulty, setDifficulty] = useState<"" | "beginner" | "intermediate" | "advanced">("");
     const [technologyInput, setTechnologyInput] = useState("");
     const [technology, setTechnology] = useState<string[]>([]);
     const [mineOnly, setMineOnly] = useState(false);
+
+    const difficulties = useMemo(
+        () =>
+            [
+                { value: "", label: t("list.difficulties.all") },
+                { value: "beginner", label: t("list.difficulties.beginner") },
+                { value: "intermediate", label: t("list.difficulties.intermediate") },
+                { value: "advanced", label: t("list.difficulties.advanced") },
+            ] as const,
+        [t],
+    );
 
     const query = useMemo(
         () => ({
@@ -49,6 +55,9 @@ export default function ProjectsListPage() {
         setTechnologyInput("");
     };
 
+    const statusLabel = (status: string) =>
+        status === "published" ? t("list.status.published") : status === "draft" ? t("list.status.draft") : status;
+
     return (
         <div className="space-y-5">
             <div className="relative overflow-hidden rounded-3xl border border-[var(--gb-border)] bg-[var(--gb-app-panel-bg)] p-6">
@@ -59,18 +68,16 @@ export default function ProjectsListPage() {
                 <div className="relative flex flex-col gap-5 lg:flex-row lg:items-end lg:justify-between">
                     <div>
                         <p className="text-xs font-semibold uppercase tracking-[0.16em] text-[var(--gb-muted)]">
-                            Community projects
+                            {t("list.eyebrow")}
                         </p>
                         <h1 className="mt-2 font-['Bricolage_Grotesque'] text-3xl font-extrabold text-[var(--gb-text)]">
-                            Build with the Glybette network
+                            {t("list.title")}
                         </h1>
-                        <p className="mt-2 max-w-2xl text-sm text-[var(--gb-text-off)]">
-                            Launch ideas, recruit collaborators, and discuss progress in public threads.
-                        </p>
+                        <p className="mt-2 max-w-2xl text-sm text-[var(--gb-text-off)]">{t("list.description")}</p>
                     </div>
                     <Button asChild className="h-11 rounded-xl px-5 text-sm font-semibold shadow-lg">
                         <Link to="/app/projects/create">
-                            <Sparkles className="h-4 w-4" /> Propose a project
+                            <Sparkles className="h-4 w-4" /> {t("list.proposeProject")}
                         </Link>
                     </Button>
                 </div>
@@ -80,25 +87,29 @@ export default function ProjectsListPage() {
                 <CardContent className="space-y-4 px-5 py-5">
                     <div className="flex items-center gap-2 text-sm font-semibold text-[var(--gb-text)]">
                         <Filter className="h-4 w-4 text-[#16a34a]" />
-                        Filter projects
+                        {t("list.filterTitle")}
                     </div>
                     <div className="grid gap-3 md:grid-cols-2 xl:grid-cols-5">
                         <label className="space-y-1.5">
-                            <span className="text-xs font-medium uppercase tracking-[0.08em] text-[var(--gb-muted)]">Search</span>
+                            <span className="text-xs font-medium uppercase tracking-[0.08em] text-[var(--gb-muted)]">
+                                {t("list.search")}
+                            </span>
                             <Input
-                                placeholder="Title or problem"
+                                placeholder={t("list.searchPlaceholder")}
                                 value={search}
                                 onChange={(event) => setSearch(event.target.value)}
                                 className="h-10 border-[var(--gb-border)] bg-[var(--gb-surface)]"
                             />
                         </label>
                         <label className="space-y-1.5">
-                            <span className="text-xs font-medium uppercase tracking-[0.08em] text-[var(--gb-muted)]">Domain</span>
+                            <span className="text-xs font-medium uppercase tracking-[0.08em] text-[var(--gb-muted)]">
+                                {t("list.domain")}
+                            </span>
                             <select
                                 className="h-10 w-full rounded-lg border border-[var(--gb-border)] bg-[var(--gb-surface)] px-3 text-sm text-[var(--gb-text)] outline-none focus:border-[var(--gb-app-ring)]"
                                 value={domain}
                                 onChange={(event) => setDomain(event.target.value)}>
-                                <option value="">All domains</option>
+                                <option value="">{t("list.allDomains")}</option>
                                 {PROJECT_DOMAINS.map((option) => (
                                     <option key={option} value={option}>
                                         {option}
@@ -108,12 +119,14 @@ export default function ProjectsListPage() {
                         </label>
                         <label className="space-y-1.5">
                             <span className="text-xs font-medium uppercase tracking-[0.08em] text-[var(--gb-muted)]">
-                                Difficulty
+                                {t("list.difficulty")}
                             </span>
                             <select
                                 className="h-10 w-full rounded-lg border border-[var(--gb-border)] bg-[var(--gb-surface)] px-3 text-sm text-[var(--gb-text)] outline-none focus:border-[var(--gb-app-ring)]"
                                 value={difficulty}
-                                onChange={(event) => setDifficulty(event.target.value as (typeof difficulties)[number]["value"])}>
+                                onChange={(event) =>
+                                    setDifficulty(event.target.value as (typeof difficulties)[number]["value"])
+                                }>
                                 {difficulties.map((option) => (
                                     <option key={option.value || "all"} value={option.value}>
                                         {option.label}
@@ -122,9 +135,11 @@ export default function ProjectsListPage() {
                             </select>
                         </label>
                         <div className="space-y-1.5">
-                            <span className="text-xs font-medium uppercase tracking-[0.08em] text-[var(--gb-muted)]">Technologies</span>
+                            <span className="text-xs font-medium uppercase tracking-[0.08em] text-[var(--gb-muted)]">
+                                {t("list.technologies")}
+                            </span>
                             <Input
-                                placeholder="Add and press Enter"
+                                placeholder={t("list.technologiesPlaceholder")}
                                 value={technologyInput}
                                 onChange={(event) => setTechnologyInput(event.target.value)}
                                 onKeyDown={(event) => {
@@ -148,7 +163,7 @@ export default function ProjectsListPage() {
                                                 type="button"
                                                 className="rounded-full p-0.5 text-[var(--gb-muted)] hover:text-[var(--gb-text)]"
                                                 onClick={() => setTechnology((current) => current.filter((item) => item !== tech))}
-                                                aria-label={`Remove ${tech} filter`}>
+                                                aria-label={t("list.removeFilterAria", { tech })}>
                                                 <X className="h-3 w-3" />
                                             </button>
                                         </Badge>
@@ -157,13 +172,15 @@ export default function ProjectsListPage() {
                             ) : null}
                         </div>
                         <label className="space-y-1.5">
-                            <span className="text-xs font-medium uppercase tracking-[0.08em] text-[var(--gb-muted)]">Ownership</span>
+                            <span className="text-xs font-medium uppercase tracking-[0.08em] text-[var(--gb-muted)]">
+                                {t("list.ownership")}
+                            </span>
                             <Button
                                 type="button"
                                 variant={mineOnly ? "default" : "outline"}
                                 className="h-10 w-full justify-center border-[var(--gb-border)]"
                                 onClick={() => setMineOnly((value) => !value)}>
-                                {mineOnly ? "Showing my projects" : "Show my projects"}
+                                {mineOnly ? t("list.showingMyProjects") : t("list.showMyProjects")}
                             </Button>
                         </label>
                     </div>
@@ -183,9 +200,7 @@ export default function ProjectsListPage() {
 
             {!projectsQuery.isLoading && projectsQuery.isError ? (
                 <Card className="border border-red-500/30 bg-red-500/5">
-                    <CardContent className="px-5 py-5 text-sm text-red-200">
-                        Failed to load projects. Please refresh the page.
-                    </CardContent>
+                    <CardContent className="px-5 py-5 text-sm text-red-200">{t("list.loadError")}</CardContent>
                 </Card>
             ) : null}
 
@@ -193,12 +208,10 @@ export default function ProjectsListPage() {
                 <Card className="border border-[var(--gb-border)] bg-[var(--gb-app-panel-bg)]">
                     <CardContent className="flex flex-col items-center gap-3 px-6 py-10 text-center">
                         <BriefcaseBusiness className="h-7 w-7 text-[var(--gb-muted)]" />
-                        <p className="text-base font-semibold text-[var(--gb-text)]">No projects match your filters yet.</p>
-                        <p className="max-w-md text-sm text-[var(--gb-muted)]">
-                            Try broadening filters or start a new project idea to attract collaborators.
-                        </p>
+                        <p className="text-base font-semibold text-[var(--gb-text)]">{t("list.emptyTitle")}</p>
+                        <p className="max-w-md text-sm text-[var(--gb-muted)]">{t("list.emptyDescription")}</p>
                         <Button asChild size="sm">
-                            <Link to="/app/projects/create">Create project</Link>
+                            <Link to="/app/projects/create">{t("list.createProject")}</Link>
                         </Button>
                     </CardContent>
                 </Card>
@@ -228,7 +241,7 @@ export default function ProjectsListPage() {
                                     />
                                 ) : (
                                     <div className="flex h-full items-center justify-center text-sm text-[var(--gb-muted)]">
-                                        Cover pending
+                                        {t("list.coverPending")}
                                     </div>
                                 )}
                                 <span
@@ -238,7 +251,7 @@ export default function ProjectsListPage() {
                                             ? "bg-emerald-500/20 text-emerald-200 ring-1 ring-emerald-400/40"
                                             : "bg-amber-500/20 text-amber-200 ring-1 ring-amber-300/40",
                                     ].join(" ")}>
-                                    {project.status}
+                                    {statusLabel(project.status)}
                                 </span>
                             </div>
 
@@ -265,13 +278,16 @@ export default function ProjectsListPage() {
 
                                 <div className="flex flex-wrap items-center gap-x-4 gap-y-2 text-xs text-[var(--gb-muted)]">
                                     <span className="inline-flex items-center gap-1.5">
-                                        <Users className="h-3.5 w-3.5" /> {project.memberCount} members
+                                        <Users className="h-3.5 w-3.5" />{" "}
+                                        {t("list.members", { count: project.memberCount })}
                                     </span>
                                     <span className="inline-flex items-center gap-1.5">
-                                        <Clock3 className="h-3.5 w-3.5" /> {project.engagement.hoursPerWeek}h/week
+                                        <Clock3 className="h-3.5 w-3.5" />{" "}
+                                        {t("list.hoursPerWeek", { count: project.engagement.hoursPerWeek })}
                                     </span>
                                     <span className="inline-flex items-center gap-1.5">
-                                        <MessageSquare className="h-3.5 w-3.5" /> {project.commentCount} comments
+                                        <MessageSquare className="h-3.5 w-3.5" />{" "}
+                                        {t("list.comments", { count: project.commentCount })}
                                     </span>
                                 </div>
 
@@ -285,7 +301,7 @@ export default function ProjectsListPage() {
                                         onClick={(event) => {
                                             event.stopPropagation();
                                         }}>
-                                        <Link to={`/app/projects/${project.id}`}>Open project</Link>
+                                        <Link to={`/app/projects/${project.id}`}>{t("list.openProject")}</Link>
                                     </Button>
                                 </div>
                             </div>

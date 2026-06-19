@@ -1,7 +1,12 @@
 import "@/styles/home/hero.css";
+import { useTranslation } from "react-i18next";
 import { Sparkles, Target, Briefcase, Zap, ArrowRight, ArrowDown } from "lucide-react";
 
+const CARD_KEYS = ["accuracy", "opportunities", "matching"] as const;
+
 export default function Hero() {
+    const { t } = useTranslation("landing");
+
     return (
         <section className="gb-hero">
             <div className="gb-orb gb-orb-1" />
@@ -13,56 +18,44 @@ export default function Hero() {
                     <div className="gb-badge-dot">
                         <Sparkles className="w-3 h-3 text-white" />
                     </div>
-                    Smart Career Platform · Tunisia &amp; Beyond
+                    {t("hero.badge")}
                 </div>
                 <h1>
-                    Your Career,
+                    {t("hero.titleLine1")}
                     <br />
-                    <span className="grad">finally moving</span>
+                    <span className="grad">{t("hero.titleHighlight")}</span>
                     <br />
-                    <span className="text-stroke">forward.</span>
+                    <span className="text-stroke">{t("hero.titleLine3")}</span>
                 </h1>
-                <h3>Stop guessing. Start matching.</h3>
-                <p className="gb-hero-sub">
-                    Glybette A smart ecosystem designed to unite talent, opportunity, and innovation helping you grow,
-                    build, and succeed.
-                </p>
+                <h3>{t("hero.tagline")}</h3>
+                <p className="gb-hero-sub">{t("hero.subtitle")}</p>
                 <div className="gb-hero-cta">
                     <a href="/onboarding" className="gb-btn-primary">
-                        Build My Profile <ArrowRight className="w-4 h-4 inline ml-1" />
+                        {t("hero.buildProfile")} <ArrowRight className="w-4 h-4 inline ml-1" />
                     </a>
                     <a href="#features" className="gb-btn-secondary">
-                        Explore Features <ArrowDown className="w-4 h-4 inline ml-1" />
+                        {t("hero.exploreFeatures")} <ArrowDown className="w-4 h-4 inline ml-1" />
                     </a>
                 </div>
                 <div className="gb-hero-cards">
-                    <div className="gb-hcard">
-                        <div className="gb-hcard-icon green">
-                            <Target className="w-5 h-5 text-green-500" />
-                        </div>
-                        <div>
-                            <div className="gb-hcard-label">97% Accuracy</div>
-                            <div className="gb-hcard-value">Real matches</div>
-                        </div>
-                    </div>
-                    <div className="gb-hcard">
-                        <div className="gb-hcard-icon blue">
-                            <Briefcase className="w-5 h-5 text-blue-500" />
-                        </div>
-                        <div>
-                            <div className="gb-hcard-label">500+ Opportunities</div>
-                            <div className="gb-hcard-value">Updated daily</div>
-                        </div>
-                    </div>
-                    <div className="gb-hcard">
-                        <div className="gb-hcard-icon purp">
-                            <Zap className="w-5 h-5 text-purple-500" />
-                        </div>
-                        <div>
-                            <div className="gb-hcard-label">Fast Matching</div>
-                            <div className="gb-hcard-value">Tailored to you</div>
-                        </div>
-                    </div>
+                    {CARD_KEYS.map((key, index) => {
+                        const icons = [
+                            <Target key="target" className="w-5 h-5 text-green-500" />,
+                            <Briefcase key="briefcase" className="w-5 h-5 text-blue-500" />,
+                            <Zap key="zap" className="w-5 h-5 text-purple-500" />,
+                        ];
+                        const iconClasses = ["green", "blue", "purp"];
+
+                        return (
+                            <div key={key} className="gb-hcard">
+                                <div className={`gb-hcard-icon ${iconClasses[index]}`}>{icons[index]}</div>
+                                <div>
+                                    <div className="gb-hcard-label">{t(`hero.cards.${key}.label`)}</div>
+                                    <div className="gb-hcard-value">{t(`hero.cards.${key}.value`)}</div>
+                                </div>
+                            </div>
+                        );
+                    })}
                 </div>
             </div>
         </section>

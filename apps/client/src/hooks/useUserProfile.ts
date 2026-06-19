@@ -1,5 +1,4 @@
 import { useUser } from "@/hooks/useUser";
-import { useCurrentPortfolio } from "@/hooks/usePortfolio";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { apiRequest } from "@/lib/api";
 import { useAuth } from "@/hooks/useAuth";

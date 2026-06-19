@@ -1,4 +1,5 @@
 import type { ReactNode } from "react";
+import { useTranslation } from "react-i18next";
 
 interface LoginCardProps {
     children: ReactNode;
@@ -8,6 +9,8 @@ interface LoginCardProps {
 }
 
 export function LoginCard({ children, title, subtitle, error }: LoginCardProps) {
+    const { t } = useTranslation("auth");
+
     return (
         <div className="login-card-wrapper">
             <div className="login-card">
@@ -37,9 +40,7 @@ export function LoginCard({ children, title, subtitle, error }: LoginCardProps) 
 
                     <div className="login-buttons">{children}</div>
 
-                    <p className="login-footer-note">
-                        By continuing, you agree to Glybette's Terms of Service and Privacy Policy
-                    </p>
+                    <p className="login-footer-note">{t("login.footerNote")}</p>
                 </div>
             </div>
         </div>

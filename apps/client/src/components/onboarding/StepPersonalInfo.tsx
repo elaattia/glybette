@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { useTranslation } from "react-i18next";
 import type { PersonalInfoPayload } from "@glybette/types";
 import { StepFooter } from "./StepFooter";
 
@@ -7,7 +8,20 @@ interface Props {
     onSkip: () => void;
 }
 
+const FIELD_CONFIG: {
+    key: keyof PersonalInfoPayload;
+    type?: string;
+    colSpan?: boolean;
+}[] = [
+    { key: "firstName" },
+    { key: "lastName" },
+    { key: "email", type: "email" },
+    { key: "phone" },
+    { key: "country", colSpan: true },
+];
+
 export function StepPersonalInfo({ onNext, onSkip }: Props) {
+    const { t } = useTranslation("onboarding");
     const [form, setForm] = useState<PersonalInfoPayload>({
         firstName: "",
         lastName: "",
@@ -22,39 +36,25 @@ export function StepPersonalInfo({ onNext, onSkip }: Props) {
 
     const isValid = form.firstName && form.lastName && form.email;
 
-    const fields: {
-        key: keyof PersonalInfoPayload;
-        label: string;
-        placeholder: string;
-        type?: string;
-        colSpan?: boolean;
-    }[] = [
-        { key: "firstName", label: "First Name", placeholder: "First Name" },
-        { key: "lastName", label: "Last Name", placeholder: "Last Name" },
-        { key: "email", label: "Email", placeholder: "you@example.com", type: "email" },
-        { key: "phone", label: "Phone Number", placeholder: "+216 12 345 678" },
-        { key: "country", label: "Country of Residence", placeholder: "e.g. Tunisia, France...", colSpan: true },
-    ];
-
     return (
         <div className="space-y-8">
             <div className="text-center space-y-2">
-                <div className="gb-sec-label justify-center w-full">Personal Info</div>
-                <h1 className="text-4xl font-bold ob-page-title">Personal information</h1>
-                <p className="text-sm ob-page-sub">Tell us who you are</p>
+                <div className="gb-sec-label justify-center w-full">{t("personalInfo.label")}</div>
+                <h1 className="text-4xl font-bold ob-page-title">{t("personalInfo.title")}</h1>
+                <p className="text-sm ob-page-sub">{t("personalInfo.subtitle")}</p>
             </div>
 
             <div className="grid grid-cols-2 gap-x-5 gap-y-5">
-                {fields.map(({ key, label, placeholder, type, colSpan }) => (
+                {FIELD_CONFIG.map(({ key, type, colSpan }) => (
                     <div key={key} className={`space-y-1.5 ${colSpan ? "col-span-2" : ""}`}>
                         <label htmlFor={key} className="ob-label">
-                            {label}
+                            {t(`personalInfo.fields.${key}.label`)}
                         </label>
                         <input
                             id={key}
                             className="ob-input"
                             type={type ?? "text"}
-                            placeholder={placeholder}
+                            placeholder={t(`personalInfo.fields.${key}.placeholder`)}
                             value={form[key]}
                             onChange={(e) => set(key, e.target.value)}
                         />

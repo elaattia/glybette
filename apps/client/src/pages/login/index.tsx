@@ -1,5 +1,6 @@
 import { Navigate, useLocation, useSearchParams } from "react-router-dom";
 import { useState } from "react";
+import { useTranslation } from "react-i18next";
 import { useAuth } from "@/hooks/useAuth";
 import { useEmailVerification } from "@/hooks/useEmailVerification";
 import { useUser } from "@/hooks/useUser";
@@ -10,11 +11,8 @@ import { GoogleIcon, LinkedInIcon, GitHubIcon } from "@/components/auth/AuthProv
 import { ApiError } from "@/lib/api";
 import "./login.css";
 
-const errorMessages: Record<string, string> = {
-    callback_failed: "Google sign-in completed but no active session was found. Please try again.",
-};
-
 export default function LoginPage() {
+    const { t } = useTranslation("auth");
     const location = useLocation();
     const [searchParams] = useSearchParams();
     const auth = useAuth();
@@ -24,7 +22,9 @@ export default function LoginPage() {
     const [password, setPassword] = useState("");
     const [passwordError, setPasswordError] = useState<string | null>(null);
     const errorCode = searchParams.get("error");
-    const errorMessage = errorCode ? (errorMessages[errorCode] ?? "Sign-in failed.") : null;
+    const errorMessage = errorCode
+        ? t(`login.errors.${errorCode}`, { defaultValue: t("login.signInFailed") })
+        : null;
 
     if (auth.isAuthenticated && verification.isPending) {
         return null;
@@ -51,10 +51,11 @@ export default function LoginPage() {
             <LoginCard
                 title={
                     <>
-                        Welcome to <span className="gradient-text">Glybette</span>
+                        {t("login.titlePrefix")}{" "}
+                        <span className="gradient-text">{t("login.titleBrand")}</span>
                     </>
                 }
-                subtitle="Sign in or create an account to continue"
+                subtitle={t("login.subtitle")}
                 error={errorMessage}>
                 <AuthButton
                     onClick={() => {
@@ -63,7 +64,7 @@ export default function LoginPage() {
                     disabled={auth.isChecking}
                     isLoading={auth.isChecking}
                     icon={<GoogleIcon />}
-                    label="Continue with Google"
+                    label={t("login.continueWithGoogle")}
                     variant="google"
                 />
                 <form
@@ -77,9 +78,7 @@ export default function LoginPage() {
                                 await auth.startEmailPasswordSignIn(email.trim(), password);
                             } catch (error) {
                                 const message =
-                                    error instanceof ApiError
-                                        ? error.message
-                                        : "Unable to sign in with email and password";
+                                    error instanceof ApiError ? error.message : t("login.emailPasswordError");
                                 setPasswordError(message);
                             }
                         };
@@ -88,7 +87,7 @@ export default function LoginPage() {
                     <input
                         type="email"
                         autoComplete="email"
-                        placeholder="Email"
+                        placeholder={t("login.emailPlaceholder")}
                         value={email}
                         onChange={(event) => setEmail(event.target.value)}
                         className="login-input"
@@ -97,21 +96,26 @@ export default function LoginPage() {
                     <input
                         type="password"
                         autoComplete="current-password"
-                        placeholder="Password"
+                        placeholder={t("login.passwordPlaceholder")}
                         value={password}
                         onChange={(event) => setPassword(event.target.value)}
                         className="login-input"
                         required
                     />
                     <button type="submit" className="login-primary-button" disabled={auth.isChecking}>
-                        {auth.isChecking ? "Signing in..." : "Continue with Email"}
+                        {auth.isChecking ? t("login.signingIn") : t("login.continueWithEmail")}
                     </button>
                 </form>
                 {passwordError && <p className="login-password-error">{passwordError}</p>}
 
-                <AuthButton disabled icon={<LinkedInIcon />} label="Continue with LinkedIn" variant="linkedin" />
+                <AuthButton
+                    disabled
+                    icon={<LinkedInIcon />}
+                    label={t("login.continueWithLinkedIn")}
+                    variant="linkedin"
+                />
 
-                <AuthButton disabled icon={<GitHubIcon />} label="Continue with GitHub" variant="github" />
+                <AuthButton disabled icon={<GitHubIcon />} label={t("login.continueWithGitHub")} variant="github" />
             </LoginCard>
         </main>
     );

@@ -1,0 +1,126 @@
+{
+    "sidebar": {
+        "brand": "Glybette",
+        "expand": "Développer la barre latérale",
+        "collapse": "Réduire la barre latérale",
+        "upgradeNow": "Passer à Pro",
+        "proPlan": {
+            "label": "Plan Pro",
+            "description": "Débloquez des générations de CV illimitées et du coaching d'entretien.",
+            "button": "Passer à Pro"
+        },
+        "nav": {
+            "dashboard": "Tableau de bord",
+            "careerInsights": "Insights carrière",
+            "cvBuilder": "Créateur de CV",
+            "portfolio": "Portfolio",
+            "opportunities": "Opportunités",
+            "projects": "Projets",
+            "enterprise": "Entreprise",
+            "overview": "Vue d'ensemble",
+            "users": "Utilisateurs",
+            "jobs": "Offres",
+            "cv": "CV",
+            "scraping": "Scraping",
+            "notifications": "Notifications"
+        }
+    },
+    "topbar": {
+        "closeNavigation": "Fermer le panneau de navigation"
+    },
+    "userMenu": {
+        "theme": "Thème",
+        "language": "Langue",
+        "toggleTheme": "Basculer entre le mode sombre et clair",
+        "settings": "Paramètres",
+        "adminDashboard": "Tableau de bord admin",
+        "signOut": "Se déconnecter",
+        "signingOut": "Déconnexion..."
+    },
+    "routes": {
+        "dashboard": {
+            "title": "Bon retour",
+            "subtitle": "Votre pipeline d'opportunités est actif et prêt pour les mises à jour."
+        },
+        "insights": {
+            "title": "Insights carrière",
+            "subtitle": "Visualisez les tendances de marché et les données de vos offres scrappées."
+        },
+        "cv": {
+            "title": "Créateur de CV",
+            "subtitle": "Créez et adaptez des versions de CV pour chaque poste cible."
+        },
+        "cvCreate": {
+            "title": "Nouveau CV",
+            "subtitle": "Choisissez un modèle et commencez à construire."
+        },
+        "cvEditor": {
+            "title": "Éditeur de CV",
+            "subtitle": "Modifiez, prévisualisez et exportez votre CV."
+        },
+        "portfolio": {
+            "title": "Portfolio",
+            "subtitle": "Mettez en avant vos projets avec des résultats mesurables et un impact clair."
+        },
+        "opportunities": {
+            "title": "Opportunités",
+            "subtitle": "Suivez les postes, entretiens et échanges recruteurs au même endroit."
+        },
+        "projects": {
+            "title": "Projets",
+            "subtitle": "Trouvez des projets auxquels contribuer."
+        },
+        "projectsCreate": {
+            "title": "Créer un projet",
+            "subtitle": "Décrivez votre concept et définissez l'équipe que vous recruterez."
+        },
+        "projectDetails": {
+            "title": "Détails du projet",
+            "subtitle": "Consultez les jalons, l'équipe et les retours de la communauté."
+        },
+        "settings": {
+            "title": "Paramètres",
+            "subtitle": "Gérez les préférences du compte et la personnalisation de l'espace de travail."
+        },
+        "enterprise": {
+            "title": "Entreprise",
+            "subtitle": "Les fonctionnalités entreprise sont en cours de préparation."
+        },
+        "admin": {
+            "title": "Tableau de bord admin",
+            "subtitle": "Surveillez la santé de la plateforme et accédez aux opérations de gestion."
+        },
+        "adminUsers": {
+            "title": "Admin · Utilisateurs",
+            "subtitle": "Modérez les comptes, rôles, statuts et vérifications."
+        },
+        "adminProjects": {
+            "title": "Admin · Projets",
+            "subtitle": "Inspectez et modérez les projets sur la plateforme."
+        },
+        "adminJobs": {
+            "title": "Admin · Offres",
+            "subtitle": "Gérez la visibilité et le cycle de vie des opportunités."
+        },
+        "adminPortfolio": {
+            "title": "Admin · Portfolio",
+            "subtitle": "Examinez et modérez les pages portfolio."
+        },
+        "adminCv": {
+            "title": "Admin · CV",
+            "subtitle": "Examinez et modérez le contenu des CV."
+        },
+        "adminScraping": {
+            "title": "Admin · Scraping",
+            "subtitle": "Contrôlez les opérations de scraping et surveillez les statistiques du flux."
+        },
+        "adminNotifications": {
+            "title": "Admin · Notifications",
+            "subtitle": "Stub d'administration des notifications."
+        },
+        "fallback": {
+            "title": "Espace de travail Glybette",
+            "subtitle": "Construisez vos atouts professionnels et restez visible."
+        }
+    }
+}

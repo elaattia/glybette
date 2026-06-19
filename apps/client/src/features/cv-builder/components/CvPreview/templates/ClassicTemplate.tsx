@@ -1,6 +1,10 @@
 import { ClassicSection, type TemplateProps } from "./TemplateSection";
 
+import { useLocale } from "@/hooks/useLocale";
+import { useSectionLabels } from "../../../lib/cv-i18n";
 export function ClassicTemplate({ personal, summary, experience, education, skills, projects, languages, certs, accent, bg }: TemplateProps) {
+    const { t } = useLocale("cvBuilder");
+    const labels = useSectionLabels(t);
     return (
         <div style={{ fontFamily: "'Segoe UI', Arial, sans-serif", fontSize: `calc(9.5pt * var(--cv-body-scale, 1))`, color: "#1c2b3a", lineHeight: 1.55, minHeight: "100%" }}>
             <div style={{ background: bg, color: "#fff", padding: "15mm 28px 24px" }}>
@@ -27,12 +31,12 @@ export function ClassicTemplate({ personal, summary, experience, education, skil
                 )}
 
                 {experience.length > 0 && (
-                    <ClassicSection title="Expérience Professionnelle" accent={accent} bg={bg}>
+                    <ClassicSection title={labels.experience} accent={accent} bg={bg}>
                         {experience.map((e) => (
                             <div key={e.id} style={{ marginBottom: "12px" }}>
                                 <div style={{ display: "flex", justifyContent: "space-between", alignItems: "baseline" }}>
                                     <strong style={{ fontSize: `calc(10pt * var(--cv-body-scale, 1))`, color: bg }}>{e.position}</strong>
-                                    <span style={{ fontSize: `calc(8pt * var(--cv-body-scale, 1))`, color: "#7f8c8d" }}>{e.startDate} – {e.current ? "Présent" : e.endDate}</span>
+                                    <span style={{ fontSize: `calc(8pt * var(--cv-body-scale, 1))`, color: "#7f8c8d" }}>{e.startDate} – {e.current ? labels.current : e.endDate}</span>
                                 </div>
                                 <div style={{ fontSize: `calc(9pt * var(--cv-body-scale, 1))`, color: accent, fontWeight: 600, marginBottom: "3px" }}>
                                     {e.company}{e.location ? ` · ${e.location}` : ""}
@@ -44,7 +48,7 @@ export function ClassicTemplate({ personal, summary, experience, education, skil
                 )}
 
                 {education.length > 0 && (
-                    <ClassicSection title="Formation" accent={accent} bg={bg}>
+                    <ClassicSection title={labels.education} accent={accent} bg={bg}>
                         {education.map((e) => (
                             <div key={e.id} style={{ marginBottom: "8px" }}>
                                 <div style={{ display: "flex", justifyContent: "space-between" }}>
@@ -58,7 +62,7 @@ export function ClassicTemplate({ personal, summary, experience, education, skil
                 )}
 
                 {projects && projects.length > 0 && (
-                    <ClassicSection title="Projets" accent={accent} bg={bg}>
+                    <ClassicSection title={labels.projects} accent={accent} bg={bg}>
                         {projects.map((p) => (
                             <div key={p.id} style={{ marginBottom: "8px" }}>
                                 <strong style={{ fontSize: `calc(9.5pt * var(--cv-body-scale, 1))`, color: bg }}>{p.name}</strong>
@@ -70,7 +74,7 @@ export function ClassicTemplate({ personal, summary, experience, education, skil
 
                 <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "20px", alignItems: "start" }}>
                     {skills.length > 0 && (
-                        <ClassicSection title="Compétences" accent={accent} bg={bg}>
+                        <ClassicSection title={labels.skills} accent={accent} bg={bg}>
                             {skills.map((g) => (
                                 <div key={g.id} style={{ marginBottom: "5px" }}>
                                     {g.category && (
@@ -88,7 +92,7 @@ export function ClassicTemplate({ personal, summary, experience, education, skil
 
                     <div>
                         {languages.length > 0 && (
-                            <ClassicSection title="Langues" accent={accent} bg={bg}>
+                            <ClassicSection title={labels.languages} accent={accent} bg={bg}>
                                 {languages.map((l) => (
                                     <div key={l.id} style={{ fontSize: `calc(9pt * var(--cv-body-scale, 1))`, marginBottom: "3px" }}>
                                         <strong>{l.language}</strong> <span style={{ color: "#777" }}>({l.level})</span>
@@ -97,7 +101,7 @@ export function ClassicTemplate({ personal, summary, experience, education, skil
                             </ClassicSection>
                         )}
                         {certs.length > 0 && (
-                            <ClassicSection title="Certifications" accent={accent} bg={bg}>
+                            <ClassicSection title={labels.certifications} accent={accent} bg={bg}>
                                 {certs.map((c) => (
                                     <div key={c.id} style={{ fontSize: `calc(8.5pt * var(--cv-body-scale, 1))`, marginBottom: "4px" }}>
                                         <strong>{c.name}</strong><br />

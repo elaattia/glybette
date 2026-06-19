@@ -14,8 +14,10 @@ import {
     useNotifications,
     useUnreadNotificationCount,
 } from "@/features/notifications/hooks/useNotifications";
+import { formatNotification } from "@/features/notifications/lib/formatNotification";
+import { useLocale } from "@/hooks/useLocale";
+import { timeAgo } from "@/lib/locale-format";
 import { cn } from "@/lib/utils";
-import { timeAgo } from "@/pages/app/opportunities/constants";
 
 function NotificationIcon({ type }: { type: NotificationType }) {
     const Icon = type === "join_request_created" ? Handshake : MessageSquare;
@@ -32,6 +34,7 @@ function isUnread(notification: NotificationDTO): boolean {
 }
 
 export default function NotificationsMenu() {
+    const { t, locale } = useLocale("notifications");
     const notificationsQuery = useNotifications();
     const unreadCountQuery = useUnreadNotificationCount();
     const markReadMutation = useMarkNotificationRead();
@@ -49,6 +52,11 @@ export default function NotificationsMenu() {
         }
     }
 
+    const ariaLabel =
+        unreadCount > 0
+            ? t("menu.ariaLabelUnread", { count: unreadCount })
+            : t("menu.ariaLabel");
+
     return (
         <DropdownMenu>
             <DropdownMenuTrigger asChild>
@@ -61,14 +69,14 @@ export default function NotificationsMenu() {
                         "text-[var(--gb-muted)] hover:border-[var(--gb-border)] hover:bg-[var(--gb-app-hover)] hover:text-[var(--gb-text)]",
                         "data-[state=open]:border-[var(--gb-border)] data-[state=open]:bg-[var(--gb-app-hover)] data-[state=open]:text-[var(--gb-text)]",
                     )}
-                    aria-label={`Notifications${unreadCount > 0 ? `, ${unreadCount} unread` : ""}`}>
+                    aria-label={ariaLabel}>
                     <Bell className="h-[18px] w-[18px]" strokeWidth={1.75} />
 
                     {unreadCount > 0 ? (
                         <span
                             className="pointer-events-none absolute -right-1 -top-1 flex h-[18px] min-w-[18px] items-center justify-center rounded-full border-2 border-[var(--gb-app-topbar-bg)] bg-[#ef4444] px-1 text-[10px] font-bold leading-none text-white shadow-sm"
                             aria-hidden>
-                            {unreadCount > 9 ? "9+" : unreadCount}
+                            {unreadCount > 9 ? t("menu.unreadOverflow") : unreadCount}
                         </span>
                     ) : null}
                 </Button>
@@ -82,60 +90,63 @@ export default function NotificationsMenu() {
                 )}>
                 <div className="border-b border-[var(--gb-border)]/40 px-4 py-3">
                     <DropdownMenuLabel className="p-0 text-sm font-semibold text-[var(--gb-text)]">
-                        Notifications
+                        {t("menu.title")}
                     </DropdownMenuLabel>
-                    <p className="mt-0.5 text-xs text-[var(--gb-muted)]">View all Glybette notifications here.</p>
+                    <p className="mt-0.5 text-xs text-[var(--gb-muted)]">{t("menu.description")}</p>
                 </div>
 
                 <div className="max-h-80 overflow-y-auto">
                     {notificationsQuery.isPending ? (
-                        <p className="px-4 py-6 text-sm text-[var(--gb-muted)]">Loading notifications...</p>
+                        <p className="px-4 py-6 text-sm text-[var(--gb-muted)]">{t("menu.loading")}</p>
                     ) : notifications.length === 0 ? (
-                        <p className="px-4 py-6 text-sm text-[var(--gb-muted)]">No notifications yet.</p>
+                        <p className="px-4 py-6 text-sm text-[var(--gb-muted)]">{t("menu.empty")}</p>
                     ) : (
-                        notifications.map((notification, index) => (
-                            <DropdownMenuItem
-                                key={notification.id}
-                                asChild
-                                className="rounded-none px-0 py-0 focus:bg-transparent">
-                                <Link
-                                    to={notification.href}
-                                    onClick={() => void handleNotificationClick(notification)}
-                                    className={cn(
-                                        "flex cursor-pointer gap-3 px-4 py-3.5 transition",
-                                        "hover:bg-[var(--gb-app-hover)]/80 focus-visible:bg-[var(--gb-app-hover)]/80 focus-visible:outline-none",
-                                        index < notifications.length - 1 && "border-b border-[var(--gb-border)]/35",
-                                    )}>
-                                    <NotificationIcon type={notification.type} />
-                                    <div className="min-w-0 flex-1">
-                                        <div className="flex items-start justify-between gap-3">
-                                            <div className="flex min-w-0 items-center gap-2">
-                                                {isUnread(notification) ? (
-                                                    <span
-                                                        className="h-1.5 w-1.5 shrink-0 rounded-full bg-[#ef4444]"
-                                                        aria-hidden
-                                                    />
-                                                ) : null}
-                                                <p className="truncate text-sm font-semibold text-[var(--gb-text)]">
-                                                    {notification.title}
-                                                </p>
+                        notifications.map((notification, index) => {
+                            const formatted = formatNotification(notification, t);
+                            return (
+                                <DropdownMenuItem
+                                    key={notification.id}
+                                    asChild
+                                    className="rounded-none px-0 py-0 focus:bg-transparent">
+                                    <Link
+                                        to={notification.href}
+                                        onClick={() => void handleNotificationClick(notification)}
+                                        className={cn(
+                                            "flex cursor-pointer gap-3 px-4 py-3.5 transition",
+                                            "hover:bg-[var(--gb-app-hover)]/80 focus-visible:bg-[var(--gb-app-hover)]/80 focus-visible:outline-none",
+                                            index < notifications.length - 1 && "border-b border-[var(--gb-border)]/35",
+                                        )}>
+                                        <NotificationIcon type={notification.type} />
+                                        <div className="min-w-0 flex-1">
+                                            <div className="flex items-start justify-between gap-3">
+                                                <div className="flex min-w-0 items-center gap-2">
+                                                    {isUnread(notification) ? (
+                                                        <span
+                                                            className="h-1.5 w-1.5 shrink-0 rounded-full bg-[#ef4444]"
+                                                            aria-hidden
+                                                        />
+                                                    ) : null}
+                                                    <p className="truncate text-sm font-semibold text-[var(--gb-text)]">
+                                                        {formatted.title}
+                                                    </p>
+                                                </div>
+                                                <span className="shrink-0 text-[11px] tabular-nums text-[var(--gb-muted)]">
+                                                    {timeAgo(notification.createdAt, t, locale)}
+                                                </span>
                                             </div>
-                                            <span className="shrink-0 text-[11px] tabular-nums text-[var(--gb-muted)]">
-                                                {timeAgo(notification.createdAt)}
-                                            </span>
-                                        </div>
-                                        <p className="mt-1 text-sm leading-snug text-[var(--gb-text-off)]">
-                                            {notification.body}
-                                        </p>
-                                        {notification.preview ? (
-                                            <p className="mt-1.5 line-clamp-2 text-xs leading-relaxed text-[var(--gb-muted)]">
-                                                {notification.preview}
+                                            <p className="mt-1 text-sm leading-snug text-[var(--gb-text-off)]">
+                                                {formatted.body}
                                             </p>
-                                        ) : null}
-                                    </div>
-                                </Link>
-                            </DropdownMenuItem>
-                        ))
+                                            {formatted.preview ? (
+                                                <p className="mt-1.5 line-clamp-2 text-xs leading-relaxed text-[var(--gb-muted)]">
+                                                    {formatted.preview}
+                                                </p>
+                                            ) : null}
+                                        </div>
+                                    </Link>
+                                </DropdownMenuItem>
+                            );
+                        })
                     )}
                 </div>
             </DropdownMenuContent>

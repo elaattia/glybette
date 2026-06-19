@@ -1,0 +1,126 @@
+{
+    "sidebar": {
+        "brand": "Glybette",
+        "expand": "Expand sidebar",
+        "collapse": "Collapse sidebar",
+        "upgradeNow": "Upgrade now",
+        "proPlan": {
+            "label": "Pro plan",
+            "description": "Unlock unlimited CV generations and interview coaching.",
+            "button": "Upgrade now"
+        },
+        "nav": {
+            "dashboard": "Dashboard",
+            "careerInsights": "Career Insights",
+            "cvBuilder": "CV Builder",
+            "portfolio": "Portfolio",
+            "opportunities": "Opportunities",
+            "projects": "Projects",
+            "enterprise": "Enterprise",
+            "overview": "Overview",
+            "users": "Users",
+            "jobs": "Jobs",
+            "cv": "CV",
+            "scraping": "Scraping",
+            "notifications": "Notifications"
+        }
+    },
+    "topbar": {
+        "closeNavigation": "Close navigation panel"
+    },
+    "userMenu": {
+        "theme": "Theme",
+        "language": "Language",
+        "toggleTheme": "Toggle between dark and light mode",
+        "settings": "Settings",
+        "adminDashboard": "Admin dashboard",
+        "signOut": "Sign out",
+        "signingOut": "Signing out..."
+    },
+    "routes": {
+        "dashboard": {
+            "title": "Welcome back",
+            "subtitle": "Your opportunity pipeline is active and ready for updates."
+        },
+        "insights": {
+            "title": "Career Insights",
+            "subtitle": "Visualise market trends and data from your scraped offers."
+        },
+        "cv": {
+            "title": "CV Builder",
+            "subtitle": "Create and tailor CV versions for each target role."
+        },
+        "cvCreate": {
+            "title": "New CV",
+            "subtitle": "Choose a template and start building."
+        },
+        "cvEditor": {
+            "title": "CV Editor",
+            "subtitle": "Edit, preview and export your CV."
+        },
+        "portfolio": {
+            "title": "Portfolio",
+            "subtitle": "Showcase projects with measurable outcomes and clear impact."
+        },
+        "opportunities": {
+            "title": "Opportunities",
+            "subtitle": "Track roles, interviews, and recruiter conversations in one place."
+        },
+        "projects": {
+            "title": "Projects",
+            "subtitle": "Look for projects to contribute to."
+        },
+        "projectsCreate": {
+            "title": "Create Project",
+            "subtitle": "Describe your concept and define the team you'll recruit."
+        },
+        "projectDetails": {
+            "title": "Project Details",
+            "subtitle": "Review milestones, team and community feedback."
+        },
+        "settings": {
+            "title": "Settings",
+            "subtitle": "Control account preferences and workspace personalization."
+        },
+        "enterprise": {
+            "title": "Enterprise",
+            "subtitle": "Enterprise-facing features are being prepared."
+        },
+        "admin": {
+            "title": "Admin Dashboard",
+            "subtitle": "Monitor platform health and access management operations."
+        },
+        "adminUsers": {
+            "title": "Admin · Users",
+            "subtitle": "Moderate accounts, roles, status, and verification."
+        },
+        "adminProjects": {
+            "title": "Admin · Projects",
+            "subtitle": "Inspect and moderate projects across the platform."
+        },
+        "adminJobs": {
+            "title": "Admin · Jobs",
+            "subtitle": "Manage opportunities visibility and lifecycle."
+        },
+        "adminPortfolio": {
+            "title": "Admin · Portfolio",
+            "subtitle": "Review and moderate portfolio pages."
+        },
+        "adminCv": {
+            "title": "Admin · CV",
+            "subtitle": "Review and moderate CV content."
+        },
+        "adminScraping": {
+            "title": "Admin · Scraping",
+            "subtitle": "Control scraping operations and monitor feed stats."
+        },
+        "adminNotifications": {
+            "title": "Admin · Notifications",
+            "subtitle": "Notifications administration stub."
+        },
+        "fallback": {
+            "title": "Glybette workspace",
+            "subtitle": "Build your career assets and stay discoverable."
+        }
+    }
+}

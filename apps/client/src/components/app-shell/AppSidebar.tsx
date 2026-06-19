@@ -1,4 +1,5 @@
 import { NavLink, useLocation } from "react-router-dom";
+import { useTranslation } from "react-i18next";
 import {
     BriefcaseBusiness,
     ChartColumnIncreasing,
@@ -21,23 +22,23 @@ import { useUser } from "@/hooks/useUser";
 import logo from "@/assets/gyblette.png";
 
 const studentNavItems = [
-    { to: "/app/dashboard", label: "Dashboard", icon: Gauge },
-    { to: "/app/insights", label: "Career Insights", icon: ChartColumnIncreasing },
-    { to: "/app/cv", label: "CV Builder", icon: FileUser },
-    { to: "/app/portfolio", label: "Portfolio", icon: FolderKanban },
-    { to: "/app/opportunities", label: "Opportunities", icon: BriefcaseBusiness },
-    { to: "/app/projects", label: "Projects", icon: Handshake },
+    { to: "/app/dashboard", labelKey: "sidebar.nav.dashboard", icon: Gauge },
+    { to: "/app/insights", labelKey: "sidebar.nav.careerInsights", icon: ChartColumnIncreasing },
+    { to: "/app/cv", labelKey: "sidebar.nav.cvBuilder", icon: FileUser },
+    { to: "/app/portfolio", labelKey: "sidebar.nav.portfolio", icon: FolderKanban },
+    { to: "/app/opportunities", labelKey: "sidebar.nav.opportunities", icon: BriefcaseBusiness },
+    { to: "/app/projects", labelKey: "sidebar.nav.projects", icon: Handshake },
 ] as const;
-const enterpriseNavItems = [{ to: "/app/enterprise", label: "Enterprise", icon: BriefcaseBusiness }] as const;
+const enterpriseNavItems = [{ to: "/app/enterprise", labelKey: "sidebar.nav.enterprise", icon: BriefcaseBusiness }] as const;
 const adminNavItems = [
-    { to: "/app/admin", label: "Overview", icon: Shield, end: true },
-    { to: "/app/admin/users", label: "Users", icon: Users },
-    { to: "/app/admin/projects", label: "Projects", icon: Handshake },
-    { to: "/app/admin/jobs", label: "Jobs", icon: BriefcaseBusiness },
-    { to: "/app/admin/portfolio", label: "Portfolio", icon: FolderKanban },
-    { to: "/app/admin/cv", label: "CV", icon: FileUser },
-    { to: "/app/admin/scraping", label: "Scraping", icon: ChartColumnIncreasing },
-    { to: "/app/admin/notifications", label: "Notifications", icon: Settings },
+    { to: "/app/admin", labelKey: "sidebar.nav.overview", icon: Shield, end: true },
+    { to: "/app/admin/users", labelKey: "sidebar.nav.users", icon: Users },
+    { to: "/app/admin/projects", labelKey: "sidebar.nav.projects", icon: Handshake },
+    { to: "/app/admin/jobs", labelKey: "sidebar.nav.jobs", icon: BriefcaseBusiness },
+    { to: "/app/admin/portfolio", labelKey: "sidebar.nav.portfolio", icon: FolderKanban },
+    { to: "/app/admin/cv", labelKey: "sidebar.nav.cv", icon: FileUser },
+    { to: "/app/admin/scraping", labelKey: "sidebar.nav.scraping", icon: ChartColumnIncreasing },
+    { to: "/app/admin/notifications", labelKey: "sidebar.nav.notifications", icon: Settings },
 ] as const;
 
 type AppSidebarProps = {
@@ -47,6 +48,7 @@ type AppSidebarProps = {
 };
 
 export default function AppSidebar({ onNavigate, layout = "desktop" }: AppSidebarProps) {
+    const { t } = useTranslation("shell");
     const [compact, setCompact] = useLocalPreference("app:sidebar-compact", false);
     const location = useLocation();
     const { user } = useUser();
@@ -83,7 +85,7 @@ export default function AppSidebar({ onNavigate, layout = "desktop" }: AppSideba
                             "font-['Bricolage_Grotesque'] text-xl font-extrabold tracking-tight text-[var(--gb-text)] transition-[opacity,max-width] duration-300 ease-out",
                             isCompact ? "sr-only max-w-0 overflow-hidden opacity-0" : "max-w-[160px] opacity-100",
                         )}>
-                        Glybette
+                        {t("sidebar.brand")}
                     </span>
                 </NavLink>
 
@@ -93,7 +95,7 @@ export default function AppSidebar({ onNavigate, layout = "desktop" }: AppSideba
                         variant="ghost"
                         size="icon-sm"
                         className="shrink-0 text-[var(--gb-muted)] hover:bg-[var(--gb-app-hover)] hover:text-[var(--gb-text)]"
-                        aria-label={isCompact ? "Expand sidebar" : "Collapse sidebar"}
+                        aria-label={isCompact ? t("sidebar.expand") : t("sidebar.collapse")}
                         aria-pressed={isCompact}
                         onClick={() => setCompact((c) => !c)}>
                         {isCompact ? (
@@ -108,13 +110,14 @@ export default function AppSidebar({ onNavigate, layout = "desktop" }: AppSideba
             <nav className="min-h-0 flex-1 space-y-1.5 overflow-y-auto overflow-x-hidden">
                 {navItems.map((item) => {
                     const Icon = item.icon;
+                    const label = t(item.labelKey);
                     return (
                         <NavLink
                             key={item.to}
                             to={item.to}
-                            end={item.end}
-                            title={item.label}
-                            aria-label={item.label}
+                            end={"end" in item ? item.end : undefined}
+                            title={label}
+                            aria-label={label}
                             onClick={onNavigate}
                             className={({ isActive }) =>
                                 cn(
@@ -133,7 +136,7 @@ export default function AppSidebar({ onNavigate, layout = "desktop" }: AppSideba
                                         ? "sr-only max-w-0 overflow-hidden opacity-0"
                                         : "max-w-[200px] opacity-100",
                                 )}>
-                                {item.label}
+                                {label}
                             </span>
                         </NavLink>
                     );
@@ -146,13 +149,13 @@ export default function AppSidebar({ onNavigate, layout = "desktop" }: AppSideba
                         <TooltipTrigger asChild>
                             <button
                                 type="button"
-                                aria-label="Upgrade now"
+                                aria-label={t("sidebar.upgradeNow")}
                                 className="inline-flex h-10 w-10 shrink-0 items-center justify-center rounded-xl border border-[var(--gb-border)] bg-[var(--gb-app-panel-bg)] text-[#ca8a04] shadow-sm transition-[transform,box-shadow] duration-300 hover:bg-[var(--gb-app-hover)] hover:shadow-md">
                                 <Crown className="h-5 w-5" strokeWidth={1.75} aria-hidden />
                             </button>
                         </TooltipTrigger>
                         <TooltipContent side="right" align="center">
-                            Upgrade now
+                            {t("sidebar.upgradeNow")}
                         </TooltipContent>
                     </Tooltip>
                 </div>
@@ -160,15 +163,13 @@ export default function AppSidebar({ onNavigate, layout = "desktop" }: AppSideba
                 <div className="mt-auto rounded-2xl border border-[var(--gb-border)] bg-[var(--gb-app-panel-bg)] p-4 transition-[padding,opacity] duration-300 ease-out">
                     <div className="mb-1 flex items-center gap-2 text-xs font-semibold uppercase tracking-[0.14em] text-[var(--gb-muted)]">
                         <ChartColumnIncreasing className="h-3.5 w-3.5 shrink-0 text-[#16A34A]" aria-hidden />
-                        <span>Pro plan</span>
+                        <span>{t("sidebar.proPlan.label")}</span>
                     </div>
-                    <p className="text-sm text-[var(--gb-text-off)]">
-                        Unlock unlimited CV generations and interview coaching.
-                    </p>
+                    <p className="text-sm text-[var(--gb-text-off)]">{t("sidebar.proPlan.description")}</p>
                     <button
                         type="button"
                         className="gb-btn-primary mt-3 inline-flex h-9 w-full items-center justify-center px-4 py-0 text-sm">
-                        Upgrade now
+                        {t("sidebar.proPlan.button")}
                     </button>
                 </div>
             )}

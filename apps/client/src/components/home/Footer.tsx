@@ -1,55 +1,42 @@
 import "@/styles/home/footer.css";
+import { useTranslation } from "react-i18next";
 
-const cols = [
-    {
-        title: "Platform",
-        links: [
-            { label: "Features", href: "#features" },
-            { label: "How it works", href: "#how-it-works" },
-            { label: "Pricing", href: "#pricing" },
-            { label: "Blog", href: "/blog" },
-        ],
-    },
-    {
-        title: "Company",
-        links: [
-            { label: "About", href: "/about" },
-            { label: "Careers", href: "/careers" },
-            { label: "Contact", href: "/contact" },
-            { label: "Partners", href: "/partners" },
-        ],
-    },
-    {
-        title: "Legal",
-        links: [
-            { label: "Privacy", href: "/privacy" },
-            { label: "Terms", href: "/terms" },
-            { label: "Cookies", href: "/cookies" },
-        ],
-    },
-];
+const COLUMN_KEYS = ["platform", "company", "legal"] as const;
+
+const COLUMN_LINKS: Record<(typeof COLUMN_KEYS)[number], readonly string[]> = {
+    platform: ["features", "howItWorks", "pricing", "blog"],
+    company: ["about", "careers", "contact", "partners"],
+    legal: ["privacy", "terms", "cookies"],
+};
+
+const COLUMN_HREFS: Record<(typeof COLUMN_KEYS)[number], readonly string[]> = {
+    platform: ["#features", "#how-it-works", "#pricing", "/blog"],
+    company: ["/about", "/careers", "/contact", "/partners"],
+    legal: ["/privacy", "/terms", "/cookies"],
+};
 
 export default function Footer() {
+    const { t } = useTranslation("landing");
+
     return (
         <footer className="gb-footer">
             <div className="gb-footer-inner">
                 <div className="gb-footer-top">
                     <div>
                         <a href="/" className="gb-footer-logo">
-                            Glybette
+                            {t("footer.brand")}
                         </a>
-                        <p className="gb-footer-tagline">
-                            The AI career platform connecting talent with opportunity — built for the next generation of
-                            professionals.
-                        </p>
+                        <p className="gb-footer-tagline">{t("footer.tagline")}</p>
                     </div>
-                    {cols.map((col) => (
-                        <div key={col.title} className="gb-footer-col">
-                            <h4>{col.title}</h4>
+                    {COLUMN_KEYS.map((colKey) => (
+                        <div key={colKey} className="gb-footer-col">
+                            <h4>{t(`footer.columns.${colKey}.title`)}</h4>
                             <ul>
-                                {col.links.map((l) => (
-                                    <li key={l.label}>
-                                        <a href={l.href}>{l.label}</a>
+                                {COLUMN_LINKS[colKey].map((linkKey, index) => (
+                                    <li key={linkKey}>
+                                        <a href={COLUMN_HREFS[colKey][index]}>
+                                            {t(`footer.columns.${colKey}.links.${linkKey}`)}
+                                        </a>
                                     </li>
                                 ))}
                             </ul>
@@ -57,9 +44,9 @@ export default function Footer() {
                     ))}
                 </div>
                 <div className="gb-footer-bottom">
-                    <p className="gb-footer-copy">© 2025 Glybette. All rights reserved.</p>
+                    <p className="gb-footer-copy">{t("footer.copyright")}</p>
                     <p className="gb-footer-made">
-                        Made with ♥ in <span>Tunisia</span>
+                        {t("footer.madeIn")} <span>{t("footer.country")}</span>
                     </p>
                 </div>
             </div>

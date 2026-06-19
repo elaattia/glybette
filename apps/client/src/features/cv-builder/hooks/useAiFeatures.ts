@@ -1,8 +1,10 @@
 import { useState, useCallback } from "react";
+import { useTranslation } from "react-i18next";
 import { cvApi } from "../api/cv.api";
-import type { AtsScoreResult, SuggestionsResult, TailorResult, CoverLetterResult } from "../types/cv.types";
+import type { AtsScoreResult, SuggestionsResult, TailorResult } from "../types/cv.types";
 
 export function useAiFeatures(cvId: string | undefined) {
+    const { t } = useTranslation("cvBuilder");
     const [atsResult, setAtsResult] = useState<AtsScoreResult | null>(null);
     const [atsCvOnlyResult, setAtsCvOnlyResult] = useState<AtsScoreResult | null>(null); 
     const [suggestions, setSuggestions] = useState<SuggestionsResult["suggestions"]>([]);
@@ -21,7 +23,7 @@ export function useAiFeatures(cvId: string | undefined) {
     const guarded = useCallback(
         <T>(setLoading: (v: boolean) => void, fn: (id: string) => Promise<T>): Promise<T | undefined> => {
             if (!cvId) {
-                setError("Sauvegardez d'abord votre CV.");
+                setError(t("ai.errors.saveFirst"));
                 return Promise.resolve(undefined);
             }
             setLoading(true);
@@ -33,7 +35,7 @@ export function useAiFeatures(cvId: string | undefined) {
                 })
                 .finally(() => setLoading(false));
         },
-        [cvId],
+        [cvId, t],
     );
 
     const checkAtsCvOnly = useCallback(
@@ -88,21 +90,21 @@ export function useAiFeatures(cvId: string | undefined) {
 
     const enhanceSection = useCallback(
         async (text: string, sectionType: string, enhanceKey: string): Promise<string | null> => {
-            if (!cvId) { setError("Sauvegardez d'abord votre CV."); return null; }
-            if (!text.trim()) { setError("Le champ est vide."); return null; }
+            if (!cvId) { setError(t("ai.errors.saveFirst")); return null; }
+            if (!text.trim()) { setError(t("ai.errors.emptyField")); return null; }
             setEnhancingKey(enhanceKey);
             setError(null);
             try {
                 const result = await cvApi.enhanceSection(cvId, text, sectionType);
                 return result.enhanced;
             } catch (e: unknown) {
-                setError(e instanceof Error ? e.message : "Erreur AI");
+                setError(e instanceof Error ? e.message : t("ai.errors.generic"));
                 return null;
             } finally {
                 setEnhancingKey(null);
             }
         },
-        [cvId],
+        [cvId, t],
     );
 
     const clearError = useCallback(() => setError(null), []);

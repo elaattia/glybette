@@ -1,16 +1,33 @@
 import "@/styles/home/navbar.css";
 import { useState, useEffect } from "react";
+import { useTranslation } from "react-i18next";
 import { useTheme } from "@/hooks/useTheme";
 import { useAuth } from "@/hooks/useAuth";
 import logo from "@/assets/gyblette.png";
-import { Sun, Moon, Menu, X, ArrowRight } from "lucide-react";
+import { Sun, Moon, Menu, X, ArrowRight, Globe } from "lucide-react";
 import { Link } from "react-router-dom";
+import {
+    DropdownMenu,
+    DropdownMenuContent,
+    DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
+import { LanguageMenuItems } from "@/components/shared/LanguageMenuItems";
 
 export default function Navbar() {
+    const { t } = useTranslation("landing");
     const [scrolled, setScrolled] = useState(false);
     const [open, setOpen] = useState(false);
     const { theme, toggle } = useTheme();
     const auth = useAuth();
+
+    useEffect(() => {
+        if (!open) return;
+        const previousOverflow = document.body.style.overflow;
+        document.body.style.overflow = "hidden";
+        return () => {
+            document.body.style.overflow = previousOverflow;
+        };
+    }, [open]);
 
     useEffect(() => {
         const fn = () => setScrolled(window.scrollY > 40);
@@ -22,33 +39,48 @@ export default function Navbar() {
         <>
             <nav className={`gb-nav${scrolled ? " scrolled" : ""}`}>
                 <Link to="/" className="gb-logo">
-                    <img src={logo} alt="glybette logo" />
-                    Glybette
+                    <img src={logo} alt={t("navbar.logoAlt")} />
+                    {t("navbar.brand")}
                 </Link>
                 <div className="gb-nav-links">
-                    <a href="#features">Features</a>
-                    <a href="#how-it-works">How it works</a>
-                    <a href="#pricing">Pricing</a>
+                    <a href="#features">{t("navbar.features")}</a>
+                    <a href="#how-it-works">{t("navbar.howItWorks")}</a>
+                    <a href="#pricing">{t("navbar.pricing")}</a>
                 </div>
                 <div className="gb-nav-actions">
+                    <DropdownMenu modal={false}>
+                        <DropdownMenuTrigger asChild>
+                            <button
+                                type="button"
+                                className="gb-theme-btn"
+                                aria-label={t("navbar.selectLanguage")}
+                                title={t("navbar.selectLanguage")}>
+                                <Globe className="h-4 w-4" />
+                            </button>
+                        </DropdownMenuTrigger>
+                        <DropdownMenuContent align="end" className="min-w-40">
+                            <LanguageMenuItems />
+                        </DropdownMenuContent>
+                    </DropdownMenu>
                     <button
+                        type="button"
                         className="gb-theme-btn"
                         onClick={toggle}
-                        aria-label="Toggle theme"
-                        title={theme === "dark" ? "Switch to light mode" : "Switch to dark mode"}>
+                        aria-label={t("navbar.toggleTheme")}
+                        title={theme === "dark" ? t("navbar.switchToLight") : t("navbar.switchToDark")}>
                         {theme === "dark" ? <Sun className="w-4 h-4" /> : <Moon className="w-4 h-4" />}
                     </button>
                     {auth.isAuthenticated ? (
                         <Link to="/app/dashboard" className="gb-cta-nav">
-                            Dashboard
+                            {t("navbar.dashboard")}
                         </Link>
                     ) : (
                         <>
                             <Link to="/login" className="gb-ghost">
-                                Log in
+                                {t("navbar.logIn")}
                             </Link>
                             <Link to="/onboarding" className="gb-cta-nav">
-                                Get Started →
+                                {t("navbar.getStarted")}
                             </Link>
                         </>
                     )}
@@ -65,8 +97,8 @@ export default function Navbar() {
                     <div className="gb-drawer">
                         <div className="gb-drawer-header">
                             <Link to="/" className="gb-logo" onClick={() => setOpen(false)}>
-                                <img src={logo} alt="glybette logo" />
-                                Glybette
+                                <img src={logo} alt={t("navbar.logoAlt")} />
+                                {t("navbar.brand")}
                             </Link>
                             <button className="gb-drawer-close" onClick={() => setOpen(false)}>
                                 <X className="w-4 h-4" />
@@ -75,30 +107,44 @@ export default function Navbar() {
 
                         <div className="gb-drawer-links">
                             <a href="#features" onClick={() => setOpen(false)}>
-                                Features
+                                {t("navbar.features")}
                             </a>
                             <a href="#how-it-works" onClick={() => setOpen(false)}>
-                                How it works
+                                {t("navbar.howItWorks")}
                             </a>
                             <a href="#pricing" onClick={() => setOpen(false)}>
-                                Pricing
+                                {t("navbar.pricing")}
                             </a>
                         </div>
 
                         <div className="gb-drawer-sep" />
 
+                        <div className="gb-drawer-lang">
+                            <DropdownMenu modal={false}>
+                                <DropdownMenuTrigger asChild>
+                                    <button type="button" className="gb-drawer-lang-btn">
+                                        <Globe className="h-4 w-4" />
+                                        {t("navbar.selectLanguage")}
+                                    </button>
+                                </DropdownMenuTrigger>
+                                <DropdownMenuContent align="start" className="min-w-40">
+                                    <LanguageMenuItems onSelect={() => setOpen(false)} />
+                                </DropdownMenuContent>
+                            </DropdownMenu>
+                        </div>
+
                         <div className="gb-drawer-btns">
                             {auth.isAuthenticated ? (
                                 <Link to="/app/dashboard" className="gb-cta-nav" onClick={() => setOpen(false)}>
-                                    Dashboard
+                                    {t("navbar.dashboard")}
                                 </Link>
                             ) : (
                                 <>
                                     <Link to="/login" className="gb-ghost" onClick={() => setOpen(false)}>
-                                        Log in
+                                        {t("navbar.logIn")}
                                     </Link>
                                     <Link to="/onboarding" className="gb-cta-nav" onClick={() => setOpen(false)}>
-                                        Get Started <ArrowRight className="w-4 h-4 inline ml-1" />
+                                        {t("navbar.getStarted").replace(" →", "")} <ArrowRight className="w-4 h-4 inline ml-1" />
                                     </Link>
                                 </>
                             )}

@@ -1,5 +1,4 @@
 import type React from "react";
-import { scoreColor } from "./constants";
 
 export const listStyles = {
     page: { minHeight: "100vh", padding: "0 0 60px", color: "var(--gb-text)", fontFamily: "'DM Sans', sans-serif" } as React.CSSProperties,

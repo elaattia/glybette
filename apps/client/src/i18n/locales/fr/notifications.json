@@ -1,0 +1,31 @@
+{
+    "menu": {
+        "title": "Notifications",
+        "description": "Consultez toutes vos notifications Glybette ici.",
+        "ariaLabel": "Notifications",
+        "ariaLabelUnread": "Notifications, {{count}} non lues",
+        "loading": "Chargement des notifications...",
+        "empty": "Aucune notification pour l'instant.",
+        "unreadOverflow": "9+"
+    },
+    "content": {
+        "unknownProject": "Projet inconnu",
+        "noMessageProvided": "Aucun message fourni.",
+        "joinRequestCreated": {
+            "title": "Nouvelle demande d'adhésion",
+            "body": "{{actor}} a demandé à rejoindre {{project}}"
+        },
+        "joinRequestApproved": {
+            "title": "Demande d'adhésion approuvée",
+            "body": "Votre demande pour rejoindre {{project}} a été approuvée"
+        },
+        "joinRequestRejected": {
+            "title": "Demande d'adhésion refusée",
+            "body": "Votre demande pour rejoindre {{project}} a été refusée"
+        },
+        "projectCommentCreated": {
+            "title": "Nouveau commentaire",
+            "body": "{{actor}} a commenté {{project}}"
+        }
+    }
+}

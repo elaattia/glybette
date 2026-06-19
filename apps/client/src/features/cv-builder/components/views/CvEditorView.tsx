@@ -15,10 +15,15 @@ import { useExportPdf } from "./useExportPdf";
 
 import { useCvEditor } from "../../hooks/useCvEditor";
 import { useAiFeatures } from "../../hooks/useAiFeatures";
-import { TEMPLATES, getTemplate } from "../../templates";
-import { SECTION_DEFS } from "./sectionDefs";
+import { TEMPLATES } from "../../templates";
+import { useSectionDefs } from "./sectionDefs";
+import { useLocale } from "@/hooks/useLocale";
+import { formatTime } from "@/lib/locale-format";
+import { getLocalizedTemplate } from "../../lib/cv-i18n";
 
-import type { CvEditorState, CvSection, CvTemplate, EditorView, ThemeSettings } from "../../types/cv.types";
+import type { TFunction } from "i18next";
+import type { AppLocale } from "@/i18n";
+import type { CvEditorState, CvSection, CvTemplate, EditorView } from "../../types/cv.types";
 
 interface CvEditorViewProps {
     initialState: CvEditorState;
@@ -27,6 +32,8 @@ interface CvEditorViewProps {
 }
 
 export function CvEditorView({ initialState, onBack, defaultOpenAts }: CvEditorViewProps) {
+    const { t, locale } = useLocale("cvBuilder");
+    const sectionDefs = useSectionDefs();
     const editor = useCvEditor(initialState);
     const ai = useAiFeatures(editor.state.id);
     const { exportPdf, exportLoading } = useExportPdf(editor);
@@ -40,7 +47,7 @@ export function CvEditorView({ initialState, onBack, defaultOpenAts }: CvEditorV
 
     const { state } = editor;
     const activeSectionTypes = new Set(state.sections.map((s) => s.type));
-    const currentTpl = getTemplate(state.template);
+    const currentTpl = getLocalizedTemplate(t, state.template);
 
     useEffect(() => {
         if (defaultOpenAts && state.id && !ai.atsCvOnlyResult && !ai.loadingAtsCvOnly && state.atsScoreCvOnly == null) {
@@ -64,14 +71,14 @@ export function CvEditorView({ initialState, onBack, defaultOpenAts }: CvEditorV
     };
 
     const allActiveSections = [
-        ...SECTION_DEFS.filter((d) => activeSectionTypes.has(d.type)),
+        ...sectionDefs.filter((d) => activeSectionTypes.has(d.type)),
         ...state.sections
             .filter((s) => s.type === "custom")
             .map((s) => {
                 const raw = s.data as unknown as Record<string, unknown>;
                 return {
                     type: "custom",
-                    label: (s as { label?: string }).label ?? (raw.title as string) ?? "Section",
+                    label: (s as { label?: string }).label ?? (raw.title as string) ?? t("editor.defaultSectionLabel"),
                     icon: <Plus style={{ width: 14, height: 14 }} />,
                     defaultData: s.data,
                 };
@@ -79,7 +86,11 @@ export function CvEditorView({ initialState, onBack, defaultOpenAts }: CvEditorV
     ];
 
     const saveStatusColor = !state.isDirty && state.lastSaved ? "#16A34A" : "var(--gb-muted)";
-    const saveBtnLabel = state.isSaving ? "Sauvegarde..." : state.isDirty ? "Sauvegarder" : "Sauvegardé";
+    const saveBtnLabel = state.isSaving
+        ? t("editor.save.saving")
+        : state.isDirty
+          ? t("editor.save.save")
+          : t("editor.save.saved");
 
     const FONTS = [
         { label: "Inter", value: "Inter, sans-serif" },
@@ -90,9 +101,9 @@ export function CvEditorView({ initialState, onBack, defaultOpenAts }: CvEditorV
     ];
 
     const FONT_SIZES = [
-        { label: "Petit", value: "small" },
-        { label: "Moyen", value: "medium" },
-        { label: "Grand", value: "large" },
+        { label: t("editor.fontSizes.small"), value: "small" },
+        { label: t("editor.fontSizes.medium"), value: "medium" },
+        { label: t("editor.fontSizes.large"), value: "large" },
     ];
 
     return (
@@ -106,6 +117,8 @@ export function CvEditorView({ initialState, onBack, defaultOpenAts }: CvEditorV
                 exportLoading={exportLoading}
                 saveStatusColor={saveStatusColor}
                 saveBtnLabel={saveBtnLabel}
+                locale={locale}
+                t={t}
                 onBack={onBack}
                 onSetView={setView}
                 onToggleTplMenu={() => setShowTplMenu((v) => !v)}
@@ -148,13 +161,13 @@ export function CvEditorView({ initialState, onBack, defaultOpenAts }: CvEditorV
                             <div style={{ marginBottom: "10px", border: "1px solid var(--gb-border)", borderRadius: "12px", overflow: "hidden", background: "var(--gb-app-panel-bg)" }}>
                                 <div onClick={() => toggleExpanded("design-settings")} style={{ display: "flex", alignItems: "center", gap: "9px", padding: "11px 13px", cursor: "pointer", userSelect: "none" }}>
                                     <span style={{ color: "#0284C7", display: "flex" }}><Sparkles style={{ width: 14, height: 14 }} /></span>
-                                    <span style={{ flex: 1, fontSize: "13px", fontWeight: 600, color: "var(--gb-text)" }}>Style & Design</span>
+                                    <span style={{ flex: 1, fontSize: "13px", fontWeight: 600, color: "var(--gb-text)" }}>{t("editor.design.title")}</span>
                                     {expanded.has("design-settings") ? <ChevronDown style={{ width: 13, height: 13, color: "var(--gb-muted)" }} /> : <ChevronRight style={{ width: 13, height: 13, color: "var(--gb-muted)" }} />}
                                 </div>
                                 {expanded.has("design-settings") && (
                                     <div style={{ padding: "13px", borderTop: "1px solid var(--gb-border)", display: "flex", flexDirection: "column", gap: "14px" }}>
                                         <div>
-                                            <label style={{ display: "block", fontSize: "11px", fontWeight: 600, color: "var(--gb-muted)", marginBottom: "6px" }}>Couleur Template (Fond)</label>
+                                            <label style={{ display: "block", fontSize: "11px", fontWeight: 600, color: "var(--gb-muted)", marginBottom: "6px" }}>{t("editor.design.templateColor")}</label>
                                             <div style={{ display: "flex", gap: "8px", flexWrap: "wrap" }}>
                                                 {["#1a3a5c", "#f8f8f8", "#111827", "#0f172a", "#1e3a5f"].map((c) => (
                                                     <button key={c}
@@ -167,12 +180,12 @@ export function CvEditorView({ initialState, onBack, defaultOpenAts }: CvEditorV
                                                     value={state.theme?.templateColor || currentTpl.previewBg}
                                                     onChange={(e) => editor.setTheme({ ...state.theme, templateColor: e.target.value })}
                                                     style={{ width: "24px", height: "24px", padding: 0, border: "none", borderRadius: "50%", cursor: "pointer", overflow: "hidden" }}
-                                                    title="Couleur personnalisée"
+                                                    title={t("editor.design.customColorTitle")}
                                                 />
                                             </div>
                                         </div>
                                         <div>
-                                            <label style={{ display: "block", fontSize: "11px", fontWeight: 600, color: "var(--gb-muted)", marginBottom: "6px" }}>Couleur des Titres (Accent)</label>
+                                            <label style={{ display: "block", fontSize: "11px", fontWeight: 600, color: "var(--gb-muted)", marginBottom: "6px" }}>{t("editor.design.titleColor")}</label>
                                             <div style={{ display: "flex", gap: "8px", flexWrap: "wrap" }}>
                                                 {["#2563EB", "#0ea5e9", "#16A34A", "#f97316", "#8b5cf6", "#ec4899", "#f59e0b", "#475569", "#000000"].map((c) => (
                                                     <button key={c}
@@ -185,12 +198,12 @@ export function CvEditorView({ initialState, onBack, defaultOpenAts }: CvEditorV
                                                     value={state.theme?.titleColor || state.theme?.accentColor || currentTpl.accentColor}
                                                     onChange={(e) => editor.setTheme({ ...state.theme, titleColor: e.target.value, accentColor: e.target.value })}
                                                     style={{ width: "24px", height: "24px", padding: 0, border: "none", borderRadius: "50%", cursor: "pointer", overflow: "hidden" }}
-                                                    title="Couleur personnalisée"
+                                                    title={t("editor.design.customColorTitle")}
                                                 />
                                             </div>
                                         </div>
                                         <div>
-                                            <label style={{ display: "block", fontSize: "11px", fontWeight: 600, color: "var(--gb-muted)", marginBottom: "6px" }}>Style des Titres (Police)</label>
+                                            <label style={{ display: "block", fontSize: "11px", fontWeight: 600, color: "var(--gb-muted)", marginBottom: "6px" }}>{t("editor.design.titleFont")}</label>
                                             <select
                                                 value={state.theme?.titleFontFamily || state.theme?.fontFamily || FONTS[0].value}
                                                 onChange={(e) => editor.setTheme({ ...state.theme, titleFontFamily: e.target.value })}
@@ -200,7 +213,7 @@ export function CvEditorView({ initialState, onBack, defaultOpenAts }: CvEditorV
                                             </select>
                                         </div>
                                         <div>
-                                            <label style={{ display: "block", fontSize: "11px", fontWeight: 600, color: "var(--gb-muted)", marginBottom: "6px" }}>Style d'écriture (Police du corps)</label>
+                                            <label style={{ display: "block", fontSize: "11px", fontWeight: 600, color: "var(--gb-muted)", marginBottom: "6px" }}>{t("editor.design.bodyFont")}</label>
                                             <select
                                                 value={state.theme?.bodyFontFamily || state.theme?.fontFamily || FONTS[0].value}
                                                 onChange={(e) => editor.setTheme({ ...state.theme, bodyFontFamily: e.target.value })}
@@ -211,7 +224,7 @@ export function CvEditorView({ initialState, onBack, defaultOpenAts }: CvEditorV
                                         </div>
                                         <div style={{ display: "flex", gap: "10px" }}>
                                             <div style={{ flex: 1 }}>
-                                                <label style={{ display: "block", fontSize: "11px", fontWeight: 600, color: "var(--gb-muted)", marginBottom: "6px" }}>Taille Titres</label>
+                                                <label style={{ display: "block", fontSize: "11px", fontWeight: 600, color: "var(--gb-muted)", marginBottom: "6px" }}>{t("editor.design.titleSize")}</label>
                                                 <select
                                                     value={state.theme?.titleFontSize || "medium"}
                                                     onChange={(e) => editor.setTheme({ ...state.theme, titleFontSize: e.target.value as any })}
@@ -221,7 +234,7 @@ export function CvEditorView({ initialState, onBack, defaultOpenAts }: CvEditorV
                                                 </select>
                                             </div>
                                             <div style={{ flex: 1 }}>
-                                                <label style={{ display: "block", fontSize: "11px", fontWeight: 600, color: "var(--gb-muted)", marginBottom: "6px" }}>Taille Corps</label>
+                                                <label style={{ display: "block", fontSize: "11px", fontWeight: 600, color: "var(--gb-muted)", marginBottom: "6px" }}>{t("editor.design.bodySize")}</label>
                                                 <select
                                                     value={state.theme?.bodyFontSize || "medium"}
                                                     onChange={(e) => editor.setTheme({ ...state.theme, bodyFontSize: e.target.value as any })}
@@ -262,7 +275,7 @@ export function CvEditorView({ initialState, onBack, defaultOpenAts }: CvEditorV
                                         </div>
                                         {isOpen && (
                                             <div style={{ padding: "13px", borderTop: "1px solid var(--gb-border)" }}>
-                                                {renderSectionContent(def, state.sections, editor, ai)}
+                                                {renderSectionContent(def, state.sections, editor, ai, t)}
                                             </div>
                                         )}
                                     </div>
@@ -275,7 +288,7 @@ export function CvEditorView({ initialState, onBack, defaultOpenAts }: CvEditorV
                                 onMouseEnter={(e) => { e.currentTarget.style.borderColor = "rgba(22,163,74,0.4)"; e.currentTarget.style.color = "#16A34A"; }}
                                 onMouseLeave={(e) => { e.currentTarget.style.borderColor = "var(--gb-border2)"; e.currentTarget.style.color = "var(--gb-muted)"; }}
                             >
-                                <Plus style={{ width: 13, height: 13 }} /> Ajouter une section
+                                <Plus style={{ width: 13, height: 13 }} /> {t("editor.addSection")}
                             </button>
                         </div>
                     </div>
@@ -325,6 +338,8 @@ interface TopBarProps {
     exportLoading: boolean;
     saveStatusColor: string;
     saveBtnLabel: string;
+    locale: AppLocale;
+    t: TFunction<"cvBuilder">;
     onBack: () => void;
     onSetView: (v: EditorView) => void;
     onToggleTplMenu: () => void;
@@ -338,7 +353,7 @@ interface TopBarProps {
 
 function TopBar({
     state, view, currentTplName, showTplMenu, exportLoading,
-    saveStatusColor, saveBtnLabel,
+    saveStatusColor, saveBtnLabel, locale, t,
     onBack, onSetView, onToggleTplMenu, onCloseTplMenu,
     onSelectTemplate, onOpenAiPanel, onSave, onExportPdf, onTitleChange,
 }: TopBarProps) {
@@ -346,7 +361,7 @@ function TopBar({
         <div style={{ height: "52px", flexShrink: 0, background: "var(--gb-app-topbar-bg)", borderBottom: "1px solid var(--gb-border)", backdropFilter: "blur(16px)", display: "flex", alignItems: "center", padding: "0 16px", gap: "10px", zIndex: 30 }}>
 
             <button onClick={onBack} style={topBtnBase}>
-                <ArrowLeft style={{ width: 13, height: 13 }} /> Mes CVs
+                <ArrowLeft style={{ width: 13, height: 13 }} /> {t("editor.back")}
             </button>
 
             <Divider />
@@ -364,10 +379,12 @@ function TopBar({
                         ? <Check style={{ width: 11, height: 11 }} />
                         : null}
                     {state.isSaving
-                        ? "Sauvegarde…"
+                        ? t("editor.save.savingEllipsis")
                         : state.lastSaved && !state.isDirty
-                        ? `Sauvegardé ${state.lastSaved.toLocaleTimeString("fr-FR", { hour: "2-digit", minute: "2-digit" })}`
-                        : state.isDirty ? "Non sauvegardé" : ""}
+                        ? t("editor.save.savedAt", {
+                              time: formatTime(state.lastSaved, locale, { hour: "2-digit", minute: "2-digit" }),
+                          })
+                        : state.isDirty ? t("editor.save.unsaved") : ""}
                 </span>
             </div>
 
@@ -376,7 +393,7 @@ function TopBar({
                     <button key={v} onClick={() => onSetView(v)}
                         style={{ display: "flex", alignItems: "center", gap: "5px", padding: "5px 11px", borderRadius: "7px", border: "none", background: view === v ? "var(--gb-app-panel-bg)" : "transparent", color: view === v ? "var(--gb-text)" : "var(--gb-muted)", fontWeight: view === v ? 600 : 400, fontSize: "12px", cursor: "pointer", boxShadow: view === v ? "0 1px 4px rgba(0,0,0,0.1)" : "none" }}>
                         {v === "edit" ? <Edit3 style={{ width: 12, height: 12 }} /> : <Eye style={{ width: 12, height: 12 }} />}
-                        {v === "edit" ? "Éditer" : "Aperçu"}
+                        {v === "edit" ? t("editor.views.edit") : t("editor.views.preview")}
                     </button>
                 ))}
             </div>
@@ -390,11 +407,11 @@ function TopBar({
                     <>
                         <div style={{ position: "fixed", inset: 0, zIndex: 10 }} onClick={onCloseTplMenu} />
                         <div style={{ position: "absolute", top: "calc(100% + 6px)", right: 0, zIndex: 20, background: "var(--gb-app-panel-bg)", border: "1px solid var(--gb-border)", borderRadius: "14px", padding: "8px", display: "grid", gridTemplateColumns: "1fr 1fr", gap: "5px", minWidth: "210px", boxShadow: "0 12px 36px rgba(0,0,0,0.22)" }}>
-                            {TEMPLATES.map((t) => (
-                                <button key={t.id} onClick={() => onSelectTemplate(t.id)}
-                                    style={{ background: state.template === t.id ? "var(--gb-app-active-bg)" : "transparent", border: state.template === t.id ? "1px solid var(--gb-app-active-border)" : "1px solid transparent", borderRadius: "9px", padding: "8px", cursor: "pointer", textAlign: "left" }}>
-                                    <div style={{ width: "100%", height: "4px", background: t.accentColor, borderRadius: "2px", marginBottom: "4px" }} />
-                                    <span style={{ fontSize: "10px", fontWeight: 500, color: "var(--gb-text-off)", lineHeight: 1.3, display: "block" }}>{t.name}</span>
+                            {TEMPLATES.map((tpl) => (
+                                <button key={tpl.id} onClick={() => onSelectTemplate(tpl.id)}
+                                    style={{ background: state.template === tpl.id ? "var(--gb-app-active-bg)" : "transparent", border: state.template === tpl.id ? "1px solid var(--gb-app-active-border)" : "1px solid transparent", borderRadius: "9px", padding: "8px", cursor: "pointer", textAlign: "left" }}>
+                                    <div style={{ width: "100%", height: "4px", background: tpl.accentColor, borderRadius: "2px", marginBottom: "4px" }} />
+                                    <span style={{ fontSize: "10px", fontWeight: 500, color: "var(--gb-text-off)", lineHeight: 1.3, display: "block" }}>{getLocalizedTemplate(t, tpl.id).name}</span>
                                 </button>
                             ))}
                         </div>
@@ -403,7 +420,7 @@ function TopBar({
             </div>
 
             <button onClick={onOpenAiPanel} style={{ ...topBtnBase, background: "rgba(139,92,246,0.12)", border: "1px solid rgba(139,92,246,0.28)", color: "#a78bfa" }}>
-                <Sparkles style={{ width: 13, height: 13 }} /> AI Improve
+                <Sparkles style={{ width: 13, height: 13 }} /> {t("editor.aiImprove")}
             </button>
 
             <button onClick={onSave} disabled={state.isSaving || !state.isDirty}
@@ -415,7 +432,7 @@ function TopBar({
             <button onClick={onExportPdf} disabled={exportLoading}
                 style={{ ...topBtnBase, background: "linear-gradient(90deg,#16A34A,#0284C7)", border: "none", color: "#fff", boxShadow: "0 0 18px rgba(22,163,74,0.28)" }}>
                 {exportLoading ? <Loader style={{ width: 13, height: 13, animation: "spin 1s linear infinite" }} /> : <Download style={{ width: 13, height: 13 }} />}
-                Export PDF
+                {t("editor.exportPdf")}
             </button>
         </div>
     );

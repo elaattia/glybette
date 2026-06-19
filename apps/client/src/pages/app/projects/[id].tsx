@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useState, type ReactNode } from "react";
 import { Link, useParams } from "react-router-dom";
 import { PROJECT_DOMAINS, type ProjectMilestoneInput, type ProjectRoleRequirementInput } from "@glybette/contracts";
+import type { TFunction } from "i18next";
 import { Clock3, MessageSquare, Pencil, Send, UserPlus, Users } from "lucide-react";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
@@ -10,12 +11,14 @@ import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } f
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { useAuth } from "@/hooks/useAuth";
+import { useLocale } from "@/hooks/useLocale";
 import { useProjectComments, useProjectDetail, useProjectJoinRequests, useProjectsMutations } from "@/features/projects";
 import { ApiError } from "@/lib/api";
 
 export default function ProjectDetailPage() {
     const params = useParams();
     const projectId = params.id ?? "";
+    const { t } = useLocale("projects");
     const auth = useAuth();
     const detailQuery = useProjectDetail(projectId);
     const commentsQuery = useProjectComments(projectId);
@@ -47,6 +50,24 @@ export default function ProjectDetailPage() {
     const [editRoles, setEditRoles] = useState<ProjectRoleRequirementInput[]>([]);
     const [editMilestones, setEditMilestones] = useState<ProjectMilestoneInput[]>([]);
 
+    const difficultyOptions = useMemo(
+        (): Array<{ value: "beginner" | "intermediate" | "advanced"; label: string }> => [
+            { value: "beginner", label: t("detail.difficultyOptions.beginner") },
+            { value: "intermediate", label: t("detail.difficultyOptions.intermediate") },
+            { value: "advanced", label: t("detail.difficultyOptions.advanced") },
+        ],
+        [t],
+    );
+
+    const workModeOptions = useMemo(
+        (): Array<{ value: "async" | "hybrid" | "live"; label: string }> => [
+            { value: "async", label: t("detail.workModeOptions.async") },
+            { value: "hybrid", label: t("detail.workModeOptions.hybrid") },
+            { value: "live", label: t("detail.workModeOptions.live") },
+        ],
+        [t],
+    );
+
     const requestState = useMemo(
         () => ({
             pending: project?.viewerJoinRequestStatus === "pending",
@@ -77,7 +98,7 @@ export default function ProjectDetailPage() {
     if (!projectId) {
         return (
             <Card className="border border-red-500/30 bg-red-500/5">
-                <CardContent className="px-5 py-5 text-sm text-red-200">Missing project id.</CardContent>
+                <CardContent className="px-5 py-5 text-sm text-red-200">{t("detail.missingId")}</CardContent>
             </Card>
         );
     }
@@ -90,9 +111,9 @@ export default function ProjectDetailPage() {
         return (
             <Card className="border border-red-500/30 bg-red-500/5">
                 <CardContent className="space-y-3 px-5 py-5 text-sm text-red-200">
-                    <p>Project not found or unavailable.</p>
+                    <p>{t("detail.notFound")}</p>
                     <Button asChild size="sm" variant="outline">
-                        <Link to="/app/projects">Back to listing</Link>
+                        <Link to="/app/projects">{t("detail.backToListing")}</Link>
                     </Button>
                 </CardContent>
             </Card>
@@ -127,18 +148,21 @@ export default function ProjectDetailPage() {
     };
 
     const saveEdit = async () => {
-        const validation = validateProjectForm({
-            title: editTitle,
-            shortDescription: editShortDescription,
-            description: editDescription,
-            technologies: editTechnologies,
-            roles: editRoles,
-            milestones: editMilestones,
-        });
+        const validation = validateProjectForm(
+            {
+                title: editTitle,
+                shortDescription: editShortDescription,
+                description: editDescription,
+                technologies: editTechnologies,
+                roles: editRoles,
+                milestones: editMilestones,
+            },
+            t,
+        );
         setEditFieldErrors(validation);
         setEditError(null);
         if (Object.keys(validation).length > 0) {
-            setEditError("Please fix the highlighted fields.");
+            setEditError(t("detail.editDialog.fixFields"));
             return;
         }
 
@@ -170,7 +194,7 @@ export default function ProjectDetailPage() {
                 setEditError(error.message);
                 return;
             }
-            setEditError("Failed to update project.");
+            setEditError(t("detail.editDialog.updateFailed"));
         }
     };
 
@@ -188,7 +212,7 @@ export default function ProjectDetailPage() {
                                     ? "bg-emerald-500/20 text-emerald-200 ring-1 ring-emerald-400/40"
                                     : "bg-amber-500/20 text-amber-200 ring-1 ring-amber-300/40"
                             }>
-                            {project.status}
+                            {t(`list.status.${project.status}`)}
                         </Badge>
                         <Badge variant="secondary" className="bg-black/45 text-white">
                             {project.domain}
@@ -216,7 +240,9 @@ export default function ProjectDetailPage() {
 
                         {project.milestones.length > 0 ? (
                             <section className="space-y-2">
-                                <h2 className="text-sm font-semibold uppercase tracking-[0.12em] text-[var(--gb-muted)]">Objectives & milestones</h2>
+                                <h2 className="text-sm font-semibold uppercase tracking-[0.12em] text-[var(--gb-muted)]">
+                                    {t("detail.objectivesMilestones")}
+                                </h2>
                                 <div className="space-y-2">
                                     {project.milestones.map((milestone) => (
                                         <div
@@ -231,7 +257,9 @@ export default function ProjectDetailPage() {
                         ) : null}
 
                         <section className="space-y-2">
-                            <h2 className="text-sm font-semibold uppercase tracking-[0.12em] text-[var(--gb-muted)]">Current team</h2>
+                            <h2 className="text-sm font-semibold uppercase tracking-[0.12em] text-[var(--gb-muted)]">
+                                {t("detail.currentTeam")}
+                            </h2>
                             <div className="flex flex-wrap gap-2">
                                 {project.members.map((member) => (
                                     <div
@@ -254,16 +282,19 @@ export default function ProjectDetailPage() {
                     <aside className="space-y-3">
                         <Card className="border border-emerald-400/30 bg-[var(--gb-surface)]">
                             <CardContent className="space-y-3 px-4 py-4">
-                                <h3 className="text-sm font-semibold text-emerald-300">Take action</h3>
+                                <h3 className="text-sm font-semibold text-emerald-300">{t("detail.takeAction")}</h3>
                                 <div className="flex flex-wrap items-center gap-x-4 gap-y-2 text-xs text-[var(--gb-muted)]">
                                     <p className="inline-flex items-center gap-1.5">
-                                        <Users className="h-3.5 w-3.5" /> {project.memberCount}/{project.teamSizeTarget} members
+                                        <Users className="h-3.5 w-3.5" />{" "}
+                                        {t("detail.membersCount", { current: project.memberCount, target: project.teamSizeTarget })}
                                     </p>
                                     <p className="inline-flex items-center gap-1.5">
-                                        <Clock3 className="h-3.5 w-3.5" /> {project.engagement.hoursPerWeek}h/week
+                                        <Clock3 className="h-3.5 w-3.5" />{" "}
+                                        {t("detail.hoursPerWeek", { count: project.engagement.hoursPerWeek })}
                                     </p>
                                     <p className="inline-flex items-center gap-1.5">
-                                        <MessageSquare className="h-3.5 w-3.5" /> {project.commentCount} comments
+                                        <MessageSquare className="h-3.5 w-3.5" />{" "}
+                                        {t("detail.commentsCount", { count: project.commentCount })}
                                     </p>
                                 </div>
 
@@ -273,7 +304,7 @@ export default function ProjectDetailPage() {
                                             value={joinMessage}
                                             onChange={(event) => setJoinMessage(event.target.value)}
                                             rows={3}
-                                            placeholder="Optional message for project owner"
+                                            placeholder={t("detail.joinMessagePlaceholder")}
                                             className="border-[var(--gb-border)] bg-[var(--gb-app-panel-bg)]"
                                         />
                                         <Button
@@ -282,15 +313,13 @@ export default function ProjectDetailPage() {
                                             onClick={() => void submitJoin()}>
                                             <UserPlus className="h-4 w-4" />
                                             {requestState.pending
-                                                ? "Request pending"
+                                                ? t("detail.requestPending")
                                                 : requestState.approved
-                                                  ? "Already accepted"
-                                                  : "Request to join"}
+                                                  ? t("detail.alreadyAccepted")
+                                                  : t("detail.requestToJoin")}
                                         </Button>
                                         {requestState.rejected ? (
-                                            <p className="text-[11px] text-amber-300">
-                                                Previous request was rejected. You can submit a new one.
-                                            </p>
+                                            <p className="text-[11px] text-amber-300">{t("detail.rejectedHint")}</p>
                                         ) : null}
                                     </div>
                                 ) : (
@@ -300,7 +329,7 @@ export default function ProjectDetailPage() {
                                             variant="outline"
                                             onClick={() => void mutations.archiveProject.mutateAsync(projectId)}
                                             disabled={mutations.archiveProject.isPending}>
-                                            Archive project
+                                            {t("detail.archiveProject")}
                                         </Button>
                                         <Button
                                             className="w-full"
@@ -311,13 +340,13 @@ export default function ProjectDetailPage() {
                                                     : mutations.publishProject.mutateAsync(projectId))
                                             }
                                             disabled={mutations.publishProject.isPending || mutations.unpublishProject.isPending}>
-                                            {project.status === "published" ? "Unpublish" : "Publish"}
+                                            {project.status === "published" ? t("detail.unpublish") : t("detail.publish")}
                                         </Button>
                                         <Button
                                             className="w-full bg-[var(--gb-app-active-bg)] text-[var(--gb-text)] hover:bg-[var(--gb-app-hover)]"
                                             onClick={() => setIsEditOpen(true)}>
                                             <Pencil className="h-4 w-4" />
-                                            Edit project
+                                            {t("detail.editProject")}
                                         </Button>
                                     </div>
                                 )}
@@ -326,11 +355,11 @@ export default function ProjectDetailPage() {
 
                         <Card className="border border-[var(--gb-border)] bg-[var(--gb-surface)]">
                             <CardContent className="space-y-2 px-4 py-4">
-                                <h3 className="text-sm font-semibold text-[var(--gb-text)]">Profiles needed</h3>
+                                <h3 className="text-sm font-semibold text-[var(--gb-text)]">{t("detail.profilesNeeded")}</h3>
                                 {project.openRoles.map((role) => (
                                     <div key={role.id} className="rounded-lg border border-[var(--gb-border)] bg-[var(--gb-app-panel-bg)] p-2">
                                         <p className="text-xs font-semibold text-[var(--gb-text)]">
-                                            {role.quantity}x {role.title}
+                                            {t("detail.roleQuantity", { quantity: role.quantity, title: role.title })}
                                         </p>
                                         <div className="mt-1 flex flex-wrap gap-1">
                                             {role.skills.map((skill) => (
@@ -350,24 +379,26 @@ export default function ProjectDetailPage() {
                         {isOwner ? (
                             <Card className="border border-[var(--gb-border)] bg-[var(--gb-surface)]">
                                 <CardContent className="space-y-2 px-4 py-4">
-                                    <h3 className="text-sm font-semibold text-[var(--gb-text)]">Pending requests</h3>
+                                    <h3 className="text-sm font-semibold text-[var(--gb-text)]">{t("detail.pendingRequests")}</h3>
                                     {joinRequestsQuery.data?.requests.filter((request) => request.status === "pending").slice(0, 5).map((request) => (
                                         <div key={request.id} className="rounded-lg border border-[var(--gb-border)] bg-[var(--gb-app-panel-bg)] p-2">
                                             <p className="text-xs text-[var(--gb-text)]">
                                                 {request.user?.displayName ?? request.userId}
                                             </p>
-                                            <p className="mt-1 text-[11px] text-[var(--gb-muted)]">{request.message ?? "No message provided."}</p>
+                                            <p className="mt-1 text-[11px] text-[var(--gb-muted)]">
+                                                {request.message ?? t("detail.noMessageProvided")}
+                                            </p>
                                             <div className="mt-2 flex gap-2">
                                                 <Button
                                                     size="xs"
                                                     onClick={() => void mutations.approveJoinRequest.mutateAsync({ id: projectId, requestId: request.id })}>
-                                                    Approve
+                                                    {t("detail.approve")}
                                                 </Button>
                                                 <Button
                                                     size="xs"
                                                     variant="outline"
                                                     onClick={() => void mutations.rejectJoinRequest.mutateAsync({ id: projectId, requestId: request.id })}>
-                                                    Reject
+                                                    {t("detail.reject")}
                                                 </Button>
                                             </div>
                                         </div>
@@ -382,14 +413,14 @@ export default function ProjectDetailPage() {
             <Card className="border border-[var(--gb-border)] bg-[var(--gb-app-panel-bg)]">
                 <CardContent className="space-y-4 px-5 py-5">
                     <h2 className="text-sm font-semibold uppercase tracking-[0.12em] text-[var(--gb-muted)]">
-                        Community thread
+                        {t("detail.communityThread")}
                     </h2>
 
                     <div className="flex items-center gap-2">
                         <Textarea
                             value={commentContent}
                             onChange={(event) => setCommentContent(event.target.value)}
-                            placeholder="Share constructive feedback..."
+                            placeholder={t("detail.commentPlaceholder")}
                             rows={2}
                             className="min-h-[44px] border-[var(--gb-border)] bg-[var(--gb-surface)]"
                         />
@@ -398,7 +429,7 @@ export default function ProjectDetailPage() {
                             disabled={!commentContent.trim() || mutations.createComment.isPending}
                             onClick={() => void submitComment()}>
                             <Send className="h-4 w-4" />
-                            Post
+                            {t("detail.post")}
                         </Button>
                     </div>
 
@@ -445,12 +476,12 @@ export default function ProjectDetailPage() {
                                     <Textarea
                                         value={replyContent}
                                         onChange={(event) => setReplyContent(event.target.value)}
-                                        placeholder="Reply..."
+                                        placeholder={t("detail.replyPlaceholder")}
                                         rows={2}
                                         className="min-h-[38px] border-[var(--gb-border)] bg-[var(--gb-app-panel-bg)]"
                                     />
                                     <Button size="sm" onClick={() => void submitReply()} disabled={!replyContent.trim()}>
-                                        Reply
+                                        {t("detail.reply")}
                                     </Button>
                                 </div>
                             ) : null}
@@ -460,7 +491,7 @@ export default function ProjectDetailPage() {
                                     variant="ghost"
                                     className="mt-2 justify-start px-0 text-[var(--gb-muted)] hover:text-[var(--gb-text)]"
                                     onClick={() => setReplyParentId((current) => (current === thread.comment.id ? null : thread.comment.id))}>
-                                    Reply
+                                    {t("detail.reply")}
                                 </Button>
                             ) : null}
                         </div>
@@ -471,8 +502,8 @@ export default function ProjectDetailPage() {
             <Dialog open={isEditOpen} onOpenChange={setIsEditOpen}>
                 <DialogContent className="max-h-[90vh] max-w-4xl overflow-y-auto">
                     <DialogHeader>
-                        <DialogTitle>Edit project</DialogTitle>
-                        <DialogDescription>Update all project details in one place.</DialogDescription>
+                        <DialogTitle>{t("detail.editDialog.title")}</DialogTitle>
+                        <DialogDescription>{t("detail.editDialog.description")}</DialogDescription>
                     </DialogHeader>
 
                     {editError ? <p className="rounded-lg border border-red-500/50 bg-red-500/10 px-3 py-2 text-sm text-red-200">{editError}</p> : null}
@@ -482,11 +513,11 @@ export default function ProjectDetailPage() {
                             {coverPreviewUrl || project.coverAsset?.publicUrl ? (
                                 <img
                                     src={coverPreviewUrl ?? project.coverAsset?.publicUrl}
-                                    alt="Project cover preview"
+                                    alt={t("create.coverPreviewAlt")}
                                     className="h-full w-full rounded-lg object-cover"
                                 />
                             ) : (
-                                <span className="text-sm text-[var(--gb-text-off)]">Upload a new cover image</span>
+                                <span className="text-sm text-[var(--gb-text-off)]">{t("detail.editDialog.uploadCover")}</span>
                             )}
                             <input
                                 type="file"
@@ -504,14 +535,14 @@ export default function ProjectDetailPage() {
                         </label>
 
                         <div className="grid gap-3 md:grid-cols-2">
-                            <Field label="Project title" error={editFieldErrors.title}>
+                            <Field label={t("detail.editDialog.projectTitle")} error={editFieldErrors.title}>
                                 <Input value={editTitle} onChange={(event) => setEditTitle(event.target.value)} />
                             </Field>
-                            <Field label="Short description" error={editFieldErrors.shortDescription}>
+                            <Field label={t("detail.editDialog.shortDescription")} error={editFieldErrors.shortDescription}>
                                 <Input value={editShortDescription} onChange={(event) => setEditShortDescription(event.target.value)} />
                             </Field>
                             <div className="md:col-span-2">
-                                <Field label="Detailed description" error={editFieldErrors.description}>
+                                <Field label={t("detail.editDialog.detailedDescription")} error={editFieldErrors.description}>
                                     <Textarea
                                         rows={4}
                                         value={editDescription}
@@ -519,7 +550,7 @@ export default function ProjectDetailPage() {
                                     />
                                 </Field>
                             </div>
-                            <Field label="Domain">
+                            <Field label={t("detail.editDialog.domain")}>
                                 <select
                                     value={editDomain}
                                     onChange={(event) => setEditDomain(event.target.value as (typeof PROJECT_DOMAINS)[number])}
@@ -531,17 +562,19 @@ export default function ProjectDetailPage() {
                                     ))}
                                 </select>
                             </Field>
-                            <Field label="Difficulty">
+                            <Field label={t("detail.editDialog.difficulty")}>
                                 <select
                                     value={editDifficulty}
                                     onChange={(event) => setEditDifficulty(event.target.value as typeof editDifficulty)}
                                     className="h-10 w-full rounded-lg border border-[var(--gb-border)] bg-[var(--gb-surface)] px-3 text-sm text-[var(--gb-text)] outline-none focus:border-[var(--gb-app-ring)]">
-                                    <option value="beginner">Beginner-friendly</option>
-                                    <option value="intermediate">Intermediate</option>
-                                    <option value="advanced">Advanced</option>
+                                    {difficultyOptions.map((option) => (
+                                        <option key={option.value} value={option.value}>
+                                            {option.label}
+                                        </option>
+                                    ))}
                                 </select>
                             </Field>
-                            <Field label="Technologies" error={editFieldErrors.technologies}>
+                            <Field label={t("detail.editDialog.technologies")} error={editFieldErrors.technologies}>
                                 <Input
                                     value={editTechnologyInput}
                                     onChange={(event) => setEditTechnologyInput(event.target.value)}
@@ -552,7 +585,7 @@ export default function ProjectDetailPage() {
                                         }
                                     }}
                                     onBlur={addEditTechnology}
-                                    placeholder="Type and press Enter"
+                                    placeholder={t("detail.editDialog.technologiesPlaceholder")}
                                 />
                                 <div className="mt-2 flex flex-wrap gap-1.5">
                                     {editTechnologies.map((tech) => (
@@ -573,7 +606,7 @@ export default function ProjectDetailPage() {
                                     ))}
                                 </div>
                             </Field>
-                            <Field label="Team size target">
+                            <Field label={t("detail.editDialog.teamSizeTarget")}>
                                 <Input
                                     type="number"
                                     min={1}
@@ -582,7 +615,7 @@ export default function ProjectDetailPage() {
                                     onChange={(event) => setEditTeamSizeTarget(Number(event.target.value) || 1)}
                                 />
                             </Field>
-                            <Field label="Hours per week">
+                            <Field label={t("detail.editDialog.hoursPerWeek")}>
                                 <Input
                                     type="number"
                                     min={1}
@@ -591,27 +624,29 @@ export default function ProjectDetailPage() {
                                     onChange={(event) => setEditHoursPerWeek(Number(event.target.value) || 1)}
                                 />
                             </Field>
-                            <Field label="Work mode">
+                            <Field label={t("detail.editDialog.workMode")}>
                                 <select
                                     value={editWorkMode}
                                     onChange={(event) => setEditWorkMode(event.target.value as typeof editWorkMode)}
                                     className="h-10 w-full rounded-lg border border-[var(--gb-border)] bg-[var(--gb-surface)] px-3 text-sm text-[var(--gb-text)] outline-none focus:border-[var(--gb-app-ring)]">
-                                    <option value="async">Async-first</option>
-                                    <option value="hybrid">Hybrid</option>
-                                    <option value="live">Live weekly sessions</option>
+                                    {workModeOptions.map((option) => (
+                                        <option key={option.value} value={option.value}>
+                                            {option.label}
+                                        </option>
+                                    ))}
                                 </select>
                             </Field>
                         </div>
 
                         <div className="space-y-2">
                             <div className="flex items-center justify-between">
-                                <h3 className="text-sm font-semibold text-[var(--gb-text)]">Open roles</h3>
+                                <h3 className="text-sm font-semibold text-[var(--gb-text)]">{t("detail.editDialog.openRoles")}</h3>
                                 <Button
                                     type="button"
                                     variant="outline"
                                     size="sm"
                                     onClick={() => setEditRoles((current) => [...current, { title: "", quantity: 1, skills: [] }])}>
-                                    Add role
+                                    {t("detail.editDialog.addRole")}
                                 </Button>
                             </div>
                             {editRoles.map((role, index) => (
@@ -625,7 +660,7 @@ export default function ProjectDetailPage() {
                                                 current.map((item, i) => (i === index ? { ...item, title: event.target.value } : item)),
                                             )
                                         }
-                                        placeholder="Role title"
+                                        placeholder={t("detail.editDialog.roleTitlePlaceholder")}
                                     />
                                     <Input
                                         type="number"
@@ -648,13 +683,13 @@ export default function ProjectDetailPage() {
                                                 ),
                                             )
                                         }
-                                        placeholder="Skills (comma-separated)"
+                                        placeholder={t("detail.editDialog.skillsCommaPlaceholder")}
                                     />
                                     <Button
                                         type="button"
                                         variant="ghost"
                                         onClick={() => setEditRoles((current) => current.filter((_, roleIndex) => roleIndex !== index))}>
-                                        Remove
+                                        {t("detail.editDialog.remove")}
                                     </Button>
                                 </div>
                             ))}
@@ -663,7 +698,7 @@ export default function ProjectDetailPage() {
 
                         <div className="space-y-2">
                             <div className="flex items-center justify-between">
-                                <h3 className="text-sm font-semibold text-[var(--gb-text)]">Milestones</h3>
+                                <h3 className="text-sm font-semibold text-[var(--gb-text)]">{t("detail.editDialog.milestones")}</h3>
                                 <Button
                                     type="button"
                                     variant="outline"
@@ -671,7 +706,7 @@ export default function ProjectDetailPage() {
                                     onClick={() =>
                                         setEditMilestones((current) => [...current, { title: "", description: "", status: "todo" }])
                                     }>
-                                    Add milestone
+                                    {t("detail.editDialog.addMilestone")}
                                 </Button>
                             </div>
                             {editMilestones.map((milestone, index) => (
@@ -708,9 +743,9 @@ export default function ProjectDetailPage() {
                                             )
                                         }
                                         className="h-8 rounded-lg border border-[var(--gb-border)] bg-[var(--gb-app-panel-bg)] px-2 text-xs">
-                                        <option value="todo">Todo</option>
-                                        <option value="in_progress">In progress</option>
-                                        <option value="done">Done</option>
+                                        <option value="todo">{t("detail.milestoneStatus.todo")}</option>
+                                        <option value="in_progress">{t("detail.milestoneStatus.inProgress")}</option>
+                                        <option value="done">{t("detail.milestoneStatus.done")}</option>
                                     </select>
                                     <Button
                                         type="button"
@@ -720,7 +755,7 @@ export default function ProjectDetailPage() {
                                                 current.filter((_, milestoneIndex) => milestoneIndex !== index),
                                             )
                                         }>
-                                        Remove
+                                        {t("detail.editDialog.remove")}
                                     </Button>
                                 </div>
                             ))}
@@ -729,10 +764,10 @@ export default function ProjectDetailPage() {
 
                         <div className="flex justify-end gap-2">
                             <Button variant="outline" onClick={() => setIsEditOpen(false)}>
-                                Cancel
+                                {t("detail.editDialog.cancel")}
                             </Button>
                             <Button onClick={() => void saveEdit()} disabled={mutations.updateProject.isPending || mutations.uploadCover.isPending}>
-                                Save changes
+                                {t("detail.editDialog.saveChanges")}
                             </Button>
                         </div>
                     </div>
@@ -746,22 +781,25 @@ function splitComma(value: string): string[] {
     return [...new Set(value.split(",").map((item) => item.trim()).filter(Boolean))];
 }
 
-function validateProjectForm(input: {
-    title: string;
-    shortDescription: string;
-    description: string;
-    technologies: string[];
-    roles: ProjectRoleRequirementInput[];
-    milestones: ProjectMilestoneInput[];
-}): Record<string, string> {
+function validateProjectForm(
+    input: {
+        title: string;
+        shortDescription: string;
+        description: string;
+        technologies: string[];
+        roles: ProjectRoleRequirementInput[];
+        milestones: ProjectMilestoneInput[];
+    },
+    t: TFunction,
+): Record<string, string> {
     const errors: Record<string, string> = {};
-    if (input.title.trim().length < 3) errors.title = "Title must be at least 3 characters.";
-    if (input.shortDescription.trim().length < 10) errors.shortDescription = "Short description must be at least 10 characters.";
-    if (input.description.trim().length < 20) errors.description = "Detailed description must be at least 20 characters.";
-    if (input.technologies.length === 0) errors.technologies = "Add at least one technology.";
-    if (!input.roles.some((role) => role.title.trim())) errors.openRoles = "Add at least one role with a title.";
+    if (input.title.trim().length < 3) errors.title = t("detail.errors.titleMin");
+    if (input.shortDescription.trim().length < 10) errors.shortDescription = t("detail.errors.shortDescriptionMin");
+    if (input.description.trim().length < 20) errors.description = t("detail.errors.descriptionMin");
+    if (input.technologies.length === 0) errors.technologies = t("detail.errors.technologiesRequired");
+    if (!input.roles.some((role) => role.title.trim())) errors.openRoles = t("detail.errors.openRolesRequired");
     if (!input.milestones.some((milestone) => milestone.title.trim() && milestone.description.trim())) {
-        errors.milestones = "Add at least one milestone with title and description.";
+        errors.milestones = t("detail.errors.milestonesRequired");
     }
     return errors;
 }

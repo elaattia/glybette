@@ -1,7 +1,8 @@
 import { useState } from "react";
 import { Edit3, Download, Trash2, Clock, Target, MoreVertical, Copy, Share2, Loader } from "lucide-react";
+import { useLocale } from "@/hooks/useLocale";
 import type { CvDTO } from "../../types/cv.types";
-import { getTemplate } from "../../templates";
+import { getLocalizedTemplate, formatCvCardTimeAgo } from "../../lib/cv-i18n";
 import { MiniCvPreview } from "./MiniCvPreview";
 
 interface CvCardProps {
@@ -25,20 +26,21 @@ export function CvCard({
     isDeleting,
     isDuplicating,
 }: CvCardProps) {
+    const { t, locale } = useLocale("cvBuilder");
     const [menuOpen, setMenuOpen] = useState(false);
-    const tpl = getTemplate(cv.template);
+    const tpl = getLocalizedTemplate(t, cv.template);
 
     const atsColor =
         cv.atsScore == null ? null : cv.atsScore >= 80 ? "#16A34A" : cv.atsScore >= 60 ? "#ca8a04" : "#dc2626";
 
-    const timeAgo = formatRelative(new Date(cv.updatedAt));
+    const timeAgo = formatCvCardTimeAgo(new Date(cv.updatedAt), t, locale);
     const isBusy = isDeleting || isDuplicating;
 
     const sections = cv.sections ?? [];
     const personal = (sections.find((s) => s.type === "personal-info")?.data ?? {}) as Record<string, string>;
-    const firstName = personal.firstName || "Prénom";
-    const lastName = personal.lastName || "Nom";
-    const roleTitle = personal.roleTitle || "Titre du poste";
+    const firstName = personal.firstName || t("card.placeholders.firstName");
+    const lastName = personal.lastName || t("card.placeholders.lastName");
+    const roleTitle = personal.roleTitle || t("card.placeholders.roleTitle");
 
     return (
         <div
@@ -86,7 +88,7 @@ export function CvCard({
 
                 {cv.isPublic && (
                     <div style={{ position: "absolute", top: "14px", left: "14px", background: "rgba(22,163,74,0.85)", backdropFilter: "blur(4px)", color: "#fff", fontSize: "9px", fontWeight: 600, padding: "2px 8px", borderRadius: "99px", display: "flex", alignItems: "center", gap: "4px" }}>
-                        <Share2 style={{ width: 9, height: 9 }} /> Public
+                        <Share2 style={{ width: 9, height: 9 }} /> {t("card.public")}
                     </div>
                 )}
 
@@ -117,7 +119,7 @@ export function CvCard({
                     <div style={{ marginTop: "10px" }}>
                         <div style={{ display: "flex", justifyContent: "space-between", marginBottom: "3px" }}>
                             <span style={{ fontSize: "11px", color: "var(--gb-muted)", display: "flex", alignItems: "center", gap: "3px" }}>
-                                <Target style={{ width: 10, height: 10 }} /> ATS Score
+                                <Target style={{ width: 10, height: 10 }} /> {t("card.atsScore")}
                             </span>
                             <span style={{ fontSize: "11px", fontWeight: 700, color: atsColor! }}>{cv.atsScore}/100</span>
                         </div>
@@ -131,13 +133,13 @@ export function CvCard({
                     <button
                         onClick={(e) => { e.stopPropagation(); onEdit(cv); }}
                         style={{ flex: 1, display: "flex", alignItems: "center", justifyContent: "center", gap: "6px", background: "linear-gradient(90deg, #16A34A, #0284C7)", color: "#fff", border: "none", borderRadius: "9px", padding: "7px", fontSize: "12px", fontWeight: 600, cursor: "pointer" }}>
-                        <Edit3 style={{ width: 12, height: 12 }} /> Modifier
+                        <Edit3 style={{ width: 12, height: 12 }} /> {t("card.edit")}
                     </button>
 
                     <button
                         onClick={(e) => { e.stopPropagation(); onExportPdf(cv._id); }}
                         disabled={isExporting}
-                        title="Exporter PDF"
+                        title={t("card.exportPdfTitle")}
                         style={{ display: "flex", alignItems: "center", justifyContent: "center", gap: "5px", background: "var(--gb-app-hover)", border: "1px solid var(--gb-border)", borderRadius: "9px", padding: "7px 11px", fontSize: "12px", fontWeight: 500, color: "var(--gb-text-off)", cursor: isExporting ? "wait" : "pointer", flexShrink: 0 }}>
                         {isExporting ? <Loader style={{ width: 12, height: 12, animation: "spin 1s linear infinite" }} /> : <Download style={{ width: 12, height: 12 }} />}
                     </button>
@@ -148,11 +150,11 @@ export function CvCard({
                 <>
                     <div style={{ position: "fixed", inset: 0, zIndex: 10 }} onClick={(e) => { e.stopPropagation(); setMenuOpen(false); }} />
                     <div style={{ position: "absolute", top: "14px", right: "14px", zIndex: 20, background: "var(--gb-app-panel-bg)", border: "1px solid var(--gb-border)", borderRadius: "12px", padding: "5px", minWidth: "160px", boxShadow: "0 8px 28px rgba(0,0,0,0.2)" }}>
-                        <MenuItem icon={<Edit3 style={{ width: 13, height: 13 }} />} label="Modifier" onClick={() => { setMenuOpen(false); onEdit(cv); }} />
-                        <MenuItem icon={<Copy style={{ width: 13, height: 13 }} />} label="Dupliquer" onClick={() => { setMenuOpen(false); onDuplicate(cv._id); }} />
-                        <MenuItem icon={<Download style={{ width: 13, height: 13 }} />} label="Exporter PDF" onClick={() => { setMenuOpen(false); onExportPdf(cv._id); }} />
+                        <MenuItem icon={<Edit3 style={{ width: 13, height: 13 }} />} label={t("card.edit")} onClick={() => { setMenuOpen(false); onEdit(cv); }} />
+                        <MenuItem icon={<Copy style={{ width: 13, height: 13 }} />} label={t("card.duplicate")} onClick={() => { setMenuOpen(false); onDuplicate(cv._id); }} />
+                        <MenuItem icon={<Download style={{ width: 13, height: 13 }} />} label={t("card.exportPdf")} onClick={() => { setMenuOpen(false); onExportPdf(cv._id); }} />
                         <div style={{ height: "1px", background: "var(--gb-border)", margin: "3px 0" }} />
-                        <MenuItem icon={<Trash2 style={{ width: 13, height: 13 }} />} label="Supprimer" danger onClick={() => { setMenuOpen(false); onDelete(cv._id); }} />
+                        <MenuItem icon={<Trash2 style={{ width: 13, height: 13 }} />} label={t("card.delete")} danger onClick={() => { setMenuOpen(false); onDelete(cv._id); }} />
                     </div>
                 </>
             )}
@@ -172,16 +174,4 @@ function MenuItem({ icon, label, onClick, danger }: { icon: React.ReactNode; lab
             {icon} {label}
         </button>
     );
-}
-
-function formatRelative(date: Date): string {
-    const diff = Date.now() - date.getTime();
-    const m = Math.floor(diff / 60000);
-    if (m < 1) return "À l'instant";
-    if (m < 60) return `Il y a ${m}m`;
-    const h = Math.floor(m / 60);
-    if (h < 24) return `Il y a ${h}h`;
-    const d = Math.floor(h / 24);
-    if (d < 7) return `Il y a ${d}j`;
-    return date.toLocaleDateString("fr-FR", { day: "numeric", month: "short" });
 }

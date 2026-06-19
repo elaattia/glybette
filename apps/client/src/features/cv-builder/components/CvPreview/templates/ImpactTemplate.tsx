@@ -2,10 +2,14 @@ import { Mail, Phone, MapPin, Linkedin, Github, Globe } from "lucide-react";
 import type { TemplateProps } from "./TemplateSection";
 import { Avatar } from "./TemplateSection";
 
+import { useLocale } from "@/hooks/useLocale";
+import { useSectionLabels } from "../../../lib/cv-i18n";
 export function ImpactTemplate({
     personal, summary, experience, education,
     skills, projects, languages, certs, accent, bg, photo,
 }: TemplateProps) {
+    const { t } = useLocale("cvBuilder");
+    const labels = useSectionLabels(t);
     const A = accent; // #f97316
 
     return (
@@ -75,7 +79,7 @@ export function ImpactTemplate({
                     flexShrink: 0,
                 }}>
                     {skills.length > 0 && (
-                        <SideSection title="Compétences" accent={A}>
+                        <SideSection title={labels.skills} accent={A}>
                             {skills.map((g) => (
                                 <div key={g.id} style={{ marginBottom: "8px" }}>
                                     {g.category && (
@@ -104,7 +108,7 @@ export function ImpactTemplate({
                     )}
 
                     {languages.length > 0 && (
-                        <SideSection title="Langues" accent={A}>
+                        <SideSection title={labels.languages} accent={A}>
                             {languages.map((l) => (
                                 <div key={l.id} style={{ marginBottom: "6px" }}>
                                     <div style={{ display: "flex", justifyContent: "space-between", marginBottom: "2px" }}>
@@ -120,7 +124,7 @@ export function ImpactTemplate({
                     )}
 
                     {education.length > 0 && (
-                        <SideSection title="Formation" accent={A}>
+                        <SideSection title={labels.education} accent={A}>
                             {education.map((e) => (
                                 <div key={e.id} style={{ marginBottom: "9px" }}>
                                     <p style={{ margin: 0, fontWeight: 700, fontSize: `calc(8.5pt * var(--cv-body-scale, 1))`, color: "#1a1a2e" }}>
@@ -134,7 +138,7 @@ export function ImpactTemplate({
                     )}
 
                     {certs.length > 0 && (
-                        <SideSection title="Certifications" accent={A}>
+                        <SideSection title={labels.certifications} accent={A}>
                             {certs.map((c) => (
                                 <div key={c.id} style={{ marginBottom: "7px" }}>
                                     <p style={{ margin: 0, fontWeight: 700, fontSize: `calc(8.5pt * var(--cv-body-scale, 1))`, color: "#222" }}>{c.name}</p>
@@ -148,7 +152,7 @@ export function ImpactTemplate({
                 <div style={{ flex: 1, padding: "22px 22px" }}>
 
                     {summary?.text && (
-                        <MainSection title="Profil" accent={A} bg={bg}>
+                        <MainSection title={labels.summary} accent={A} bg={bg}>
                             <p style={{ fontSize: `calc(9pt * var(--cv-body-scale, 1))`, color: "#444", margin: 0, lineHeight: 1.7 }}>
                                 {summary.text}
                             </p>
@@ -156,7 +160,7 @@ export function ImpactTemplate({
                     )}
 
                     {experience.length > 0 && (
-                        <MainSection title="Expérience" accent={A} bg={bg}>
+                        <MainSection title={labels.experience} accent={A} bg={bg}>
                             {experience.map((e, i) => (
                                 <div key={e.id} style={{
                                     marginBottom: "14px",
@@ -173,7 +177,7 @@ export function ImpactTemplate({
                                             padding: "1px 8px",
                                             fontWeight: 600,
                                         }}>
-                                            {e.startDate} – {e.current ? "Présent" : e.endDate}
+                                            {e.startDate} – {e.current ? labels.current : e.endDate}
                                         </span>
                                     </div>
                                     <div style={{ fontSize: `calc(8.5pt * var(--cv-body-scale, 1))`, color: A, fontWeight: 600, marginBottom: "3px" }}>
@@ -190,7 +194,7 @@ export function ImpactTemplate({
                     )}
 
                     {projects.length > 0 && (
-                        <MainSection title="Projets" accent={A} bg={bg}>
+                        <MainSection title={labels.projects} accent={A} bg={bg}>
                             {projects.map((p) => (
                                 <div key={p.id} style={{ marginBottom: "10px" }}>
                                     <span style={{ fontWeight: 700, fontSize: `calc(9pt * var(--cv-body-scale, 1))`, color: "#1a1a2e" }}>{p.name}</span>

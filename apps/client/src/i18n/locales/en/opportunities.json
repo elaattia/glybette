@@ -1,0 +1,290 @@
+{
+    "constants": {
+        "sourceLabels": {
+            "entreprise_partenaire": "Glybette Partner",
+            "indeed": "Indeed",
+            "linkedin": "LinkedIn",
+            "welcometothejungle": "WTTJ",
+            "pfebooks.com": "PFEBooks"
+        },
+        "filterLabels": {
+            "type_offre": {
+                "emploi": "Job",
+                "stage": "Internship",
+                "pfe": "Final-year project",
+                "opportunite": "Opportunity"
+            },
+            "source": {
+                "entreprise_partenaire": "Glybette Partner",
+                "indeed": "Indeed",
+                "linkedin": "LinkedIn",
+                "welcometothejungle": "WTTJ",
+                "pfebooks.com": "PFEBooks"
+            },
+            "date_posted": {
+                "today": "Today",
+                "this_week": "This week",
+                "3days": "Last 3 days",
+                "this_hour": "This hour"
+            },
+            "teletravail": {
+                "remote": "Full Remote",
+                "hybrid": "Hybrid",
+                "onsite": "On-site"
+            },
+            "niveau_experience": {
+                "junior": "Junior",
+                "mid": "Mid-level",
+                "senior": "Senior"
+            }
+        },
+        "scoreLabel": {
+            "excellent": "Excellent match",
+            "good": "Good match",
+            "partial": "Partial match"
+        },
+        "timeAgo": {
+            "recently": "Recently",
+            "justNow": "Just now",
+            "minutesAgo": "{{count}} min ago",
+            "hoursAgo": "{{count}}h ago",
+            "daysAgo": "{{count}}d ago"
+        }
+    },
+    "list": {
+        "label": "Discover",
+        "title": "Opportunities",
+        "loading": "Loading...",
+        "offersAvailable": "{{count}} offers available",
+        "recommendedForYou": "{{count}} recommended for you",
+        "live": "LIVE",
+        "updated": "Updated {{time}}",
+        "checkNewOffersTitle": "Check for new offers",
+        "newBanner": {
+            "one": "{{count}} new offer available!",
+            "other": "{{count}} new offers available!"
+        },
+        "showNew": "Show",
+        "sourceTabs": {
+            "all": "All offers",
+            "partner": "Partner offers",
+            "scraped": "Scraped offers"
+        },
+        "statsBar": {
+            "visibleOfTotal": "{{visible}} shown of {{total}}",
+            "recommended": "recommended for you"
+        },
+        "sections": {
+            "recommended": "Recommended for you ({{count}})",
+            "other": "Other offers ({{count}})"
+        },
+        "error": "Unable to load offers. Make sure the jobs service is running.",
+        "empty": {
+            "title": "No offers found",
+            "description": "Try changing your filters or search query.",
+            "resetFilters": "Reset filters"
+        }
+    },
+    "filters": {
+        "searchPlaceholder": "Search for a role, company, skill...",
+        "search": "Search",
+        "filters": "Filters",
+        "resetAll": "Reset all filters",
+        "locationPlaceholder": "e.g. Tunis, Paris...",
+        "groups": {
+            "type_offre": "Offer type",
+            "source": "Source",
+            "teletravail": "Work mode",
+            "date_posted": "Posted",
+            "niveau_experience": "Level",
+            "tri": "Sort by",
+            "localisation": "Location"
+        },
+        "options": {
+            "all": "All",
+            "allFeminine": "All",
+            "allPeriod": "Any time",
+            "recent": "Most recent",
+            "vues": "Most viewed"
+        }
+    },
+    "jobCard": {
+        "viewDetails": "View details →"
+    },
+    "detail": {
+        "loading": "Loading offer...",
+        "notFound": "Offer not found.",
+        "backToOffers": "← Back to offers",
+        "applicationStatus": {
+            "label": "Your application status:",
+            "pending": "Pending",
+            "viewed": "Viewed",
+            "accepted": "Accepted",
+            "rejected": "Rejected"
+        },
+        "tabs": {
+            "overview": "Overview",
+            "interview": "Interview",
+            "coverLetter": "Cover letter",
+            "cvAdapt": "Adapt CV"
+        },
+        "actions": {
+            "title": "AI Actions",
+            "prepareInterview": "Prepare for interview",
+            "coverLetter": "Cover letter",
+            "adaptCv": "Adapt my CV"
+        },
+        "header": {
+            "defaultCompany": "Company",
+            "views": "{{count}} views",
+            "applyNow": "Apply now"
+        },
+        "matching": {
+            "title": "AI Match Score",
+            "calculating": "Calculating...",
+            "notCalculated": "Score not calculated",
+            "calculate": "Calculate",
+            "strengths": "Strengths",
+            "improvements": "Areas for improvement",
+            "missingSkills": "Missing skills",
+            "matchingSkills": "Matching skills",
+            "recommendations": "Recommendations"
+        },
+        "overview": {
+            "requiredSkills": "Required skills",
+            "description": "Job description",
+            "expand": "Show more",
+            "collapse": "Show less",
+            "aboutCompany": "About the company",
+            "info": "Information",
+            "contact": "Contact",
+            "fields": {
+                "source": "Source",
+                "type": "Type",
+                "domain": "Domain",
+                "size": "Size",
+                "level": "Level",
+                "contract": "Contract"
+            }
+        },
+        "coverLetter": {
+            "toneTitle": "Letter tone",
+            "tones": {
+                "professional": "Formal",
+                "enthusiastic": "Enthusiastic",
+                "concise": "Concise"
+            },
+            "generating": "Generating...",
+            "generate": "Generate letter",
+            "regenerate": "Regenerate",
+            "yourLetter": "Your cover letter",
+            "downloadingPdf": "PDF...",
+            "downloadPdf": "Download PDF",
+            "copied": "✓ Copied!",
+            "copy": "Copy",
+            "send": "Send",
+            "defaultProfile": "Candidate profile not provided"
+        },
+        "interview": {
+            "subTabs": {
+                "questions": "Interview questions",
+                "chat": "AI Chat"
+            },
+            "generatingQuestions": "Generating questions...",
+            "generateQuestions": "Generate interview questions",
+            "categories": {
+                "behavioural": "Behavioral",
+                "technical": "Technical",
+                "situational": "Situational"
+            },
+            "questionNumber": "Question {{current}}/{{total}}",
+            "previous": "← Previous",
+            "next": "Next →",
+            "yourAnswer": "Your answer",
+            "voiceStop": "Stop",
+            "voiceStart": "Answer by voice",
+            "answerPlaceholder": "Write or dictate your answer... (STAR method recommended)",
+            "evaluating": "Evaluating...",
+            "submitEvaluation": "Submit for AI evaluation",
+            "evaluation": "Evaluation",
+            "evalStrengths": "Strengths",
+            "evalImprove": "To improve",
+            "keywords": "Keywords",
+            "suggestedAnswer": "Suggested answer",
+            "tips": "Tips"
+        },
+        "chat": {
+            "title": "AI Career Assistant",
+            "online": "Online · Specialized for this offer",
+            "listening": "Listening…",
+            "welcome": "Hello! I'm your career assistant for this opportunity at **{{company}}** ({{title}}).\n\nI can help you:\n• Understand the job requirements\n• Prepare your interview answers\n• Analyze your fit with the offer\n• Answer any questions you have\n\nWhat would you like to know?",
+            "defaultCompany": "the company",
+            "noResponse": "I couldn't generate a response.",
+            "error": "Sorry, an error occurred. Make sure the AI service is running.",
+            "suggestedQuestions": "Suggested questions",
+            "suggestions": [
+                "What skills are most important for this role?",
+                "How should I prepare for an interview for this offer?",
+                "What questions might I be asked?",
+                "How can I highlight my profile for this role?",
+                "What salary range is reasonable for this type of role?"
+            ],
+            "placeholderActive": "Speak now… (or type your message)",
+            "placeholderIdle": "Ask a question about this offer… (Enter to send)",
+            "stopMicTitle": "Stop microphone",
+            "startMicTitle": "Dictate a message",
+            "rec": "REC",
+            "footer": "Enter to send · Shift+Enter for new line",
+            "micActive": "Click the mic to stop",
+            "micAvailable": "Microphone available"
+        },
+        "cvAdapt": {
+            "importTitle": "Import your CV",
+            "importDescription": "Upload your CV (PDF, DOCX or TXT) for personalized recommendations.",
+            "parsingFile": "Reading file...",
+            "charactersClickToChange": "{{count}} characters · Click to change",
+            "dropTitle": "Drag and drop your CV here",
+            "dropHint": "PDF, DOCX, TXT · max 5 MB",
+            "analyzing": "Analyzing your CV...",
+            "atsScoreTitle": "Estimated ATS score",
+            "basedOnUpload": "Based on your uploaded CV",
+            "basedOnProfile": "Based on your profile",
+            "keywordsToAdd": "Keywords to add",
+            "adaptedSummary": "Adapted summary",
+            "skillsToAdd": "Skills to add",
+            "currentVersion": "Current version",
+            "improvedVersion": "Improved version",
+            "generalAdvice": "General advice",
+            "createAdaptedTitle": "Create a CV tailored to this offer",
+            "createAdaptedDescription": "AI will generate a complete CV optimized for **{{title}}**{{companySuffix}}.",
+            "companySuffix": " at {{company}}",
+            "cvCreatedRedirect": "CV created! Redirecting...",
+            "generating": "Generating...",
+            "createAdaptedCv": "Create my tailored CV",
+            "rerunAnalysis": "Run analysis again",
+            "analyzeForOffer": "Analyze my CV for this offer",
+            "uploadHint": "Upload your CV above for an accurate analysis,<br />or run with your current profile.",
+            "createError": "Error creating CV. Please try again.",
+            "defaultProfile": "Candidate profile not provided",
+            "defaultSummary": "Motivated candidate for the {{title}} role{{companySuffix}}. {{skillsPrefix}}",
+            "skillsPrefix": "Proficient in {{skills}}.",
+            "skillCategories": {
+                "skills": "Skills",
+                "technical": "Technical skills",
+                "required": "Required skills"
+            },
+            "cvTitle": "Tailored CV - {{title}}{{companySuffix}}"
+        },
+        "applyForm": {
+            "resumeLabel": "Resume (PDF)",
+            "coverLetterLabel": "Cover letter (PDF)",
+            "filesRequired": "Please upload your resume and cover letter in PDF format.",
+            "successTitle": "✓ Application sent successfully!",
+            "successSubtitle": "The company will review your application soon.",
+            "cancel": "Cancel",
+            "submitting": "Sending...",
+            "submit": "Apply",
+            "genericError": "An error occurred"
+        }
+    }
+}

@@ -1,4 +1,5 @@
 import { Plus, FileText, Sparkles } from "lucide-react";
+import { useLocale } from "@/hooks/useLocale";
 import { CvCard } from "../CvCard/CvCard";
 import { useCvList } from "../../hooks/useCvList";
 import type { CvDTO } from "../../types/cv.types";
@@ -9,6 +10,7 @@ interface CvListViewProps {
 }
 
 export function CvListView({ onNewCv, onEditCv }: CvListViewProps) {
+    const { t } = useLocale("cvBuilder");
     const { cvs, isLoading, deleteCV, isDeletingId, duplicateCV, isDuplicatingId, exportPdf, isExportingId } =
         useCvList();
 
@@ -33,12 +35,12 @@ export function CvListView({ onNewCv, onEditCv }: CvListViewProps) {
                             letterSpacing: "-0.03em",
                             margin: 0,
                         }}>
-                        Mes CVs
+                        {t("list.title")}
                     </h1>
                     <p style={{ fontSize: "13.5px", color: "var(--gb-muted)", marginTop: "4px" }}>
                         {isLoading
-                            ? "Chargement…"
-                            : `${cvs.length} CV${cvs.length !== 1 ? "s" : ""} sauvegardé${cvs.length !== 1 ? "s" : ""}`}
+                            ? t("list.loading")
+                            : t("list.savedCount", { count: cvs.length })}
                     </p>
                 </div>
 
@@ -69,7 +71,7 @@ export function CvListView({ onNewCv, onEditCv }: CvListViewProps) {
                         e.currentTarget.style.boxShadow = "0 0 28px rgba(22,163,74,0.28)";
                     }}>
                     <Plus style={{ width: 16, height: 16 }} />
-                    Créer un nouveau CV
+                    {t("list.createNew")}
                 </button>
             </div>
 
@@ -129,7 +131,7 @@ export function CvListView({ onNewCv, onEditCv }: CvListViewProps) {
                             color: "var(--gb-text)",
                             margin: "0 0 8px",
                         }}>
-                        Aucun CV pour le moment
+                        {t("list.empty.title")}
                     </h2>
                     <p
                         style={{
@@ -138,7 +140,7 @@ export function CvListView({ onNewCv, onEditCv }: CvListViewProps) {
                             marginBottom: "24px",
                             maxWidth: "340px",
                         }}>
-                        Créez votre premier CV optimisé par l'IA en quelques minutes.
+                        {t("list.empty.description")}
                     </p>
                     <button
                         onClick={onNewCv}
@@ -157,7 +159,7 @@ export function CvListView({ onNewCv, onEditCv }: CvListViewProps) {
                             fontFamily: "inherit",
                         }}>
                         <Sparkles style={{ width: 15, height: 15 }} />
-                        Créer mon premier CV
+                        {t("list.empty.createFirst")}
                     </button>
                 </div>
             )}

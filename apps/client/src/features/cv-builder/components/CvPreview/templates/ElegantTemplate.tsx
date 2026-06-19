@@ -3,10 +3,14 @@ import type { TemplateProps } from "./TemplateSection";
 import { Avatar } from "./TemplateSection";
 
 
+import { useLocale } from "@/hooks/useLocale";
+import { useSectionLabels } from "../../../lib/cv-i18n";
 export function ElegantTemplate({
     personal, summary, experience, education,
     skills, projects, languages, certs, accent, bg, photo,
 }: TemplateProps) {
+    const { t } = useLocale("cvBuilder");
+    const labels = useSectionLabels(t);
     const sidebarBg = bg;
     const A = accent;
 
@@ -66,7 +70,7 @@ export function ElegantTemplate({
                 <div style={{ height: "1px", background: "rgba(255,255,255,0.15)" }} />
 
                 <div>
-                    <SideLabel text="Contact" accent={A} />
+                    <SideLabel text={labels.personalInfo} accent={A} />
                     {personal?.email && (
                         <SideItem icon={<Mail size={9} />} text={personal.email} />
                     )}
@@ -89,7 +93,7 @@ export function ElegantTemplate({
 
                 {skills.length > 0 && (
                     <div>
-                        <SideLabel text="Compétences" accent={A} />
+                        <SideLabel text={labels.skills} accent={A} />
                         {skills.map((g) => (
                             <div key={g.id} style={{ marginBottom: "8px" }}>
                                 {g.category && (
@@ -117,7 +121,7 @@ export function ElegantTemplate({
 
                 {languages.length > 0 && (
                     <div>
-                        <SideLabel text="Langues" accent={A} />
+                        <SideLabel text={labels.languages} accent={A} />
                         {languages.map((l) => (
                             <div key={l.id} style={{ marginBottom: "5px" }}>
                                 <div style={{ display: "flex", justifyContent: "space-between", marginBottom: "2px" }}>
@@ -154,7 +158,7 @@ export function ElegantTemplate({
             <div style={{ flex: 1, padding: "32px 26px", background: "#fff" }}>
 
                 {summary?.text && (
-                    <MainSection title="Profil Professionnel" accent={A}>
+                    <MainSection title={labels.summary} accent={A}>
                         <p style={{ fontSize: `calc(9pt * var(--cv-body-scale, 1))`, color: "#444", margin: 0, lineHeight: 1.7, fontStyle: "italic" }}>
                             {summary.text}
                         </p>
@@ -162,13 +166,13 @@ export function ElegantTemplate({
                 )}
 
                 {experience.length > 0 && (
-                    <MainSection title="Expérience Professionnelle" accent={A}>
+                    <MainSection title={labels.experience} accent={A}>
                         {experience.map((e) => (
                             <div key={e.id} style={{ marginBottom: "14px" }}>
                                 <div style={{ display: "flex", justifyContent: "space-between", alignItems: "baseline", flexWrap: "wrap" }}>
                                     <span style={{ fontWeight: 700, fontSize: `calc(9.5pt * var(--cv-body-scale, 1))`, color: "#1a1a2e" }}>{e.position}</span>
                                     <span style={{ fontSize: `calc(7.5pt * var(--cv-body-scale, 1))`, color: "#888" }}>
-                                        {e.startDate}{e.startDate ? " – " : ""}{e.current ? "Présent" : e.endDate}
+                                        {e.startDate}{e.startDate ? " – " : ""}{e.current ? labels.current : e.endDate}
                                     </span>
                                 </div>
                                 <div style={{ fontSize: `calc(8.5pt * var(--cv-body-scale, 1))`, color: A, fontWeight: 600, marginBottom: "3px" }}>
@@ -185,7 +189,7 @@ export function ElegantTemplate({
                 )}
 
                 {education.length > 0 && (
-                    <MainSection title="Formation" accent={A}>
+                    <MainSection title={labels.education} accent={A}>
                         {education.map((e) => (
                             <div key={e.id} style={{ marginBottom: "10px" }}>
                                 <div style={{ display: "flex", justifyContent: "space-between", alignItems: "baseline", flexWrap: "wrap" }}>
@@ -202,7 +206,7 @@ export function ElegantTemplate({
                 )}
 
                 {projects.length > 0 && (
-                    <MainSection title="Projets" accent={A}>
+                    <MainSection title={labels.projects} accent={A}>
                         {projects.map((p) => (
                             <div key={p.id} style={{ marginBottom: "10px" }}>
                                 <span style={{ fontWeight: 600, fontSize: `calc(9pt * var(--cv-body-scale, 1))`, color: "#1a1a2e" }}>{p.name}</span>

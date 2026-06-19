@@ -1,25 +1,13 @@
 import "@/styles/home/how-it-works.css";
+import { useTranslation } from "react-i18next";
 import { User, Sparkles, Rocket, ArrowRight } from "lucide-react";
 
-const steps = [
-    {
-        num: "01",
-        icon: <User className="w-6 h-6" />,
-        title: "Build Your Profile",
-        desc: "Start with the basics. Create your CV, add your skills, and build a profile that truly reflects who you are.",
-    },
-    {
-        num: "02",
-        icon: <Sparkles className="w-6 h-6" />,
-        title: "Grow & Prepare",
-        desc: "Level up before you apply. Work on your portfolio, practice interviews, and improve your skills with courses and certifications.",
-    },
-    {
-        num: "03",
-        icon: <Rocket className="w-6 h-6" />,
-        title: "Discover & Apply",
-        desc: "Find the right opportunities. Explore internships, PFE projects, and jobs tailored to your profile and apply with confidence.",
-    },
+const STEP_KEYS = ["profile", "prepare", "apply"] as const;
+
+const STEP_ICONS = [
+    <User className="w-6 h-6" />,
+    <Sparkles className="w-6 h-6" />,
+    <Rocket className="w-6 h-6" />,
 ];
 
 function useReveal() {
@@ -40,33 +28,38 @@ function useReveal() {
 }
 
 export default function HowItWorks() {
+    const { t } = useTranslation("landing");
     const reveal = useReveal();
+
     return (
         <section id="how-it-works">
             <div className="gb-hiw" ref={reveal}>
                 <div className="gb-hiw-header">
-                    <div className="gb-sec-label">How it works</div>
+                    <div className="gb-sec-label">{t("howItWorks.label")}</div>
                     <h2>
-                        From getting started
+                        {t("howItWorks.titleLine1")}
                         <br />
-                        to getting hired
+                        {t("howItWorks.titleLine2")}
                     </h2>
-                    <p>Glybette is designed to get you from zero to opportunity as fast as possible.</p>
+                    <p>{t("howItWorks.subtitle")}</p>
                 </div>
                 <div className="gb-steps">
-                    {steps.map((s) => (
-                        <div key={s.num} className="gb-step">
-                            <div className="gb-step-bg-num">{s.num}</div>
-                            <div className="gb-step-icon">{s.icon}</div>
-                            <div className="gb-step-n">Step {s.num}</div>
-                            <h3>{s.title}</h3>
-                            <p>{s.desc}</p>
-                        </div>
-                    ))}
+                    {STEP_KEYS.map((key, index) => {
+                        const num = t(`howItWorks.steps.${key}.num`);
+                        return (
+                            <div key={key} className="gb-step">
+                                <div className="gb-step-bg-num">{num}</div>
+                                <div className="gb-step-icon">{STEP_ICONS[index]}</div>
+                                <div className="gb-step-n">{t("howItWorks.stepPrefix", { num })}</div>
+                                <h3>{t(`howItWorks.steps.${key}.title`)}</h3>
+                                <p>{t(`howItWorks.steps.${key}.description`)}</p>
+                            </div>
+                        );
+                    })}
                 </div>
                 <div className="gb-hiw-cta">
                     <a href="/onboarding" className="gb-btn-primary-sm">
-                        Start Now <ArrowRight className="w-4 h-4 inline ml-1" />
+                        {t("howItWorks.startNow")} <ArrowRight className="w-4 h-4 inline ml-1" />
                     </a>
                 </div>
             </div>

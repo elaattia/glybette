@@ -2,6 +2,8 @@ import * as pdfjsLib from "pdfjs-dist";
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useQueryClient } from "@tanstack/react-query";
+import { useTranslation } from "react-i18next";
+import type { TFunction } from "i18next";
 import { FileText, Bot, Sparkles } from "lucide-react";
 import { TemplatePickerView } from "@/features/cv-builder";
 import { makeDefaultSections } from "@/features/cv-builder";
@@ -13,14 +15,13 @@ pdfjsLib.GlobalWorkerOptions.workerSrc = `https://unpkg.com/pdfjs-dist@${pdfjsLi
 
 type UploadStep = "reading" | "extracting" | "creating" | null;
 
-const STEPS: { key: UploadStep & string; label: string; Icon: React.ComponentType<{ size?: number; style?: React.CSSProperties }> }[] = [
-    { key: "reading", label: "Lecture du fichier", Icon: FileText },
-    { key: "extracting", label: "Extraction IA des données…", Icon: Bot },
-    { key: "creating", label: "Création de votre CV", Icon: Sparkles },
-] as const;
-
-function UploadProgressOverlay({ step, fileName }: { step: UploadStep; fileName?: string }) {
+function UploadProgressOverlay({ step, fileName, t }: { step: UploadStep; fileName?: string; t: TFunction }) {
     if (!step) return null;
+    const STEPS: { key: UploadStep & string; labelKey: string; Icon: React.ComponentType<{ size?: number; style?: React.CSSProperties }> }[] = [
+        { key: "reading", labelKey: "create.upload.steps.reading", Icon: FileText },
+        { key: "extracting", labelKey: "create.upload.steps.extracting", Icon: Bot },
+        { key: "creating", labelKey: "create.upload.steps.creating", Icon: Sparkles },
+    ];
     const currentIdx = STEPS.findIndex((s) => s.key === step);
     const CurrentIcon = STEPS[currentIdx]?.Icon;
     return (
@@ -61,7 +62,7 @@ function UploadProgressOverlay({ step, fileName }: { step: UploadStep; fileName?
                     {CurrentIcon && <CurrentIcon size={32} style={{ color: "#16A34A" }} />}
                 </div>
                 <h3 style={{ margin: "0 0 6px", fontSize: "16px", fontWeight: 700, color: "var(--gb-text)" }}>
-                    Importation en cours…
+                    {t("create.upload.title")}
                 </h3>
                 {fileName && (
                     <p
@@ -130,7 +131,7 @@ function UploadProgressOverlay({ step, fileName }: { step: UploadStep; fileName?
                                         fontWeight: isActive ? 600 : 400,
                                         color: isDone ? "#16A34A" : isActive ? "var(--gb-text)" : "var(--gb-muted)",
                                     }}>
-                                    {s.label}
+                                    {t(s.labelKey)}
                                 </span>
                             </div>
                         );
@@ -154,9 +155,7 @@ function UploadProgressOverlay({ step, fileName }: { step: UploadStep; fileName?
                     />
                 </div>
                 <p style={{ margin: "12px 0 0", fontSize: "11px", color: "var(--gb-muted)" }}>
-                    {step === "extracting"
-                        ? "L'IA analyse votre CV, cela peut prendre 30-60 secondes…"
-                        : "Veuillez patienter…"}
+                    {step === "extracting" ? t("create.upload.extractingHint") : t("create.upload.pleaseWait")}
                 </p>
             </div>
             <style>{`
@@ -167,7 +166,7 @@ function UploadProgressOverlay({ step, fileName }: { step: UploadStep; fileName?
     );
 }
 
-async function extractTextFromFile(file: File): Promise<string> {
+async function extractTextFromFile(file: File, t: TFunction): Promise<string> {
     if (file.name.toLowerCase().endsWith(".docx") || file.name.toLowerCase().endsWith(".doc")) {
         return new Promise((resolve, reject) => {
             const reader = new FileReader();
@@ -190,7 +189,7 @@ async function extractTextFromFile(file: File): Promise<string> {
                     .slice(0, 10000);
                 resolve(clean.length > 50 ? clean : `[DOCX: ${file.name}]`);
             };
-            reader.onerror = () => reject(new Error("Impossible de lire le fichier DOCX"));
+            reader.onerror = () => reject(new Error(t("create.docxReadError")));
             reader.readAsArrayBuffer(file);
         });
     }
@@ -215,14 +214,14 @@ async function extractTextFromFile(file: File): Promise<string> {
             return clean.length > 50 ? clean : `[PDF: ${file.name}]`;
         } catch (error) {
             console.error("Échec critique du parsing PDF", error);
-            throw new Error("Impossible de lire ce PDF");
+            throw new Error(t("create.pdfReadError"));
         }
     }
     return "";
 }
 
-function extractResultToSections(result: ExtractResult, templateId?: string) {
-    const sections = makeDefaultSections(templateId);
+function extractResultToSections(result: ExtractResult, templateId?: string, t?: TFunction) {
+    const sections = makeDefaultSections(templateId, t);
 
     const personalSection = sections.find((s) => s.type === "personal-info");
     if (personalSection && result.personalInfo) {
@@ -385,6 +384,7 @@ function extractResultToSections(result: ExtractResult, templateId?: string) {
 }
 
 export default function CvCreatePage() {
+    const { t } = useTranslation("cvBuilder");
     const navigate = useNavigate();
     const qc = useQueryClient();
     const [uploadStep, setUploadStep] = useState<UploadStep>(null);
@@ -394,15 +394,15 @@ export default function CvCreatePage() {
         if (mode === "blank") {
             try {
                 const { cv } = await cvApi.create({
-                    title: "Mon nouveau CV",
+                    title: t("create.defaultTitle"),
                     template: template.id,
-                    sections: makeDefaultSections(template.id),
+                    sections: makeDefaultSections(template.id, t),
                 });
                 qc.invalidateQueries({ queryKey: CV_LIST_KEY });
                 navigate(`/app/cv/${cv._id}`);
             } catch (err) {
                 console.error("[create] Failed to create blank CV", err);
-                alert("Erreur lors de la création du CV. Veuillez réessayer.");
+                alert(t("create.createError"));
             }
             return;
         }
@@ -411,12 +411,12 @@ export default function CvCreatePage() {
             setUploadFile(file.name);
             try {
                 setUploadStep("reading");
-                const rawText = await extractTextFromFile(file);
+                const rawText = await extractTextFromFile(file, t);
                 console.log("[create] extracted text length:", rawText.length);
                 console.log("[create] text preview:", rawText.slice(0, 300));
 
                 setUploadStep("extracting");
-                let sections = makeDefaultSections(template.id);
+                let sections = makeDefaultSections(template.id, t);
 
                 if (rawText.length > 50 && !rawText.startsWith("[PDF:") && !rawText.startsWith("[DOCX:")) {
                     try {
@@ -436,12 +436,9 @@ export default function CvCreatePage() {
                             extracted.skills?.length > 0;
 
                         if (hasData) {
-                            sections = extractResultToSections(extracted, template.id) as typeof sections;
+                            sections = extractResultToSections(extracted, template.id, t) as typeof sections;
                         } else {
-                            alert(
-                                "Le fichier a bien été importé mais le remplissage automatique a échoué. " +
-                                "Vous pourrez utiliser les boutons IA manuellement par la suite dans le formulaire.",
-                            );
+                            alert(t("create.importFailedAlert"));
                             console.warn("[create] extraction returned no meaningful data, using blank sections");
                         }
                     } catch (err) {
@@ -458,7 +455,7 @@ export default function CvCreatePage() {
                     .trim();
 
                 const { cv } = await cvApi.create({
-                    title: title || "Mon CV",
+                    title: title || t("create.importedTitle"),
                     template: template.id,
                     sections,
                 });
@@ -468,9 +465,9 @@ export default function CvCreatePage() {
                 console.error("[create] upload pipeline failed:", err);
                 setUploadStep("creating");
                 const { cv } = await cvApi.create({
-                    title: file.name.replace(/\.[^.]+$/, "") || "Mon CV",
+                    title: file.name.replace(/\.[^.]+$/, "") || t("create.importedTitle"),
                     template: template.id,
-                    sections: makeDefaultSections(template.id),
+                    sections: makeDefaultSections(template.id, t),
                 });
                 qc.invalidateQueries({ queryKey: CV_LIST_KEY });
                 navigate(`/app/cv/${cv._id}`);
@@ -483,7 +480,7 @@ export default function CvCreatePage() {
 
     return (
         <>
-            <UploadProgressOverlay step={uploadStep} fileName={uploadFile} />
+            <UploadProgressOverlay step={uploadStep} fileName={uploadFile} t={t} />
             <TemplatePickerView
                 onBack={() => navigate("/app/cv")}
                 onReady={handleReady}

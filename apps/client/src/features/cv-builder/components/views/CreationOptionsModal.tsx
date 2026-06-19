@@ -1,7 +1,8 @@
 import { useRef } from "react";
 import { X, Plus, Upload, Loader } from "lucide-react";
+import { useLocale } from "@/hooks/useLocale";
+import { getLocalizedTemplate } from "../../lib/cv-i18n";
 import type { TemplateInfo } from "../../types/cv.types";
-import { getTemplate } from "../../templates";
 
 interface CreationOptionsModalProps {
     template: TemplateInfo;
@@ -18,8 +19,9 @@ export function CreationOptionsModal({
     onUpload,
     isUploading = false,
 }: CreationOptionsModalProps) {
+    const { t } = useLocale("cvBuilder");
     const fileRef = useRef<HTMLInputElement>(null);
-    const tpl = getTemplate(template.id);
+    const tpl = getLocalizedTemplate(t, template.id);
 
     return (
         <div
@@ -55,10 +57,10 @@ export function CreationOptionsModal({
                     }}>
                     <div>
                         <h2 style={{ margin: 0, fontSize: "15px", fontWeight: 700, color: "var(--gb-text)" }}>
-                            Options de création
+                            {t("creationModal.title")}
                         </h2>
                         <p style={{ margin: "3px 0 0", fontSize: "12px", color: "var(--gb-muted)" }}>
-                            Comment souhaitez-vous commencer ?
+                            {t("creationModal.subtitle")}
                         </p>
                     </div>
                     <button
@@ -82,8 +84,8 @@ export function CreationOptionsModal({
                             icon={<Plus style={{ width: 18, height: 18 }} />}
                             iconBg="rgba(2,132,199,0.12)"
                             iconColor="#0284C7"
-                            title="Créer un nouveau CV"
-                            subtitle="Commencer avec un formulaire vierge"
+                            title={t("creationModal.blank.title")}
+                            subtitle={t("creationModal.blank.subtitle")}
                             onClick={onCreateBlank}
                         />
 
@@ -98,8 +100,8 @@ export function CreationOptionsModal({
                             }
                             iconBg="rgba(22,163,74,0.12)"
                             iconColor="#16A34A"
-                            title={isUploading ? "Extraction en cours…" : "Importer mon CV existant"}
-                            subtitle="Extraction IA depuis un PDF ou Word"
+                            title={isUploading ? t("creationModal.upload.titleUploading") : t("creationModal.upload.title")}
+                            subtitle={t("creationModal.upload.subtitle")}
                             onClick={() => fileRef.current?.click()}
                             disabled={isUploading}
                         />
@@ -178,7 +180,7 @@ export function CreationOptionsModal({
                                         textTransform: "uppercase",
                                         letterSpacing: "0.05em",
                                     }}>
-                                    Modèle choisi
+                                    {t("creationModal.selectedTemplate")}
                                 </p>
                                 <p
                                     style={{

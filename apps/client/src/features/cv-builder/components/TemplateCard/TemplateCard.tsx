@@ -1,4 +1,6 @@
 import { Check, Star } from "lucide-react";
+import { useLocale } from "@/hooks/useLocale";
+import { getLocalizedTemplate } from "../../lib/cv-i18n";
 import type { TemplateInfo } from "../../types/cv.types";
 import { MiniTemplatePreview } from "./MiniTemplatePreview";
 
@@ -9,6 +11,9 @@ interface TemplateCardProps {
 }
 
 export function TemplateCard({ template, isSelected, onClick }: TemplateCardProps) {
+    const { t } = useLocale("cvBuilder");
+    const localized = getLocalizedTemplate(t, template.id);
+
     return (
         <button
             onClick={onClick}
@@ -48,13 +53,13 @@ export function TemplateCard({ template, isSelected, onClick }: TemplateCardProp
 
                 {template.isAtsReady && (
                     <div style={{ position: "absolute", top: "14px", left: "14px", background: "#16A34A", color: "#fff", fontSize: "8.5px", fontWeight: 800, padding: "3px 9px", borderRadius: "99px", letterSpacing: "0.08em", zIndex: 3, boxShadow: "0 2px 8px rgba(22,163,74,0.4)", textTransform: "uppercase" }}>
-                        ATS-Ready
+                        {t("templates.badges.atsReady")}
                     </div>
                 )}
 
                 {template.category === "fancy" && (
                     <div style={{ position: "absolute", top: "14px", right: "14px", background: template.accentColor, color: "#fff", fontSize: "8.5px", fontWeight: 800, padding: "3px 9px", borderRadius: "99px", letterSpacing: "0.08em", zIndex: 3, display: "flex", alignItems: "center", gap: "3px", boxShadow: `0 2px 8px ${template.accentColor}60` }}>
-                        <Star style={{ width: 8, height: 8 }} /> Fancy
+                        <Star style={{ width: 8, height: 8 }} /> {t("templates.badges.fancy")}
                     </div>
                 )}
 
@@ -66,8 +71,8 @@ export function TemplateCard({ template, isSelected, onClick }: TemplateCardProp
             </div>
 
             <div style={{ padding: "10px 12px 11px", borderTop: "1px solid var(--gb-border)", background: "var(--gb-app-panel-bg)" }}>
-                <p style={{ margin: 0, fontSize: "12.5px", fontWeight: 700, color: "var(--gb-text)", lineHeight: 1.3 }}>{template.name}</p>
-                <p style={{ margin: "3px 0 0", fontSize: "10.5px", color: "var(--gb-muted)", lineHeight: 1.4 }}>{template.description}</p>
+                <p style={{ margin: 0, fontSize: "12.5px", fontWeight: 700, color: "var(--gb-text)", lineHeight: 1.3 }}>{localized.name}</p>
+                <p style={{ margin: "3px 0 0", fontSize: "10.5px", color: "var(--gb-muted)", lineHeight: 1.4 }}>{localized.description}</p>
             </div>
         </button>
     );

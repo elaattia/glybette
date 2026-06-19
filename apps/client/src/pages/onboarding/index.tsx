@@ -1,3 +1,4 @@
+import { useTranslation } from "react-i18next";
 import { useOnboarding } from "@/hooks/useOnboarding";
 import { OnboardingLayout } from "@/components/onboarding/OnboardingLayout";
 import { StepRoleSelect } from "@/components/onboarding/StepRoleSelect";
@@ -10,6 +11,7 @@ import { StepBackground } from "@/components/onboarding/StepBackground";
 import { StepComplete } from "@/components/onboarding/StepComplete";
 
 export function OnboardingPage() {
+    const { t: tCommon } = useTranslation("common");
     const {
         currentStep,
         currentIndex,
@@ -28,6 +30,8 @@ export function OnboardingPage() {
         markOnboardingDone,
     } = useOnboarding();
 
+    const fallbackName = tCommon("user.fallbackName");
+
     function handleFinish() {
         markOnboardingDone();
     }
@@ -36,7 +40,7 @@ export function OnboardingPage() {
         return (
             <OnboardingLayout currentStep={totalSteps} totalSteps={totalSteps} progress={100}>
                 <StepComplete
-                    name={data.role === "enterprise" ? data.companyName ?? "there" : data.personalInfo?.firstName ?? "there"}
+                    name={data.role === "enterprise" ? data.companyName ?? fallbackName : data.personalInfo?.firstName ?? fallbackName}
                     domain={data.background?.domain}
                     lookingFor={data.lookingFor?.opportunities}
                     onFinish={handleFinish}

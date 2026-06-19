@@ -1,7 +1,7 @@
-import React from "react";
 import { Sparkles, RefreshCw, Check, AlertTriangle, Zap, Lightbulb } from "lucide-react";
+import { useLocale } from "@/hooks/useLocale";
 import { detailStyles as styles } from "../styles";
-import { scoreColor, scoreLabel } from "../constants";
+import { scoreColor, getScoreLabel } from "../constants";
 import type { Matching } from "../types";
 
 interface MatchingPanelProps {
@@ -11,12 +11,14 @@ interface MatchingPanelProps {
 }
 
 export function MatchingPanel({ matching, loading, onRefresh }: MatchingPanelProps) {
+    const { t } = useLocale("opportunities");
+
     return (
         <div style={styles.matchCard}>
             <div style={styles.matchHeader}>
                 <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
                     <Sparkles size={16} style={{ color: "#a78bfa" }} />
-                    <span style={styles.sectionTitle}>AI Match Score</span>
+                    <span style={styles.sectionTitle}>{t("detail.matching.title")}</span>
                 </div>
                 <button onClick={onRefresh} style={styles.refreshBtn} disabled={loading}>
                     <RefreshCw size={12} style={{ animation: loading ? "spin 1s linear infinite" : "none" }} />
@@ -26,7 +28,7 @@ export function MatchingPanel({ matching, loading, onRefresh }: MatchingPanelPro
             {loading ? (
                 <div style={styles.loadingInline}>
                     <div style={styles.spinnerSm} />
-                    <span style={{ color: "var(--gb-muted)", fontSize: 12 }}>Calcul en cours...</span>
+                    <span style={{ color: "var(--gb-muted)", fontSize: 12 }}>{t("detail.matching.calculating")}</span>
                 </div>
             ) : matching ? (
                 <div>
@@ -37,7 +39,7 @@ export function MatchingPanel({ matching, loading, onRefresh }: MatchingPanelPro
                         </div>
                         <div style={{ flex: 1 }}>
                             <div style={{ fontWeight: 700, color: scoreColor(matching.score), fontSize: 16, marginBottom: 4 }}>
-                                {scoreLabel(matching.score)}
+                                {getScoreLabel(t, matching.score)}
                             </div>
                             <p style={styles.explication}>{matching.explication}</p>
                         </div>
@@ -46,7 +48,7 @@ export function MatchingPanel({ matching, loading, onRefresh }: MatchingPanelPro
                     {matching.pointsForts.length > 0 && (
                         <div style={{ marginTop: 10 }}>
                             <div style={styles.matchSectionTitle}>
-                                <Check size={13} style={{ color: "#22c55e" }} /> Points forts
+                                <Check size={13} style={{ color: "#22c55e" }} /> {t("detail.matching.strengths")}
                             </div>
                             {matching.pointsForts.map((p, i) => (
                                 <div key={i} style={styles.matchItem("success")}>
@@ -59,7 +61,7 @@ export function MatchingPanel({ matching, loading, onRefresh }: MatchingPanelPro
                     {matching.pointsFaibles.length > 0 && (
                         <div style={{ marginTop: 10 }}>
                             <div style={styles.matchSectionTitle}>
-                                <AlertTriangle size={13} style={{ color: "#f59e0b" }} /> Axes d'amélioration
+                                <AlertTriangle size={13} style={{ color: "#f59e0b" }} /> {t("detail.matching.improvements")}
                             </div>
                             {matching.pointsFaibles.map((p, i) => (
                                 <div key={i} style={styles.matchItem("warn")}>
@@ -72,7 +74,7 @@ export function MatchingPanel({ matching, loading, onRefresh }: MatchingPanelPro
                     {matching.skillsManquantes.length > 0 && (
                         <div style={{ marginTop: 12 }}>
                             <div style={styles.matchSectionTitle}>
-                                <Zap size={13} style={{ color: "#ef4444" }} /> Skills manquantes
+                                <Zap size={13} style={{ color: "#ef4444" }} /> {t("detail.matching.missingSkills")}
                             </div>
                             <div style={styles.skillsRow}>
                                 {matching.skillsManquantes.map((s, i) => (
@@ -85,7 +87,7 @@ export function MatchingPanel({ matching, loading, onRefresh }: MatchingPanelPro
                     {matching.skillsCorrespondantes.length > 0 && (
                         <div style={{ marginTop: 8 }}>
                             <div style={styles.matchSectionTitle}>
-                                <Check size={13} style={{ color: "#22c55e" }} /> Skills correspondantes
+                                <Check size={13} style={{ color: "#22c55e" }} /> {t("detail.matching.matchingSkills")}
                             </div>
                             <div style={styles.skillsRow}>
                                 {matching.skillsCorrespondantes.map((s, i) => (
@@ -98,7 +100,7 @@ export function MatchingPanel({ matching, loading, onRefresh }: MatchingPanelPro
                     {matching.recommandations.length > 0 && (
                         <div style={styles.recommandationsBox}>
                             <div style={{ fontWeight: 700, fontSize: 12, marginBottom: 6, color: "var(--gb-text)", display: "flex", alignItems: "center", gap: 5 }}>
-                                <Lightbulb size={13} style={{ color: "#16a34a" }} /> Recommandations
+                                <Lightbulb size={13} style={{ color: "#16a34a" }} /> {t("detail.matching.recommendations")}
                             </div>
                             {matching.recommandations.map((r, i) => (
                                 <div key={i} style={{ fontSize: 12, color: "var(--gb-text-off)", marginBottom: 4, paddingLeft: 8, borderLeft: "2px solid rgba(22,163,74,0.4)" }}>
@@ -110,8 +112,8 @@ export function MatchingPanel({ matching, loading, onRefresh }: MatchingPanelPro
                 </div>
             ) : (
                 <div style={styles.loadingInline}>
-                    <span style={{ color: "var(--gb-muted)", fontSize: 12 }}>Score non calculé</span>
-                    <button onClick={onRefresh} style={styles.calcBtn}>Calculer</button>
+                    <span style={{ color: "var(--gb-muted)", fontSize: 12 }}>{t("detail.matching.notCalculated")}</span>
+                    <button onClick={onRefresh} style={styles.calcBtn}>{t("detail.matching.calculate")}</button>
                 </div>
             )}
         </div>

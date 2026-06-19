@@ -3,6 +3,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { useLocale } from "@/hooks/useLocale";
 import { normalizePortfolioSlug } from "@/lib/portfolio";
 import { premiumPortfolioUrl, publicPortfolioUrl } from "@/lib/portfolio-urls";
 
@@ -23,6 +24,7 @@ export function PortfolioSlugStep({
     isCheckingSlug,
     onContinue,
 }: PortfolioSlugStepProps) {
+    const { t } = useLocale("portfolio");
     const normalizedSlug = normalizePortfolioSlug(slugInput);
 
     return (
@@ -33,27 +35,25 @@ export function PortfolioSlugStep({
                         <Sparkles className="size-5" />
                     </div>
                     <CardTitle className="font-['Bricolage_Grotesque'] text-3xl tracking-[-0.04em]">
-                        Claim your portfolio URL
+                        {t("builder.slugStep.title")}
                     </CardTitle>
                 </CardHeader>
                 <CardContent className="space-y-5 px-6 pb-6">
                     <div className="space-y-2">
-                        <Label htmlFor="portfolio-slug">Portfolio name</Label>
+                        <Label htmlFor="portfolio-slug">{t("builder.slugStep.portfolioName")}</Label>
                         <Input
                             id="portfolio-slug"
                             value={slugInput}
                             onChange={(event) => setSlugInput(event.target.value)}
-                            placeholder="your-name"
+                            placeholder={t("builder.slugStep.portfolioNamePlaceholder")}
                             className="h-11 border-[var(--gb-border)] bg-[var(--gb-bg)]"
                         />
-                        <p className="text-xs text-[var(--gb-muted)]">
-                            Letters, numbers, and hyphens only. You can change it later, but the link will change.
-                        </p>
+                        <p className="text-xs text-[var(--gb-muted)]">{t("builder.slugStep.slugHint")}</p>
                     </div>
                     <div className="grid gap-3 rounded-2xl border border-[var(--gb-border)] bg-[var(--gb-bg)] p-4 text-sm">
                         <div>
                             <p className="text-xs uppercase tracking-[0.24em] text-[var(--gb-muted)]">
-                                Your public link
+                                {t("builder.slugStep.publicLink")}
                             </p>
                             <p className="mt-1 font-medium text-[var(--gb-text)]">
                                 {publicPortfolioUrl(normalizedSlug || "name", isPremium, true)}
@@ -62,12 +62,10 @@ export function PortfolioSlugStep({
                         {!isPremium ? (
                             <div className="rounded-xl border border-[#16A34A]/20 bg-[#16A34A]/10 p-3">
                                 <p className="text-xs font-semibold uppercase tracking-[0.24em] text-[#16A34A]">
-                                    Pro URL preview
+                                    {t("builder.slugStep.proUrlPreview")}
                                 </p>
                                 <p className="mt-1 text-[var(--gb-text)]">{premiumPortfolioUrl(normalizedSlug)}</p>
-                                <p className="mt-1 text-xs text-[var(--gb-muted)]">
-                                    Upgrade to Pro for a professional portfolio URL.
-                                </p>
+                                <p className="mt-1 text-xs text-[var(--gb-muted)]">{t("builder.slugStep.proUrlHint")}</p>
                             </div>
                         ) : null}
                     </div>
@@ -77,7 +75,7 @@ export function PortfolioSlugStep({
                         onClick={onContinue}
                         disabled={isCheckingSlug || normalizedSlug.length < 3}>
                         {isCheckingSlug ? <Loader2 className="animate-spin" /> : <Check />}
-                        Continue to templates
+                        {t("builder.slugStep.continueToTemplates")}
                     </Button>
                 </CardContent>
             </Card>

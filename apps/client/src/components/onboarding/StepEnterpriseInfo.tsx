@@ -1,4 +1,5 @@
 import React from "react";
+import { useTranslation } from "react-i18next";
 import { Building2 } from "lucide-react";
 import { StepFooter } from "@/components/onboarding/StepFooter";
 import { Input } from "@/components/ui/input";
@@ -9,6 +10,7 @@ interface StepEnterpriseInfoProps {
 }
 
 export function StepEnterpriseInfo({ onNext }: StepEnterpriseInfoProps) {
+    const { t } = useTranslation("onboarding");
     const [companyName, setCompanyName] = React.useState("");
 
     return (
@@ -17,23 +19,22 @@ export function StepEnterpriseInfo({ onNext }: StepEnterpriseInfoProps) {
                 <div className="max-w-xl mx-auto space-y-6">
                     <div>
                         <h2 className="text-2xl font-bold tracking-tight text-[var(--gb-text)]">
-                            Bienvenue dans l'espace recruteur
+                            {t("enterpriseInfo.title")}
                         </h2>
-                        <p className="mt-2 text-[var(--gb-muted)]">
-                            Afin d'associer vos offres à votre entreprise, veuillez indiquer le nom de celle-ci.
-                        </p>
+                        <p className="mt-2 text-[var(--gb-muted)]">{t("enterpriseInfo.subtitle")}</p>
                     </div>
 
                     <div className="space-y-4 mt-8">
                         <div className="space-y-2">
                             <Label htmlFor="companyName" className="text-[var(--gb-secondary-text)]">
-                                Nom de l'entreprise <span className="text-red-500">*</span>
+                                {t("enterpriseInfo.companyNameLabel")}{" "}
+                                <span className="text-red-500">{t("enterpriseInfo.required")}</span>
                             </Label>
                             <div className="relative">
                                 <Building2 className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-[var(--gb-muted)]" />
                                 <Input
                                     id="companyName"
-                                    placeholder="Ex: MyCompany Inc."
+                                    placeholder={t("enterpriseInfo.companyNamePlaceholder")}
                                     value={companyName}
                                     onChange={(e: { target: { value: React.SetStateAction<string> } }) => setCompanyName(e.target.value)}
                                     className="pl-9 h-11 bg-[var(--gb-app-panel-bg)] border-[var(--gb-border)]"

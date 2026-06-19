@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { X, Share2, Copy, Check, Link, Loader, Globe, Lock } from "lucide-react";
+import { useLocale } from "@/hooks/useLocale";
 
 interface ShareModalProps {
     cvId: string;
@@ -12,6 +13,7 @@ interface ShareModalProps {
 }
 
 export function ShareModal({ cvId, shareToken, isPublic, onClose, onShare, onRevoke, onUpdate }: ShareModalProps) {
+    const { t } = useLocale("cvBuilder");
     const [loading, setLoading] = useState(false);
     const [copied, setCopied] = useState(false);
 
@@ -95,10 +97,10 @@ export function ShareModal({ cvId, shareToken, isPublic, onClose, onShare, onRev
                         </div>
                         <div>
                             <h2 style={{ margin: 0, fontSize: "15px", fontWeight: 700, color: "var(--gb-text)" }}>
-                                Partager votre CV
+                                {t("share.title")}
                             </h2>
                             <p style={{ margin: 0, fontSize: "11.5px", color: "var(--gb-muted)" }}>
-                                Générez un lien public de partage
+                                {t("share.subtitle")}
                             </p>
                         </div>
                     </div>
@@ -135,12 +137,10 @@ export function ShareModal({ cvId, shareToken, isPublic, onClose, onShare, onRev
                     )}
                     <div>
                         <p style={{ margin: 0, fontSize: "13px", fontWeight: 600, color: "var(--gb-text)" }}>
-                            {isPublic ? "CV public" : "CV privé"}
+                            {isPublic ? t("share.publicCv") : t("share.privateCv")}
                         </p>
                         <p style={{ margin: 0, fontSize: "11.5px", color: "var(--gb-muted)" }}>
-                            {isPublic
-                                ? "Toute personne avec le lien peut consulter votre CV"
-                                : "Seul vous pouvez voir ce CV"}
+                            {isPublic ? t("share.publicDescription") : t("share.privateDescription")}
                         </p>
                     </div>
                 </div>
@@ -157,7 +157,7 @@ export function ShareModal({ cvId, shareToken, isPublic, onClose, onShare, onRev
                                 letterSpacing: "0.06em",
                                 marginBottom: "6px",
                             }}>
-                            Lien de partage
+                            {t("share.shareLink")}
                         </label>
                         <div style={{ display: "flex", gap: "6px" }}>
                             <div
@@ -206,7 +206,7 @@ export function ShareModal({ cvId, shareToken, isPublic, onClose, onShare, onRev
                                 ) : (
                                     <Copy style={{ width: 13, height: 13 }} />
                                 )}
-                                {copied ? "Copié !" : "Copier"}
+                                {copied ? t("share.copied") : t("share.copy")}
                             </button>
                         </div>
                     </div>
@@ -237,7 +237,7 @@ export function ShareModal({ cvId, shareToken, isPublic, onClose, onShare, onRev
                             ) : (
                                 <Globe style={{ width: 14, height: 14 }} />
                             )}
-                            {loading ? "Génération..." : "Rendre public et copier le lien"}
+                            {loading ? t("share.generating") : t("share.makePublic")}
                         </button>
                     ) : (
                         <button
@@ -263,7 +263,7 @@ export function ShareModal({ cvId, shareToken, isPublic, onClose, onShare, onRev
                             ) : (
                                 <Lock style={{ width: 14, height: 14 }} />
                             )}
-                            {loading ? "Révocation..." : "Révoquer le lien public"}
+                            {loading ? t("share.revoking") : t("share.revoke")}
                         </button>
                     )}
                 </div>

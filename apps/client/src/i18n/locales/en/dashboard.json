@@ -1,0 +1,94 @@
+{
+    "welcomeProgress": {
+        "label": "Profile Completion",
+        "greeting": "Good morning, {{name}}!",
+        "complete": "Your profile is complete 🎉",
+        "incomplete": "Your profile is {{score}}% ready — complete it for better matches.",
+        "completeProfile": "Complete profile",
+        "checks": {
+            "personalInfo": "Personal info",
+            "background": "Background",
+            "journey": "Journey",
+            "lookingFor": "Looking for",
+            "academic": "Academic"
+        }
+    },
+    "recommendedJobs": {
+        "title": "Recommended for You",
+        "seeAll": "See all →",
+        "matchedSubtitle": "Matched to your {{background}} background.",
+        "defaultBackground": "profile",
+        "genericSubtitle": "Based on latest opportunities — complete your profile for personalized matches.",
+        "signInPrompt": "Sign in to see personalized recommendations.",
+        "empty": "No recommendations yet.",
+        "browseAll": "Browse all opportunities",
+        "matchBadge": "{{score}}% match",
+        "view": "View →",
+        "unknownCompany": "—"
+    },
+    "resumeHealth": {
+        "title": "ATS Resume Health",
+        "tooltip": "Score based on how readable your latest resume is by ATS systems.",
+        "basedOn": "Based on:",
+        "loading": "Loading...",
+        "empty": "Create your first resume to see your ATS score here.",
+        "createCv": "Create a resume →",
+        "scoreUnavailable": "Score unavailable",
+        "analyzePrompt": "Open your resume and analyze its ATS readability.",
+        "analyzeButton": "Analyze my resume",
+        "overallScore": "Overall score",
+        "viewFullReport": "View full report",
+        "scoreSummary": {
+            "excellent": "Excellent ATS score",
+            "good": "Good ATS score",
+            "fair": "Fair score",
+            "needsImprovement": "Needs improvement"
+        },
+        "scoreDetails": {
+            "excellent": "Your resume is very well structured and readable by ATS systems.",
+            "good": "Your resume is well read by ATS systems; a few improvements are possible.",
+            "fair": "Some elements reduce your resume's ATS compatibility.",
+            "needsImprovement": "Your resume needs improvements to be read correctly by ATS systems."
+        },
+        "checks": {
+            "keywords": {
+                "label": "Keywords",
+                "optimized": "Optimized",
+                "partial": "Partial",
+                "insufficient": "Insufficient"
+            },
+            "formatting": {
+                "label": "Formatting",
+                "compatible": "Compatible",
+                "needsReview": "Needs review"
+            },
+            "completeness": {
+                "label": "Completeness",
+                "complete": "Complete",
+                "partial": "Partial",
+                "incomplete": "Incomplete"
+            }
+        }
+    },
+    "recentActivity": {
+        "title": "Recent Activity",
+        "items": {
+            "cvTailored": {
+                "title": "CV tailored for Product Designer role",
+                "meta": "14 minutes ago"
+            },
+            "projectMessage": {
+                "title": "New project message from Lena A.",
+                "meta": "2 hours ago"
+            },
+            "portfolioUpdated": {
+                "title": "Portfolio section Skills was updated",
+                "meta": "Yesterday"
+            },
+            "opportunityStatus": {
+                "title": "Opportunity status changed to Interviewing",
+                "meta": "2 days ago"
+            }
+        }
+    }
+}

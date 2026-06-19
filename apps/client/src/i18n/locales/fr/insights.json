@@ -1,0 +1,86 @@
+{
+    "page": {
+        "title": "Career Insights",
+        "subtitle": "Analyse statistique en temps réel des offres scrappées — sources, domaines, compétences, salaires et fraîcheur des données."
+    },
+    "loading": "Chargement des données...",
+    "error": "Erreur : {{message}}",
+    "stats": {
+        "activeOffers": {
+            "label": "Offres actives",
+            "sub": "dans votre pipeline"
+        },
+        "uniqueCompanies": {
+            "label": "Entreprises uniques",
+            "sub": "ayant publié au moins une offre"
+        },
+        "locations": {
+            "label": "Localisations",
+            "sub": "villes et régions distinctes"
+        },
+        "distinctSkills": {
+            "label": "Compétences distinctes",
+            "sub": "mentionnées dans les offres"
+        }
+    },
+    "charts": {
+        "freshness": {
+            "title": "Fraîcheur des offres",
+            "last24h": "Dernières 24 h",
+            "last3days": "Derniers 3 jours",
+            "lastWeek": "Dernière semaine",
+            "older": "Plus d'une semaine"
+        },
+        "salary": {
+            "title": "Données salariales",
+            "empty": "Aucune donnée salariale structurée disponible pour le moment.",
+            "minimum": "Minimum",
+            "average": "Moyenne",
+            "maximum": "Maximum",
+            "basedOn": "Basé sur {{count}} offre avec salaire renseigné",
+            "basedOn_other": "Basé sur {{count}} offres avec salaire renseigné",
+            "ofTotal": "({{percent}} du total)."
+        },
+        "completeness": {
+            "title": "Complétude des données",
+            "withDescription": "Avec description",
+            "withCompany": "Entreprise renseignée",
+            "withSalary": "Salaire renseigné",
+            "withSkills": "Compétences listées",
+            "withTelework": "Info télétravail",
+            "withExpLevel": "Niveau d'expérience"
+        },
+        "sources": {
+            "title": "Sources de scraping",
+            "empty": "Aucune source détectée."
+        },
+        "offerTypes": {
+            "title": "Types d'offres",
+            "empty": "Aucun type détecté."
+        },
+        "contractTypes": {
+            "title": "Types de contrat",
+            "empty": "Aucun type de contrat détecté."
+        },
+        "expLevels": {
+            "title": "Niveaux d'expérience",
+            "empty": "Aucun niveau d'expérience détecté."
+        },
+        "remote": {
+            "title": "Répartition télétravail",
+            "empty": "Aucune information sur le télétravail."
+        },
+        "locations": {
+            "title": "Principales localisations",
+            "empty": "Aucune localisation détectée."
+        },
+        "skills": {
+            "title": "Compétences les plus demandées",
+            "empty": "Aucune compétence détectée."
+        },
+        "domains": {
+            "title": "Domaines en vogue",
+            "empty": "Aucun domaine détecté."
+        }
+    }
+}

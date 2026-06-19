@@ -1,5 +1,6 @@
 import { useState, useRef, useEffect } from "react";
 import { MapPin, ChevronDown, Search } from "lucide-react";
+import { useLocale } from "@/hooks/useLocale";
 import { inputCss, Input } from "../primitives";
 
 const COUNTRIES_CITIES: Record<string, string[]> = {
@@ -39,6 +40,7 @@ interface LocationPickerProps {
 }
 
 export function LocationPicker({ value, onChange }: LocationPickerProps) {
+    const { t } = useLocale("cvBuilder");
     const detectCountry = () => {
         for (const c of ALL_COUNTRIES) {
             if (value && value.includes(c)) return c;
@@ -129,7 +131,7 @@ export function LocationPicker({ value, onChange }: LocationPickerProps) {
                     <div style={{ display: "flex", alignItems: "center", gap: "6px" }}>
                         <MapPin style={{ width: 13, height: 13, color: "var(--gb-muted)", flexShrink: 0 }} />
                         <span style={{ color: country ? "var(--gb-text)" : "var(--gb-muted)", fontSize: "13px" }}>
-                            {country || "Sélectionner un pays"}
+                            {country || t("sections.locationPicker.selectCountry")}
                         </span>
                     </div>
                     <ChevronDown style={{ width: 13, height: 13, color: "var(--gb-muted)", transform: countryOpen ? "rotate(180deg)" : "none", transition: "transform 0.2s" }} />
@@ -142,7 +144,7 @@ export function LocationPicker({ value, onChange }: LocationPickerProps) {
                                 <input
                                     value={search}
                                     onChange={(e) => setSearch(e.target.value)}
-                                    placeholder="Rechercher un pays…"
+                                    placeholder={t("sections.locationPicker.searchCountry")}
                                     style={{ background: "none", border: "none", outline: "none", fontSize: "12px", color: "var(--gb-text)", width: "100%" }}
                                     autoFocus
                                 />
@@ -168,7 +170,7 @@ export function LocationPicker({ value, onChange }: LocationPickerProps) {
                         onClick={() => setCityOpen((o) => !o)}
                         style={{ ...inputCss, display: "flex", alignItems: "center", justifyContent: "space-between", cursor: "pointer", textAlign: "left", borderColor: cityOpen ? "#16A34A" : "var(--gb-border)" }}>
                         <span style={{ color: city ? "var(--gb-text)" : "var(--gb-muted)", fontSize: "13px" }}>
-                            {city || "Sélectionner une ville"}
+                            {city || t("sections.locationPicker.selectCity")}
                         </span>
                         <ChevronDown style={{ width: 13, height: 13, color: "var(--gb-muted)", transform: cityOpen ? "rotate(180deg)" : "none", transition: "transform 0.2s" }} />
                     </button>
@@ -190,7 +192,7 @@ export function LocationPicker({ value, onChange }: LocationPickerProps) {
 
             <Input
                 value={address}
-                placeholder="Adresse complète (optionnel)"
+                placeholder={t("sections.locationPicker.addressOptional")}
                 onChange={(e) => {
                     setAddress(e.target.value);
                     buildValue(country, city, e.target.value);

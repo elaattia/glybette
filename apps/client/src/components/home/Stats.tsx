@@ -1,11 +1,7 @@
 import "@/styles/home/stats.css";
+import { useTranslation } from "react-i18next";
 
-const stats = [
-    { val: "500+", label: "Active Opportunities", sub: "Internships, PFE & Jobs" },
-    { val: "200+", label: "Partner Companies", sub: "Startups to enterprises" },
-    { val: "2,000+", label: "Profiles Created", sub: "Students & professionals" },
-    { val: "97%", label: "Match Accuracy", sub: "AI powered precision" },
-];
+const STAT_KEYS = ["opportunities", "companies", "profiles", "accuracy"] as const;
 
 function useReveal() {
     return (el: HTMLElement | null) => {
@@ -25,15 +21,17 @@ function useReveal() {
 }
 
 export default function Stats() {
+    const { t } = useTranslation("landing");
     const reveal = useReveal();
+
     return (
         <div className="gb-stats" ref={reveal}>
             <div className="gb-stats-inner">
-                {stats.map((s) => (
-                    <div key={s.val} className="gb-stat">
-                        <div className="gb-stat-val">{s.val}</div>
-                        <div className="gb-stat-label">{s.label}</div>
-                        <div className="gb-stat-sub">{s.sub}</div>
+                {STAT_KEYS.map((key) => (
+                    <div key={key} className="gb-stat">
+                        <div className="gb-stat-val">{t(`stats.items.${key}.value`)}</div>
+                        <div className="gb-stat-label">{t(`stats.items.${key}.label`)}</div>
+                        <div className="gb-stat-sub">{t(`stats.items.${key}.sub`)}</div>
                     </div>
                 ))}
             </div>

@@ -1,3 +1,4 @@
+import type { TFunction } from "i18next";
 import type { CvSection } from "../../types/cv.types";
 import type { ExperienceItem } from "../../types/cv.types";
 import type { CustomSectionDataV2 } from "../sections";
@@ -22,6 +23,7 @@ export function renderSectionContent(
         enhancingKey: string | null;
         enhanceSection: (text: string, context: string, key: string) => Promise<string | null>;
     },
+    t: TFunction,
 ): React.ReactNode {
     const { type } = sectionDef;
     const s = sections.find((sec) => sec.type === type);
@@ -116,7 +118,7 @@ export function renderSectionContent(
                     : {
                           title: (raw.title as string) ?? sectionDef.label ?? "",
                           fields: raw.content
-                              ? [{ id: "legacy-1", type: "textarea" as const, label: "Contenu", value: raw.content as string }]
+                              ? [{ id: "legacy-1", type: "textarea" as const, label: t("sections.custom.legacyContent"), value: raw.content as string }]
                               : [],
                       };
             return (
@@ -130,7 +132,7 @@ export function renderSectionContent(
         default:
             return (
                 <p style={{ fontSize: "12px", color: "var(--gb-muted)", fontStyle: "italic" }}>
-                    Section non reconnue.
+                    {t("editor.unknownSection")}
                 </p>
             );
     }

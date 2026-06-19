@@ -1,9 +1,13 @@
 import type { TemplateProps } from "./TemplateSection";
 
+import { useLocale } from "@/hooks/useLocale";
+import { useSectionLabels } from "../../../lib/cv-i18n";
 export function MinimalistTemplate({
     personal, summary, experience, education,
     skills, projects, languages, certs, accent,
 }: TemplateProps) {
+    const { t } = useLocale("cvBuilder");
+    const labels = useSectionLabels(t);
     const A = accent;
 
     return (
@@ -46,7 +50,7 @@ export function MinimalistTemplate({
                 </div>
 
                 {summary?.text && (
-                    <MinSection title="Profil" accent={A}>
+                    <MinSection title={labels.summary} accent={A}>
                         <p style={{ margin: 0, fontSize: `calc(9.5pt * var(--cv-body-scale, 1))`, color: "#333", fontStyle: "italic", lineHeight: 1.75 }}>
                             {summary.text}
                         </p>
@@ -54,13 +58,13 @@ export function MinimalistTemplate({
                 )}
 
                 {experience.length > 0 && (
-                    <MinSection title="Expérience" accent={A}>
+                    <MinSection title={labels.experience} accent={A}>
                         {experience.map((e) => (
                             <div key={e.id} style={{ marginBottom: "14px" }}>
                                 <div style={{ display: "flex", justifyContent: "space-between", flexWrap: "wrap" }}>
                                     <span style={{ fontWeight: 700, fontSize: `calc(10pt * var(--cv-body-scale, 1))` }}>{e.position}</span>
                                     <span style={{ fontSize: `calc(8pt * var(--cv-body-scale, 1))`, color: "#888", fontStyle: "italic" }}>
-                                        {e.startDate}{e.startDate ? " – " : ""}{e.current ? "Présent" : e.endDate}
+                                        {e.startDate}{e.startDate ? " – " : ""}{e.current ? labels.current : e.endDate}
                                     </span>
                                 </div>
                                 <div style={{ fontSize: `calc(9pt * var(--cv-body-scale, 1))`, color: "#555", marginBottom: "3px" }}>
@@ -77,7 +81,7 @@ export function MinimalistTemplate({
                 )}
 
                 {education.length > 0 && (
-                    <MinSection title="Formation" accent={A}>
+                    <MinSection title={labels.education} accent={A}>
                         {education.map((e) => (
                             <div key={e.id} style={{ marginBottom: "10px" }}>
                                 <div style={{ display: "flex", justifyContent: "space-between", flexWrap: "wrap" }}>
@@ -96,7 +100,7 @@ export function MinimalistTemplate({
                 {(skills.length > 0 || languages.length > 0 || certs.length > 0) && (
                     <div style={{ display: "grid", gridTemplateColumns: "1.4fr 1fr", gap: "24px" }}>
                         {skills.length > 0 && (
-                            <MinSection title="Compétences" accent={A}>
+                            <MinSection title={labels.skills} accent={A}>
                                 {skills.map((g) => (
                                     <div key={g.id} style={{ marginBottom: "5px", fontSize: `calc(9pt * var(--cv-body-scale, 1))` }}>
                                         {g.category && (
@@ -110,7 +114,7 @@ export function MinimalistTemplate({
 
                         <div>
                             {languages.length > 0 && (
-                                <MinSection title="Langues" accent={A}>
+                                <MinSection title={labels.languages} accent={A}>
                                     {languages.map((l) => (
                                         <div key={l.id} style={{ fontSize: `calc(9pt * var(--cv-body-scale, 1))`, marginBottom: "3px" }}>
                                             <strong>{l.language}</strong>{" "}
@@ -120,7 +124,7 @@ export function MinimalistTemplate({
                                 </MinSection>
                             )}
                             {certs.length > 0 && (
-                                <MinSection title="Certifications" accent={A}>
+                                <MinSection title={labels.certifications} accent={A}>
                                     {certs.map((c) => (
                                         <div key={c.id} style={{ fontSize: `calc(8.5pt * var(--cv-body-scale, 1))`, marginBottom: "5px" }}>
                                             <div style={{ fontWeight: 700 }}>{c.name}</div>
@@ -134,7 +138,7 @@ export function MinimalistTemplate({
                 )}
 
                 {projects.length > 0 && (
-                    <MinSection title="Projets" accent={A}>
+                    <MinSection title={labels.projects} accent={A}>
                         {projects.map((p) => (
                             <div key={p.id} style={{ marginBottom: "12px" }}>
                                 <span style={{ fontWeight: 700, fontSize: `calc(10pt * var(--cv-body-scale, 1))` }}>{p.name}</span>

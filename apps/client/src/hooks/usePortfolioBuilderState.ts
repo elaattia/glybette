@@ -9,6 +9,7 @@ import type {
     SavePortfolioRequest,
 } from "@glybette/contracts";
 import { useCurrentPortfolio, usePortfolioMutations } from "@/hooks/usePortfolio";
+import { useLocale } from "@/hooks/useLocale";
 import { useUser } from "@/hooks/useUser";
 import {
     createPortfolioBlock,
@@ -25,6 +26,7 @@ export type BuilderStep = "slug" | "template" | "editor";
 
 export function usePortfolioBuilderState() {
     const { user } = useUser();
+    const { t } = useLocale("portfolio");
     const userId = user?.id;
     const currentPortfolio = useCurrentPortfolio();
     const mutations = usePortfolioMutations();
@@ -126,22 +128,22 @@ export function usePortfolioBuilderState() {
         setSlugMessage("");
         const availability = await mutations.checkSlug.mutateAsync(slug);
         if (!availability.available) {
-            setSlugMessage("That portfolio URL is already taken.");
+            setSlugMessage(t("errors.slugTaken"));
             return;
         }
         await mutations.setSlug.mutateAsync(slug);
         setStep("template");
-    }, [mutations.checkSlug, mutations.setSlug, slugInput]);
+    }, [mutations.checkSlug, mutations.setSlug, slugInput, t]);
 
     const chooseTemplate = useCallback(
         (templateId: PortfolioTemplateId) => {
-            const nextDraft = createStarterPortfolio(normalizePortfolioSlug(slugInput), templateId);
+            const nextDraft = createStarterPortfolio(normalizePortfolioSlug(slugInput), templateId, t);
             setDraft(nextDraft);
             setActiveTabId(nextDraft.tabs[0]?.id);
             setSelectedBlockId(nextDraft.tabs[0]?.blocks[0]?.id ?? null);
             setStep("editor");
         },
-        [slugInput],
+        [slugInput, t],
     );
 
     const applyTemplate = useCallback(
@@ -161,19 +163,19 @@ export function usePortfolioBuilderState() {
             if (!activeTab) {
                 return;
             }
-            const block = createPortfolioBlock(type, activeTab.blocks.length + 1);
+            const block = createPortfolioBlock(type, activeTab.blocks.length + 1, t);
             updateActiveTab((tab) => ({ ...tab, blocks: [...tab.blocks, block] }));
             setSelectedBlockId(block.id);
         },
-        [activeTab, updateActiveTab],
+        [activeTab, t, updateActiveTab],
     );
 
     const addTab = useCallback(() => {
-        const tab = createPortfolioTab("Custom tab");
+        const tab = createPortfolioTab(t("blocks.defaults.tabCustom"), t);
         updateDraft((current) => ({ ...current, tabs: [...current.tabs, tab] }));
         setActiveTabId(tab.id);
         setSelectedBlockId(null);
-    }, [updateDraft]);
+    }, [t, updateDraft]);
 
     const updateTab = useCallback(
         (tabId: string, label: string) => {
@@ -277,13 +279,13 @@ export function usePortfolioBuilderState() {
         async (value: string) => {
             const slug = normalizePortfolioSlug(value);
             if (slug.length < 3) {
-                setSlugMessage("Portfolio URL name must be at least 3 characters.");
+                setSlugMessage(t("errors.slugTooShort"));
                 return;
             }
 
             const availability = await mutations.checkSlug.mutateAsync(slug);
             if (!availability.available) {
-                setSlugMessage("That portfolio URL is already taken.");
+                setSlugMessage(t("errors.slugTaken"));
                 return;
             }
 
@@ -291,7 +293,7 @@ export function usePortfolioBuilderState() {
             updateDraft((current) => ({ ...current, slug }));
             setSlugInput(slug);
         },
-        [mutations.checkSlug, updateDraft],
+        [mutations.checkSlug, t, updateDraft],
     );
 
     return {

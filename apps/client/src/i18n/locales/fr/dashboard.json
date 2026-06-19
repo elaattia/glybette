@@ -1,0 +1,94 @@
+{
+    "welcomeProgress": {
+        "label": "Complétion du profil",
+        "greeting": "Bonjour, {{name}} !",
+        "complete": "Votre profil est complet 🎉",
+        "incomplete": "Votre profil est prêt à {{score}} % — complétez-le pour de meilleures correspondances.",
+        "completeProfile": "Compléter le profil",
+        "checks": {
+            "personalInfo": "Infos personnelles",
+            "background": "Parcours",
+            "journey": "Situation",
+            "lookingFor": "Recherche",
+            "academic": "Académique"
+        }
+    },
+    "recommendedJobs": {
+        "title": "Recommandé pour vous",
+        "seeAll": "Tout voir →",
+        "matchedSubtitle": "Correspond à votre parcours en {{background}}.",
+        "defaultBackground": "profil",
+        "genericSubtitle": "Basé sur les dernières opportunités — complétez votre profil pour des correspondances personnalisées.",
+        "signInPrompt": "Connectez-vous pour voir des recommandations personnalisées.",
+        "empty": "Aucune recommandation pour l'instant.",
+        "browseAll": "Parcourir toutes les opportunités",
+        "matchBadge": "{{score}} % de correspondance",
+        "view": "Voir →",
+        "unknownCompany": "—"
+    },
+    "resumeHealth": {
+        "title": "Santé CV ATS",
+        "tooltip": "Score basé sur la lisibilité de votre dernier CV par les systèmes ATS.",
+        "basedOn": "Basé sur :",
+        "loading": "Chargement…",
+        "empty": "Créez votre premier CV pour voir votre score ATS ici.",
+        "createCv": "Créer un CV →",
+        "scoreUnavailable": "Score non disponible",
+        "analyzePrompt": "Ouvrez votre CV et analysez sa lisibilité ATS.",
+        "analyzeButton": "Analyser mon CV",
+        "overallScore": "Score global",
+        "viewFullReport": "Voir le rapport complet",
+        "scoreSummary": {
+            "excellent": "Excellent score ATS",
+            "good": "Bon score ATS",
+            "fair": "Score passable",
+            "needsImprovement": "Nécessite des améliorations"
+        },
+        "scoreDetails": {
+            "excellent": "Votre CV est très bien structuré et lisible par les ATS.",
+            "good": "Votre CV est bien lu par les ATS, quelques améliorations possibles.",
+            "fair": "Certains éléments réduisent la compatibilité ATS de votre CV.",
+            "needsImprovement": "Votre CV nécessite des améliorations pour être lu correctement par les ATS."
+        },
+        "checks": {
+            "keywords": {
+                "label": "Mots-clés",
+                "optimized": "Optimisés",
+                "partial": "Partiels",
+                "insufficient": "Insuffisants"
+            },
+            "formatting": {
+                "label": "Mise en forme",
+                "compatible": "Compatible",
+                "needsReview": "À revoir"
+            },
+            "completeness": {
+                "label": "Complétude",
+                "complete": "Complète",
+                "partial": "Partielle",
+                "incomplete": "Incomplète"
+            }
+        }
+    },
+    "recentActivity": {
+        "title": "Activité récente",
+        "items": {
+            "cvTailored": {
+                "title": "CV adapté pour un poste de Product Designer",
+                "meta": "Il y a 14 minutes"
+            },
+            "projectMessage": {
+                "title": "Nouveau message de projet de Lena A.",
+                "meta": "Il y a 2 heures"
+            },
+            "portfolioUpdated": {
+                "title": "La section Compétences du portfolio a été mise à jour",
+                "meta": "Hier"
+            },
+            "opportunityStatus": {
+                "title": "Statut de l'opportunité passé à Entretien",
+                "meta": "Il y a 2 jours"
+            }
+        }
+    }
+}

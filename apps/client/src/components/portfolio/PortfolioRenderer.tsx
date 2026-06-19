@@ -4,6 +4,7 @@ import { PortfolioThemeRoot } from "@/components/portfolio/shared/PortfolioTheme
 import { ProjectDetailModal } from "@/components/portfolio/shared/ProjectDetailModal";
 import { getTemplateEntry } from "@/components/portfolio/template-registry";
 import type { PortfolioRendererProps, ProjectItem } from "@/components/portfolio/renderer-types";
+import { useLocale } from "@/hooks/useLocale";
 
 export type { PortfolioRenderModel, PortfolioRendererProps } from "@/components/portfolio/renderer-types";
 
@@ -17,11 +18,14 @@ function getRadiusClassName(radius: string) {
     return "rounded-3xl";
 }
 
-function getPortfolioIdentity(portfolio: PortfolioRendererProps["portfolio"]): PortfolioIdentity {
+function getPortfolioIdentity(
+    portfolio: PortfolioRendererProps["portfolio"],
+    eyebrowFallback: string,
+): PortfolioIdentity {
     return (
         portfolio.identity ?? {
             displayName: portfolio.slug,
-            eyebrowText: "Independent portfolio",
+            eyebrowText: eyebrowFallback,
             eyebrowPlacement: "above",
         }
     );
@@ -37,6 +41,7 @@ export function PortfolioRenderer({
     chrome = "public",
     showGrid = false,
 }: PortfolioRendererProps) {
+    const { t } = useLocale("portfolio");
     const [project, setProject] = useState<ProjectItem | null>(null);
     const { config: template, Component } = getTemplateEntry(portfolio.templateId);
     const activeTab = useMemo<PortfolioTab | undefined>(
@@ -50,7 +55,7 @@ export function PortfolioRenderer({
             <Component
                 portfolio={portfolio}
                 template={template}
-                identity={getPortfolioIdentity(portfolio)}
+                identity={getPortfolioIdentity(portfolio, t("blocks.defaults.eyebrowText"))}
                 activeTab={activeTab}
                 selectedBlockId={selectedBlockId}
                 onTabChange={onTabChange}

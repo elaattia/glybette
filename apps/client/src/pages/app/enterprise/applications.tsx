@@ -1,11 +1,14 @@
 import { useState, useEffect } from "react";
 import { useSearchParams } from "react-router-dom";
-import { Building2, Users, TrendingUp, CheckCircle2, Clock, XCircle } from "lucide-react";
+import { Users, CheckCircle2, Clock, XCircle } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { applicationsApi } from "@/features/jobs/api/applications.api";
 import type { ApplicationWithOffreDTO } from "@glybette/contracts";
+import { useLocale } from "@/hooks/useLocale";
+import { formatDate } from "@/lib/locale-format";
 
 export default function EnterpriseApplicationsPage() {
+    const { t, locale } = useLocale("enterprise");
     const [applications, setApplications] = useState<ApplicationWithOffreDTO[]>([]);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);
@@ -25,7 +28,7 @@ export default function EnterpriseApplicationsPage() {
             const data = await applicationsApi.getEnterpriseApplications();
             setApplications(data.applications);
         } catch (err) {
-            setError(err instanceof Error ? err.message : "Erreur lors du chargement des candidatures");
+            setError(err instanceof Error ? err.message : t("applications.loadError"));
         } finally {
             setLoading(false);
         }
@@ -39,8 +42,8 @@ export default function EnterpriseApplicationsPage() {
                 app._id === appId ? { ...app, status: newStatus as any } : app,
             );
             setApplications(updated);
-        } catch (err) {
-            alert("Erreur lors de la mise à jour");
+        } catch {
+            alert(t("applications.updateError"));
         } finally {
             setUpdatingId(null);
         }
@@ -82,13 +85,11 @@ export default function EnterpriseApplicationsPage() {
     };
 
     const getStatusLabel = (status: string) => {
-        const labels: Record<string, string> = {
-            pending: "En attente",
-            viewed: "Consulté",
-            accepted: "Accepté",
-            rejected: "Rejeté",
-        };
-        return labels[status] || status;
+        const known = ["pending", "viewed", "accepted", "rejected"] as const;
+        if (known.includes(status as (typeof known)[number])) {
+            return t(`applications.stats.${status as (typeof known)[number]}`);
+        }
+        return status;
     };
 
     return (
@@ -97,54 +98,54 @@ export default function EnterpriseApplicationsPage() {
                 <CardHeader className="px-5 pt-5 md:px-6">
                     <CardTitle className="flex items-center gap-2 text-lg text-[var(--gb-text)]">
                         <Users className="h-5 w-5 text-[#3B82F6]" />
-                        Gestion des Candidatures
+                        {t("applications.title")}
                     </CardTitle>
                     <CardDescription>
                         {selectedOfferTitle
-                            ? `Candidatures reçues pour l'offre : ${selectedOfferTitle}`
-                            : "Consultez et gérez les candidatures reçues pour vos offres."}
+                            ? t("applications.descriptionFiltered", { title: selectedOfferTitle })
+                            : t("applications.descriptionAll")}
                     </CardDescription>
                 </CardHeader>
 
                 <CardContent className="px-5 pb-5 md:px-6 space-y-6">
                     <div className="grid grid-cols-2 md:grid-cols-5 gap-3">
-                        <StatCard label="Total" value={stats.total} color="#6366f1" />
-                        <StatCard label="En attente" value={stats.pending} color="#f59e0b" />
-                        <StatCard label="Consulté" value={stats.viewed} color="#3b82f6" />
-                        <StatCard label="Accepté" value={stats.accepted} color="#10b981" />
-                        <StatCard label="Rejeté" value={stats.rejected} color="#ef4444" />
+                        <StatCard label={t("applications.stats.total")} value={stats.total} color="#6366f1" />
+                        <StatCard label={t("applications.stats.pending")} value={stats.pending} color="#f59e0b" />
+                        <StatCard label={t("applications.stats.viewed")} value={stats.viewed} color="#3b82f6" />
+                        <StatCard label={t("applications.stats.accepted")} value={stats.accepted} color="#10b981" />
+                        <StatCard label={t("applications.stats.rejected")} value={stats.rejected} color="#ef4444" />
                     </div>
 
                     <div className="flex gap-2 flex-wrap">
                         <FilterTab
-                            label="Tous"
+                            label={t("applications.filters.all")}
                             count={stats.total}
                             isActive={selectedStatus === null}
                             onClick={() => setSelectedStatus(null)}
                         />
                         <FilterTab
-                            label="En attente"
+                            label={t("applications.filters.pending")}
                             count={stats.pending}
                             isActive={selectedStatus === "pending"}
                             onClick={() => setSelectedStatus("pending")}
                             color="bg-amber-100"
                         />
                         <FilterTab
-                            label="Consulté"
+                            label={t("applications.filters.viewed")}
                             count={stats.viewed}
                             isActive={selectedStatus === "viewed"}
                             onClick={() => setSelectedStatus("viewed")}
                             color="bg-blue-100"
                         />
                         <FilterTab
-                            label="Accepté"
+                            label={t("applications.filters.accepted")}
                             count={stats.accepted}
                             isActive={selectedStatus === "accepted"}
                             onClick={() => setSelectedStatus("accepted")}
                             color="bg-green-100"
                         />
                         <FilterTab
-                            label="Rejeté"
+                            label={t("applications.filters.rejected")}
                             count={stats.rejected}
                             isActive={selectedStatus === "rejected"}
                             onClick={() => setSelectedStatus("rejected")}
@@ -155,7 +156,7 @@ export default function EnterpriseApplicationsPage() {
                     {loading ? (
                         <div className="text-center py-12">
                             <div className="inline-block animate-spin">⟳</div>
-                            <p className="text-[var(--gb-muted)] mt-2">Chargement des candidatures...</p>
+                            <p className="text-[var(--gb-muted)] mt-2">{t("applications.loading")}</p>
                         </div>
                     ) : error ? (
                         <div className="p-4 bg-red-100 border border-red-300 rounded-lg text-red-800">
@@ -165,7 +166,7 @@ export default function EnterpriseApplicationsPage() {
                         <div className="text-center py-12">
                             <Users className="w-12 h-12 text-[var(--gb-muted)] mx-auto mb-3 opacity-50" />
                             <p className="text-[var(--gb-muted)]">
-                                {selectedStatus ? "Aucune candidature avec ce statut" : "Aucune candidature reçue"}
+                                {selectedStatus ? t("applications.emptyFiltered") : t("applications.emptyAll")}
                             </p>
                         </div>
                     ) : (
@@ -174,6 +175,7 @@ export default function EnterpriseApplicationsPage() {
                                 <ApplicationCard
                                     key={app._id}
                                     app={app}
+                                    locale={locale}
                                     isExpanded={expandedApp === app._id}
                                     isUpdating={updatingId === app._id}
                                     onToggle={() =>
@@ -184,6 +186,7 @@ export default function EnterpriseApplicationsPage() {
                                     }
                                     getStatusColor={getStatusColor}
                                     getStatusLabel={getStatusLabel}
+                                    t={t}
                                 />
                             ))}
                         </div>
@@ -234,20 +237,24 @@ function FilterTab({
 
 function ApplicationCard({
     app,
+    locale,
     isExpanded,
     isUpdating,
     onToggle,
     onStatusChange,
     getStatusColor,
     getStatusLabel,
+    t,
 }: {
     app: ApplicationWithOffreDTO;
+    locale: "en" | "fr";
     isExpanded: boolean;
     isUpdating: boolean;
     onToggle: () => void;
     onStatusChange: (status: string) => void;
     getStatusColor: (status: string) => any;
     getStatusLabel: (status: string) => string;
+    t: ReturnType<typeof useLocale>["t"];
 }) {
     const statusInfo = getStatusColor(app.status);
     const StatusIcon = statusInfo.icon;
@@ -263,7 +270,7 @@ function ApplicationCard({
                     <div className="flex items-center gap-3 text-sm text-[var(--gb-muted)]">
                         <span>{app.offre?.entreprise}</span>
                         <span>•</span>
-                        <span>{new Date(app.appliedAt).toLocaleDateString("fr-FR")}</span>
+                        <span>{formatDate(app.appliedAt, locale)}</span>
                     </div>
                 </div>
                 <div
@@ -279,13 +286,13 @@ function ApplicationCard({
                 <div className="px-5 py-4 bg-[var(--gb-app-panel-bg)] border-t border-[var(--gb-border)] space-y-4">
                     <div className="grid gap-3 md:grid-cols-2">
                         <div>
-                            <h4 className="text-sm font-600 text-[var(--gb-text)] mb-2">Candidat</h4>
+                            <h4 className="text-sm font-600 text-[var(--gb-text)] mb-2">{t("applications.card.candidate")}</h4>
                             <p className="text-sm text-[var(--gb-muted)] bg-[var(--gb-surface)] p-3 rounded">
                                 {app.userId}
                             </p>
                         </div>
                         <div>
-                            <h4 className="text-sm font-600 text-[var(--gb-text)] mb-2">Documents PDF</h4>
+                            <h4 className="text-sm font-600 text-[var(--gb-text)] mb-2">{t("applications.card.pdfDocuments")}</h4>
                             <div className="flex flex-col gap-2">
                                 {app.resumeUrl ? (
                                     <a
@@ -294,10 +301,10 @@ function ApplicationCard({
                                         rel="noreferrer"
                                         className="text-sm text-blue-600 hover:underline"
                                     >
-                                        Voir le CV
+                                        {t("applications.card.viewResume")}
                                     </a>
                                 ) : (
-                                    <span className="text-sm text-[var(--gb-muted)]">CV non fourni</span>
+                                    <span className="text-sm text-[var(--gb-muted)]">{t("applications.card.resumeNotProvided")}</span>
                                 )}
                                 {app.coverLetterUrl ? (
                                     <a
@@ -306,44 +313,40 @@ function ApplicationCard({
                                         rel="noreferrer"
                                         className="text-sm text-blue-600 hover:underline"
                                     >
-                                        Voir la lettre de motivation
+                                        {t("applications.card.viewCoverLetter")}
                                     </a>
                                 ) : (
-                                    <span className="text-sm text-[var(--gb-muted)]">Lettre non fournie</span>
+                                    <span className="text-sm text-[var(--gb-muted)]">{t("applications.card.coverLetterNotProvided")}</span>
                                 )}
                             </div>
                         </div>
                     </div>
 
                     <div>
-                        <h4 className="text-sm font-600 text-[var(--gb-text)] mb-2">Lettre de motivation</h4>
+                        <h4 className="text-sm font-600 text-[var(--gb-text)] mb-2">{t("applications.card.coverLetter")}</h4>
                         <p className="text-sm text-[var(--gb-muted)] bg-[var(--gb-surface)] p-3 rounded whitespace-pre-wrap">
-                            {app.coverLetter || "(Pas de lettre fournie)"}
+                            {app.coverLetter || t("applications.card.noCoverLetter")}
                         </p>
                     </div>
 
                     <div>
-                        <h4 className="text-sm font-600 text-[var(--gb-text)] mb-2">Notes du recruteur</h4>
+                        <h4 className="text-sm font-600 text-[var(--gb-text)] mb-2">{t("applications.card.recruiterNotes")}</h4>
                         <textarea
-                            placeholder="Ajoutez vos notes sur cette candidature..."
+                            placeholder={t("applications.card.recruiterNotesPlaceholder")}
                             defaultValue={app.recruiterNotes || ""}
-                            onBlur={(e) => {
-                                if (e.target.value !== app.recruiterNotes) {
-                                }
-                            }}
+                            onBlur={() => {}}
                             className="w-full px-3 py-2 text-sm border border-[var(--gb-border)] rounded-lg bg-[var(--gb-surface)] text-[var(--gb-text)] placeholder-[var(--gb-muted)]"
                             rows={3}
                         />
                     </div>
 
                     <div>
-                        <h4 className="text-sm font-600 text-[var(--gb-text)] mb-2">Notation (0-5)</h4>
+                        <h4 className="text-sm font-600 text-[var(--gb-text)] mb-2">{t("applications.card.rating")}</h4>
                         <div className="flex gap-2">
                             {[1, 2, 3, 4, 5].map((star) => (
                                 <button
                                     key={star}
-                                    onClick={() => {
-                                    }}
+                                    onClick={() => {}}
                                     className={`text-2xl ${
                                         (app.rating || 0) >= star ? "text-yellow-400" : "text-gray-300"
                                     }`}
@@ -355,21 +358,25 @@ function ApplicationCard({
                     </div>
 
                     <div>
-                        <h4 className="text-sm font-600 text-[var(--gb-text)] mb-2">Changez le statut</h4>
+                        <h4 className="text-sm font-600 text-[var(--gb-text)] mb-2">{t("applications.card.changeStatus")}</h4>
                         <div className="grid grid-cols-2 md:grid-cols-4 gap-2">
-                            {[
-                                { status: "pending", label: "En attente", color: "bg-amber-100 text-amber-800" },
-                                { status: "viewed", label: "Consulté", color: "bg-blue-100 text-blue-800" },
-                                { status: "accepted", label: "Accepter", color: "bg-green-100 text-green-800" },
-                                { status: "rejected", label: "Rejeter", color: "bg-red-100 text-red-800" },
-                            ].map(({ status, label, color }) => (
+                            {(
+                                [
+                                    { status: "pending", color: "bg-amber-100 text-amber-800" },
+                                    { status: "viewed", color: "bg-blue-100 text-blue-800" },
+                                    { status: "accepted", color: "bg-green-100 text-green-800" },
+                                    { status: "rejected", color: "bg-red-100 text-red-800" },
+                                ] as const
+                            ).map(({ status, color }) => (
                                 <button
                                     key={status}
                                     onClick={() => onStatusChange(status)}
                                     disabled={isUpdating || app.status === status}
                                     className={`px-3 py-2 text-sm font-600 rounded-lg transition-opacity disabled:opacity-50 ${color}`}
                                 >
-                                    {isUpdating && app.status !== status ? "..." : label}
+                                    {isUpdating && app.status !== status
+                                        ? t("applications.card.updating")
+                                        : t(`applications.card.statusActions.${status}`)}
                                 </button>
                             ))}
                         </div>

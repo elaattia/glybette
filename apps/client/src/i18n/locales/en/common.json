@@ -1,0 +1,114 @@
+{
+    "actions": {
+        "back": "← Back",
+        "cancel": "Cancel",
+        "close": "Close",
+        "continue": "Continue →",
+        "deletePermanently": "Delete permanently",
+        "deleting": "Deleting...",
+        "gotIt": "Got it",
+        "loading": "Loading...",
+        "save": "Save",
+        "saveAccount": "Save account",
+        "saveContactProfile": "Save contact profile",
+        "saving": "Saving...",
+        "skipForNow": "Skip for now",
+        "updating": "Updating...",
+        "upgradeNow": "Upgrade now"
+    },
+    "brand": {
+        "name": "Glybette"
+    },
+    "language": {
+        "label": "Language",
+        "description": "Choose the language for the Glybette interface.",
+        "en": "English",
+        "fr": "Français"
+    },
+    "timeAgo": {
+        "recently": "Recently",
+        "justNow": "Just now",
+        "minutesAgo": "{{count}} min ago",
+        "hoursAgo": "{{count}}h ago",
+        "daysAgo": "{{count}}d ago"
+    },
+    "user": {
+        "unknown": "Unknown",
+        "noEmail": "No email available",
+        "fallbackName": "there"
+    },
+    "settings": {
+        "account": {
+            "title": "Account",
+            "description": "Update your identity and email address.",
+            "firstNamePlaceholder": "First name",
+            "lastNamePlaceholder": "Last name",
+            "emailPlaceholder": "Email",
+            "verifiedEmail": "Verified email",
+            "verificationRequired": "Email verification required",
+            "fullNameBadge": "Full Name: {{name}}",
+            "updated": "Account details updated.",
+            "updateError": "Unable to update account."
+        },
+        "contact": {
+            "title": "Contact profile",
+            "description": "Manage phone and location used across your account.",
+            "phonePlaceholder": "Phone number",
+            "locationPlaceholder": "Location",
+            "loading": "Loading contact profile...",
+            "updated": "Contact information updated.",
+            "updateError": "Unable to update profile."
+        },
+        "security": {
+            "title": "Security",
+            "changePasswordDescription": "Change your password for email/password sign-in.",
+            "setPasswordDescription": "Set a password to enable email/password sign-in for this account.",
+            "currentPasswordPlaceholder": "Current password",
+            "newPasswordPlaceholder": "New password",
+            "confirmPasswordPlaceholder": "Confirm new password",
+            "passwordMismatch": "New password and confirmation must match.",
+            "passwordUpdated": "Password updated successfully.",
+            "passwordSet": "Password set successfully.",
+            "changePasswordError": "Unable to change password.",
+            "setPasswordError": "Unable to set password.",
+            "changePassword": "Change password",
+            "setPassword": "Set password"
+        },
+        "providers": {
+            "title": "Connected accounts",
+            "description": "Manage sign-in providers linked to your account.",
+            "google": "Google",
+            "github": "GitHub",
+            "linkedin": "LinkedIn",
+            "connected": "Connected to {{provider}}",
+            "connect": "Connect to {{provider}}"
+        },
+        "dangerZone": {
+            "title": "Danger zone",
+            "description": "Permanently delete your account and all active sessions.",
+            "deleteAccount": "Delete account"
+        },
+        "deleteDialog": {
+            "title": "Delete account",
+            "descriptionPrefix": "Type {{phrase}} to confirm.",
+            "descriptionSuffixPasswordRequired": "Enter your current password to continue.",
+            "descriptionSuffixPasswordOptional": "Password is optional for this provider.",
+            "confirmPhrase": "DELETE MY ACCOUNT",
+            "passwordRequiredPlaceholder": "Current password (required)",
+            "passwordOptionalPlaceholder": "Current password (optional)",
+            "confirmPhraseError": "Please type exactly: {{phrase}}",
+            "passwordRequiredError": "Current password is required for email/password accounts.",
+            "deleteError": "Unable to delete account."
+        },
+        "route": {
+            "title": "Settings",
+            "subtitle": "Control account preferences and workspace personalization."
+        }
+    },
+    "confirm": {
+        "title": "Are you sure?",
+        "description": "This action cannot be undone.",
+        "confirm": "Confirm",
+        "cancel": "Cancel"
+    }
+}

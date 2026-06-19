@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { useTranslation } from "react-i18next";
 import { Monitor, Building2, Stethoscope, BarChart3, Palette, Sparkles } from "lucide-react";
 import type { BackgroundPayload, Domain } from "@glybette/types";
 import { cn } from "@/lib/utils";
@@ -6,57 +7,50 @@ import { StepFooter } from "./StepFooter";
 
 const OPTIONS: {
     value: Domain;
+    key: "it" | "architecture" | "medicine" | "business" | "design" | "other";
     icon: React.ReactNode;
-    title: string;
-    description: string;
     iconBgVar: string;
     iconColorVar: string;
 }[] = [
     {
         value: "IT",
+        key: "it",
         icon: <Monitor className="w-7 h-7" />,
-        title: "IT",
-        description: "Software, data, cybersecurity...",
         iconBgVar: "var(--ob-icon-bg-blue)",
         iconColorVar: "var(--ob-icon-blue)",
     },
     {
         value: "Architecture",
+        key: "architecture",
         icon: <Building2 className="w-7 h-7" />,
-        title: "Architecture",
-        description: "Design, urban planning...",
         iconBgVar: "var(--ob-icon-bg-yellow)",
         iconColorVar: "var(--ob-icon-yellow)",
     },
     {
         value: "Medicine",
+        key: "medicine",
         icon: <Stethoscope className="w-7 h-7" />,
-        title: "Medicine",
-        description: "Health, pharmacy, biology...",
         iconBgVar: "var(--ob-icon-bg-red)",
         iconColorVar: "var(--ob-icon-red)",
     },
     {
         value: "Business",
+        key: "business",
         icon: <BarChart3 className="w-7 h-7" />,
-        title: "Business",
-        description: "Finance, marketing, management...",
         iconBgVar: "var(--ob-icon-bg-green)",
         iconColorVar: "var(--ob-icon-green)",
     },
     {
         value: "Design",
+        key: "design",
         icon: <Palette className="w-7 h-7" />,
-        title: "Design",
-        description: "UI/UX, graphic, motion...",
         iconBgVar: "var(--ob-icon-bg-purple)",
         iconColorVar: "var(--ob-icon-purple)",
     },
     {
         value: "Other",
+        key: "other",
         icon: <Sparkles className="w-7 h-7" />,
-        title: "Other",
-        description: "Something else entirely",
         iconBgVar: "var(--ob-icon-bg-teal)",
         iconColorVar: "var(--ob-icon-teal)",
     },
@@ -68,16 +62,15 @@ interface Props {
 }
 
 export function StepBackground({ onNext, onSkip }: Props) {
+    const { t } = useTranslation("onboarding");
     const [selected, setSelected] = useState<Domain | null>(null);
 
     return (
         <div>
             <div className="ob-step-head ob-step-head--tight">
-                <div className="gb-sec-label justify-center w-full">Background</div>
-                <h1 className="ob-step-title">Your background</h1>
-                <p className="ob-step-sub">
-                    What is your field of expertise? This helps us show relevant opportunities.
-                </p>
+                <div className="gb-sec-label justify-center w-full">{t("background.label")}</div>
+                <h1 className="ob-step-title">{t("background.title")}</h1>
+                <p className="ob-step-sub">{t("background.subtitle")}</p>
             </div>
 
             <div className="ob-bg-grid">
@@ -94,8 +87,8 @@ export function StepBackground({ onNext, onSkip }: Props) {
                                 style={{ background: option.iconBgVar, color: option.iconColorVar }}>
                                 {option.icon}
                             </div>
-                            <p className="ob-bg-card-title">{option.title}</p>
-                            <p className="ob-bg-card-desc">{option.description}</p>
+                            <p className="ob-bg-card-title">{t(`background.options.${option.key}.title`)}</p>
+                            <p className="ob-bg-card-desc">{t(`background.options.${option.key}.description`)}</p>
                         </button>
                     );
                 })}

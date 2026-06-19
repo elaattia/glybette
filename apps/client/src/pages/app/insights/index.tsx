@@ -1,7 +1,6 @@
-import { useMemo, useState } from "react";
+import { useMemo } from "react";
 import {
     Briefcase,
-    BarChart3,
     Globe2,
     Sparkles,
     TrendingUp,
@@ -13,14 +12,14 @@ import {
     Monitor,
     Award,
     Activity,
-    ChevronRight,
-    ArrowUpRight,
     Zap,
     Database,
 } from "lucide-react";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardContent, CardHeader } from "@/components/ui/card";
 import { BarRow, ChartSection, fmt, fmtPct, topEntries } from "@/components/charts";
 import { useOffres } from "@/hooks/useJobs";
+import { useLocale } from "@/hooks/useLocale";
+import { formatNumber } from "@/lib/locale-format";
 
 function parseSalary(value: unknown): number | null {
     if (!value || typeof value !== "string") return null;
@@ -36,7 +35,6 @@ function daysSince(dateStr: string | undefined): number | null {
     if (isNaN(d.getTime())) return null;
     return Math.floor((Date.now() - d.getTime()) / 86_400_000);
 }
-
 
 function StatCard({
     label,
@@ -77,6 +75,7 @@ function StatCard({
 }
 
 export default function CareerInsightsPage() {
+    const { t, locale } = useLocale("insights");
     const { data, loading, error } = useOffres({ page: 1, limit: 500 });
     const offres: any[] = data?.offres ?? data?.items ?? [];
 
@@ -165,10 +164,19 @@ export default function CareerInsightsPage() {
         };
     }, [offres]);
 
+    const formatCurrency = (value: number | null) =>
+        value !== null
+            ? formatNumber(value, locale, {
+                  style: "currency",
+                  currency: "TND",
+                  maximumFractionDigits: 0,
+              })
+            : "—";
+
     if (loading) {
         return (
             <div className="flex items-center justify-center h-48 text-sm text-[var(--gb-text-off)]">
-                Chargement des données...
+                {t("loading")}
             </div>
         );
     }
@@ -176,7 +184,7 @@ export default function CareerInsightsPage() {
     if (error) {
         return (
             <div className="flex items-center justify-center h-48 text-sm text-destructive">
-                Erreur : {error}
+                {t("error", { message: error })}
             </div>
         );
     }
@@ -187,40 +195,59 @@ export default function CareerInsightsPage() {
     const maxSkill = stats.topSkills[0]?.count ?? 1;
     const maxContract = stats.topContracts[0]?.count ?? 1;
     const maxExp = stats.topExpLevels[0]?.count ?? 1;
-    const maxRemote = stats.remoteBreakdown[0]?.count ?? 1;
     const maxType = stats.topTypes[0]?.count ?? 1;
 
     const freshnessTotal = stats.total || 1;
 
     return (
         <div className="space-y-6">
-
             <div className="flex flex-col gap-1">
-                <h1 className="text-lg font-semibold text-[var(--gb-text)]">Career Insights</h1>
-                <p className="text-sm text-[var(--gb-text-off)] max-w-2xl">
-                    Analyse statistique en temps réel des offres scrappées — sources, domaines, compétences, salaires et fraîcheur des données.
-                </p>
+                <h1 className="text-lg font-semibold text-[var(--gb-text)]">{t("page.title")}</h1>
+                <p className="text-sm text-[var(--gb-text-off)] max-w-2xl">{t("page.subtitle")}</p>
             </div>
 
             <section className="grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
-                <StatCard label="Offres actives" value={fmt(stats.total)} sub="dans votre pipeline" icon={Database} accent="#16a34a" />
-                <StatCard label="Entreprises uniques" value={fmt(stats.uniqueCompanies)} sub="ayant publié au moins une offre" icon={Users} accent="#2563eb" />
-                <StatCard label="Localisations" value={fmt(stats.uniqueLocations)} sub="villes et régions distinctes" icon={MapPin} accent="#f97316" />
-                <StatCard label="Compétences distinctes" value={fmt(stats.uniqueSkills)} sub="mentionnées dans les offres" icon={Award} accent="#8b5cf6" />
+                <StatCard
+                    label={t("stats.activeOffers.label")}
+                    value={fmt(stats.total, locale)}
+                    sub={t("stats.activeOffers.sub")}
+                    icon={Database}
+                    accent="#16a34a"
+                />
+                <StatCard
+                    label={t("stats.uniqueCompanies.label")}
+                    value={fmt(stats.uniqueCompanies, locale)}
+                    sub={t("stats.uniqueCompanies.sub")}
+                    icon={Users}
+                    accent="#2563eb"
+                />
+                <StatCard
+                    label={t("stats.locations.label")}
+                    value={fmt(stats.uniqueLocations, locale)}
+                    sub={t("stats.locations.sub")}
+                    icon={MapPin}
+                    accent="#f97316"
+                />
+                <StatCard
+                    label={t("stats.distinctSkills.label")}
+                    value={fmt(stats.uniqueSkills, locale)}
+                    sub={t("stats.distinctSkills.sub")}
+                    icon={Award}
+                    accent="#8b5cf6"
+                />
             </section>
 
             <section className="grid gap-4 lg:grid-cols-2">
-
                 <Card className="border-[var(--gb-border)] bg-[var(--gb-app-panel-bg)] shadow-none">
                     <CardHeader className="px-5 pt-5 md:px-6 pb-3">
-                        <ChartSection title="Fraîcheur des offres" icon={Clock} accent="#14b8a6" />
+                        <ChartSection title={t("charts.freshness.title")} icon={Clock} accent="#14b8a6" />
                     </CardHeader>
                     <CardContent className="px-5 pb-5 md:px-6 space-y-3">
                         {[
-                            { label: "Dernières 24 h", count: stats.freshness.last24h },
-                            { label: "Derniers 3 jours", count: stats.freshness.last3days },
-                            { label: "Dernière semaine", count: stats.freshness.lastWeek },
-                            { label: "Plus d'une semaine", count: stats.freshness.older },
+                            { label: t("charts.freshness.last24h"), count: stats.freshness.last24h },
+                            { label: t("charts.freshness.last3days"), count: stats.freshness.last3days },
+                            { label: t("charts.freshness.lastWeek"), count: stats.freshness.lastWeek },
+                            { label: t("charts.freshness.older"), count: stats.freshness.older },
                         ].map(({ label, count }) => (
                             <BarRow
                                 key={label}
@@ -236,38 +263,32 @@ export default function CareerInsightsPage() {
 
                 <Card className="border-[var(--gb-border)] bg-[var(--gb-app-panel-bg)] shadow-none">
                     <CardHeader className="px-5 pt-5 md:px-6 pb-3">
-                        <ChartSection title="Données salariales" icon={TrendingUp} accent="#f59e0b" />
+                        <ChartSection title={t("charts.salary.title")} icon={TrendingUp} accent="#f59e0b" />
                     </CardHeader>
                     <CardContent className="px-5 pb-5 md:px-6">
                         {stats.salaryCount === 0 ? (
-                            <p className="text-sm text-[var(--gb-text-off)]">
-                                Aucune donnée salariale structurée disponible pour le moment.
-                            </p>
+                            <p className="text-sm text-[var(--gb-text-off)]">{t("charts.salary.empty")}</p>
                         ) : (
                             <div className="space-y-4">
                                 <div className="grid grid-cols-3 gap-3">
                                     {[
-                                        { label: "Minimum", value: stats.minSalary },
-                                        { label: "Moyenne", value: stats.avgSalary },
-                                        { label: "Maximum", value: stats.maxSalary },
+                                        { label: t("charts.salary.minimum"), value: stats.minSalary },
+                                        { label: t("charts.salary.average"), value: stats.avgSalary },
+                                        { label: t("charts.salary.maximum"), value: stats.maxSalary },
                                     ].map(({ label, value }) => (
                                         <div key={label} className="rounded-xl border border-[var(--gb-border)] px-3 py-3 text-center">
                                             <p className="text-xs text-[var(--gb-text-off)] mb-1">{label}</p>
                                             <p className="text-base font-semibold text-[var(--gb-text)] tabular-nums">
-                                                {value !== null
-                                                    ? new Intl.NumberFormat("fr-FR", {
-                                                          style: "currency",
-                                                          currency: "TND",
-                                                          maximumFractionDigits: 0,
-                                                      }).format(value)
-                                                    : "—"}
+                                                {formatCurrency(value)}
                                             </p>
                                         </div>
                                     ))}
                                 </div>
                                 <p className="text-xs text-[var(--gb-text-off)]">
-                                    Basé sur {fmt(stats.salaryCount)} offre{stats.salaryCount > 1 ? "s" : ""} avec salaire renseigné
-                                    ({fmtPct((stats.salaryCount / Math.max(stats.total, 1)) * 100)} du total).
+                                    {t("charts.salary.basedOn", { count: stats.salaryCount })}{" "}
+                                    {t("charts.salary.ofTotal", {
+                                        percent: fmtPct((stats.salaryCount / Math.max(stats.total, 1)) * 100, locale),
+                                    })}
                                 </p>
                             </div>
                         )}
@@ -277,17 +298,17 @@ export default function CareerInsightsPage() {
 
             <Card className="border-[var(--gb-border)] bg-[var(--gb-app-panel-bg)] shadow-none">
                 <CardHeader className="px-5 pt-5 md:px-6 pb-3">
-                    <ChartSection title="Complétude des données" icon={Activity} accent="#6366f1" />
+                    <ChartSection title={t("charts.completeness.title")} icon={Activity} accent="#6366f1" />
                 </CardHeader>
                 <CardContent className="px-5 pb-5 md:px-6">
                     <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
                         {[
-                            { label: "Avec description", count: stats.completeness.description, accent: "#6366f1" },
-                            { label: "Entreprise renseignée", count: stats.completeness.company, accent: "#2563eb" },
-                            { label: "Salaire renseigné", count: stats.completeness.salary, accent: "#f59e0b" },
-                            { label: "Compétences listées", count: stats.completeness.skills, accent: "#16a34a" },
-                            { label: "Info télétravail", count: stats.completeness.telework, accent: "#14b8a6" },
-                            { label: "Niveau d'expérience", count: stats.completeness.expLevel, accent: "#8b5cf6" },
+                            { label: t("charts.completeness.withDescription"), count: stats.completeness.description, accent: "#6366f1" },
+                            { label: t("charts.completeness.withCompany"), count: stats.completeness.company, accent: "#2563eb" },
+                            { label: t("charts.completeness.withSalary"), count: stats.completeness.salary, accent: "#f59e0b" },
+                            { label: t("charts.completeness.withSkills"), count: stats.completeness.skills, accent: "#16a34a" },
+                            { label: t("charts.completeness.withTelework"), count: stats.completeness.telework, accent: "#14b8a6" },
+                            { label: t("charts.completeness.withExpLevel"), count: stats.completeness.expLevel, accent: "#8b5cf6" },
                         ].map(({ label, count, accent }) => {
                             const pct = stats.total ? (count / stats.total) * 100 : 0;
                             return (
@@ -295,7 +316,8 @@ export default function CareerInsightsPage() {
                                     <div className="flex justify-between text-xs">
                                         <span className="text-[var(--gb-text)]">{label}</span>
                                         <span className="text-[var(--gb-text-off)] tabular-nums">
-                                            {fmt(count)} <span className="opacity-60">({fmtPct(pct)})</span>
+                                            {fmt(count, locale)}{" "}
+                                            <span className="opacity-60">({fmtPct(pct, locale)})</span>
                                         </span>
                                     </div>
                                     <div className="h-1.5 w-full rounded-full bg-[var(--gb-border)]">
@@ -314,11 +336,11 @@ export default function CareerInsightsPage() {
             <section className="grid gap-4 lg:grid-cols-2">
                 <Card className="border-[var(--gb-border)] bg-[var(--gb-app-panel-bg)] shadow-none">
                     <CardHeader className="px-5 pt-5 md:px-6 pb-3">
-                        <ChartSection title="Sources de scraping" icon={Globe2} accent="#14b8a6" />
+                        <ChartSection title={t("charts.sources.title")} icon={Globe2} accent="#14b8a6" />
                     </CardHeader>
                     <CardContent className="px-5 pb-5 md:px-6 space-y-3">
                         {stats.topSources.length === 0 ? (
-                            <p className="text-sm text-[var(--gb-text-off)]">Aucune source détectée.</p>
+                            <p className="text-sm text-[var(--gb-text-off)]">{t("charts.sources.empty")}</p>
                         ) : (
                             stats.topSources.map(({ label, count }) => (
                                 <BarRow
@@ -336,11 +358,11 @@ export default function CareerInsightsPage() {
 
                 <Card className="border-[var(--gb-border)] bg-[var(--gb-app-panel-bg)] shadow-none">
                     <CardHeader className="px-5 pt-5 md:px-6 pb-3">
-                        <ChartSection title="Types d'offres" icon={Briefcase} accent="#8b5cf6" />
+                        <ChartSection title={t("charts.offerTypes.title")} icon={Briefcase} accent="#8b5cf6" />
                     </CardHeader>
                     <CardContent className="px-5 pb-5 md:px-6 space-y-3">
                         {stats.topTypes.length === 0 ? (
-                            <p className="text-sm text-[var(--gb-text-off)]">Aucun type détecté.</p>
+                            <p className="text-sm text-[var(--gb-text-off)]">{t("charts.offerTypes.empty")}</p>
                         ) : (
                             stats.topTypes.map(({ label, count }) => (
                                 <BarRow
@@ -360,11 +382,11 @@ export default function CareerInsightsPage() {
             <section className="grid gap-4 lg:grid-cols-2">
                 <Card className="border-[var(--gb-border)] bg-[var(--gb-app-panel-bg)] shadow-none">
                     <CardHeader className="px-5 pt-5 md:px-6 pb-3">
-                        <ChartSection title="Types de contrat" icon={Layers} accent="#f97316" />
+                        <ChartSection title={t("charts.contractTypes.title")} icon={Layers} accent="#f97316" />
                     </CardHeader>
                     <CardContent className="px-5 pb-5 md:px-6 space-y-3">
                         {stats.topContracts.length === 0 ? (
-                            <p className="text-sm text-[var(--gb-text-off)]">Aucun type de contrat détecté.</p>
+                            <p className="text-sm text-[var(--gb-text-off)]">{t("charts.contractTypes.empty")}</p>
                         ) : (
                             stats.topContracts.map(({ label, count }) => (
                                 <BarRow
@@ -382,11 +404,11 @@ export default function CareerInsightsPage() {
 
                 <Card className="border-[var(--gb-border)] bg-[var(--gb-app-panel-bg)] shadow-none">
                     <CardHeader className="px-5 pt-5 md:px-6 pb-3">
-                        <ChartSection title="Niveaux d'expérience" icon={Target} accent="#16a34a" />
+                        <ChartSection title={t("charts.expLevels.title")} icon={Target} accent="#16a34a" />
                     </CardHeader>
                     <CardContent className="px-5 pb-5 md:px-6 space-y-3">
                         {stats.topExpLevels.length === 0 ? (
-                            <p className="text-sm text-[var(--gb-text-off)]">Aucun niveau d'expérience détecté.</p>
+                            <p className="text-sm text-[var(--gb-text-off)]">{t("charts.expLevels.empty")}</p>
                         ) : (
                             stats.topExpLevels.map(({ label, count }) => (
                                 <BarRow
@@ -405,11 +427,11 @@ export default function CareerInsightsPage() {
 
             <Card className="border-[var(--gb-border)] bg-[var(--gb-app-panel-bg)] shadow-none">
                 <CardHeader className="px-5 pt-5 md:px-6 pb-3">
-                    <ChartSection title="Répartition télétravail" icon={Monitor} accent="#2563eb" />
+                    <ChartSection title={t("charts.remote.title")} icon={Monitor} accent="#2563eb" />
                 </CardHeader>
                 <CardContent className="px-5 pb-5 md:px-6">
                     {stats.remoteBreakdown.length === 0 ? (
-                        <p className="text-sm text-[var(--gb-text-off)]">Aucune information sur le télétravail.</p>
+                        <p className="text-sm text-[var(--gb-text-off)]">{t("charts.remote.empty")}</p>
                     ) : (
                         <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
                             {stats.remoteBreakdown.map(({ label, count }) => {
@@ -417,8 +439,8 @@ export default function CareerInsightsPage() {
                                 return (
                                     <div key={label} className="rounded-xl border border-[var(--gb-border)] px-4 py-3">
                                         <p className="text-xs text-[var(--gb-text-off)] truncate mb-1">{label}</p>
-                                        <p className="text-xl font-semibold text-[var(--gb-text)] tabular-nums">{fmt(count)}</p>
-                                        <p className="text-xs text-[var(--gb-text-off)]">{fmtPct(pct)}</p>
+                                        <p className="text-xl font-semibold text-[var(--gb-text)] tabular-nums">{fmt(count, locale)}</p>
+                                        <p className="text-xs text-[var(--gb-text-off)]">{fmtPct(pct, locale)}</p>
                                     </div>
                                 );
                             })}
@@ -429,11 +451,11 @@ export default function CareerInsightsPage() {
 
             <Card className="border-[var(--gb-border)] bg-[var(--gb-app-panel-bg)] shadow-none">
                 <CardHeader className="px-5 pt-5 md:px-6 pb-3">
-                    <ChartSection title="Principales localisations" icon={MapPin} accent="#f97316" />
+                    <ChartSection title={t("charts.locations.title")} icon={MapPin} accent="#f97316" />
                 </CardHeader>
                 <CardContent className="px-5 pb-5 md:px-6 space-y-3">
                     {stats.topLocations.length === 0 ? (
-                        <p className="text-sm text-[var(--gb-text-off)]">Aucune localisation détectée.</p>
+                        <p className="text-sm text-[var(--gb-text-off)]">{t("charts.locations.empty")}</p>
                     ) : (
                         stats.topLocations.map(({ label, count }) => (
                             <BarRow
@@ -452,11 +474,11 @@ export default function CareerInsightsPage() {
             <section className="grid gap-4 lg:grid-cols-[1.2fr_0.8fr]">
                 <Card className="border-[var(--gb-border)] bg-[var(--gb-app-panel-bg)] shadow-none">
                     <CardHeader className="px-5 pt-5 md:px-6 pb-3">
-                        <ChartSection title="Compétences les plus demandées" icon={Zap} accent="#f59e0b" />
+                        <ChartSection title={t("charts.skills.title")} icon={Zap} accent="#f59e0b" />
                     </CardHeader>
                     <CardContent className="px-5 pb-5 md:px-6 space-y-3">
                         {stats.topSkills.length === 0 ? (
-                            <p className="text-sm text-[var(--gb-text-off)]">Aucune compétence détectée.</p>
+                            <p className="text-sm text-[var(--gb-text-off)]">{t("charts.skills.empty")}</p>
                         ) : (
                             stats.topSkills.map(({ label, count }) => (
                                 <BarRow
@@ -473,11 +495,11 @@ export default function CareerInsightsPage() {
 
                 <Card className="border-[var(--gb-border)] bg-[var(--gb-app-panel-bg)] shadow-none">
                     <CardHeader className="px-5 pt-5 md:px-6 pb-3">
-                        <ChartSection title="Domaines en vogue" icon={Sparkles} accent="#16a34a" />
+                        <ChartSection title={t("charts.domains.title")} icon={Sparkles} accent="#16a34a" />
                     </CardHeader>
                     <CardContent className="px-5 pb-5 md:px-6 space-y-3">
                         {stats.topDomains.length === 0 ? (
-                            <p className="text-sm text-[var(--gb-text-off)]">Aucun domaine détecté.</p>
+                            <p className="text-sm text-[var(--gb-text-off)]">{t("charts.domains.empty")}</p>
                         ) : (
                             stats.topDomains.map(({ label, count }) => (
                                 <BarRow
@@ -493,7 +515,6 @@ export default function CareerInsightsPage() {
                     </CardContent>
                 </Card>
             </section>
-
         </div>
     );
 }

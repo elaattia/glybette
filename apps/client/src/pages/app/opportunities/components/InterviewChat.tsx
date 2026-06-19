@@ -1,5 +1,7 @@
-import React, { useState, useEffect, useCallback, useRef } from "react";
+import React, { useState, useEffect, useCallback, useRef, useMemo } from "react";
 import { Bot, User, Send, Mic, MicOff, Loader2 } from "lucide-react";
+import { useLocale } from "@/hooks/useLocale";
+import { formatTime, getIntlLocale } from "@/lib/locale-format";
 import type { ChatMessage } from "../types";
 
 const API_BASE = (import.meta as any).env?.VITE_API_URL ?? "http://localhost:3000/api";
@@ -7,12 +9,12 @@ const API_BASE = (import.meta as any).env?.VITE_API_URL ?? "http://localhost:300
 interface Offre {
     _id: string;
     titre: string;
-    entreprise?: string;
-    description?: string;
+    entreprise?: string | null;
+    description?: string | null;
     competences: string[];
-    localisation?: string;
-    type_contrat?: string;
-    niveau_experience?: string;
+    localisation?: string | null;
+    type_contrat?: string | null;
+    niveau_experience?: string | null;
 }
 
 interface InterviewChatProps {
@@ -21,14 +23,17 @@ interface InterviewChatProps {
 }
 
 export function InterviewChat({ offre, userProfile }: InterviewChatProps) {
-    const [messages, setMessages] = useState<ChatMessage[]>([
-        {
-            id: "welcome",
-            role: "assistant",
-            content: `Bonjour ! Je suis votre assistant carrière pour cette opportunité chez **${offre.entreprise ?? "l'entreprise"}** (${offre.titre}).\n\nJe peux vous aider à :\n• Comprendre les exigences du poste\n• Préparer vos réponses d'entretien\n• Analyser votre compatibilité avec l'offre\n• Répondre à toutes vos questions\n\nQue souhaitez-vous savoir ?`,
-            timestamp: new Date(),
-        },
-    ]);
+    const { t, locale, i18n } = useLocale("opportunities");
+
+    const welcomeContent = useMemo(
+        () => t("detail.chat.welcome", {
+            company: offre.entreprise ?? t("detail.chat.defaultCompany"),
+            title: offre.titre,
+        }),
+        [t, offre.entreprise, offre.titre, i18n.language],
+    );
+
+    const [messages, setMessages] = useState<ChatMessage[]>([]);
     const [input, setInput] = useState("");
     const [loading, setLoading] = useState(false);
 
@@ -39,6 +44,16 @@ export function InterviewChat({ offre, userProfile }: InterviewChatProps) {
     const isVoiceSupported = Boolean(
         (window as any).SpeechRecognition || (window as any).webkitSpeechRecognition,
     );
+    const speechLang = getIntlLocale(locale);
+
+    useEffect(() => {
+        setMessages((prev) => {
+            if (prev.length === 0) {
+                return [{ id: "welcome", role: "assistant", content: welcomeContent, timestamp: new Date() }];
+            }
+            return prev.map((m) => (m.id === "welcome" ? { ...m, content: welcomeContent } : m));
+        });
+    }, [welcomeContent]);
 
     const bottomRef = useRef<HTMLDivElement>(null);
     const inputRef = useRef<HTMLTextAreaElement>(null);
@@ -51,7 +66,7 @@ export function InterviewChat({ offre, userProfile }: InterviewChatProps) {
         const SR = (window as any).SpeechRecognition || (window as any).webkitSpeechRecognition;
         if (!SR) return;
         const r = new SR();
-        r.lang = "fr-FR";
+        r.lang = speechLang;
         r.continuous = true;
         r.interimResults = true;
 
@@ -76,7 +91,7 @@ export function InterviewChat({ offre, userProfile }: InterviewChatProps) {
         };
         r.start();
         chatRecognitionRef.current = r;
-    }, []);
+    }, [speechLang]);
 
     const stopChatVoice = useCallback(() => {
         chatRecognitionRef.current?.stop();
@@ -126,33 +141,27 @@ export function InterviewChat({ offre, userProfile }: InterviewChatProps) {
             setMessages((prev) => [...prev, {
                 id: `assistant-${Date.now()}`,
                 role: "assistant",
-                content: data.content ?? "Je n'ai pas pu générer une réponse.",
+                content: data.content ?? t("detail.chat.noResponse"),
                 timestamp: new Date(),
             }]);
         } catch {
             setMessages((prev) => [...prev, {
                 id: `error-${Date.now()}`,
                 role: "assistant",
-                content: "Désolé, une erreur s'est produite. Vérifiez que le service IA est démarré.",
+                content: t("detail.chat.error"),
                 timestamp: new Date(),
             }]);
         } finally {
             setLoading(false);
             setTimeout(() => inputRef.current?.focus(), 100);
         }
-    }, [input, loading, messages, offreText, userProfile, isVoiceActive, stopChatVoice]);
+    }, [input, loading, messages, offreText, userProfile, isVoiceActive, stopChatVoice, t]);
 
     const handleKeyDown = (e: React.KeyboardEvent) => {
         if (e.key === "Enter" && !e.shiftKey) { e.preventDefault(); sendMessage(); }
     };
 
-    const quickSuggestions = [
-        "Quelles compétences sont les plus importantes pour ce poste ?",
-        "Comment préparer mon entretien pour cette offre ?",
-        "Quelles questions pourraient m'être posées ?",
-        "Comment mettre en valeur mon profil pour ce poste ?",
-        "Quel salaire est envisageable pour ce type de poste ?",
-    ];
+    const quickSuggestions = t("detail.chat.suggestions", { returnObjects: true }) as string[];
 
     return (
         <div style={{ display: "flex", flexDirection: "column", height: "100%", minHeight: 500 }}>
@@ -169,10 +178,10 @@ export function InterviewChat({ offre, userProfile }: InterviewChatProps) {
                     <Bot size={18} style={{ color: "#fff" }} />
                 </div>
                 <div style={{ flex: 1 }}>
-                    <div style={{ fontSize: 13, fontWeight: 700, color: "var(--gb-text)" }}>Assistant Carrière IA</div>
+                    <div style={{ fontSize: 13, fontWeight: 700, color: "var(--gb-text)" }}>{t("detail.chat.title")}</div>
                     <div style={{ fontSize: 11, color: "#22c55e", display: "flex", alignItems: "center", gap: 4 }}>
                         <span style={{ width: 6, height: 6, borderRadius: "50%", background: "#22c55e", animation: "pulse 2s infinite" }} />
-                        En ligne · Spécialisé sur cette offre
+                        {t("detail.chat.online")}
                     </div>
                 </div>
                 {isVoiceActive && (
@@ -182,7 +191,7 @@ export function InterviewChat({ offre, userProfile }: InterviewChatProps) {
                         animation: "pulse 1.2s ease-in-out infinite",
                     }}>
                         <span style={{ width: 7, height: 7, borderRadius: "50%", background: "#ef4444" }} />
-                        <span style={{ fontSize: 11, fontWeight: 700, color: "#ef4444" }}>Écoute…</span>
+                        <span style={{ fontSize: 11, fontWeight: 700, color: "#ef4444" }}>{t("detail.chat.listening")}</span>
                     </div>
                 )}
             </div>
@@ -220,7 +229,7 @@ export function InterviewChat({ offre, userProfile }: InterviewChatProps) {
                             fontSize: 13, lineHeight: 1.65, color: "var(--gb-text)", whiteSpace: "pre-line",
                         }}>
                             {msg.content.split("\n").map((line, i) => {
-                                const boldLine = line.replace(/\*\*(.*?)\*\*/g, (_, t) => `<strong>${t}</strong>`);
+                                const boldLine = line.replace(/\*\*(.*?)\*\*/g, (_, text) => `<strong>${text}</strong>`);
                                 return (
                                     <div key={i}
                                         dangerouslySetInnerHTML={{ __html: boldLine }}
@@ -229,7 +238,7 @@ export function InterviewChat({ offre, userProfile }: InterviewChatProps) {
                                 );
                             })}
                             <div style={{ fontSize: 10, color: "var(--gb-muted)", marginTop: 6, textAlign: msg.role === "user" ? "right" : "left" }}>
-                                {msg.timestamp.toLocaleTimeString("fr-FR", { hour: "2-digit", minute: "2-digit" })}
+                                {formatTime(msg.timestamp, locale, { hour: "2-digit", minute: "2-digit" })}
                             </div>
                         </div>
                     </div>
@@ -254,7 +263,7 @@ export function InterviewChat({ offre, userProfile }: InterviewChatProps) {
             {messages.length <= 2 && (
                 <div style={{ padding: "8px 16px", borderTop: "1px solid var(--gb-border)" }}>
                     <div style={{ fontSize: 11, color: "var(--gb-muted)", marginBottom: 6, fontWeight: 600, letterSpacing: "0.06em", textTransform: "uppercase" }}>
-                        Questions suggérées
+                        {t("detail.chat.suggestedQuestions")}
                     </div>
                     <div style={{ display: "flex", flexWrap: "wrap", gap: 6 }}>
                         {quickSuggestions.slice(0, 3).map((s) => (
@@ -287,7 +296,7 @@ export function InterviewChat({ offre, userProfile }: InterviewChatProps) {
                     {isVoiceSupported && (
                         <button
                             onClick={toggleChatVoice}
-                            title={isVoiceActive ? "Arrêter le micro" : "Dicter un message"}
+                            title={isVoiceActive ? t("detail.chat.stopMicTitle") : t("detail.chat.startMicTitle")}
                             style={{
                                 width: 42, height: 42, borderRadius: 12, flexShrink: 0,
                                 display: "flex", alignItems: "center", justifyContent: "center",
@@ -310,7 +319,7 @@ export function InterviewChat({ offre, userProfile }: InterviewChatProps) {
                             value={input}
                             onChange={(e) => setInput(e.target.value)}
                             onKeyDown={handleKeyDown}
-                            placeholder={isVoiceActive ? "Parlez maintenant… (ou tapez votre message)" : "Posez une question sur cette offre… (Entrée pour envoyer)"}
+                            placeholder={isVoiceActive ? t("detail.chat.placeholderActive") : t("detail.chat.placeholderIdle")}
                             disabled={loading}
                             rows={2}
                             style={{
@@ -331,7 +340,7 @@ export function InterviewChat({ offre, userProfile }: InterviewChatProps) {
                                 fontSize: 10, color: "#ef4444", fontWeight: 700, pointerEvents: "none",
                             }}>
                                 <span style={{ width: 5, height: 5, borderRadius: "50%", background: "#ef4444", animation: "pulse 0.8s infinite" }} />
-                                REC
+                                {t("detail.chat.rec")}
                             </div>
                         )}
                     </div>
@@ -356,13 +365,13 @@ export function InterviewChat({ offre, userProfile }: InterviewChatProps) {
                 </div>
 
                 <div style={{ fontSize: 10, color: "var(--gb-muted)", marginTop: 5, textAlign: "center", display: "flex", alignItems: "center", justifyContent: "center", gap: 8 }}>
-                    <span>Entrée pour envoyer · Maj+Entrée pour nouvelle ligne</span>
+                    <span>{t("detail.chat.footer")}</span>
                     {isVoiceSupported && (
                         <>
                             <span style={{ opacity: 0.4 }}>·</span>
                             <span style={{ display: "flex", alignItems: "center", gap: 3 }}>
                                 <Mic size={9} />
-                                {isVoiceActive ? "Cliquez sur le micro pour arrêter" : "Micro disponible"}
+                                {isVoiceActive ? t("detail.chat.micActive") : t("detail.chat.micAvailable")}
                             </span>
                         </>
                     )}

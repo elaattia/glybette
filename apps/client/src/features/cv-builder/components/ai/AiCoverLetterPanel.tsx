@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { X, FileText, Loader, Copy, Check, Download } from "lucide-react";
+import { useLocale } from "@/hooks/useLocale";
 
 interface AiCoverLetterPanelProps {
     content: string;
@@ -10,11 +11,7 @@ interface AiCoverLetterPanelProps {
     onGenerate: (jobDescription: string, tone: "professional" | "enthusiastic" | "concise") => void;
 }
 
-const TONES = [
-    { value: "professional", label: "Professionnel", desc: "Formel et confiant" },
-    { value: "enthusiastic", label: "Enthousiaste", desc: "Dynamique et engagé" },
-    { value: "concise", label: "Concis", desc: "Court et percutant" },
-] as const;
+const TONE_VALUES = ["professional", "enthusiastic", "concise"] as const;
 
 export function AiCoverLetterPanel({
     content,
@@ -24,6 +21,7 @@ export function AiCoverLetterPanel({
     onClose,
     onGenerate,
 }: AiCoverLetterPanelProps) {
+    const { t } = useLocale("cvBuilder");
     const [jobDesc, setJobDesc] = useState("");
     const [tone, setTone] = useState<"professional" | "enthusiastic" | "concise">("professional");
     const [copied, setCopied] = useState(false);
@@ -39,7 +37,7 @@ export function AiCoverLetterPanel({
         const url = URL.createObjectURL(blob);
         const a = document.createElement("a");
         a.href = url;
-        a.download = "lettre-de-motivation.txt";
+        a.download = t("ai.coverLetter.downloadFilename");
         a.click();
         URL.revokeObjectURL(url);
     };
@@ -95,10 +93,10 @@ export function AiCoverLetterPanel({
                         </div>
                         <div>
                             <h3 style={{ margin: 0, fontSize: "14px", fontWeight: 700, color: "var(--gb-text)" }}>
-                                Lettre de motivation
+                                {t("ai.coverLetter.title")}
                             </h3>
                             <p style={{ margin: 0, fontSize: "11px", color: "var(--gb-muted)" }}>
-                                Générée par IA selon votre profil
+                                {t("ai.coverLetter.subtitle")}
                             </p>
                         </div>
                     </div>
@@ -144,19 +142,19 @@ export function AiCoverLetterPanel({
                                 letterSpacing: "0.06em",
                                 marginBottom: "8px",
                             }}>
-                            Ton de la lettre
+                            {t("ai.coverLetter.toneTitle")}
                         </label>
                         <div style={{ display: "flex", gap: "6px" }}>
-                            {TONES.map((t) => (
+                            {TONE_VALUES.map((toneValue) => (
                                 <button
-                                    key={t.value}
-                                    onClick={() => setTone(t.value)}
+                                    key={toneValue}
+                                    onClick={() => setTone(toneValue)}
                                     style={{
                                         flex: 1,
                                         padding: "8px 6px",
                                         borderRadius: "9px",
-                                        border: tone === t.value ? "1.5px solid #f59e0b" : "1px solid var(--gb-border)",
-                                        background: tone === t.value ? "rgba(251,191,36,0.1)" : "transparent",
+                                        border: tone === toneValue ? "1.5px solid #f59e0b" : "1px solid var(--gb-border)",
+                                        background: tone === toneValue ? "rgba(251,191,36,0.1)" : "transparent",
                                         cursor: "pointer",
                                         textAlign: "center",
                                     }}>
@@ -164,12 +162,12 @@ export function AiCoverLetterPanel({
                                         style={{
                                             fontSize: "11.5px",
                                             fontWeight: 600,
-                                            color: tone === t.value ? "#f59e0b" : "var(--gb-text)",
+                                            color: tone === toneValue ? "#f59e0b" : "var(--gb-text)",
                                         }}>
-                                        {t.label}
+                                        {t(`ai.coverLetter.tones.${toneValue}.label`)}
                                     </div>
                                     <div style={{ fontSize: "10px", color: "var(--gb-muted)", marginTop: "2px" }}>
-                                        {t.desc}
+                                        {t(`ai.coverLetter.tones.${toneValue}.desc`)}
                                     </div>
                                 </button>
                             ))}
@@ -187,12 +185,12 @@ export function AiCoverLetterPanel({
                                 letterSpacing: "0.06em",
                                 marginBottom: "6px",
                             }}>
-                            Description du poste
+                            {t("ai.coverLetter.jobDescription")}
                         </label>
                         <textarea
                             value={jobDesc}
                             onChange={(e) => setJobDesc(e.target.value)}
-                            placeholder="Collez la description du poste ici..."
+                            placeholder={t("ai.coverLetter.jobDescriptionPlaceholder")}
                             rows={5}
                             style={{
                                 width: "100%",
@@ -237,7 +235,7 @@ export function AiCoverLetterPanel({
                         ) : (
                             <FileText style={{ width: 14, height: 14 }} />
                         )}
-                        {isLoading ? "Génération en cours..." : "Générer la lettre"}
+                        {isLoading ? t("ai.coverLetter.generating") : t("ai.coverLetter.generate")}
                     </button>
 
                     {content && !isLoading && (
@@ -257,7 +255,7 @@ export function AiCoverLetterPanel({
                                         textTransform: "uppercase",
                                         letterSpacing: "0.06em",
                                     }}>
-                                    Lettre générée
+                                    {t("ai.coverLetter.generatedLetter")}
                                 </span>
                                 <div style={{ display: "flex", gap: "6px" }}>
                                     <button
@@ -279,7 +277,7 @@ export function AiCoverLetterPanel({
                                         ) : (
                                             <Copy style={{ width: 11, height: 11 }} />
                                         )}
-                                        {copied ? "Copié" : "Copier"}
+                                        {copied ? t("ai.coverLetter.copied") : t("ai.coverLetter.copy")}
                                     </button>
                                     <button
                                         onClick={handleDownload}
@@ -297,7 +295,7 @@ export function AiCoverLetterPanel({
                                             fontWeight: 600,
                                         }}>
                                         <Download style={{ width: 11, height: 11 }} />
-                                        Télécharger
+                                        {t("ai.coverLetter.download")}
                                     </button>
                                 </div>
                             </div>

@@ -1,9 +1,12 @@
-export function fmt(n: number) {
-    return new Intl.NumberFormat("fr-FR").format(n);
+import type { AppLocale } from "@/i18n";
+import { formatNumber } from "@/lib/locale-format";
+
+export function fmt(n: number, locale: AppLocale) {
+    return formatNumber(n, locale);
 }
 
-export function fmtPct(n: number) {
-    return `${n.toFixed(1)} %`;
+export function fmtPct(n: number, locale: AppLocale) {
+    return `${formatNumber(n, locale, { minimumFractionDigits: 1, maximumFractionDigits: 1 })} %`;
 }
 
 export function topEntries(values: string[] = [], limit = 8) {

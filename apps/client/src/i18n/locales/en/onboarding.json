@@ -1,0 +1,199 @@
+{
+    "layout": {
+        "stepOf": "STEP {{current}} of {{total}}",
+        "percentComplete": "{{progress}}% COMPLETE",
+        "back": "← Back",
+        "whyThisMatters": "Why this matters",
+        "close": "Close",
+        "whyModal": {
+            "title": "Why this matters",
+            "body1": "We ask a few questions to better understand you. This helps us personalize your profile and recommend opportunities that match your interests and goals.",
+            "body2": "Since our platform supports different types of users, this information allows us to show the most relevant opportunities first, so you can quickly find what you're looking for.",
+            "gotIt": "Got it"
+        }
+    },
+    "footer": {
+        "skipForNow": "Skip for now",
+        "continue": "Continue →"
+    },
+    "roleSelect": {
+        "title": "How would you like to use Glybette?",
+        "subtitle": "Select your role to help us personalize your experience.",
+        "student": {
+            "title": "Student / Candidate",
+            "description": "I want to create my resume, find job offers, and prepare for interviews."
+        },
+        "enterprise": {
+            "title": "Enterprise",
+            "description": "I want to publish internship / job offers and recruit new talent."
+        }
+    },
+    "enterpriseInfo": {
+        "title": "Welcome to the recruiter space",
+        "subtitle": "To associate your offers with your company, please enter its name.",
+        "companyNameLabel": "Company name",
+        "required": "*",
+        "companyNamePlaceholder": "Ex: MyCompany Inc."
+    },
+    "personalInfo": {
+        "label": "Personal Info",
+        "title": "Personal information",
+        "subtitle": "Tell us who you are",
+        "fields": {
+            "firstName": {
+                "label": "First Name",
+                "placeholder": "First Name"
+            },
+            "lastName": {
+                "label": "Last Name",
+                "placeholder": "Last Name"
+            },
+            "email": {
+                "label": "Email",
+                "placeholder": "you@example.com"
+            },
+            "phone": {
+                "label": "Phone Number",
+                "placeholder": "+216 12 345 678"
+            },
+            "country": {
+                "label": "Country of Residence",
+                "placeholder": "e.g. Tunisia, France..."
+            }
+        }
+    },
+    "academicBackground": {
+        "label": "Academic",
+        "title": "Academic background",
+        "subtitle": "Tell us about your studies.",
+        "fields": {
+            "university": {
+                "label": "University",
+                "placeholder": "Your university or school"
+            },
+            "degree": {
+                "label": "Degree",
+                "placeholder": "Select your degree"
+            },
+            "graduationYear": {
+                "label": "Graduation Year",
+                "placeholder": "Select year"
+            },
+            "specialization": {
+                "label": "Specialization",
+                "placeholder": "e.g. Computer Science, Marketing..."
+            }
+        },
+        "degrees": {
+            "licence": "Licence",
+            "master": "Master",
+            "ingenieur": "Ingénieur",
+            "doctorat": "Doctorat",
+            "bts": "BTS",
+            "other": "Other"
+        }
+    },
+    "journey": {
+        "label": "Your Journey",
+        "title": "Where are you in your journey?",
+        "subtitle": "Select the option that best describes your current professional or academic standing.",
+        "options": {
+            "student": {
+                "title": "Student",
+                "description": "Currently enrolled in an academic program or course."
+            },
+            "graduate": {
+                "title": "Graduate",
+                "description": "Recently finished studies and ready for the next chapter."
+            },
+            "jobSeeker": {
+                "title": "Job Seeker",
+                "description": "Actively looking for new professional opportunities."
+            }
+        }
+    },
+    "lookingFor": {
+        "label": "Opportunities",
+        "title": "What are you looking for?",
+        "subtitle": "Select all that apply. You can change this later.",
+        "options": {
+            "internship": {
+                "title": "Internship",
+                "description": "Short-term professional experience"
+            },
+            "pfe": {
+                "title": "PFE",
+                "description": "End-of-study project"
+            },
+            "job": {
+                "title": "Job",
+                "description": "Full-time position"
+            },
+            "remote": {
+                "title": "Remote",
+                "description": "Work from anywhere"
+            },
+            "freelance": {
+                "title": "Freelance",
+                "description": "Independent missions"
+            },
+            "other": {
+                "title": "Other",
+                "description": "Something else entirely"
+            }
+        }
+    },
+    "background": {
+        "label": "Background",
+        "title": "Your background",
+        "subtitle": "What is your field of expertise? This helps us show relevant opportunities.",
+        "options": {
+            "it": {
+                "title": "IT",
+                "description": "Software, data, cybersecurity..."
+            },
+            "architecture": {
+                "title": "Architecture",
+                "description": "Design, urban planning..."
+            },
+            "medicine": {
+                "title": "Medicine",
+                "description": "Health, pharmacy, biology..."
+            },
+            "business": {
+                "title": "Business",
+                "description": "Finance, marketing, management..."
+            },
+            "design": {
+                "title": "Design",
+                "description": "UI/UX, graphic, motion..."
+            },
+            "other": {
+                "title": "Other",
+                "description": "Something else entirely"
+            }
+        }
+    },
+    "complete": {
+        "title": "All set for your journey!",
+        "profileSummaryLookingFor": "looking for a {{opportunity}}",
+        "preparedTitle": "What we've prepared for you:",
+        "features": {
+            "dashboard": {
+                "title": "Personalized Dashboard",
+                "description": "Real-time tracking of your opportunities tailored to your profile."
+            },
+            "opportunities": {
+                "title": "Recommended Opportunities",
+                "description": "Curated offers that match your specific background and preferences."
+            },
+            "cvTemplate": {
+                "title": "CV Template",
+                "description": "A professional template optimized for your domain and target opportunities."
+            }
+        },
+        "launch": "Launch My Experience",
+        "countdown": "Redirecting to your dashboard in {{count}} moment{{plural}}...",
+        "trust": "Secure & Personalized Account Setup"
+    }
+}

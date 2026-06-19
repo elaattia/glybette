@@ -1,35 +1,10 @@
 import { useState } from "react";
 import { Plus, X } from "lucide-react";
-import { User, AlignLeft, Briefcase, GraduationCap, Code2, FolderKanban, Languages, Award } from "lucide-react";
+import { useLocale } from "@/hooks/useLocale";
 import { CustomSectionEditor } from "../sections/CustomSectionEditor";
 import type { CustomSectionDataV2 } from "../sections/CustomSectionEditor";
-import type { CvSection, CvSectionType } from "../../types/cv.types";
-
-const SECTION_DEFS: {
-    type: CvSectionType;
-    label: string;
-    icon: React.ReactNode;
-    defaultData: CvSection["data"];
-}[] = [
-    {
-        type: "personal-info",
-        label: "Contact",
-        icon: <User style={{ width: 14, height: 14 }} />,
-        defaultData: { firstName: "", lastName: "", roleTitle: "", email: "", phone: "", location: "", linkedin: "", github: "", portfolio: "" },
-    },
-    {
-        type: "summary",
-        label: "Résumé",
-        icon: <AlignLeft style={{ width: 14, height: 14 }} />,
-        defaultData: { text: "" },
-    },
-    { type: "experience", label: "Expérience", icon: <Briefcase style={{ width: 14, height: 14 }} />, defaultData: [] },
-    { type: "education", label: "Formation", icon: <GraduationCap style={{ width: 14, height: 14 }} />, defaultData: [] },
-    { type: "skills", label: "Compétences", icon: <Code2 style={{ width: 14, height: 14 }} />, defaultData: [] },
-    { type: "projects", label: "Projets", icon: <FolderKanban style={{ width: 14, height: 14 }} />, defaultData: [] },
-    { type: "languages", label: "Langues", icon: <Languages style={{ width: 14, height: 14 }} />, defaultData: [] },
-    { type: "certifications", label: "Certifications", icon: <Award style={{ width: 14, height: 14 }} />, defaultData: [] },
-];
+import type { CvSection } from "../../types/cv.types";
+import { useSectionDefs } from "./sectionDefs";
 
 interface CustomSectionModalProps {
     onClose: () => void;
@@ -39,11 +14,13 @@ interface CustomSectionModalProps {
 }
 
 export function CustomSectionModal({ onClose, onAdd, existingTypes, nextOrder }: CustomSectionModalProps) {
+    const { t } = useLocale("cvBuilder");
+    const sectionDefs = useSectionDefs();
     const [customData, setCustomData] = useState<CustomSectionDataV2>({ title: "", fields: [] });
 
-    const available = SECTION_DEFS.filter((d) => !existingTypes.has(d.type));
+    const available = sectionDefs.filter((d) => !existingTypes.has(d.type));
 
-    const handleAddPredefined = (def: (typeof SECTION_DEFS)[0]) => {
+    const handleAddPredefined = (def: (typeof sectionDefs)[0]) => {
         onAdd({ type: def.type, order: nextOrder, data: def.defaultData as never });
         onClose();
     };
@@ -78,8 +55,8 @@ export function CustomSectionModal({ onClose, onAdd, existingTypes, nextOrder }:
                 }}>
                 <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "20px" }}>
                     <div>
-                        <h3 style={{ margin: 0, fontSize: "15px", fontWeight: 700, color: "var(--gb-text)" }}>Ajouter une section</h3>
-                        <p style={{ margin: "3px 0 0", fontSize: "12px", color: "var(--gb-muted)" }}>Choisissez une section prédéfinie ou créez la vôtre</p>
+                        <h3 style={{ margin: 0, fontSize: "15px", fontWeight: 700, color: "var(--gb-text)" }}>{t("sections.custom.modalTitle")}</h3>
+                        <p style={{ margin: "3px 0 0", fontSize: "12px", color: "var(--gb-muted)" }}>{t("sections.custom.modalSubtitle")}</p>
                     </div>
                     <button
                         onClick={onClose}
@@ -91,7 +68,7 @@ export function CustomSectionModal({ onClose, onAdd, existingTypes, nextOrder }:
                 {available.length > 0 && (
                     <div style={{ marginBottom: "20px" }}>
                         <p style={{ fontSize: "11px", fontWeight: 700, color: "var(--gb-muted)", textTransform: "uppercase", letterSpacing: "0.06em", margin: "0 0 10px" }}>
-                            Sections disponibles
+                            {t("sections.custom.available")}
                         </p>
                         <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "7px" }}>
                             {available.map((def) => (
@@ -111,7 +88,7 @@ export function CustomSectionModal({ onClose, onAdd, existingTypes, nextOrder }:
 
                 <div style={{ display: "flex", alignItems: "center", gap: "10px", marginBottom: "18px" }}>
                     <div style={{ flex: 1, height: "1px", background: "var(--gb-border)" }} />
-                    <span style={{ fontSize: "11px", color: "var(--gb-muted)", whiteSpace: "nowrap" }}>Section personnalisée</span>
+                    <span style={{ fontSize: "11px", color: "var(--gb-muted)", whiteSpace: "nowrap" }}>{t("sections.custom.customDivider")}</span>
                     <div style={{ flex: 1, height: "1px", background: "var(--gb-border)" }} />
                 </div>
 
@@ -137,7 +114,7 @@ export function CustomSectionModal({ onClose, onAdd, existingTypes, nextOrder }:
                         cursor: customData.title.trim() ? "pointer" : "not-allowed",
                     }}>
                     <Plus style={{ width: 14, height: 14 }} />
-                    Créer la section personnalisée
+                    {t("sections.custom.createCustom")}
                 </button>
             </div>
         </>

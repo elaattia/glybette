@@ -1,0 +1,203 @@
+{
+    "common": {
+        "manage": "Gérer",
+        "scraping": "Scraping",
+        "noData": "Aucune donnée pour le moment.",
+        "delete": "Supprimer",
+        "confirm": "Confirmer",
+        "unknownOwner": "Propriétaire inconnu",
+        "unknownCompany": "Entreprise inconnue",
+        "noEmail": "Aucun e-mail",
+        "entityId": "ID entité",
+        "title": "Titre",
+        "status": "Statut",
+        "user": "Utilisateur",
+        "actions": "Actions",
+        "updated": "Mis à jour",
+        "metric": "Métrique",
+        "value": "Valeur",
+        "company": "Entreprise",
+        "displayName": "Nom affiché",
+        "email": "E-mail",
+        "baseRole": "Rôle de base",
+        "admin": "Admin",
+        "verified": "Vérifié",
+        "slug": "Slug",
+        "roles": {
+            "student": "Étudiant",
+            "enterprise": "Entreprise"
+        },
+        "projectStatus": {
+            "draft": "Brouillon",
+            "published": "Publié",
+            "archived": "Archivé"
+        },
+        "accountStatus": {
+            "active": "actif",
+            "banned": "banni"
+        },
+        "adminBadge": {
+            "admin": "Admin",
+            "member": "Membre"
+        },
+        "verification": {
+            "verified": "Vérifié",
+            "unverified": "Non vérifié"
+        },
+        "jobStatus": {
+            "active": "actif",
+            "archived": "archivé"
+        },
+        "deltaThisWeek": "+{{count}} cette semaine",
+        "newLast24h": "{{count}} nouveaux (24 h)"
+    },
+    "dashboard": {
+        "title": "Tableau de bord admin",
+        "description": "Métriques globales, signaux de modération et croissance sur les 30 derniers jours.",
+        "loadError": "Impossible de charger les statistiques. Essayez d'actualiser la page.",
+        "kpi": {
+            "accounts": "Comptes",
+            "projects": "Projets",
+            "jobs": "Offres",
+            "portfolios": "Portfolios",
+            "cvs": "CV"
+        },
+        "charts": {
+            "contentVolume": "Volume de contenu",
+            "accountsByRole": "Comptes par rôle",
+            "accountHealth": "Santé des comptes",
+            "offersBySource": "Offres par source",
+            "offersByType": "Offres par type",
+            "jobPipeline": "Pipeline des offres",
+            "projectsByStatus": "Projets par statut",
+            "moderationQueue": "File de modération",
+            "growth": "Croissance (30 derniers jours)"
+        },
+        "contentVolume": {
+            "projects": "Projets",
+            "cvs": "CV",
+            "portfolios": "Portfolios",
+            "activeJobs": "Offres actives"
+        },
+        "accountHealth": {
+            "verified": "Vérifiés",
+            "unverified": "Non vérifiés",
+            "banned": "Bannis",
+            "admins": "Admins"
+        },
+        "jobPipeline": {
+            "activeOffers": "Offres actives",
+            "archivedOffers": "Offres archivées",
+            "new24h": "Nouveaux (24 h)"
+        },
+        "moderation": {
+            "pendingJoinRequests": "Demandes d'adhésion en attente",
+            "projectsWithPending": "Projets avec demandes en attente"
+        },
+        "growthSeries": {
+            "accounts": "Comptes",
+            "projects": "Projets",
+            "cvs": "CV",
+            "portfolios": "Portfolios"
+        }
+    },
+    "users": {
+        "title": "Gestion des utilisateurs",
+        "searchPlaceholder": "Rechercher par nom, e-mail, rôle, statut ou ID utilisateur",
+        "empty": "Aucun utilisateur trouvé pour cette recherche.",
+        "ban": "Bannir",
+        "unban": "Débannir",
+        "verify": "Vérifier",
+        "revokeVerification": "Révoquer la vérification",
+        "switchRole": "Changer de rôle",
+        "grantAdmin": "Accorder admin",
+        "revokeAdmin": "Révoquer admin",
+        "confirm": {
+            "banTitle": "Bannir l'utilisateur",
+            "unbanTitle": "Débannir l'utilisateur",
+            "banDescription": "Voulez-vous vraiment bannir {{name}} ?",
+            "unbanDescription": "Voulez-vous vraiment débannir {{name}} ?",
+            "confirmBan": "Confirmer le bannissement",
+            "confirmUnban": "Confirmer le débannissement",
+            "verifyTitle": "Vérifier l'utilisateur",
+            "revokeVerificationTitle": "Révoquer la vérification",
+            "verifyDescription": "Confirmer la vérification pour {{name}}.",
+            "revokeVerificationDescription": "Confirmer la révocation de vérification pour {{name}}.",
+            "verifyUser": "Vérifier l'utilisateur",
+            "revokeVerificationLabel": "Révoquer la vérification",
+            "switchRoleTitle": "Changer le rôle de base",
+            "switchRoleDescription": "Déplacer {{name}} vers le rôle {{role}} ?",
+            "confirmRoleSwitch": "Confirmer le changement de rôle",
+            "grantAdminTitle": "Accorder l'accès admin",
+            "revokeAdminTitle": "Révoquer l'accès admin",
+            "adminChangeDescription": "Confirmer le changement de privilèges admin pour {{name}}.",
+            "grantAdminLabel": "Accorder admin",
+            "revokeAdminLabel": "Révoquer admin",
+            "deleteTitle": "Supprimer le compte utilisateur",
+            "deleteDescription": "Cela supprimera définitivement {{name}}. Cette action est irréversible.",
+            "deleteUser": "Supprimer l'utilisateur"
+        }
+    },
+    "projects": {
+        "title": "Gestion des projets",
+        "searchPlaceholder": "Rechercher par titre, utilisateur, statut ou ID projet",
+        "empty": "Aucun projet trouvé pour cette recherche.",
+        "deleteTitle": "Supprimer le projet",
+        "deleteDescription": "Supprimer le projet « {{title}} » ({{id}}) ? Cette action est irréversible.",
+        "deleteProject": "Supprimer le projet"
+    },
+    "portfolio": {
+        "title": "Gestion des portfolios",
+        "searchPlaceholder": "Rechercher par slug, utilisateur ou ID portfolio",
+        "empty": "Aucun portfolio trouvé pour cette recherche.",
+        "deleteTitle": "Supprimer le portfolio",
+        "deleteDescription": "Supprimer le portfolio « {{slug}} » ({{id}}) ? Cette action est irréversible.",
+        "deletePortfolio": "Supprimer le portfolio"
+    },
+    "cv": {
+        "title": "Gestion des CV",
+        "searchPlaceholder": "Rechercher par titre, utilisateur ou ID CV",
+        "empty": "Aucun CV trouvé pour cette recherche.",
+        "deleteTitle": "Supprimer le CV",
+        "deleteDescription": "Supprimer le CV « {{title}} » ({{id}}) ? Cette action est irréversible.",
+        "deleteCv": "Supprimer le CV"
+    },
+    "jobs": {
+        "title": "Gestion des offres",
+        "searchPlaceholder": "Rechercher par titre, entreprise, statut ou ID offre",
+        "empty": "Aucune offre trouvée pour cette recherche.",
+        "archive": "Archiver",
+        "activate": "Activer",
+        "confirm": {
+            "archiveTitle": "Archiver l'offre",
+            "activateTitle": "Activer l'offre",
+            "archiveDescription": "Confirmer l'archivage de « {{title}} ».",
+            "activateDescription": "Confirmer l'activation de « {{title}} ».",
+            "archiveJob": "Archiver l'offre",
+            "activateJob": "Activer l'offre",
+            "deleteTitle": "Supprimer l'offre",
+            "deleteDescription": "Supprimer « {{title}} » définitivement ? Cette action est irréversible.",
+            "deleteJob": "Supprimer l'offre"
+        }
+    },
+    "scraping": {
+        "title": "Gestion du scraping",
+        "searchPlaceholder": "Rechercher des métriques",
+        "empty": "Aucune métrique trouvée pour cette recherche.",
+        "metrics": {
+            "activeOffers": "Offres actives",
+            "archivedOffers": "Offres archivées",
+            "newOffers24h": "Nouvelles offres (24 h)"
+        },
+        "triggerAll": "Lancer toutes les sources",
+        "triggerLinkedIn": "Lancer LinkedIn",
+        "triggerIndeed": "Lancer Indeed",
+        "confirmTitle": "Lancer un job de scraping",
+        "confirmDescription": "Exécuter le scraping pour « {{source}} » maintenant ?",
+        "confirmLabel": "Lancer le scraping"
+    },
+    "notifications": {
+        "title": "Gestion des notifications",
+        "description": "Les notifications in-app sont actives. Les journaux de livraison et les contrôles admin sont encore reportés."
+    }
+}

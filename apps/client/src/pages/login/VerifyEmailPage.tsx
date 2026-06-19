@@ -1,4 +1,5 @@
 import { useEffect, useMemo, useState } from "react";
+import { useTranslation } from "react-i18next";
 import { Navigate, useLocation, useNavigate } from "react-router-dom";
 import { REGEXP_ONLY_DIGITS } from "input-otp";
 import { useAuth } from "@/hooks/useAuth";
@@ -15,6 +16,7 @@ type VerifyEmailPageProps = {
 };
 
 export function VerifyEmailPage({ skipVerifiedRedirect = false }: VerifyEmailPageProps = {}) {
+    const { t } = useTranslation("auth");
     const navigate = useNavigate();
     const location = useLocation();
     const auth = useAuth();
@@ -28,7 +30,7 @@ export function VerifyEmailPage({ skipVerifiedRedirect = false }: VerifyEmailPag
 
     const maskedEmail = useMemo(() => {
         if (!verification.email) {
-            return "your email address";
+            return t("verifyEmail.fallbackEmail");
         }
         const [name, domain] = verification.email.split("@");
         if (!name || !domain) {
@@ -36,7 +38,7 @@ export function VerifyEmailPage({ skipVerifiedRedirect = false }: VerifyEmailPag
         }
         const visible = name.slice(0, 2);
         return `${visible}${"*".repeat(Math.max(1, name.length - visible.length))}@${domain}`;
-    }, [verification.email]);
+    }, [t, verification.email]);
 
     useEffect(() => {
         if (!auth.isAuthenticated || verification.isPending || verification.isError) {
@@ -62,7 +64,7 @@ export function VerifyEmailPage({ skipVerifiedRedirect = false }: VerifyEmailPag
         return (
             <main className="min-h-screen flex items-center justify-center px-6">
                 <div className="w-full max-w-md rounded-2xl border border-[var(--gb-border)] bg-[var(--gb-surface)] p-6 text-center">
-                    <p className="text-sm text-[var(--gb-muted)]">Preparing verification...</p>
+                    <p className="text-sm text-[var(--gb-muted)]">{t("verifyEmail.preparing")}</p>
                 </div>
             </main>
         );
@@ -82,7 +84,7 @@ export function VerifyEmailPage({ skipVerifiedRedirect = false }: VerifyEmailPag
                 navigate(resolveAuthenticatedDestination(from, user), { replace: true });
             }
         } catch (error) {
-            const message = error instanceof ApiError ? error.message : "Unable to verify OTP code";
+            const message = error instanceof ApiError ? error.message : t("verifyEmail.verifyError");
             setErrorMessage(message);
         }
     };
@@ -91,9 +93,9 @@ export function VerifyEmailPage({ skipVerifiedRedirect = false }: VerifyEmailPag
         setErrorMessage(null);
         try {
             const response = await verification.requestOtp();
-            setRequestMessage(`A new code was sent. It expires in ${response.expiresInSeconds} seconds.`);
+            setRequestMessage(t("verifyEmail.codeSent", { seconds: response.expiresInSeconds }));
         } catch (error) {
-            const message = error instanceof ApiError ? error.message : "Unable to request a new OTP";
+            const message = error instanceof ApiError ? error.message : t("verifyEmail.resendError");
             setErrorMessage(message);
         }
     };
@@ -109,12 +111,9 @@ export function VerifyEmailPage({ skipVerifiedRedirect = false }: VerifyEmailPag
                 <div className="login-card">
                     <div className="login-card-content">
                         <div className="login-header">
-                            <p className="gb-sec-label mb-2">Email verification</p>
-                            <h1 className="login-title">Verify your account</h1>
-                            <p className="login-subtitle">
-                                Enter the 6-digit code sent to{" "}
-                                <span className="font-semibold text-[var(--gb-text)]">{maskedEmail}</span>.
-                            </p>
+                            <p className="gb-sec-label mb-2">{t("verifyEmail.label")}</p>
+                            <h1 className="login-title">{t("verifyEmail.title")}</h1>
+                            <p className="login-subtitle">{t("verifyEmail.subtitle", { email: maskedEmail })}</p>
                         </div>
 
                         {errorMessage && (
@@ -154,7 +153,9 @@ export function VerifyEmailPage({ skipVerifiedRedirect = false }: VerifyEmailPag
                                 }}
                                 disabled={code.trim().length !== 6 || isSubmitting}
                                 className="login-primary-button">
-                                {verification.verifyOtpMutation.isPending ? "Verifying..." : "Verify email"}
+                                {verification.verifyOtpMutation.isPending
+                                    ? t("verifyEmail.verifying")
+                                    : t("verifyEmail.verifyButton")}
                             </button>
                             <button
                                 type="button"
@@ -163,7 +164,9 @@ export function VerifyEmailPage({ skipVerifiedRedirect = false }: VerifyEmailPag
                                 }}
                                 disabled={isSubmitting}
                                 className="w-full rounded-xl border border-[var(--gb-border)] px-4 py-3 font-medium text-[var(--gb-text)] transition hover:bg-[var(--gb-surface2)] disabled:cursor-not-allowed disabled:opacity-50">
-                                {verification.requestOtpMutation.isPending ? "Sending..." : "Resend code"}
+                                {verification.requestOtpMutation.isPending
+                                    ? t("verifyEmail.sending")
+                                    : t("verifyEmail.resendCode")}
                             </button>
                         </div>
                     </div>

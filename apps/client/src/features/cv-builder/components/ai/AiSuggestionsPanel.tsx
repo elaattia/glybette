@@ -1,4 +1,5 @@
-import { X, Sparkles, Lightbulb, Loader, RefreshCw } from "lucide-react";
+import { X, Sparkles, Lightbulb, RefreshCw } from "lucide-react";
+import { useLocale } from "@/hooks/useLocale";
 import type { SuggestionsResult } from "../../types/cv.types";
 
 interface AiSuggestionsPanelProps {
@@ -11,9 +12,9 @@ interface AiSuggestionsPanelProps {
 }
 
 const PRIORITY_STYLES = {
-    high: { bg: "rgba(220,38,38,0.1)", border: "rgba(220,38,38,0.25)", color: "#dc2626", label: "Haute" },
-    medium: { bg: "rgba(202,138,4,0.1)", border: "rgba(202,138,4,0.25)", color: "#ca8a04", label: "Moyenne" },
-    low: { bg: "rgba(22,163,74,0.1)", border: "rgba(22,163,74,0.25)", color: "#16A34A", label: "Faible" },
+    high: { bg: "rgba(220,38,38,0.1)", border: "rgba(220,38,38,0.25)", color: "#dc2626" },
+    medium: { bg: "rgba(202,138,4,0.1)", border: "rgba(202,138,4,0.25)", color: "#ca8a04" },
+    low: { bg: "rgba(22,163,74,0.1)", border: "rgba(22,163,74,0.25)", color: "#16A34A" },
 };
 
 export function AiSuggestionsPanel({
@@ -24,6 +25,8 @@ export function AiSuggestionsPanel({
     onClose,
     onRefresh,
 }: AiSuggestionsPanelProps) {
+    const { t } = useLocale("cvBuilder");
+    const priorityLabel = (p: keyof typeof PRIORITY_STYLES) => t(`ai.suggestions.priority.${p}`);
     return (
         <>
             <div
@@ -76,10 +79,10 @@ export function AiSuggestionsPanel({
                         </div>
                         <div>
                             <h3 style={{ margin: 0, fontSize: "14px", fontWeight: 700, color: "var(--gb-text)" }}>
-                                Suggestions d'amélioration
+                                {t("ai.suggestions.title")}
                             </h3>
                             <p style={{ margin: 0, fontSize: "11px", color: "var(--gb-muted)" }}>
-                                Analyse intelligente de votre CV
+                                {t("ai.suggestions.subtitle")}
                             </p>
                         </div>
                     </div>
@@ -155,7 +158,7 @@ export function AiSuggestionsPanel({
                                     maxWidth: "260px",
                                     margin: "0 auto 20px",
                                 }}>
-                                Obtenez des suggestions personnalisées pour améliorer l'impact de votre CV.
+                                {t("ai.suggestions.emptyDescription")}
                             </p>
                             <button
                                 onClick={onRefresh}
@@ -175,11 +178,11 @@ export function AiSuggestionsPanel({
                                     opacity: hasCvId ? 1 : 0.5,
                                 }}>
                                 <Sparkles style={{ width: 14, height: 14 }} />
-                                Analyser mon CV
+                                {t("ai.suggestions.analyze")}
                             </button>
                             {!hasCvId && (
                                 <p style={{ marginTop: "12px", fontSize: "11px", color: "var(--gb-muted)" }}>
-                                    Sauvegardez d'abord votre CV pour activer cette fonctionnalité.
+                                    {t("ai.suggestions.saveFirst")}
                                 </p>
                             )}
                         </div>
@@ -231,7 +234,7 @@ export function AiSuggestionsPanel({
                                                     textTransform: "uppercase",
                                                     letterSpacing: "0.05em",
                                                 }}>
-                                                {pStyle.label}
+                                                {priorityLabel(s.priority as keyof typeof PRIORITY_STYLES)}
                                             </span>
                                         </div>
                                         <p
@@ -288,7 +291,7 @@ export function AiSuggestionsPanel({
                                 e.currentTarget.style.color = "var(--gb-muted)";
                             }}>
                             <RefreshCw style={{ width: 12, height: 12 }} />
-                            Rafraîchir l'analyse
+                            {t("ai.suggestions.refresh")}
                         </button>
                     </div>
                 )}

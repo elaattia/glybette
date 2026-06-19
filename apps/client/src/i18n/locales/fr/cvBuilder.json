@@ -1,0 +1,443 @@
+{
+    "list": {
+        "title": "Mes CVs",
+        "loading": "Chargement…",
+        "savedCount": "{{count}} CV sauvegardé",
+        "savedCount_other": "{{count}} CVs sauvegardés",
+        "createNew": "Créer un nouveau CV",
+        "empty": {
+            "title": "Aucun CV pour le moment",
+            "description": "Créez votre premier CV optimisé par l'IA en quelques minutes.",
+            "createFirst": "Créer mon premier CV"
+        }
+    },
+    "create": {
+        "defaultTitle": "Mon nouveau CV",
+        "importedTitle": "Mon CV",
+        "createError": "Erreur lors de la création du CV. Veuillez réessayer.",
+        "importFailedAlert": "Le fichier a bien été importé mais le remplissage automatique a échoué. Vous pourrez utiliser les boutons IA manuellement par la suite dans le formulaire.",
+        "docxReadError": "Impossible de lire le fichier DOCX",
+        "pdfReadError": "Impossible de lire ce PDF",
+        "upload": {
+            "title": "Importation en cours…",
+            "extractingHint": "L'IA analyse votre CV, cela peut prendre 30-60 secondes…",
+            "pleaseWait": "Veuillez patienter…",
+            "steps": {
+                "reading": "Lecture du fichier",
+                "extracting": "Extraction IA des données…",
+                "creating": "Création de votre CV"
+            }
+        }
+    },
+    "editor": {
+        "loading": "Chargement du CV...",
+        "notFound": "CV introuvable.",
+        "previewEmpty": "Remplissez le formulaire pour voir votre CV ici",
+        "backToList": "Retour à mes CVs",
+        "back": "Mes CVs",
+        "views": {
+            "edit": "Éditer",
+            "preview": "Aperçu"
+        },
+        "save": {
+            "saving": "Sauvegarde...",
+            "save": "Sauvegarder",
+            "saved": "Sauvegardé",
+            "savingEllipsis": "Sauvegarde…",
+            "savedAt": "Sauvegardé {{time}}",
+            "unsaved": "Non sauvegardé"
+        },
+        "aiImprove": "AI Improve",
+        "exportPdf": "Export PDF",
+        "exportError": "Erreur lors de l'export PDF. Veuillez réessayer.",
+        "addSection": "Ajouter une section",
+        "design": {
+            "title": "Style & Design",
+            "templateColor": "Couleur Template (Fond)",
+            "titleColor": "Couleur des Titres (Accent)",
+            "titleFont": "Style des Titres (Police)",
+            "bodyFont": "Style d'écriture (Police du corps)",
+            "titleSize": "Taille Titres",
+            "bodySize": "Taille Corps",
+            "customColorTitle": "Couleur personnalisée"
+        },
+        "fontSizes": {
+            "small": "Petit",
+            "medium": "Moyen",
+            "large": "Grand"
+        },
+        "unknownSection": "Section non reconnue.",
+        "defaultSectionLabel": "Section"
+    },
+    "templates": {
+        "galleryTitle": "Galerie de Templates",
+        "gallerySubtitle": "Tous nos templates sont optimisés ATS et conçus pour maximiser vos chances.",
+        "back": "Retour",
+        "categories": {
+            "all": "Tous",
+            "ats": "ATS",
+            "fancy": "Fancy"
+        },
+        "allDomains": "Tous les domaines",
+        "availableCount": "{{count}} template disponible",
+        "availableCount_other": "{{count}} templates disponibles",
+        "emptyFilters": "Aucun template pour cette combinaison de filtres.",
+        "resetFilters": "Réinitialiser les filtres",
+        "badges": {
+            "atsReady": "ATS-Ready",
+            "fancy": "Fancy"
+        },
+        "items": {
+            "creative": {
+                "name": "Élégant",
+                "description": "Deux colonnes, emplacement photo, sobre et professionnel"
+            },
+            "minimalist": {
+                "name": "Minimaliste",
+                "description": "Tout en typographie, espaces généreux, intemporel"
+            },
+            "modern-strategy": {
+                "name": "Impact",
+                "description": "Header sombre audacieux, sidebar colorée avec photo"
+            },
+            "tech": {
+                "name": "Tech",
+                "description": "Dark mode, blocs de code, idéal pour les développeurs"
+            },
+            "classic-reinvented": {
+                "name": "Classique",
+                "description": "Serif élégant, entête centré, style académique raffiné"
+            }
+        },
+        "domains": {
+            "general": "Général",
+            "it": "IT & Tech",
+            "design": "Design",
+            "business": "Business",
+            "academic": "Académique",
+            "healthcare": "Santé",
+            "engineering": "Ingénierie",
+            "marketing": "Marketing",
+            "legal": "Juridique",
+            "finance": "Finance"
+        },
+        "defaultSkillGroups": {
+            "hardSkills": "Hard Skills",
+            "softSkills": "Soft Skills",
+            "devOpsTools": "DevOps & Tools"
+        }
+    },
+    "creationModal": {
+        "title": "Options de création",
+        "subtitle": "Comment souhaitez-vous commencer ?",
+        "blank": {
+            "title": "Créer un nouveau CV",
+            "subtitle": "Commencer avec un formulaire vierge"
+        },
+        "upload": {
+            "title": "Importer mon CV existant",
+            "titleUploading": "Extraction en cours…",
+            "subtitle": "Extraction IA depuis un PDF ou Word"
+        },
+        "selectedTemplate": "Modèle choisi"
+    },
+    "sections": {
+        "defs": {
+            "personal-info": "Contact",
+            "summary": "Résumé",
+            "experience": "Expérience",
+            "education": "Formation",
+            "skills": "Compétences",
+            "projects": "Projets",
+            "languages": "Langues",
+            "certifications": "Certifications"
+        },
+        "personalInfo": {
+            "photo": "Photo de profil",
+            "import": "Importer",
+            "remove": "Supprimer",
+            "profileAlt": "Profil",
+            "firstName": "Prénom",
+            "lastName": "Nom",
+            "roleTitle": "Titre / Poste visé",
+            "email": "Email",
+            "phone": "Téléphone",
+            "location": "Localisation",
+            "linkedin": "LinkedIn",
+            "github": "GitHub",
+            "portfolio": "Site web / Portfolio",
+            "placeholders": {
+                "firstName": "Alex",
+                "lastName": "Johnson",
+                "roleTitle": "Product Designer",
+                "email": "alex@example.com",
+                "phone": "+216 XX XXX XXX",
+                "linkedin": "linkedin.com/in/alex",
+                "github": "github.com/alex",
+                "portfolio": "alexjohnson.dev"
+            }
+        },
+        "summary": {
+            "label": "Résumé professionnel",
+            "placeholder": "Résultats-orienté avec 5+ ans d'expérience en..."
+        },
+        "experience": {
+            "positionNumber": "Position {{number}}",
+            "position": "Poste",
+            "company": "Entreprise",
+            "start": "Début",
+            "end": "Fin",
+            "current": "En poste",
+            "currentLabel": "Actuel",
+            "location": "Localisation",
+            "description": "Description",
+            "enhance": "Améliorer",
+            "add": "Ajouter une position",
+            "placeholders": {
+                "position": "Senior Developer",
+                "company": "TechCorp",
+                "date": "Mois Année",
+                "description": "Décrivez vos responsabilités et résultats avec des métriques..."
+            }
+        },
+        "education": {
+            "itemNumber": "Formation {{number}}",
+            "institution": "Établissement",
+            "degree": "Diplôme",
+            "field": "Spécialité",
+            "start": "Début",
+            "graduation": "Obtention",
+            "gpa": "Mention / GPA (optionnel)",
+            "add": "Ajouter une formation",
+            "placeholders": {
+                "institution": "Université de Tunis",
+                "degree": "Master / Licence",
+                "field": "Informatique",
+                "gpa": "Très bien / 16.5/20"
+            }
+        },
+        "skills": {
+            "categoryPlaceholder": "Catégorie (ex: Frontend, DevOps…)",
+            "addSkillPlaceholder": "Ajouter… (Entrée pour valider)",
+            "addSkillButton": "+ Add",
+            "addCategory": "Ajouter une catégorie"
+        },
+        "projects": {
+            "itemNumber": "Projet {{number}}",
+            "name": "Nom du projet",
+            "description": "Description",
+            "url": "URL",
+            "github": "GitHub",
+            "technologies": "Technologies",
+            "add": "Ajouter un projet",
+            "placeholders": {
+                "name": "Nom du projet",
+                "description": "Décrivez le projet, son impact et vos contributions…",
+                "url": "https://example.com",
+                "github": "github.com/user/repo",
+                "tech": "React, TypeScript… (Entrée)"
+            }
+        },
+        "languages": {
+            "language": "Langue",
+            "level": "Niveau",
+            "add": "Ajouter une langue",
+            "levels": {
+                "A1": "A1 – Débutant",
+                "A2": "A2 – Élémentaire",
+                "B1": "B1 – Intermédiaire",
+                "B2": "B2 – Avancé",
+                "C1": "C1 – Courant",
+                "C2": "C2 – Maîtrise",
+                "Native": "Langue maternelle"
+            },
+            "picker": {
+                "select": "Sélectionner une langue",
+                "search": "Rechercher une langue…"
+            }
+        },
+        "certifications": {
+            "itemNumber": "Certification {{number}}",
+            "name": "Nom de la certification",
+            "issuer": "Organisme",
+            "date": "Date",
+            "url": "URL (optionnel)",
+            "add": "Ajouter une certification",
+            "placeholders": {
+                "name": "AWS Solutions Architect",
+                "issuer": "Amazon / Coursera…",
+                "url": "https://credly.com/…"
+            }
+        },
+        "custom": {
+            "modalTitle": "Ajouter une section",
+            "modalSubtitle": "Choisissez une section prédéfinie ou créez la vôtre",
+            "available": "Sections disponibles",
+            "customDivider": "Section personnalisée",
+            "createCustom": "Créer la section personnalisée",
+            "sectionTitle": "Titre de la section",
+            "sectionTitlePlaceholder": "Ex: Bénévolat, Publications, Réalisations…",
+            "fieldNamePlaceholder": "Nom du champ",
+            "addField": "Ajouter un champ",
+            "fieldType": "Type de champ",
+            "cancel": "Annuler",
+            "fieldTypes": {
+                "text": { "label": "Texte court", "desc": "Une ligne de texte" },
+                "textarea": { "label": "Texte long", "desc": "Paragraphe/description" },
+                "date": { "label": "Date", "desc": "Mois et année" },
+                "location": { "label": "Lieu", "desc": "Ville, pays" },
+                "list": { "label": "Liste", "desc": "Éléments séparés" },
+                "link": { "label": "Lien URL", "desc": "Site web, profil…" }
+            },
+            "placeholders": {
+                "value": "Valeur…",
+                "description": "Description…",
+                "link": "https://…",
+                "listItem": "Ajouter un élément…"
+            },
+            "legacyContent": "Contenu"
+        },
+        "locationPicker": {
+            "selectCountry": "Sélectionner un pays",
+            "searchCountry": "Rechercher un pays…",
+            "selectCity": "Sélectionner une ville",
+            "addressOptional": "Adresse complète (optionnel)"
+        },
+        "datePicker": {
+            "default": "Mois AAAA"
+        }
+    },
+    "card": {
+        "public": "Public",
+        "atsScore": "ATS Score",
+        "edit": "Modifier",
+        "duplicate": "Dupliquer",
+        "exportPdf": "Exporter PDF",
+        "delete": "Supprimer",
+        "exportPdfTitle": "Exporter PDF",
+        "placeholders": {
+            "firstName": "Prénom",
+            "lastName": "Nom",
+            "roleTitle": "Titre du poste"
+        },
+        "timeAgo": {
+            "justNow": "À l'instant",
+            "minutesAgo": "Il y a {{count}}m",
+            "hoursAgo": "Il y a {{count}}h",
+            "daysAgo": "Il y a {{count}}j"
+        }
+    },
+    "share": {
+        "title": "Partager votre CV",
+        "subtitle": "Générez un lien public de partage",
+        "publicCv": "CV public",
+        "privateCv": "CV privé",
+        "publicDescription": "Toute personne avec le lien peut consulter votre CV",
+        "privateDescription": "Seul vous pouvez voir ce CV",
+        "shareLink": "Lien de partage",
+        "copied": "Copié !",
+        "copy": "Copier",
+        "generating": "Génération...",
+        "makePublic": "Rendre public et copier le lien",
+        "revoking": "Révocation...",
+        "revoke": "Révoquer le lien public"
+    },
+    "ats": {
+        "jobMatch": {
+            "title": "ATS Score",
+            "analyzeAnother": "Analyser une autre offre",
+            "analyzeWithOffer": "Analyser avec une offre",
+            "jobDescription": "Description du poste",
+            "jobDescriptionPlaceholder": "Collez la description de l'offre ici...",
+            "analyzing": "Analyse...",
+            "analyze": "Analyser",
+            "cancel": "Annuler"
+        },
+        "cvOnly": {
+            "title": "Score ATS — Lisibilité du CV",
+            "tooltip": "Ce score mesure la compatibilité structurelle de votre CV avec les systèmes ATS, indépendamment de toute offre d'emploi.",
+            "analyzing": "Analyse en cours…",
+            "reanalyze": "Ré-analyser",
+            "analyzeReadability": "Analyser la lisibilité ATS",
+            "saveFirst": "Sauvegardez votre CV pour activer l'analyse."
+        },
+        "scoreLabel": {
+            "excellent": "Excellent",
+            "good": "Bon",
+            "fair": "Passable",
+            "needsWork": "À améliorer"
+        },
+        "breakdown": {
+            "keywordMatch": "Mots-clés",
+            "formatting": "Mise en forme",
+            "completeness": "Complétude",
+            "relevance": "Pertinence",
+            "structure": "Structure"
+        },
+        "missingKeywords": "Mots-clés manquants",
+        "matchedKeywords": "Mots-clés présents",
+        "pointsToImprove": "Points à améliorer",
+        "presentElements": "Éléments présents",
+        "strengths": "Points forts",
+        "weaknesses": "Points faibles",
+        "tips": "Conseils d'amélioration",
+        "suggestions": "Suggestions"
+    },
+    "ai": {
+        "enhance": {
+            "defaultLabel": "AI Enhance",
+            "loading": "En cours...",
+            "enhance": "Améliorer"
+        },
+        "errors": {
+            "saveFirst": "Sauvegardez d'abord votre CV.",
+            "emptyField": "Le champ est vide.",
+            "generic": "Erreur AI"
+        },
+        "suggestions": {
+            "title": "Suggestions d'amélioration",
+            "subtitle": "Analyse intelligente de votre CV",
+            "emptyDescription": "Obtenez des suggestions personnalisées pour améliorer l'impact de votre CV.",
+            "analyze": "Analyser mon CV",
+            "saveFirst": "Sauvegardez d'abord votre CV pour activer cette fonctionnalité.",
+            "refresh": "Rafraîchir l'analyse",
+            "priority": {
+                "high": "Haute",
+                "medium": "Moyenne",
+                "low": "Faible"
+            }
+        },
+        "tailor": {
+            "title": "Adapter à l'offre",
+            "subtitle": "Personnalisez votre CV pour une offre ciblée",
+            "jobDescription": "Description du poste",
+            "jobDescriptionPlaceholder": "Collez la description complète du poste ici...",
+            "adapting": "Adaptation en cours...",
+            "adaptCv": "Adapter mon CV",
+            "suggestedSummary": "Résumé suggéré",
+            "copy": "Copier",
+            "apply": "Appliquer",
+            "skillsToAdd": "Compétences à ajouter",
+            "importantKeywords": "Mots-clés importants"
+        },
+        "coverLetter": {
+            "title": "Lettre de motivation",
+            "subtitle": "Générée par IA selon votre profil",
+            "toneTitle": "Ton de la lettre",
+            "tones": {
+                "professional": { "label": "Professionnel", "desc": "Formel et confiant" },
+                "enthusiastic": { "label": "Enthousiaste", "desc": "Dynamique et engagé" },
+                "concise": { "label": "Concis", "desc": "Court et percutant" }
+            },
+            "jobDescription": "Description du poste",
+            "jobDescriptionPlaceholder": "Collez la description du poste ici...",
+            "generating": "Génération en cours...",
+            "generate": "Générer la lettre",
+            "generatedLetter": "Lettre générée",
+            "copied": "Copié",
+            "copy": "Copier",
+            "download": "Télécharger",
+            "downloadFilename": "lettre-de-motivation.txt"
+        }
+    }
+}

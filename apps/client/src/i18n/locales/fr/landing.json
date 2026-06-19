@@ -1,0 +1,234 @@
+{
+    "navbar": {
+        "brand": "Glybette",
+        "logoAlt": "logo glybette",
+        "features": "Fonctionnalités",
+        "howItWorks": "Comment ça marche",
+        "pricing": "Tarifs",
+        "toggleTheme": "Changer de thème",
+        "selectLanguage": "Choisir la langue",
+        "switchToLight": "Passer en mode clair",
+        "switchToDark": "Passer en mode sombre",
+        "dashboard": "Tableau de bord",
+        "logIn": "Se connecter",
+        "getStarted": "Commencer →"
+    },
+    "hero": {
+        "badge": "Plateforme carrière intelligente · Tunisie et au-delà",
+        "titleLine1": "Votre carrière,",
+        "titleHighlight": "enfin en mouvement",
+        "titleLine3": "vers l'avant.",
+        "tagline": "Arrêtez de deviner. Commencez à matcher.",
+        "subtitle": "Glybette, un écosystème intelligent conçu pour unir talent, opportunité et innovation afin de vous aider à grandir, construire et réussir.",
+        "buildProfile": "Créer mon profil",
+        "exploreFeatures": "Explorer les fonctionnalités",
+        "cards": {
+            "accuracy": {
+                "label": "97 % de précision",
+                "value": "Correspondances réelles"
+            },
+            "opportunities": {
+                "label": "500+ opportunités",
+                "value": "Mises à jour quotidiennement"
+            },
+            "matching": {
+                "label": "Matching rapide",
+                "value": "Adapté à vous"
+            }
+        }
+    },
+    "features": {
+        "label": "Écosystème principal",
+        "titleLine1": "Tout ce dont vous avez besoin pour",
+        "titleLine2": "lancer votre carrière",
+        "subtitle1": "Oubliez les outils dispersés et les recherches interminables.",
+        "subtitle2": "Glybette réunit tout dans une plateforme intelligente conçue pour les étudiants et les professionnels.",
+        "items": {
+            "cvBuilder": {
+                "title": "Créateur de CV",
+                "description": "Créez un CV qui se remarque vraiment. Construisez un CV propre et professionnel en quelques minutes, adapté à vos compétences, votre expérience et vos objectifs."
+            },
+            "portfolioBuilder": {
+                "title": "Créateur de portfolio",
+                "description": "Présentez votre travail comme il se doit. Créez un portfolio simple et élégant pour mettre en avant vos projets et vous démarquer auprès des recruteurs."
+            },
+            "interviewPrep": {
+                "title": "Préparation aux entretiens",
+                "description": "Continuez à apprendre. Continuez à progresser. Accédez à des cours et certifications pour renforcer vos compétences et rester compétitif dans votre domaine."
+            },
+            "courses": {
+                "title": "Cours et certifications",
+                "description": "Explorez les tendances du marché, les données salariales et les compétences recherchées dans votre domaine."
+            },
+            "studies": {
+                "title": "Terminer vos études",
+                "description": "Restez sur la bonne voie dans votre parcours académique. Obtenez des conseils sur vos études, votre PFE et vos prochaines étapes — le tout au même endroit."
+            },
+            "insights": {
+                "title": "Tendances et insights carrière",
+                "description": "Comprenez où va votre domaine. Explorez les compétences recherchées, les tendances d'emploi et les opportunités dans différents secteurs."
+            }
+        }
+    },
+    "howItWorks": {
+        "label": "Comment ça marche",
+        "titleLine1": "Du premier pas",
+        "titleLine2": "à l'embauche",
+        "subtitle": "Glybette est conçu pour vous mener de zéro à l'opportunité le plus rapidement possible.",
+        "stepPrefix": "Étape {{num}}",
+        "startNow": "Commencer maintenant",
+        "steps": {
+            "profile": {
+                "num": "01",
+                "title": "Construisez votre profil",
+                "description": "Commencez par les bases. Créez votre CV, ajoutez vos compétences et construisez un profil qui vous reflète vraiment."
+            },
+            "prepare": {
+                "num": "02",
+                "title": "Progressez et préparez-vous",
+                "description": "Montez en niveau avant de postuler. Travaillez votre portfolio, pratiquez les entretiens et améliorez vos compétences avec des cours et certifications."
+            },
+            "apply": {
+                "num": "03",
+                "title": "Découvrez et postulez",
+                "description": "Trouvez les bonnes opportunités. Explorez des stages, des projets PFE et des emplois adaptés à votre profil et postulez en toute confiance."
+            }
+        }
+    },
+    "stats": {
+        "items": {
+            "opportunities": {
+                "value": "500+",
+                "label": "Opportunités actives",
+                "sub": "Stages, PFE et emplois"
+            },
+            "companies": {
+                "value": "200+",
+                "label": "Entreprises partenaires",
+                "sub": "Des startups aux grands groupes"
+            },
+            "profiles": {
+                "value": "2 000+",
+                "label": "Profils créés",
+                "sub": "Étudiants et professionnels"
+            },
+            "accuracy": {
+                "value": "97 %",
+                "label": "Précision du matching",
+                "sub": "Précision alimentée par l'IA"
+            }
+        }
+    },
+    "testimonials": {
+        "label": "Témoignages",
+        "titleLine1": "Apprécié par les étudiants",
+        "titleLine2": "et les professionnels",
+        "subtitle": "Des histoires réelles de personnes qui ont trouvé leur prochaine opportunité avec Glybette.",
+        "items": {
+            "yasmine": {
+                "initials": "YB",
+                "name": "Yasmine Ben Ali",
+                "role": "Étudiante en génie logiciel · ISSAT",
+                "text": "J'ai trouvé mon stage PFE en moins d'une semaine. L'IA m'a associée à un projet qui correspondait parfaitement à mes compétences React et Node.js. Je n'ai pas eu à chercher, l'opportunité est venue à moi."
+            },
+            "mohamed": {
+                "initials": "MA",
+                "name": "Mohamed Ayari",
+                "role": "Développeur full-stack · 3 ans d'expérience",
+                "text": "Je passais au DevOps et ne savais pas comment repositionner mon profil. Glybette a restructuré mon expérience et a fait remonter des postes ciblés que je n'aurais jamais trouvés seul."
+            },
+            "ines": {
+                "initials": "IC",
+                "name": "Ines Chaabane",
+                "role": "Étudiante en data science · EPS",
+                "text": "Le profil optimisé par l'IA m'a permis de me démarquer. Les recruteurs ont commencé à me contacter directement. Glybette a complètement changé ma façon de chercher un emploi."
+            }
+        }
+    },
+    "pricing": {
+        "label": "Tarifs",
+        "title": "Choisissez votre voie",
+        "subtitle": "Commencez gratuitement et débloquez toute la puissance de Glybette Pro quand vous êtes prêt.",
+        "essential": {
+            "name": "Essentiel",
+            "price": "0",
+            "currency": "DT",
+            "period": "/ à vie",
+            "description": "Tout pour démarrer et décrocher votre première opportunité.",
+            "cta": "Commencer gratuitement",
+            "features": {
+                "cvProfile": "Créez votre CV et profil",
+                "opportunities": "Accédez à des opportunités sélectionnées",
+                "portfolio": "Créez un portfolio simple",
+                "tracking": "Suivez vos candidatures",
+                "insights": "Insights carrière de base",
+                "community": "Accès à la communauté"
+            }
+        },
+        "professional": {
+            "badge": "Le plus populaire",
+            "name": "Professionnel",
+            "price": "30",
+            "currency": "DT",
+            "period": "/ mois",
+            "description": "Des outils avancés pour accélérer votre carrière et vous démarquer.",
+            "cta": "Passer à Pro →",
+            "features": {
+                "optimization": "Optimisation avancée du CV et du profil",
+                "unlimitedOpportunities": "Accès illimité aux opportunités",
+                "recommendations": "Tableau de bord de recommandations intelligentes",
+                "visibility": "Visibilité prioritaire auprès des recruteurs",
+                "interviewPractice": "Pratique d'entretien illimitée",
+                "courses": "Accès aux cours et certifications",
+                "portfolioCustomization": "Personnalisation avancée du portfolio",
+                "fullTracking": "Suivi complet des candidatures"
+            }
+        }
+    },
+    "cta": {
+        "titleLine1": "Prêt à commencer",
+        "titleLine2": "votre parcours ?",
+        "subtitle": "Rejoignez des milliers d'étudiants et de professionnels qui utilisent Glybette pour trouver leur prochaine opportunité décisive.",
+        "createProfile": "Créer mon profil gratuit",
+        "seeFeatures": "Voir les fonctionnalités",
+        "note": "Gratuit pour commencer · Sans carte bancaire · 2 minutes"
+    },
+    "logoStrip": {
+        "label": "Approuvé par des entreprises à travers la Tunisie"
+    },
+    "footer": {
+        "brand": "Glybette",
+        "tagline": "La plateforme carrière IA qui connecte les talents aux opportunités — conçue pour la prochaine génération de professionnels.",
+        "columns": {
+            "platform": {
+                "title": "Plateforme",
+                "links": {
+                    "features": "Fonctionnalités",
+                    "howItWorks": "Comment ça marche",
+                    "pricing": "Tarifs",
+                    "blog": "Blog"
+                }
+            },
+            "company": {
+                "title": "Entreprise",
+                "links": {
+                    "about": "À propos",
+                    "careers": "Carrières",
+                    "contact": "Contact",
+                    "partners": "Partenaires"
+                }
+            },
+            "legal": {
+                "title": "Légal",
+                "links": {
+                    "privacy": "Confidentialité",
+                    "terms": "Conditions",
+                    "cookies": "Cookies"
+                }
+            }
+        },
+        "copyright": "© 2025 Glybette. Tous droits réservés.",
+        "madeIn": "Fait avec ♥ en",
+        "country": "Tunisie"
+    }
+}

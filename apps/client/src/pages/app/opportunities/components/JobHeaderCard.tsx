@@ -1,7 +1,9 @@
 import React from "react";
 import { MapPin, Briefcase, Globe, Star, BookOpen, Clock, ArrowRight } from "lucide-react";
+import { useLocale } from "@/hooks/useLocale";
+import { timeAgo, formatNumber } from "@/lib/locale-format";
 import { detailStyles as styles } from "../styles";
-import { timeAgo, SOURCE_ICONS, TYPE_COLORS } from "../constants";
+import { getFilterLabel, SOURCE_ICONS, TYPE_COLORS } from "../constants";
 import type { Offre } from "../types";
 
 function Chip({ icon, children, accent, green }: { icon?: React.ReactNode; children: React.ReactNode; accent?: boolean; green?: boolean }) {
@@ -24,7 +26,11 @@ interface JobHeaderCardProps {
 }
 
 export function JobHeaderCard({ offre, onApplyClick }: JobHeaderCardProps) {
+    const { t, locale } = useLocale("opportunities");
     const typeColors = TYPE_COLORS[offre.type_offre] ?? TYPE_COLORS.emploi;
+    const typeLabel = getFilterLabel(t, "type_offre", offre.type_offre);
+    const teletravailLabel = offre.teletravail ? getFilterLabel(t, "teletravail", offre.teletravail) : null;
+    const levelLabel = offre.niveau_experience ? getFilterLabel(t, "niveau_experience", offre.niveau_experience) : null;
 
     return (
         <div style={styles.headerCard}>
@@ -39,29 +45,31 @@ export function JobHeaderCard({ offre, onApplyClick }: JobHeaderCardProps) {
                 <div style={{ flex: 1 }}>
                     <div style={styles.typeBadge(typeColors)}>
                         <span style={styles.typeDot(typeColors.text)} />
-                        {offre.type_offre}
+                        {typeLabel}
                     </div>
                     <h1 style={styles.jobTitle}>{offre.titre}</h1>
-                    <p style={styles.company}>{offre.entreprise ?? "Entreprise"}</p>
+                    <p style={styles.company}>{offre.entreprise ?? t("detail.header.defaultCompany")}</p>
                 </div>
             </div>
 
             <div style={styles.chips}>
                 {offre.localisation      && <Chip icon={<MapPin    size={11} />}>{offre.localisation}</Chip>}
                 {offre.type_contrat      && <Chip icon={<Briefcase size={11} />}>{offre.type_contrat}</Chip>}
-                {offre.teletravail       && <Chip icon={<Globe     size={11} />} accent>{offre.teletravail}</Chip>}
+                {teletravailLabel        && <Chip icon={<Globe     size={11} />} accent>{teletravailLabel}</Chip>}
                 {offre.salaire           && <Chip icon={<Star      size={11} />} green>{offre.salaire}</Chip>}
-                {offre.niveau_experience && <Chip icon={<BookOpen  size={11} />}>{offre.niveau_experience}</Chip>}
+                {levelLabel              && <Chip icon={<BookOpen  size={11} />}>{levelLabel}</Chip>}
             </div>
 
             <div style={styles.quickStats}>
                 <span style={styles.statItem}>
                     <Clock size={11} style={{ color: "var(--gb-muted)" }} />
-                    {timeAgo(offre.date_publication ?? offre.date_scraped)}
+                    {timeAgo(offre.date_publication ?? offre.date_scraped, t, locale)}
                 </span>
                 <span style={styles.statSep} />
                 <span style={styles.statItem}>
-                    <span style={{ color: "var(--gb-muted)", fontSize: 11 }}>{offre.nb_vues} vues</span>
+                    <span style={{ color: "var(--gb-muted)", fontSize: 11 }}>
+                        {t("detail.header.views", { count: formatNumber(offre.nb_vues, locale) })}
+                    </span>
                 </span>
             </div>
 
@@ -85,7 +93,7 @@ export function JobHeaderCard({ offre, onApplyClick }: JobHeaderCardProps) {
                             gap: "8px",
                         }}
                     >
-                        Postuler maintenant <ArrowRight size={14} />
+                        {t("detail.header.applyNow")} <ArrowRight size={14} />
                     </button>
                 )}
             </div>

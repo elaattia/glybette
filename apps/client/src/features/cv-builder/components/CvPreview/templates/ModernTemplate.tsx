@@ -1,7 +1,11 @@
 import { Mail, Phone, MapPin, Linkedin, Github, Globe } from "lucide-react";
 import { EmptyState, ModernSection, type TemplateProps } from "./TemplateSection";
 
+import { useLocale } from "@/hooks/useLocale";
+import { useSectionLabels } from "../../../lib/cv-i18n";
 export function ModernTemplate({ personal, summary, experience, education, skills, projects, languages, certs, accent, bg, photo }: TemplateProps) {
+    const { t } = useLocale("cvBuilder");
+    const labels = useSectionLabels(t);
     const hasContent = personal || summary?.text || experience.length > 0;
     if (!hasContent) return <EmptyState />;
 
@@ -62,19 +66,19 @@ export function ModernTemplate({ personal, summary, experience, education, skill
 
             <div style={{ padding: "22px 30px 20px" }}>
                 {summary?.text && (
-                    <ModernSection title="Profil" accent={accent}>
+                    <ModernSection title={labels.summary} accent={accent}>
                         <p style={{ fontSize: `calc(9pt * var(--cv-body-scale, 1))`, color: "#444", margin: 0, lineHeight: 1.7 }}>{summary.text}</p>
                     </ModernSection>
                 )}
 
                 {experience.length > 0 && (
-                    <ModernSection title="Expérience" accent={accent}>
+                    <ModernSection title={labels.experience} accent={accent}>
                         {experience.map((e) => (
                             <div key={e.id} style={{ marginBottom: "12px" }}>
                                 <div style={{ display: "flex", justifyContent: "space-between", alignItems: "baseline", flexWrap: "wrap", gap: "4px" }}>
                                     <span style={{ fontWeight: 700, fontSize: `calc(9.5pt * var(--cv-body-scale, 1))`, color: "#1a1a2e" }}>{e.position || "Poste"}</span>
                                     <span style={{ fontSize: `calc(7.5pt * var(--cv-body-scale, 1))`, color: "#888", whiteSpace: "nowrap" }}>
-                                        {e.startDate}{e.startDate ? " – " : ""}{e.current ? "Présent" : e.endDate}
+                                        {e.startDate}{e.startDate ? " – " : ""}{e.current ? labels.current : e.endDate}
                                     </span>
                                 </div>
                                 <div style={{ fontSize: `calc(8.5pt * var(--cv-body-scale, 1))`, color: accent, fontWeight: 600, marginBottom: "3px" }}>
@@ -87,12 +91,12 @@ export function ModernTemplate({ personal, summary, experience, education, skill
                 )}
 
                 {education.length > 0 && (
-                    <ModernSection title="Formation" accent={accent}>
+                    <ModernSection title={labels.education} accent={accent}>
                         {education.map((e) => (
                             <div key={e.id} style={{ marginBottom: "9px" }}>
                                 <div style={{ display: "flex", justifyContent: "space-between", alignItems: "baseline", flexWrap: "wrap" }}>
                                     <span style={{ fontWeight: 600, fontSize: `calc(9pt * var(--cv-body-scale, 1))`, color: "#1a1a2e" }}>{e.degree}{e.field ? ` – ${e.field}` : ""}</span>
-                                    <span style={{ fontSize: `calc(7.5pt * var(--cv-body-scale, 1))`, color: "#888" }}>{e.endDate || (e.current ? "Présent" : "")}</span>
+                                    <span style={{ fontSize: `calc(7.5pt * var(--cv-body-scale, 1))`, color: "#888" }}>{e.endDate || (e.current ? labels.current : "")}</span>
                                 </div>
                                 <div style={{ fontSize: `calc(8.5pt * var(--cv-body-scale, 1))`, color: accent }}>{e.institution}</div>
                                 {e.gpa && <div style={{ fontSize: `calc(8pt * var(--cv-body-scale, 1))`, color: "#777" }}>{e.gpa}</div>}
@@ -102,7 +106,7 @@ export function ModernTemplate({ personal, summary, experience, education, skill
                 )}
 
                 {skills.length > 0 && (
-                    <ModernSection title="Compétences" accent={accent}>
+                    <ModernSection title={labels.skills} accent={accent}>
                         <div style={{ display: "flex", flexWrap: "wrap", gap: "12px" }}>
                             {skills.map((g) => (
                                 <div key={g.id} style={{ minWidth: "120px" }}>
@@ -119,7 +123,7 @@ export function ModernTemplate({ personal, summary, experience, education, skill
                 )}
 
                 {projects.length > 0 && (
-                    <ModernSection title="Projets" accent={accent}>
+                    <ModernSection title={labels.projects} accent={accent}>
                         {projects.map((p) => (
                             <div key={p.id} style={{ marginBottom: "9px" }}>
                                 <span style={{ fontWeight: 600, fontSize: `calc(9pt * var(--cv-body-scale, 1))`, color: "#1a1a2e" }}>{p.name}</span>
@@ -137,7 +141,7 @@ export function ModernTemplate({ personal, summary, experience, education, skill
 
                 <div style={{ display: "grid", gridTemplateColumns: languages.length > 0 && certs.length > 0 ? "1fr 1fr" : "1fr", gap: "20px" }}>
                     {languages.length > 0 && (
-                        <ModernSection title="Langues" accent={accent}>
+                        <ModernSection title={labels.languages} accent={accent}>
                             {languages.map((l) => (
                                 <div key={l.id} style={{ fontSize: `calc(9pt * var(--cv-body-scale, 1))`, marginBottom: "3px", display: "flex", justifyContent: "space-between" }}>
                                     <strong style={{ color: "#1a1a2e" }}>{l.language}</strong>
@@ -147,7 +151,7 @@ export function ModernTemplate({ personal, summary, experience, education, skill
                         </ModernSection>
                     )}
                     {certs.length > 0 && (
-                        <ModernSection title="Certifications" accent={accent}>
+                        <ModernSection title={labels.certifications} accent={accent}>
                             {certs.map((c) => (
                                 <div key={c.id} style={{ fontSize: `calc(8.5pt * var(--cv-body-scale, 1))`, marginBottom: "5px" }}>
                                     <strong style={{ color: "#1a1a2e" }}>{c.name}</strong>

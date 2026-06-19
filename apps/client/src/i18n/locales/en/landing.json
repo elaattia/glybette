@@ -1,0 +1,234 @@
+{
+    "navbar": {
+        "brand": "Glybette",
+        "logoAlt": "glybette logo",
+        "features": "Features",
+        "howItWorks": "How it works",
+        "pricing": "Pricing",
+        "toggleTheme": "Toggle theme",
+        "selectLanguage": "Select language",
+        "switchToLight": "Switch to light mode",
+        "switchToDark": "Switch to dark mode",
+        "dashboard": "Dashboard",
+        "logIn": "Log in",
+        "getStarted": "Get Started →"
+    },
+    "hero": {
+        "badge": "Smart Career Platform · Tunisia & Beyond",
+        "titleLine1": "Your Career,",
+        "titleHighlight": "finally moving",
+        "titleLine3": "forward.",
+        "tagline": "Stop guessing. Start matching.",
+        "subtitle": "Glybette A smart ecosystem designed to unite talent, opportunity, and innovation helping you grow, build, and succeed.",
+        "buildProfile": "Build My Profile",
+        "exploreFeatures": "Explore Features",
+        "cards": {
+            "accuracy": {
+                "label": "97% Accuracy",
+                "value": "Real matches"
+            },
+            "opportunities": {
+                "label": "500+ Opportunities",
+                "value": "Updated daily"
+            },
+            "matching": {
+                "label": "Fast Matching",
+                "value": "Tailored to you"
+            }
+        }
+    },
+    "features": {
+        "label": "Core Ecosystem",
+        "titleLine1": "Everything you need to",
+        "titleLine2": "launch your career",
+        "subtitle1": "Forget scattered tools and endless searching.",
+        "subtitle2": "Glybette brings everything together into one smart platform built for students and professionals.",
+        "items": {
+            "cvBuilder": {
+                "title": "CV Builder",
+                "description": "Create a CV that actually gets noticed. Build a clean, professional resume in minutes tailored to your skills, experience, and goals."
+            },
+            "portfolioBuilder": {
+                "title": "Portfolio Builder",
+                "description": "Show your work the right way. Create a simple and beautiful portfolio to highlight your projects and stand out to recruiters."
+            },
+            "interviewPrep": {
+                "title": "Interview Preparation",
+                "description": "Keep learning. Keep growing. Access courses and certifications to strengthen your skills and stay competitive in your field."
+            },
+            "courses": {
+                "title": "Courses & Certifications",
+                "description": "Explore market trends, salary data, and in-demand skills for your field."
+            },
+            "studies": {
+                "title": "Complete Your Studies",
+                "description": "Stay on track with your academic journey. Get guidance on your studies, PFE, and next steps — all in one place."
+            },
+            "insights": {
+                "title": "Career Trends & Insights",
+                "description": "Understand where your field is going. Explore in-demand skills, job trends, and opportunities across different industries."
+            }
+        }
+    },
+    "howItWorks": {
+        "label": "How it works",
+        "titleLine1": "From getting started",
+        "titleLine2": "to getting hired",
+        "subtitle": "Glybette is designed to get you from zero to opportunity as fast as possible.",
+        "stepPrefix": "Step {{num}}",
+        "startNow": "Start Now",
+        "steps": {
+            "profile": {
+                "num": "01",
+                "title": "Build Your Profile",
+                "description": "Start with the basics. Create your CV, add your skills, and build a profile that truly reflects who you are."
+            },
+            "prepare": {
+                "num": "02",
+                "title": "Grow & Prepare",
+                "description": "Level up before you apply. Work on your portfolio, practice interviews, and improve your skills with courses and certifications."
+            },
+            "apply": {
+                "num": "03",
+                "title": "Discover & Apply",
+                "description": "Find the right opportunities. Explore internships, PFE projects, and jobs tailored to your profile and apply with confidence."
+            }
+        }
+    },
+    "stats": {
+        "items": {
+            "opportunities": {
+                "value": "500+",
+                "label": "Active Opportunities",
+                "sub": "Internships, PFE & Jobs"
+            },
+            "companies": {
+                "value": "200+",
+                "label": "Partner Companies",
+                "sub": "Startups to enterprises"
+            },
+            "profiles": {
+                "value": "2,000+",
+                "label": "Profiles Created",
+                "sub": "Students & professionals"
+            },
+            "accuracy": {
+                "value": "97%",
+                "label": "Match Accuracy",
+                "sub": "AI powered precision"
+            }
+        }
+    },
+    "testimonials": {
+        "label": "Testimonials",
+        "titleLine1": "Loved by students",
+        "titleLine2": "and professionals",
+        "subtitle": "Real stories from people who found their next opportunity with Glybette.",
+        "items": {
+            "yasmine": {
+                "initials": "YB",
+                "name": "Yasmine Ben Ali",
+                "role": "Software Engineering Student · ISSAT",
+                "text": "I found my PFE placement in under a week. The AI matched me with a project that perfectly fit my React and Node.js skills. I didn't have to search it came to me."
+            },
+            "mohamed": {
+                "initials": "MA",
+                "name": "Mohamed Ayari",
+                "role": "Full-Stack Developer · 3 yrs experience",
+                "text": "I was transitioning to DevOps and had no idea how to reposition my profile. Glybette restructured my experience and surfaced targeted roles I never would have found alone."
+            },
+            "ines": {
+                "initials": "IC",
+                "name": "Ines Chaabane",
+                "role": "Data Science Student · EPS",
+                "text": "The AI optimized profile made me stand out. Recruiters started reaching out to me directly. Glybette completely changed how I approach job searching."
+            }
+        }
+    },
+    "pricing": {
+        "label": "Pricing",
+        "title": "Choose your path",
+        "subtitle": "Start free and unlock the full power of Glybette Pro when you're ready.",
+        "essential": {
+            "name": "Essential",
+            "price": "0",
+            "currency": "DT",
+            "period": "/ forever",
+            "description": "Everything to get started and land your first opportunity.",
+            "cta": "Get Started Free",
+            "features": {
+                "cvProfile": "Build your CV & profile",
+                "opportunities": "Access curated opportunities",
+                "portfolio": "Create a simple portfolio",
+                "tracking": "Track your applications",
+                "insights": "Basic career insights",
+                "community": "Community access"
+            }
+        },
+        "professional": {
+            "badge": "Most Popular",
+            "name": "Professional",
+            "price": "30",
+            "currency": "DT",
+            "period": "/ month",
+            "description": "Advanced tools to accelerate your career and stand out.",
+            "cta": "Upgrade to Pro →",
+            "features": {
+                "optimization": "Advanced CV & profile optimization",
+                "unlimitedOpportunities": "Unlimited opportunities access",
+                "recommendations": "Smart recommendations dashboard",
+                "visibility": "Priority visibility to recruiters",
+                "interviewPractice": "Unlimited interview practice",
+                "courses": "Courses & certifications access",
+                "portfolioCustomization": "Advanced portfolio customization",
+                "fullTracking": "Full application tracking"
+            }
+        }
+    },
+    "cta": {
+        "titleLine1": "Ready to start",
+        "titleLine2": "your journey?",
+        "subtitle": "Join thousands of students and professionals using Glybette to find their next career defining opportunity.",
+        "createProfile": "Create My Free Profile",
+        "seeFeatures": "See Features",
+        "note": "Free to start · No credit card · Takes 2 minutes"
+    },
+    "logoStrip": {
+        "label": "Trusted by companies across Tunisia"
+    },
+    "footer": {
+        "brand": "Glybette",
+        "tagline": "The AI career platform connecting talent with opportunity — built for the next generation of professionals.",
+        "columns": {
+            "platform": {
+                "title": "Platform",
+                "links": {
+                    "features": "Features",
+                    "howItWorks": "How it works",
+                    "pricing": "Pricing",
+                    "blog": "Blog"
+                }
+            },
+            "company": {
+                "title": "Company",
+                "links": {
+                    "about": "About",
+                    "careers": "Careers",
+                    "contact": "Contact",
+                    "partners": "Partners"
+                }
+            },
+            "legal": {
+                "title": "Legal",
+                "links": {
+                    "privacy": "Privacy",
+                    "terms": "Terms",
+                    "cookies": "Cookies"
+                }
+            }
+        },
+        "copyright": "© 2025 Glybette. All rights reserved.",
+        "madeIn": "Made with ♥ in",
+        "country": "Tunisia"
+    }
+}

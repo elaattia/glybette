@@ -1,5 +1,7 @@
 import React, { useState, useCallback } from "react";
 import { Mic, MicOff, Send, MessageCircle, Play, Lightbulb, CheckCircle, AlertTriangle, Key } from "lucide-react";
+import { useLocale } from "@/hooks/useLocale";
+import { getIntlLocale } from "@/lib/locale-format";
 import { InterviewChat } from "./InterviewChat";
 import { detailStyles as styles } from "../styles";
 import type { Offre, InterviewQuestions, AnswerEval } from "../types";
@@ -15,6 +17,7 @@ interface InterviewTabProps {
 }
 
 export function InterviewTab({ offre, userProfile, questions, loading, onGenerateQuestions }: InterviewTabProps) {
+    const { t, locale } = useLocale("opportunities");
     const [subTab, setSubTab] = useState<"questions" | "chat">("questions");
     const [category, setCategory] = useState<"behavioural" | "technical" | "situational">("behavioural");
     const [currentIdx, setCurrentIdx] = useState(0);
@@ -25,6 +28,7 @@ export function InterviewTab({ offre, userProfile, questions, loading, onGenerat
     const [isListening, setIsListening] = useState(false);
     const recognitionRef = React.useRef<any>(null);
     const isVoiceSupported = Boolean((window as any).SpeechRecognition || (window as any).webkitSpeechRecognition);
+    const speechLang = getIntlLocale(locale);
 
     const toggleVoice = useCallback(() => {
         if (isListening) {
@@ -35,7 +39,7 @@ export function InterviewTab({ offre, userProfile, questions, loading, onGenerat
         const SR = (window as any).SpeechRecognition || (window as any).webkitSpeechRecognition;
         if (!SR) return;
         const r = new SR();
-        r.lang = "fr-FR"; r.continuous = true; r.interimResults = true;
+        r.lang = speechLang; r.continuous = true; r.interimResults = true;
         r.onstart = () => setIsListening(true);
         r.onerror = () => setIsListening(false);
         r.onend = () => setIsListening(false);
@@ -48,7 +52,7 @@ export function InterviewTab({ offre, userProfile, questions, loading, onGenerat
         };
         r.start();
         recognitionRef.current = r;
-    }, [isListening]);
+    }, [isListening, speechLang]);
 
     const evaluateAnswer = useCallback(async () => {
         if (!answer.trim() || !questions) return;
@@ -77,10 +81,10 @@ export function InterviewTab({ offre, userProfile, questions, loading, onGenerat
                 <button
                     onClick={() => { setSubTab("questions"); if (!questions) onGenerateQuestions(); }}
                     style={styles.subTabBtn(subTab === "questions")}>
-                    <Mic size={13} /> Questions d'entretien
+                    <Mic size={13} /> {t("detail.interview.subTabs.questions")}
                 </button>
                 <button onClick={() => setSubTab("chat")} style={styles.subTabBtn(subTab === "chat")}>
-                    <MessageCircle size={13} /> Chat IA
+                    <MessageCircle size={13} /> {t("detail.interview.subTabs.chat")}
                 </button>
             </div>
 
@@ -89,45 +93,44 @@ export function InterviewTab({ offre, userProfile, questions, loading, onGenerat
                     {loading ? (
                         <div style={styles.loadingBlock}>
                             <div style={styles.spinnerSm} />
-                            <p style={{ color: "var(--gb-muted)", fontSize: 13 }}>Génération des questions...</p>
+                            <p style={{ color: "var(--gb-muted)", fontSize: 13 }}>{t("detail.interview.generatingQuestions")}</p>
                         </div>
                     ) : questions ? (
                         <div>
                             <div style={styles.catTabs}>
-                                {(["behavioural", "technical", "situational"] as const).map((cat) => {
-                                    const labels = { behavioural: "Comportemental", technical: "Technique", situational: "Situationnel" };
-                                    return (
-                                        <button key={cat} onClick={() => resetQuestion(cat, 0)} style={styles.catTab(category === cat)}>
-                                            {labels[cat]}
-                                            <span style={styles.catCount}>{questions[cat]?.length ?? 0}</span>
-                                        </button>
-                                    );
-                                })}
+                                {(["behavioural", "technical", "situational"] as const).map((cat) => (
+                                    <button key={cat} onClick={() => resetQuestion(cat, 0)} style={styles.catTab(category === cat)}>
+                                        {t(`detail.interview.categories.${cat}`)}
+                                        <span style={styles.catCount}>{questions[cat]?.length ?? 0}</span>
+                                    </button>
+                                ))}
                             </div>
 
                             {qList.length > 0 && (
                                 <div>
                                     <div style={styles.questionCard}>
-                                        <div style={styles.questionNumber}>Question {currentIdx + 1}/{qList.length}</div>
+                                        <div style={styles.questionNumber}>
+                                            {t("detail.interview.questionNumber", { current: currentIdx + 1, total: qList.length })}
+                                        </div>
                                         <p style={styles.questionText}>"{currentQ}"</p>
                                         <div style={styles.questionNav}>
                                             <button
                                                 onClick={() => resetQuestion(category, Math.max(0, currentIdx - 1))}
                                                 disabled={currentIdx === 0}
                                                 style={styles.navBtn}>
-                                                ← Précédente
+                                                {t("detail.interview.previous")}
                                             </button>
                                             <button
                                                 onClick={() => resetQuestion(category, Math.min(qList.length - 1, currentIdx + 1))}
                                                 disabled={currentIdx === qList.length - 1}
                                                 style={styles.navBtn}>
-                                                Suivante →
+                                                {t("detail.interview.next")}
                                             </button>
                                         </div>
                                     </div>
 
                                     <div style={styles.section}>
-                                        <div style={styles.sectionTitle}>Votre réponse</div>
+                                        <div style={styles.sectionTitle}>{t("detail.interview.yourAnswer")}</div>
                                         {isVoiceSupported && (
                                             <div style={{ marginBottom: 8 }}>
                                                 <button onClick={toggleVoice} style={{
@@ -139,21 +142,21 @@ export function InterviewTab({ offre, userProfile, questions, loading, onGenerat
                                                     animation: isListening ? "pulse 1.5s infinite" : "none",
                                                 }}>
                                                     {isListening ? <MicOff size={14} /> : <Mic size={14} />}
-                                                    {isListening ? "Arrêter" : "Répondre vocalement"}
+                                                    {isListening ? t("detail.interview.voiceStop") : t("detail.interview.voiceStart")}
                                                 </button>
                                             </div>
                                         )}
                                         <textarea
                                             value={answer}
                                             onChange={(e) => setAnswer(e.target.value)}
-                                            placeholder="Rédigez ou dictez votre réponse... (méthode STAR recommandée)"
+                                            placeholder={t("detail.interview.answerPlaceholder")}
                                             style={styles.textarea}
                                             rows={5}
                                         />
                                         <button onClick={evaluateAnswer} disabled={!answer.trim() || loadingEval} style={styles.evalBtn}>
                                             {loadingEval
-                                                ? <><div style={styles.spinnerXs} /> Évaluation...</>
-                                                : <><Send size={14} /> Soumettre pour évaluation IA</>
+                                                ? <><div style={styles.spinnerXs} /> {t("detail.interview.evaluating")}</>
+                                                : <><Send size={14} /> {t("detail.interview.submitEvaluation")}</>
                                             }
                                         </button>
                                     </div>
@@ -162,18 +165,18 @@ export function InterviewTab({ offre, userProfile, questions, loading, onGenerat
                                         <div style={styles.evalResult}>
                                             <div style={{ display: "flex", alignItems: "center", gap: 10, marginBottom: 14 }}>
                                                 <div style={styles.evalScore(eval_.score)}>{eval_.score}/10</div>
-                                                <span style={{ fontWeight: 600, fontSize: 14, color: "var(--gb-text)" }}>Évaluation</span>
+                                                <span style={{ fontWeight: 600, fontSize: 14, color: "var(--gb-text)" }}>{t("detail.interview.evaluation")}</span>
                                             </div>
                                             <div style={styles.evalGrid}>
                                                 <div>
                                                     <div style={{ ...styles.evalSubTitle, display: "flex", alignItems: "center", gap: 5 }}>
-                                                        <CheckCircle size={13} style={{ color: "#22c55e" }} /> Points forts
+                                                        <CheckCircle size={13} style={{ color: "#22c55e" }} /> {t("detail.interview.evalStrengths")}
                                                     </div>
                                                     {eval_.strengths.map((s, i) => <div key={i} style={styles.evalItem("success")}>{s}</div>)}
                                                 </div>
                                                 <div>
                                                     <div style={{ ...styles.evalSubTitle, display: "flex", alignItems: "center", gap: 5 }}>
-                                                        <AlertTriangle size={13} style={{ color: "#f59e0b" }} /> À améliorer
+                                                        <AlertTriangle size={13} style={{ color: "#f59e0b" }} /> {t("detail.interview.evalImprove")}
                                                     </div>
                                                     {eval_.improvements.map((s, i) => <div key={i} style={styles.evalItem("warn")}>{s}</div>)}
                                                 </div>
@@ -181,7 +184,7 @@ export function InterviewTab({ offre, userProfile, questions, loading, onGenerat
                                             {eval_.keywords.length > 0 && (
                                                 <div style={{ marginTop: 12 }}>
                                                     <div style={{ ...styles.evalSubTitle, display: "flex", alignItems: "center", gap: 5 }}>
-                                                        <Key size={13} style={{ color: "#a78bfa" }} /> Mots-clés
+                                                        <Key size={13} style={{ color: "#a78bfa" }} /> {t("detail.interview.keywords")}
                                                     </div>
                                                     <div style={styles.skillsRow}>
                                                         {eval_.keywords.map((k, i) => <span key={i} style={styles.skillBadge("kw")}>{k}</span>)}
@@ -190,7 +193,7 @@ export function InterviewTab({ offre, userProfile, questions, loading, onGenerat
                                             )}
                                             <div style={{ marginTop: 14 }}>
                                                 <div style={{ ...styles.evalSubTitle, display: "flex", alignItems: "center", gap: 5 }}>
-                                                    <Lightbulb size={13} style={{ color: "#f59e0b" }} /> Réponse suggérée
+                                                    <Lightbulb size={13} style={{ color: "#f59e0b" }} /> {t("detail.interview.suggestedAnswer")}
                                                 </div>
                                                 <div style={styles.suggestedAnswer}>{eval_.suggestedAnswer}</div>
                                             </div>
@@ -202,7 +205,7 @@ export function InterviewTab({ offre, userProfile, questions, loading, onGenerat
                             {questions.tips?.length > 0 && (
                                 <div style={styles.tipsBox}>
                                     <div style={{ fontWeight: 700, fontSize: 13, marginBottom: 8, color: "var(--gb-text)", display: "flex", alignItems: "center", gap: 6 }}>
-                                        <Lightbulb size={14} style={{ verticalAlign: "middle" }} /> Conseils
+                                        <Lightbulb size={14} style={{ verticalAlign: "middle" }} /> {t("detail.interview.tips")}
                                     </div>
                                     {questions.tips.map((tip, i) => <div key={i} style={styles.tip}>{tip}</div>)}
                                 </div>
@@ -211,7 +214,7 @@ export function InterviewTab({ offre, userProfile, questions, loading, onGenerat
                     ) : (
                         <div style={styles.loadingBlock}>
                             <button onClick={onGenerateQuestions} style={styles.generateBtn}>
-                                <Play size={14} /> Générer les questions d'entretien
+                                <Play size={14} /> {t("detail.interview.generateQuestions")}
                             </button>
                         </div>
                     )}

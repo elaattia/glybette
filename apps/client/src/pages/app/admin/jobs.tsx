@@ -7,6 +7,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { ConfirmActionDialog, type ConfirmActionTone } from "@/components/ui/confirm-action-dialog";
 import { Input } from "@/components/ui/input";
 import { AdminTableSkeleton } from "@/pages/app/admin/components/admin-skeletons";
+import { useLocale } from "@/hooks/useLocale";
 
 type JobRow = {
     _id: string;
@@ -25,6 +26,7 @@ type ConfirmState = {
 };
 
 export default function AdminJobsManagementPage() {
+    const { t } = useLocale("admin");
     const queryClient = useQueryClient();
     const [search, setSearch] = useState("");
     const [confirmState, setConfirmState] = useState<ConfirmState | null>(null);
@@ -57,14 +59,14 @@ export default function AdminJobsManagementPage() {
     return (
         <Card className="border-[var(--gb-border)] bg-[var(--gb-app-panel-bg)]">
             <CardHeader className="px-5 pt-5 md:px-6">
-                <CardTitle className="text-base text-[var(--gb-text)]">Jobs management</CardTitle>
+                <CardTitle className="text-base text-[var(--gb-text)]">{t("jobs.title")}</CardTitle>
             </CardHeader>
             <CardContent className="px-5 pb-5 md:px-6 md:pb-6">
                 <div className="mb-3">
                     <Input
                         value={search}
                         onChange={(event) => setSearch(event.currentTarget.value)}
-                        placeholder="Search by title, company, status, or job id"
+                        placeholder={t("jobs.searchPlaceholder")}
                         className="max-w-xl"
                     />
                 </div>
@@ -72,78 +74,90 @@ export default function AdminJobsManagementPage() {
                     <table className="w-full min-w-[820px] text-left text-sm">
                         <thead className="bg-[var(--gb-app-hover)] text-xs uppercase tracking-[0.08em] text-[var(--gb-muted)]">
                             <tr>
-                                <th className="px-3 py-2">Title</th>
-                                <th className="px-3 py-2">Company</th>
-                                <th className="px-3 py-2">Status</th>
-                                <th className="px-3 py-2">Actions</th>
+                                <th className="px-3 py-2">{t("common.title")}</th>
+                                <th className="px-3 py-2">{t("common.company")}</th>
+                                <th className="px-3 py-2">{t("common.status")}</th>
+                                <th className="px-3 py-2">{t("common.actions")}</th>
                             </tr>
                         </thead>
                         <tbody>
                             {query.isPending ? <AdminTableSkeleton columns={4} /> : null}
                             {!query.isPending
                                 ? filteredJobs.map((job) => (
-                                <tr key={job._id} className="border-t border-[var(--gb-border)] text-[var(--gb-text)]">
-                                    <td className="px-3 py-2">
-                                        <p className="font-medium">{job.titre}</p>
-                                        <Badge variant="outline" appearance="metadata" className="mt-1">
-                                            {job._id}
-                                        </Badge>
-                                    </td>
-                                    <td className="px-3 py-2 text-[var(--gb-muted)]">
-                                        <Badge
-                                            variant={job.entreprise ? "secondary" : "outline"}
-                                            tone={job.entreprise ? "neutral" : undefined}
-                                            appearance={job.entreprise ? undefined : "metadata"}>
-                                            {job.entreprise ?? "Unknown company"}
-                                        </Badge>
-                                    </td>
-                                    <td className="px-3 py-2">
-                                        <Badge variant="outline" tone={job.status === "active" ? "success" : "warning"}>
-                                            {job.status === "archivee" ? "archived" : job.status}
-                                        </Badge>
-                                    </td>
-                                    <td className="px-3 py-2">
-                                        <div className="flex flex-wrap gap-2">
-                                            <Button
-                                                size="sm"
-                                                variant="outline"
-                                                onClick={() =>
-                                                    setConfirmState({
-                                                        title: `${job.status === "active" ? "Archive" : "Activate"} job`,
-                                                        description: `Confirm ${job.status === "active" ? "archiving" : "activation"} for "${job.titre}".`,
-                                                        confirmLabel: job.status === "active" ? "Archive job" : "Activate job",
-                                                        onConfirm: () =>
-                                                            statusMutation.mutate({
-                                                                id: job._id,
-                                                                status: job.status === "active" ? "archivee" : "active",
-                                                            }),
-                                                    })
-                                                }>
-                                                {job.status === "active" ? "Archive" : "Activate"}
-                                            </Button>
-                                            <Button
-                                                size="sm"
-                                                variant="destructive"
-                                                onClick={() =>
-                                                    setConfirmState({
-                                                        title: "Delete job",
-                                                        description: `Delete "${job.titre}" permanently? This action cannot be undone.`,
-                                                        confirmLabel: "Delete job",
-                                                        tone: "danger",
-                                                        onConfirm: () => deleteMutation.mutate(job._id),
-                                                    })
-                                                }>
-                                                Delete
-                                            </Button>
-                                        </div>
-                                    </td>
-                                </tr>
-                            ))
+                                      <tr key={job._id} className="border-t border-[var(--gb-border)] text-[var(--gb-text)]">
+                                          <td className="px-3 py-2">
+                                              <p className="font-medium">{job.titre}</p>
+                                              <Badge variant="outline" appearance="metadata" className="mt-1">
+                                                  {job._id}
+                                              </Badge>
+                                          </td>
+                                          <td className="px-3 py-2 text-[var(--gb-muted)]">
+                                              <Badge
+                                                  variant={job.entreprise ? "secondary" : "outline"}
+                                                  tone={job.entreprise ? "neutral" : undefined}
+                                                  appearance={job.entreprise ? undefined : "metadata"}
+                                              >
+                                                  {job.entreprise ?? t("common.unknownCompany")}
+                                              </Badge>
+                                          </td>
+                                          <td className="px-3 py-2">
+                                              <Badge variant="outline" tone={job.status === "active" ? "success" : "warning"}>
+                                                  {t(`common.jobStatus.${job.status === "archivee" ? "archived" : "active"}`)}
+                                              </Badge>
+                                          </td>
+                                          <td className="px-3 py-2">
+                                              <div className="flex flex-wrap gap-2">
+                                                  <Button
+                                                      size="sm"
+                                                      variant="outline"
+                                                      onClick={() =>
+                                                          setConfirmState({
+                                                              title:
+                                                                  job.status === "active"
+                                                                      ? t("jobs.confirm.archiveTitle")
+                                                                      : t("jobs.confirm.activateTitle"),
+                                                              description:
+                                                                  job.status === "active"
+                                                                      ? t("jobs.confirm.archiveDescription", { title: job.titre })
+                                                                      : t("jobs.confirm.activateDescription", { title: job.titre }),
+                                                              confirmLabel:
+                                                                  job.status === "active"
+                                                                      ? t("jobs.confirm.archiveJob")
+                                                                      : t("jobs.confirm.activateJob"),
+                                                              onConfirm: () =>
+                                                                  statusMutation.mutate({
+                                                                      id: job._id,
+                                                                      status: job.status === "active" ? "archivee" : "active",
+                                                                  }),
+                                                          })
+                                                      }
+                                                  >
+                                                      {job.status === "active" ? t("jobs.archive") : t("jobs.activate")}
+                                                  </Button>
+                                                  <Button
+                                                      size="sm"
+                                                      variant="destructive"
+                                                      onClick={() =>
+                                                          setConfirmState({
+                                                              title: t("jobs.confirm.deleteTitle"),
+                                                              description: t("jobs.confirm.deleteDescription", { title: job.titre }),
+                                                              confirmLabel: t("jobs.confirm.deleteJob"),
+                                                              tone: "danger",
+                                                              onConfirm: () => deleteMutation.mutate(job._id),
+                                                          })
+                                                      }
+                                                  >
+                                                      {t("common.delete")}
+                                                  </Button>
+                                              </div>
+                                          </td>
+                                      </tr>
+                                  ))
                                 : null}
                             {!query.isPending && filteredJobs.length === 0 ? (
                                 <tr>
                                     <td colSpan={4} className="px-3 py-6 text-center text-sm text-[var(--gb-muted)]">
-                                        No jobs found for this search.
+                                        {t("jobs.empty")}
                                     </td>
                                 </tr>
                             ) : null}
@@ -158,7 +172,7 @@ export default function AdminJobsManagementPage() {
                 }}
                 title={confirmState?.title ?? ""}
                 description={confirmState?.description ?? ""}
-                confirmLabel={confirmState?.confirmLabel ?? "Confirm"}
+                confirmLabel={confirmState?.confirmLabel ?? t("common.confirm")}
                 tone={confirmState?.tone}
                 onConfirm={() => confirmState?.onConfirm()}
                 isLoading={statusMutation.isPending || deleteMutation.isPending}

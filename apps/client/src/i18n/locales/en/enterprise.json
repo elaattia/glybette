@@ -1,0 +1,85 @@
+{
+    "dashboard": {
+        "createOffer": {
+            "title": "Create a new job posting",
+            "description": "Publish offers that will be highlighted to Glybette candidates.",
+            "successMessage": "Your offer has been published successfully! It is now visible to students.",
+            "jobTitle": "Job title",
+            "jobTitlePlaceholder": "e.g. Fullstack React/Node Developer",
+            "location": "Location",
+            "locationPlaceholder": "e.g. Paris, France",
+            "contractType": "Contract type",
+            "remoteWork": "Remote work",
+            "descriptionLabel": "Description",
+            "descriptionPlaceholder": "Describe the responsibilities, required profile...",
+            "publishOffer": "Publish offer",
+            "required": "*"
+        },
+        "contractTypes": {
+            "emploi": "Permanent / Fixed-term (Employment)",
+            "stage": "Internship / Apprenticeship",
+            "pfe": "Final-year project (PFE)"
+        },
+        "remoteOptions": {
+            "hybrid": "Hybrid",
+            "remote": "100% Remote",
+            "onsite": "On-site"
+        },
+        "myOffers": {
+            "title": "My published offers ({{count}})",
+            "description": "Manage your job postings and review received applications.",
+            "loading": "Loading offers...",
+            "emptyTitle": "No offers published yet",
+            "emptyHint": "Create your first offer above",
+            "active": "Active",
+            "candidates": "{{count}} candidates",
+            "viewMore": "View more →"
+        },
+        "defaultCompanyName": "Partner company"
+    },
+    "applications": {
+        "title": "Application management",
+        "descriptionAll": "Review and manage applications received for your offers.",
+        "descriptionFiltered": "Applications received for offer: {{title}}",
+        "stats": {
+            "total": "Total",
+            "pending": "Pending",
+            "viewed": "Viewed",
+            "accepted": "Accepted",
+            "rejected": "Rejected"
+        },
+        "filters": {
+            "all": "All",
+            "pending": "Pending",
+            "viewed": "Viewed",
+            "accepted": "Accepted",
+            "rejected": "Rejected"
+        },
+        "loading": "Loading applications...",
+        "loadError": "Error loading applications",
+        "updateError": "Error updating status",
+        "emptyFiltered": "No applications with this status",
+        "emptyAll": "No applications received",
+        "card": {
+            "candidate": "Candidate",
+            "pdfDocuments": "PDF documents",
+            "viewResume": "View resume",
+            "resumeNotProvided": "Resume not provided",
+            "viewCoverLetter": "View cover letter",
+            "coverLetterNotProvided": "Cover letter not provided",
+            "coverLetter": "Cover letter",
+            "noCoverLetter": "(No cover letter provided)",
+            "recruiterNotes": "Recruiter notes",
+            "recruiterNotesPlaceholder": "Add your notes on this application...",
+            "rating": "Rating (0-5)",
+            "changeStatus": "Change status",
+            "statusActions": {
+                "pending": "Pending",
+                "viewed": "Viewed",
+                "accepted": "Accept",
+                "rejected": "Reject"
+            },
+            "updating": "..."
+        }
+    }
+}

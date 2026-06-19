@@ -1,0 +1,229 @@
+{
+    "builder": {
+        "loading": "Chargement de l'espace portfolio...",
+        "topbar": {
+            "liveUrl": "URL en direct",
+            "localAutosave": "Sauvegarde locale",
+            "localAutosaveAt": "Sauvegarde locale à {{time}}",
+            "localAutosaveReady": "Sauvegarde locale prête",
+            "open": "Ouvrir",
+            "openTitle": "Ouvrir le portfolio public dans un nouvel onglet",
+            "save": "Enregistrer"
+        },
+        "slugStep": {
+            "title": "Réservez l'URL de votre portfolio",
+            "portfolioName": "Nom du portfolio",
+            "portfolioNamePlaceholder": "votre-nom",
+            "slugHint": "Lettres, chiffres et tirets uniquement. Vous pourrez le modifier plus tard, mais le lien changera.",
+            "publicLink": "Votre lien public",
+            "proUrlPreview": "Aperçu URL Pro",
+            "proUrlHint": "Passez à Pro pour une URL portfolio professionnelle.",
+            "continueToTemplates": "Continuer vers les modèles"
+        },
+        "templateStep": {
+            "sectionLabel": "Modèles de portfolio",
+            "title": "Choisissez un point de départ",
+            "description": "Les modèles définissent la mise en page, le style des composants et la grille sur laquelle vos blocs s'alignent."
+        },
+        "leftPanel": {
+            "identityAndUrl": "Identité et URL",
+            "displayName": "Nom affiché",
+            "displayNamePlaceholder": "Votre nom public",
+            "eyebrowText": "Petit texte personnalisé",
+            "eyebrowTextPlaceholder": "Disponible pour des rôles produit",
+            "textPlacement": "Placement du texte",
+            "aboveName": "Au-dessus du nom",
+            "belowName": "Sous le nom",
+            "urlSlug": "Slug URL",
+            "urlSlugPlaceholder": "votre-nom",
+            "identityHint": "Le nom affiché modifie le titre visuel du portfolio. Le slug ne change que l'URL publique.",
+            "templates": "Modèles",
+            "tabs": "Onglets",
+            "renameTabAria": "Renommer l'onglet {{label}}",
+            "deleteTabAria": "Supprimer l'onglet {{label}}",
+            "addTab": "Ajouter un onglet",
+            "blocks": "Blocs"
+        },
+        "rightPanel": {
+            "templateStyle": "Style du modèle",
+            "accent": "Couleur d'accent",
+            "radius": "Arrondi",
+            "radiusSharp": "Net",
+            "radiusSoft": "Doux",
+            "radiusRound": "Arrondi",
+            "selectedBlock": "Bloc sélectionné",
+            "deleteSelectedBlockAria": "Supprimer le bloc sélectionné",
+            "title": "Titre",
+            "blockWidth": "Largeur du bloc",
+            "halfWidth": "Demi-largeur",
+            "fullWidth": "Pleine largeur",
+            "blockWidthHint": "Les blocs s'alignent sur une grille à deux colonnes. Glissez pour réordonner ; utilisez la largeur pour la mise en page.",
+            "selectBlockHint": "Sélectionnez un bloc dans l'aperçu pour modifier la mise en page et le contenu."
+        },
+        "saveSuccess": {
+            "sectionLabel": "Portfolio enregistré",
+            "title": "Votre portfolio en ligne est à jour.",
+            "description": "Partagez ce lien partout. Les visiteurs verront la dernière version enregistrée de votre portfolio.",
+            "publicLink": "Lien public",
+            "proUpgradeTitle": "Passez à Pro pour un domaine portfolio plus épuré.",
+            "proUpgradeHint": "Votre URL Pro serait {{url}}.",
+            "openPortfolio": "Ouvrir le portfolio",
+            "share": "Partager",
+            "copied": "Copié"
+        },
+        "sortableBlock": {
+            "dragAria": "Glisser le bloc pour réordonner"
+        }
+    },
+    "templates": {
+        "atelier": {
+            "name": "Atelier Ledger",
+            "tone": "Éditorial, concentré, discrètement luxueux",
+            "description": "Un portfolio façon magazine avec une typographie généreuse, des panneaux calmes et une narration de projets nette."
+        },
+        "signal": {
+            "name": "Signal Grid",
+            "tone": "Industriel, technique, à fort contraste",
+            "description": "Une grille dense pour les builders qui veulent un portfolio qui ressemble à une salle de contrôle."
+        },
+        "folio": {
+            "name": "Folio Bloom",
+            "tone": "Doux, chaleureux, personnel",
+            "description": "Un portfolio plus léger pour les profils qui ont besoin de chaleur, de clarté et d'un rythme accessible."
+        },
+        "mono": {
+            "name": "Mono Dispatch",
+            "tone": "Brutaliste, compact, typographique",
+            "description": "Un profil épuré pour les spécialistes techniques qui veulent des preuves, des liens et du signal rapidement."
+        }
+    },
+    "blocks": {
+        "library": {
+            "markdown": {
+                "label": "Markdown / À propos",
+                "description": "Texte riche pour introductions, essais et notes d'étude de cas."
+            },
+            "socialLinks": {
+                "label": "Liens sociaux",
+                "description": "Une rangée compacte de liens de profil et de destinations de contact."
+            },
+            "projectList": {
+                "label": "Cartes projet",
+                "description": "Résumés de projets ouvrant des vues détaillées en modal."
+            },
+            "experienceTimeline": {
+                "label": "Frise d'expérience",
+                "description": "Rôles chronologiques, jalons et points forts."
+            },
+            "skills": {
+                "label": "Badges de compétences",
+                "description": "Capacités taguées regroupées dans un bloc scannable."
+            },
+            "contactCta": {
+                "label": "CTA contact",
+                "description": "Une invitation visible à vous contacter."
+            },
+            "media": {
+                "label": "Image / média",
+                "description": "URL d'image externe avec légende."
+            },
+            "customLink": {
+                "label": "Bouton personnalisé",
+                "description": "Un lien unique ou un appel à l'action type téléchargement."
+            }
+        },
+        "defaults": {
+            "tabAbout": "À propos",
+            "tabExperience": "Expérience",
+            "tabCustom": "Onglet personnalisé",
+            "displayNameFallback": "Votre nom",
+            "eyebrowText": "Portfolio indépendant",
+            "markdownTitle": "À propos de moi",
+            "markdownBody": "Rédigez une intro concise. Mentionnez votre métier, les problèmes que vous aimez résoudre et ce qui distingue votre travail.",
+            "socialLinksTitle": "Me trouver",
+            "projectListTitle": "Projets sélectionnés",
+            "experienceTitle": "Expérience",
+            "skillsTitle": "Compétences",
+            "contactCtaTitle": "Travaillons ensemble",
+            "contactCtaHeading": "Un rôle ou un projet en tête ?",
+            "contactCtaBody": "Envoyez un message et je répondrai avec ma disponibilité et les prochaines étapes.",
+            "contactCtaLabel": "Me contacter",
+            "mediaTitle": "Média",
+            "mediaCaption": "Ajoutez une URL d'image externe qui soutient votre histoire.",
+            "customLinkTitle": "Lien mis en avant",
+            "customLinkLabel": "Voir le CV",
+            "newGroup": "Nouveau groupe",
+            "newSkill": "Nouvelle compétence",
+            "newLink": "Nouveau lien",
+            "newProject": "Nouveau projet",
+            "newProjectSummary": "Résultat court",
+            "newProjectDetail": "Qu'est-ce qui a changé ?",
+            "newRole": "Nouveau rôle",
+            "newCompany": "Entreprise",
+            "newPeriod": "Année",
+            "newImpact": "Impact"
+        },
+        "fields": {
+            "markdownText": "Texte Markdown",
+            "groupName": "Nom du groupe",
+            "groupNameAria": "Nom du groupe de compétences",
+            "deleteGroupAria": "Supprimer le groupe {{label}}",
+            "skillsPlaceholder": "React, TypeScript, APIs",
+            "addSkillGroup": "Ajouter un groupe de compétences",
+            "heading": "Titre",
+            "body": "Corps",
+            "buttonLabel": "Libellé du bouton",
+            "buttonUrl": "URL du bouton",
+            "imageUrl": "URL de l'image",
+            "caption": "Légende",
+            "linkLabel": "Libellé du lien",
+            "url": "URL",
+            "labelPlaceholder": "Libellé",
+            "urlPlaceholder": "https://",
+            "addLink": "Ajouter un lien",
+            "projectTitle": "Titre du projet",
+            "shortSummary": "Résumé court",
+            "modalDetail": "Détail modal",
+            "projectUrl": "URL du projet",
+            "addProject": "Ajouter un projet",
+            "role": "Rôle",
+            "company": "Entreprise",
+            "period": "2024 - Présent",
+            "whatYouDid": "Ce que vous avez fait",
+            "addExperience": "Ajouter une expérience"
+        }
+    },
+    "socialIcons": {
+        "website": "Site web",
+        "github": "GitHub",
+        "linkedin": "LinkedIn",
+        "email": "E-mail",
+        "twitter": "Twitter / X",
+        "instagram": "Instagram",
+        "dribbble": "Dribbble"
+    },
+    "renderer": {
+        "contactFallback": "Contact",
+        "mediaAltFallback": "Média portfolio",
+        "openLinkFallback": "Ouvrir le lien",
+        "footer": "Propulsé par GLYBETTE",
+        "projectModal": {
+            "caseFile": "Dossier",
+            "closeAria": "Fermer le détail du projet",
+            "eyebrow": "Détails du projet",
+            "openProject": "Ouvrir le projet",
+            "close": "Fermer"
+        }
+    },
+    "public": {
+        "loading": "Chargement du portfolio...",
+        "notFoundLabel": "Portfolio introuvable",
+        "notFoundTitle": "Ce portfolio n'est pas encore en ligne.",
+        "notFoundDescription": "Le propriétaire est peut-être encore en train de le construire, ou l'URL a changé.",
+        "goToGlybette": "Aller sur Glybette"
+    },
+    "errors": {
+        "slugTooShort": "Le nom d'URL du portfolio doit comporter au moins 3 caractères.",
+        "slugTaken": "Cette URL de portfolio est déjà prise."
+    }
+}

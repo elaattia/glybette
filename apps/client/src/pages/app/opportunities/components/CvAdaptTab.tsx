@@ -2,15 +2,21 @@ import React, { useState, useCallback } from "react";
 import { FileText, Brain, Key, Edit3, Target, Rocket, Check, RefreshCw, Lightbulb, Loader2 } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { useQueryClient } from "@tanstack/react-query";
+import type { TFunction } from "i18next";
 import { CV_LIST_KEY } from "@/features/cv-builder/hooks/useCvList";
+import { useLocale } from "@/hooks/useLocale";
+import { formatNumber } from "@/lib/locale-format";
 import { detailStyles as styles } from "../styles";
 import { scoreColor } from "../constants";
 import type { Offre, CvImprovement } from "../types";
 
 const API_BASE = (import.meta as any).env?.VITE_API_URL ?? "http://localhost:3000/api";
 
-function buildTailoredSections(tailoredData: any, userProfile: any, offre: Offre) {
+function buildTailoredSections(tailoredData: any, userProfile: any, offre: Offre, t: TFunction) {
     const uid = () => Math.random().toString(36).slice(2) + Date.now().toString(36);
+    const companySuffix = offre.entreprise ? t("detail.cvAdapt.companySuffix", { company: offre.entreprise }) : "";
+    const skills = offre.competences?.slice(0, 3).join(", ");
+    const skillsPrefix = skills ? t("detail.cvAdapt.skillsPrefix", { skills }) : "";
 
     const sections: any[] = [
         {
@@ -29,7 +35,7 @@ function buildTailoredSections(tailoredData: any, userProfile: any, offre: Offre
             type: "summary", order: 1,
             data: {
                 text: tailoredData?.summary ?? userProfile.summary
-                    ?? `Candidat motivé pour le poste de ${offre.titre}${offre.entreprise ? ` chez ${offre.entreprise}` : ""}. ${offre.competences?.slice(0, 3).join(", ") ? `Maîtrise de ${offre.competences.slice(0, 3).join(", ")}.` : ""}`,
+                    ?? t("detail.cvAdapt.defaultSummary", { title: offre.titre, companySuffix, skillsPrefix }),
             },
         },
     ];
@@ -60,11 +66,19 @@ function buildTailoredSections(tailoredData: any, userProfile: any, offre: Offre
     const skillGroups: any[] = [];
 
     if (suggestedSkills.length > 0) {
-        skillGroups.push(...suggestedSkills.map((g: any) => ({ id: uid(), category: g.category ?? "Compétences", skills: g.skills ?? [] })));
+        skillGroups.push(...suggestedSkills.map((g: any) => ({
+            id: uid(),
+            category: g.category ?? t("detail.cvAdapt.skillCategories.skills"),
+            skills: g.skills ?? [],
+        })));
     } else {
-        if (baseSkills.length > 0) skillGroups.push({ id: uid(), category: "Compétences techniques", skills: baseSkills });
+        if (baseSkills.length > 0) {
+            skillGroups.push({ id: uid(), category: t("detail.cvAdapt.skillCategories.technical"), skills: baseSkills });
+        }
         const newSkills = offreSkills.filter((s: string) => !baseSkills.includes(s));
-        if (newSkills.length > 0)  skillGroups.push({ id: uid(), category: "Compétences requises", skills: newSkills.slice(0, 6) });
+        if (newSkills.length > 0) {
+            skillGroups.push({ id: uid(), category: t("detail.cvAdapt.skillCategories.required"), skills: newSkills.slice(0, 6) });
+        }
     }
     if (skillGroups.length > 0) sections.push({ type: "skills", order: 4, data: skillGroups });
 
@@ -85,6 +99,7 @@ interface CvAdaptTabProps {
 export function CvAdaptTab({ offre, userProfile, profileText, matchScore }: CvAdaptTabProps) {
     const navigate = useNavigate();
     const queryClient = useQueryClient();
+    const { t, locale } = useLocale("opportunities");
 
     const [uploadedCvText, setUploadedCvText]     = useState("");
     const [uploadedFileName, setUploadedFileName] = useState("");
@@ -93,6 +108,8 @@ export function CvAdaptTab({ offre, userProfile, profileText, matchScore }: CvAd
     const [loadingCvImp, setLoadingCvImp]         = useState(false);
     const [creatingCv, setCreatingCv]             = useState(false);
     const [cvCreated, setCvCreated]               = useState<string | null>(null);
+
+    const companySuffix = offre.entreprise ? t("detail.cvAdapt.companySuffix", { company: offre.entreprise }) : "";
 
     const handleCvFileUpload = useCallback(async (e: React.ChangeEvent<HTMLInputElement>) => {
         const file = e.target.files?.[0];
@@ -123,7 +140,7 @@ export function CvAdaptTab({ offre, userProfile, profileText, matchScore }: CvAd
         if (!offre._id || cvImprovements) return;
         setLoadingCvImp(true);
         try {
-            const cvText = uploadedCvText || profileText || "Profil candidat non renseigné";
+            const cvText = uploadedCvText || profileText || t("detail.cvAdapt.defaultProfile");
             const res = await fetch(`${API_BASE}/jobs/matching/cv-improvements`, {
                 method: "POST", headers: { "Content-Type": "application/json" }, credentials: "include",
                 body: JSON.stringify({ offreId: offre._id, cvText }),
@@ -136,13 +153,13 @@ export function CvAdaptTab({ offre, userProfile, profileText, matchScore }: CvAd
             });
         } catch (e) { console.error(e); }
         finally { setLoadingCvImp(false); }
-    }, [offre._id, cvImprovements, uploadedCvText, profileText, matchScore]);
+    }, [offre._id, cvImprovements, uploadedCvText, profileText, matchScore, t]);
 
     const createTailoredCv = useCallback(async () => {
         if (!offre._id) return;
         setCreatingCv(true); setCvCreated(null);
         try {
-            const cvText    = uploadedCvText || profileText || "Profil candidat non renseigné";
+            const cvText    = uploadedCvText || profileText || t("detail.cvAdapt.defaultProfile");
             const offreText = `${offre.titre}\n${offre.entreprise ?? ""}\n${offre.description ?? ""}\nCompétences: ${offre.competences?.join(", ")}\nNiveau: ${offre.niveau_experience ?? ""}\nContrat: ${offre.type_contrat ?? ""}`;
 
             let tailoredData: any = null;
@@ -154,8 +171,8 @@ export function CvAdaptTab({ offre, userProfile, profileText, matchScore }: CvAd
                 if (aiRes.ok) tailoredData = await aiRes.json();
             } catch (e) { console.warn("AI tailoring failed:", e); }
 
-            const sections = buildTailoredSections(tailoredData, userProfile, offre);
-            const cvTitle  = `CV adapté - ${offre.titre}${offre.entreprise ? ` chez ${offre.entreprise}` : ""}`;
+            const sections = buildTailoredSections(tailoredData, userProfile, offre, t);
+            const cvTitle  = t("detail.cvAdapt.cvTitle", { title: offre.titre, companySuffix });
 
             const createRes = await fetch(`${API_BASE}/cvs`, {
                 method: "POST", headers: { "Content-Type": "application/json" }, credentials: "include",
@@ -169,18 +186,18 @@ export function CvAdaptTab({ offre, userProfile, profileText, matchScore }: CvAd
             setTimeout(() => navigate(`/app/cv/${cv._id}`), 1500);
         } catch (e) {
             console.error(e);
-            alert("Erreur lors de la création du CV. Veuillez réessayer.");
+            alert(t("detail.cvAdapt.createError"));
         } finally { setCreatingCv(false); }
-    }, [offre, uploadedCvText, profileText, userProfile, queryClient, navigate]);
+    }, [offre, uploadedCvText, profileText, userProfile, queryClient, navigate, t, companySuffix]);
 
     return (
         <div style={styles.tabContent}>
             <div style={styles.section}>
                 <div style={styles.sectionTitle}>
-                    <FileText size={14} style={{ marginRight: 6 }} />Importer votre CV
+                    <FileText size={14} style={{ marginRight: 6 }} />{t("detail.cvAdapt.importTitle")}
                 </div>
                 <p style={{ fontSize: 12, color: "var(--gb-muted)", marginBottom: 12 }}>
-                    Uploadez votre CV (PDF, DOCX ou TXT) pour des recommandations personnalisées.
+                    {t("detail.cvAdapt.importDescription")}
                 </p>
                 <label style={{
                     display: "flex", alignItems: "center", justifyContent: "center",
@@ -192,7 +209,7 @@ export function CvAdaptTab({ offre, userProfile, profileText, matchScore }: CvAd
                     {parsingFile ? (
                         <div style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: 8 }}>
                             <div style={styles.spinnerSm} />
-                            <span style={{ fontSize: 13, color: "var(--gb-muted)" }}>Lecture du fichier...</span>
+                            <span style={{ fontSize: 13, color: "var(--gb-muted)" }}>{t("detail.cvAdapt.parsingFile")}</span>
                         </div>
                     ) : uploadedCvText ? (
                         <div style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: 6 }}>
@@ -200,7 +217,9 @@ export function CvAdaptTab({ offre, userProfile, profileText, matchScore }: CvAd
                                 <FileText size={18} style={{ color: "#22c55e" }} />
                             </div>
                             <span style={{ fontSize: 13, fontWeight: 600, color: "#22c55e" }}>{uploadedFileName}</span>
-                            <span style={{ fontSize: 11, color: "var(--gb-muted)" }}>{uploadedCvText.length} caractères · Cliquez pour changer</span>
+                            <span style={{ fontSize: 11, color: "var(--gb-muted)" }}>
+                                {t("detail.cvAdapt.charactersClickToChange", { count: formatNumber(uploadedCvText.length, locale) })}
+                            </span>
                         </div>
                     ) : (
                         <div style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: 8 }}>
@@ -208,8 +227,8 @@ export function CvAdaptTab({ offre, userProfile, profileText, matchScore }: CvAd
                                 <FileText size={20} style={{ color: "var(--gb-muted)" }} />
                             </div>
                             <div style={{ textAlign: "center" }}>
-                                <div style={{ fontSize: 13, fontWeight: 600, color: "var(--gb-text)", marginBottom: 2 }}>Glissez-déposez votre CV ici</div>
-                                <div style={{ fontSize: 11, color: "var(--gb-muted)" }}>PDF, DOCX, TXT · max 5 MB</div>
+                                <div style={{ fontSize: 13, fontWeight: 600, color: "var(--gb-text)", marginBottom: 2 }}>{t("detail.cvAdapt.dropTitle")}</div>
+                                <div style={{ fontSize: 11, color: "var(--gb-muted)" }}>{t("detail.cvAdapt.dropHint")}</div>
                             </div>
                         </div>
                     )}
@@ -219,7 +238,7 @@ export function CvAdaptTab({ offre, userProfile, profileText, matchScore }: CvAd
             {loadingCvImp ? (
                 <div style={styles.loadingBlock}>
                     <div style={styles.spinnerSm} />
-                    <p style={{ color: "var(--gb-muted)", fontSize: 13 }}>Analyse de votre CV...</p>
+                    <p style={{ color: "var(--gb-muted)", fontSize: 13 }}>{t("detail.cvAdapt.analyzing")}</p>
                 </div>
             ) : cvImprovements ? (
                 <div>
@@ -231,9 +250,9 @@ export function CvAdaptTab({ offre, userProfile, profileText, matchScore }: CvAd
                                     <span style={styles.scoreUnit}>%</span>
                                 </div>
                                 <div>
-                                    <div style={{ fontWeight: 700, fontSize: 14, color: "var(--gb-text)" }}>Score ATS estimé</div>
+                                    <div style={{ fontWeight: 700, fontSize: 14, color: "var(--gb-text)" }}>{t("detail.cvAdapt.atsScoreTitle")}</div>
                                     <div style={{ fontSize: 12, color: "var(--gb-muted)" }}>
-                                        {uploadedCvText ? "Basé sur votre CV uploadé" : "Basé sur votre profil"}
+                                        {uploadedCvText ? t("detail.cvAdapt.basedOnUpload") : t("detail.cvAdapt.basedOnProfile")}
                                     </div>
                                 </div>
                             </div>
@@ -242,7 +261,7 @@ export function CvAdaptTab({ offre, userProfile, profileText, matchScore }: CvAd
 
                     {cvImprovements.keywordsToAdd && cvImprovements.keywordsToAdd.length > 0 && (
                         <div style={styles.section}>
-                            <div style={styles.sectionTitle}><Key size={14} style={{ marginRight: 6 }} />Mots-clés à ajouter</div>
+                            <div style={styles.sectionTitle}><Key size={14} style={{ marginRight: 6 }} />{t("detail.cvAdapt.keywordsToAdd")}</div>
                             <div style={styles.skillsRow}>
                                 {cvImprovements.keywordsToAdd.map((k, i) => (
                                     <span key={i} style={{ ...styles.skillBadge("add"), cursor: "pointer" }}
@@ -256,14 +275,14 @@ export function CvAdaptTab({ offre, userProfile, profileText, matchScore }: CvAd
 
                     {cvImprovements.suggestedSummary && (
                         <div style={styles.section}>
-                            <div style={styles.sectionTitle}><Edit3 size={14} style={{ marginRight: 6 }} />Résumé adapté</div>
+                            <div style={styles.sectionTitle}><Edit3 size={14} style={{ marginRight: 6 }} />{t("detail.cvAdapt.adaptedSummary")}</div>
                             <div style={styles.suggestionBox}>{cvImprovements.suggestedSummary}</div>
                         </div>
                     )}
 
                     {cvImprovements.suggestedSkillsToAdd?.length > 0 && (
                         <div style={styles.section}>
-                            <div style={styles.sectionTitle}><Target size={14} style={{ marginRight: 6 }} />Skills à ajouter</div>
+                            <div style={styles.sectionTitle}><Target size={14} style={{ marginRight: 6 }} />{t("detail.cvAdapt.skillsToAdd")}</div>
                             <div style={styles.skillsRow}>
                                 {cvImprovements.suggestedSkillsToAdd.map((s, i) => (
                                     <span key={i} style={styles.skillBadge("add")}>+ {s}</span>
@@ -276,9 +295,9 @@ export function CvAdaptTab({ offre, userProfile, profileText, matchScore }: CvAd
                         <div key={i} style={styles.section}>
                             <div style={styles.sectionTitle}><Edit3 size={14} style={{ marginRight: 6 }} />{imp.section}</div>
                             <div style={styles.improvementCard}>
-                                <div style={styles.improvementLabel}>Version actuelle</div>
+                                <div style={styles.improvementLabel}>{t("detail.cvAdapt.currentVersion")}</div>
                                 <div style={styles.currentText}>{imp.current}</div>
-                                <div style={{ ...styles.improvementLabel, color: "#22c55e", marginTop: 10 }}>Version améliorée</div>
+                                <div style={{ ...styles.improvementLabel, color: "#22c55e", marginTop: 10 }}>{t("detail.cvAdapt.improvedVersion")}</div>
                                 <div style={styles.suggestedText}>{imp.suggested}</div>
                                 <div style={styles.improvementReason}>
                                     <Lightbulb size={14} style={{ marginRight: 6, verticalAlign: "text-bottom" }} />{imp.reason}
@@ -289,7 +308,7 @@ export function CvAdaptTab({ offre, userProfile, profileText, matchScore }: CvAd
 
                     {cvImprovements.overallAdvice && (
                         <div style={styles.overallAdvice}>
-                            <div style={{ fontWeight: 700, fontSize: 13, marginBottom: 6 }}>Conseil général</div>
+                            <div style={{ fontWeight: 700, fontSize: 13, marginBottom: 6 }}>{t("detail.cvAdapt.generalAdvice")}</div>
                             {cvImprovements.overallAdvice}
                         </div>
                     )}
@@ -297,16 +316,15 @@ export function CvAdaptTab({ offre, userProfile, profileText, matchScore }: CvAd
                     <div style={{ marginTop: 24, padding: 16, borderRadius: 14, background: "rgba(22,163,74,0.06)", border: "1px solid rgba(22,163,74,0.2)" }}>
                         <div style={{ fontWeight: 700, fontSize: 14, color: "var(--gb-text)", marginBottom: 6 }}>
                             <Rocket size={16} style={{ marginRight: 8, verticalAlign: "middle" }} />
-                            Créer un CV adapté à cette offre
+                            {t("detail.cvAdapt.createAdaptedTitle")}
                         </div>
                         <p style={{ fontSize: 12, color: "var(--gb-muted)", marginBottom: 14 }}>
-                            L'IA va générer un CV complet optimisé pour <strong style={{ color: "var(--gb-text)" }}>{offre.titre}</strong>
-                            {offre.entreprise ? ` chez ${offre.entreprise}` : ""}.
+                            {t("detail.cvAdapt.createAdaptedDescription", { title: offre.titre, companySuffix })}
                         </p>
                         {cvCreated ? (
                             <div style={{ display: "flex", alignItems: "center", gap: 10, padding: "10px 16px", borderRadius: 10, background: "rgba(22,163,74,0.1)", border: "1px solid rgba(22,163,74,0.3)" }}>
                                 <Check size={16} style={{ color: "#22c55e" }} />
-                                <span style={{ fontSize: 13, fontWeight: 600, color: "#22c55e" }}>CV créé ! Redirection...</span>
+                                <span style={{ fontSize: 13, fontWeight: 600, color: "#22c55e" }}>{t("detail.cvAdapt.cvCreatedRedirect")}</span>
                                 <Loader2 size={14} style={{ color: "#22c55e", animation: "spin 1s linear infinite", marginLeft: "auto" }} />
                             </div>
                         ) : (
@@ -322,8 +340,8 @@ export function CvAdaptTab({ offre, userProfile, profileText, matchScore }: CvAd
                                     boxShadow: creatingCv ? "none" : "0 4px 20px rgba(22,163,74,0.35)",
                                 }}>
                                 {creatingCv
-                                    ? <><Loader2 size={16} style={{ animation: "spin 1s linear infinite" }} /> Génération en cours...</>
-                                    : <><Brain size={16} /> Créer mon CV adapté</>
+                                    ? <><Loader2 size={16} style={{ animation: "spin 1s linear infinite" }} /> {t("detail.cvAdapt.generating")}</>
+                                    : <><Brain size={16} /> {t("detail.cvAdapt.createAdaptedCv")}</>
                                 }
                             </button>
                         )}
@@ -331,19 +349,20 @@ export function CvAdaptTab({ offre, userProfile, profileText, matchScore }: CvAd
 
                     <div style={{ marginTop: 12 }}>
                         <button onClick={() => { setCvImprovements(null); getCvImprovements(); }} style={styles.copyBtn}>
-                            <RefreshCw size={14} /> Relancer l'analyse
+                            <RefreshCw size={14} /> {t("detail.cvAdapt.rerunAnalysis")}
                         </button>
                     </div>
                 </div>
             ) : (
                 <div style={styles.loadingBlock}>
                     <button onClick={getCvImprovements} disabled={parsingFile} style={{ ...styles.generateBtn, cursor: parsingFile ? "not-allowed" : "pointer" }}>
-                        <Brain size={14} /> {parsingFile ? "Lecture du fichier..." : "Analyser mon CV pour cette offre"}
+                        <Brain size={14} /> {parsingFile ? t("detail.cvAdapt.parsingFile") : t("detail.cvAdapt.analyzeForOffer")}
                     </button>
                     {!uploadedCvText && (
-                        <p style={{ fontSize: 11, color: "var(--gb-muted)", textAlign: "center" }}>
-                            Uploadez votre CV ci-dessus pour une analyse précise,<br />ou lancez avec votre profil actuel.
-                        </p>
+                        <p
+                            style={{ fontSize: 11, color: "var(--gb-muted)", textAlign: "center" }}
+                            dangerouslySetInnerHTML={{ __html: t("detail.cvAdapt.uploadHint") }}
+                        />
                     )}
                 </div>
             )}

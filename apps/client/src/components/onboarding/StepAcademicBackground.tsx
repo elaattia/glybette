@@ -1,8 +1,9 @@
 import { useState } from "react";
+import { useTranslation } from "react-i18next";
 import type { AcademicBackgroundPayload } from "@glybette/types";
 import { StepFooter } from "./StepFooter";
 
-const DEGREES = ["Licence", "Master", "Ingénieur", "Doctorat", "BTS", "Other"];
+const DEGREE_KEYS = ["licence", "master", "ingenieur", "doctorat", "bts", "other"] as const;
 const YEARS = ["2024", "2025", "2026", "2027", "2028", "2029", "2030"];
 
 interface Props {
@@ -11,6 +12,7 @@ interface Props {
 }
 
 export function StepAcademicBackground({ onNext, onSkip }: Props) {
+    const { t } = useTranslation("onboarding");
     const [form, setForm] = useState<AcademicBackgroundPayload>({
         university: "",
         degree: "",
@@ -27,20 +29,20 @@ export function StepAcademicBackground({ onNext, onSkip }: Props) {
     return (
         <div className="space-y-8">
             <div className="text-center space-y-2">
-                <div className="gb-sec-label justify-center w-full">Academic</div>
-                <h1 className="text-4xl font-bold ob-page-title">Academic background</h1>
-                <p className="text-sm ob-page-sub">Tell us about your studies.</p>
+                <div className="gb-sec-label justify-center w-full">{t("academicBackground.label")}</div>
+                <h1 className="text-4xl font-bold ob-page-title">{t("academicBackground.title")}</h1>
+                <p className="text-sm ob-page-sub">{t("academicBackground.subtitle")}</p>
             </div>
 
             <div className="grid grid-cols-2 gap-x-5 gap-y-5">
                 <div className="col-span-2 space-y-1.5">
                     <label htmlFor="university" className="ob-label">
-                        University
+                        {t("academicBackground.fields.university.label")}
                     </label>
                     <input
                         id="university"
                         className="ob-input"
-                        placeholder="Your university or school"
+                        placeholder={t("academicBackground.fields.university.placeholder")}
                         value={form.university}
                         onChange={(e) => set("university", e.target.value)}
                     />
@@ -48,7 +50,7 @@ export function StepAcademicBackground({ onNext, onSkip }: Props) {
 
                 <div className="space-y-1.5">
                     <label htmlFor="degree" className="ob-label">
-                        Degree
+                        {t("academicBackground.fields.degree.label")}
                     </label>
                     <select
                         id="degree"
@@ -56,11 +58,11 @@ export function StepAcademicBackground({ onNext, onSkip }: Props) {
                         value={form.degree}
                         onChange={(e) => set("degree", e.target.value)}>
                         <option value="" disabled>
-                            Select your degree
+                            {t("academicBackground.fields.degree.placeholder")}
                         </option>
-                        {DEGREES.map((d) => (
-                            <option key={d} value={d}>
-                                {d}
+                        {DEGREE_KEYS.map((key) => (
+                            <option key={key} value={t(`academicBackground.degrees.${key}`)}>
+                                {t(`academicBackground.degrees.${key}`)}
                             </option>
                         ))}
                     </select>
@@ -68,7 +70,7 @@ export function StepAcademicBackground({ onNext, onSkip }: Props) {
 
                 <div className="space-y-1.5">
                     <label htmlFor="graduationYear" className="ob-label">
-                        Graduation Year
+                        {t("academicBackground.fields.graduationYear.label")}
                     </label>
                     <select
                         id="graduationYear"
@@ -76,7 +78,7 @@ export function StepAcademicBackground({ onNext, onSkip }: Props) {
                         value={form.graduationYear}
                         onChange={(e) => set("graduationYear", e.target.value)}>
                         <option value="" disabled>
-                            Select year
+                            {t("academicBackground.fields.graduationYear.placeholder")}
                         </option>
                         {YEARS.map((y) => (
                             <option key={y} value={y}>
@@ -88,12 +90,12 @@ export function StepAcademicBackground({ onNext, onSkip }: Props) {
 
                 <div className="col-span-2 space-y-1.5">
                     <label htmlFor="specialization" className="ob-label">
-                        Specialization
+                        {t("academicBackground.fields.specialization.label")}
                     </label>
                     <input
                         id="specialization"
                         className="ob-input"
-                        placeholder="e.g. Computer Science, Marketing..."
+                        placeholder={t("academicBackground.fields.specialization.placeholder")}
                         value={form.specialization}
                         onChange={(e) => set("specialization", e.target.value)}
                     />

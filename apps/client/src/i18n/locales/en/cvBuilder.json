@@ -1,0 +1,443 @@
+{
+    "list": {
+        "title": "My CVs",
+        "loading": "Loading…",
+        "savedCount": "{{count}} CV saved",
+        "savedCount_other": "{{count}} CVs saved",
+        "createNew": "Create a new CV",
+        "empty": {
+            "title": "No CV yet",
+            "description": "Create your first AI-optimized CV in minutes.",
+            "createFirst": "Create my first CV"
+        }
+    },
+    "create": {
+        "defaultTitle": "My new CV",
+        "importedTitle": "My CV",
+        "createError": "Error creating CV. Please try again.",
+        "importFailedAlert": "The file was imported but auto-fill failed. You can use the AI buttons manually in the form later.",
+        "docxReadError": "Unable to read DOCX file",
+        "pdfReadError": "Unable to read this PDF",
+        "upload": {
+            "title": "Import in progress…",
+            "extractingHint": "AI is analyzing your CV, this may take 30-60 seconds…",
+            "pleaseWait": "Please wait…",
+            "steps": {
+                "reading": "Reading file",
+                "extracting": "AI data extraction…",
+                "creating": "Creating your CV"
+            }
+        }
+    },
+    "editor": {
+        "loading": "Loading CV...",
+        "notFound": "CV not found.",
+        "previewEmpty": "Fill in the form to see your CV here",
+        "backToList": "Back to my CVs",
+        "back": "My CVs",
+        "views": {
+            "edit": "Edit",
+            "preview": "Preview"
+        },
+        "save": {
+            "saving": "Saving...",
+            "save": "Save",
+            "saved": "Saved",
+            "savingEllipsis": "Saving…",
+            "savedAt": "Saved {{time}}",
+            "unsaved": "Unsaved"
+        },
+        "aiImprove": "AI Improve",
+        "exportPdf": "Export PDF",
+        "exportError": "Error exporting PDF. Please try again.",
+        "addSection": "Add a section",
+        "design": {
+            "title": "Style & Design",
+            "templateColor": "Template color (Background)",
+            "titleColor": "Heading color (Accent)",
+            "titleFont": "Heading style (Font)",
+            "bodyFont": "Body style (Font)",
+            "titleSize": "Heading size",
+            "bodySize": "Body size",
+            "customColorTitle": "Custom color"
+        },
+        "fontSizes": {
+            "small": "Small",
+            "medium": "Medium",
+            "large": "Large"
+        },
+        "unknownSection": "Unrecognized section.",
+        "defaultSectionLabel": "Section"
+    },
+    "templates": {
+        "galleryTitle": "Template Gallery",
+        "gallerySubtitle": "All our templates are ATS-optimized and designed to maximize your chances.",
+        "back": "Back",
+        "categories": {
+            "all": "All",
+            "ats": "ATS",
+            "fancy": "Fancy"
+        },
+        "allDomains": "All domains",
+        "availableCount": "{{count}} template available",
+        "availableCount_other": "{{count}} templates available",
+        "emptyFilters": "No template for this filter combination.",
+        "resetFilters": "Reset filters",
+        "badges": {
+            "atsReady": "ATS-Ready",
+            "fancy": "Fancy"
+        },
+        "items": {
+            "creative": {
+                "name": "Elegant",
+                "description": "Two columns, photo slot, clean and professional"
+            },
+            "minimalist": {
+                "name": "Minimalist",
+                "description": "Typography-focused, generous spacing, timeless"
+            },
+            "modern-strategy": {
+                "name": "Impact",
+                "description": "Bold dark header, colored sidebar with photo"
+            },
+            "tech": {
+                "name": "Tech",
+                "description": "Dark mode, code blocks, ideal for developers"
+            },
+            "classic-reinvented": {
+                "name": "Classic",
+                "description": "Elegant serif, centered header, refined academic style"
+            }
+        },
+        "domains": {
+            "general": "General",
+            "it": "IT & Tech",
+            "design": "Design",
+            "business": "Business",
+            "academic": "Academic",
+            "healthcare": "Healthcare",
+            "engineering": "Engineering",
+            "marketing": "Marketing",
+            "legal": "Legal",
+            "finance": "Finance"
+        },
+        "defaultSkillGroups": {
+            "hardSkills": "Hard Skills",
+            "softSkills": "Soft Skills",
+            "devOpsTools": "DevOps & Tools"
+        }
+    },
+    "creationModal": {
+        "title": "Creation options",
+        "subtitle": "How would you like to get started?",
+        "blank": {
+            "title": "Create a new CV",
+            "subtitle": "Start with a blank form"
+        },
+        "upload": {
+            "title": "Import my existing CV",
+            "titleUploading": "Extracting…",
+            "subtitle": "AI extraction from PDF or Word"
+        },
+        "selectedTemplate": "Selected template"
+    },
+    "sections": {
+        "defs": {
+            "personal-info": "Contact",
+            "summary": "Summary",
+            "experience": "Experience",
+            "education": "Education",
+            "skills": "Skills",
+            "projects": "Projects",
+            "languages": "Languages",
+            "certifications": "Certifications"
+        },
+        "personalInfo": {
+            "photo": "Profile photo",
+            "import": "Import",
+            "remove": "Remove",
+            "profileAlt": "Profile",
+            "firstName": "First name",
+            "lastName": "Last name",
+            "roleTitle": "Title / Target role",
+            "email": "Email",
+            "phone": "Phone",
+            "location": "Location",
+            "linkedin": "LinkedIn",
+            "github": "GitHub",
+            "portfolio": "Website / Portfolio",
+            "placeholders": {
+                "firstName": "Alex",
+                "lastName": "Johnson",
+                "roleTitle": "Product Designer",
+                "email": "alex@example.com",
+                "phone": "+216 XX XXX XXX",
+                "linkedin": "linkedin.com/in/alex",
+                "github": "github.com/alex",
+                "portfolio": "alexjohnson.dev"
+            }
+        },
+        "summary": {
+            "label": "Professional summary",
+            "placeholder": "Results-oriented with 5+ years of experience in..."
+        },
+        "experience": {
+            "positionNumber": "Position {{number}}",
+            "position": "Role",
+            "company": "Company",
+            "start": "Start",
+            "end": "End",
+            "current": "Currently employed",
+            "currentLabel": "Current",
+            "location": "Location",
+            "description": "Description",
+            "enhance": "Enhance",
+            "add": "Add a position",
+            "placeholders": {
+                "position": "Senior Developer",
+                "company": "TechCorp",
+                "date": "Month Year",
+                "description": "Describe your responsibilities and results with metrics..."
+            }
+        },
+        "education": {
+            "itemNumber": "Education {{number}}",
+            "institution": "Institution",
+            "degree": "Degree",
+            "field": "Field",
+            "start": "Start",
+            "graduation": "Graduation",
+            "gpa": "Honors / GPA (optional)",
+            "add": "Add education",
+            "placeholders": {
+                "institution": "University of Tunis",
+                "degree": "Master / Bachelor",
+                "field": "Computer Science",
+                "gpa": "Very good / 16.5/20"
+            }
+        },
+        "skills": {
+            "categoryPlaceholder": "Category (e.g. Frontend, DevOps…)",
+            "addSkillPlaceholder": "Add… (Enter to confirm)",
+            "addSkillButton": "+ Add",
+            "addCategory": "Add a category"
+        },
+        "projects": {
+            "itemNumber": "Project {{number}}",
+            "name": "Project name",
+            "description": "Description",
+            "url": "URL",
+            "github": "GitHub",
+            "technologies": "Technologies",
+            "add": "Add a project",
+            "placeholders": {
+                "name": "Project name",
+                "description": "Describe the project, its impact and your contributions…",
+                "url": "https://example.com",
+                "github": "github.com/user/repo",
+                "tech": "React, TypeScript… (Enter)"
+            }
+        },
+        "languages": {
+            "language": "Language",
+            "level": "Level",
+            "add": "Add a language",
+            "levels": {
+                "A1": "A1 – Beginner",
+                "A2": "A2 – Elementary",
+                "B1": "B1 – Intermediate",
+                "B2": "B2 – Advanced",
+                "C1": "C1 – Fluent",
+                "C2": "C2 – Mastery",
+                "Native": "Native language"
+            },
+            "picker": {
+                "select": "Select a language",
+                "search": "Search for a language…"
+            }
+        },
+        "certifications": {
+            "itemNumber": "Certification {{number}}",
+            "name": "Certification name",
+            "issuer": "Issuer",
+            "date": "Date",
+            "url": "URL (optional)",
+            "add": "Add a certification",
+            "placeholders": {
+                "name": "AWS Solutions Architect",
+                "issuer": "Amazon / Coursera…",
+                "url": "https://credly.com/…"
+            }
+        },
+        "custom": {
+            "modalTitle": "Add a section",
+            "modalSubtitle": "Choose a predefined section or create your own",
+            "available": "Available sections",
+            "customDivider": "Custom section",
+            "createCustom": "Create custom section",
+            "sectionTitle": "Section title",
+            "sectionTitlePlaceholder": "e.g. Volunteering, Publications, Achievements…",
+            "fieldNamePlaceholder": "Field name",
+            "addField": "Add a field",
+            "fieldType": "Field type",
+            "cancel": "Cancel",
+            "fieldTypes": {
+                "text": { "label": "Short text", "desc": "Single line of text" },
+                "textarea": { "label": "Long text", "desc": "Paragraph/description" },
+                "date": { "label": "Date", "desc": "Month and year" },
+                "location": { "label": "Location", "desc": "City, country" },
+                "list": { "label": "List", "desc": "Separated items" },
+                "link": { "label": "URL link", "desc": "Website, profile…" }
+            },
+            "placeholders": {
+                "value": "Value…",
+                "description": "Description…",
+                "link": "https://…",
+                "listItem": "Add an item…"
+            },
+            "legacyContent": "Content"
+        },
+        "locationPicker": {
+            "selectCountry": "Select a country",
+            "searchCountry": "Search for a country…",
+            "selectCity": "Select a city",
+            "addressOptional": "Full address (optional)"
+        },
+        "datePicker": {
+            "default": "Month YYYY"
+        }
+    },
+    "card": {
+        "public": "Public",
+        "atsScore": "ATS Score",
+        "edit": "Edit",
+        "duplicate": "Duplicate",
+        "exportPdf": "Export PDF",
+        "delete": "Delete",
+        "exportPdfTitle": "Export PDF",
+        "placeholders": {
+            "firstName": "First name",
+            "lastName": "Last name",
+            "roleTitle": "Job title"
+        },
+        "timeAgo": {
+            "justNow": "Just now",
+            "minutesAgo": "{{count}}m ago",
+            "hoursAgo": "{{count}}h ago",
+            "daysAgo": "{{count}}d ago"
+        }
+    },
+    "share": {
+        "title": "Share your CV",
+        "subtitle": "Generate a public sharing link",
+        "publicCv": "Public CV",
+        "privateCv": "Private CV",
+        "publicDescription": "Anyone with the link can view your CV",
+        "privateDescription": "Only you can see this CV",
+        "shareLink": "Share link",
+        "copied": "Copied!",
+        "copy": "Copy",
+        "generating": "Generating...",
+        "makePublic": "Make public and copy link",
+        "revoking": "Revoking...",
+        "revoke": "Revoke public link"
+    },
+    "ats": {
+        "jobMatch": {
+            "title": "ATS Score",
+            "analyzeAnother": "Analyze another offer",
+            "analyzeWithOffer": "Analyze with a job offer",
+            "jobDescription": "Job description",
+            "jobDescriptionPlaceholder": "Paste the job description here...",
+            "analyzing": "Analyzing...",
+            "analyze": "Analyze",
+            "cancel": "Cancel"
+        },
+        "cvOnly": {
+            "title": "ATS Score — CV Readability",
+            "tooltip": "This score measures your CV's structural compatibility with ATS systems, regardless of any job offer.",
+            "analyzing": "Analyzing…",
+            "reanalyze": "Re-analyze",
+            "analyzeReadability": "Analyze ATS readability",
+            "saveFirst": "Save your CV to enable analysis."
+        },
+        "scoreLabel": {
+            "excellent": "Excellent",
+            "good": "Good",
+            "fair": "Fair",
+            "needsWork": "Needs improvement"
+        },
+        "breakdown": {
+            "keywordMatch": "Keywords",
+            "formatting": "Formatting",
+            "completeness": "Completeness",
+            "relevance": "Relevance",
+            "structure": "Structure"
+        },
+        "missingKeywords": "Missing keywords",
+        "matchedKeywords": "Matched keywords",
+        "pointsToImprove": "Points to improve",
+        "presentElements": "Present elements",
+        "strengths": "Strengths",
+        "weaknesses": "Weaknesses",
+        "tips": "Improvement tips",
+        "suggestions": "Suggestions"
+    },
+    "ai": {
+        "enhance": {
+            "defaultLabel": "AI Enhance",
+            "loading": "In progress...",
+            "enhance": "Enhance"
+        },
+        "errors": {
+            "saveFirst": "Save your CV first.",
+            "emptyField": "The field is empty.",
+            "generic": "AI error"
+        },
+        "suggestions": {
+            "title": "Improvement suggestions",
+            "subtitle": "Smart analysis of your CV",
+            "emptyDescription": "Get personalized suggestions to improve your CV's impact.",
+            "analyze": "Analyze my CV",
+            "saveFirst": "Save your CV first to enable this feature.",
+            "refresh": "Refresh analysis",
+            "priority": {
+                "high": "High",
+                "medium": "Medium",
+                "low": "Low"
+            }
+        },
+        "tailor": {
+            "title": "Tailor to offer",
+            "subtitle": "Personalize your CV for a targeted offer",
+            "jobDescription": "Job description",
+            "jobDescriptionPlaceholder": "Paste the full job description here...",
+            "adapting": "Adapting...",
+            "adaptCv": "Tailor my CV",
+            "suggestedSummary": "Suggested summary",
+            "copy": "Copy",
+            "apply": "Apply",
+            "skillsToAdd": "Skills to add",
+            "importantKeywords": "Important keywords"
+        },
+        "coverLetter": {
+            "title": "Cover letter",
+            "subtitle": "AI-generated based on your profile",
+            "toneTitle": "Letter tone",
+            "tones": {
+                "professional": { "label": "Professional", "desc": "Formal and confident" },
+                "enthusiastic": { "label": "Enthusiastic", "desc": "Dynamic and engaged" },
+                "concise": { "label": "Concise", "desc": "Short and impactful" }
+            },
+            "jobDescription": "Job description",
+            "jobDescriptionPlaceholder": "Paste the job description here...",
+            "generating": "Generating...",
+            "generate": "Generate letter",
+            "generatedLetter": "Generated letter",
+            "copied": "Copied",
+            "copy": "Copy",
+            "download": "Download",
+            "downloadFilename": "cover-letter.txt"
+        }
+    }
+}

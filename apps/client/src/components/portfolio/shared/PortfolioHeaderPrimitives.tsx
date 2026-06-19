@@ -1,4 +1,5 @@
 import type { PortfolioIdentity, PortfolioTab } from "@glybette/contracts";
+import { useLocale } from "@/hooks/useLocale";
 import { cn } from "@/lib/utils";
 
 type PortfolioNameProps = {
@@ -63,9 +64,10 @@ export function PortfolioTabNav({ tabs, activeTab, onTabChange, className, butto
 }
 
 export function PortfolioFooter() {
+    const { t } = useLocale("portfolio");
     return (
         <footer className="relative mt-auto pt-10 text-center text-xs uppercase tracking-[0.35em] opacity-55">
-            Powered by GLYBETTE
+            {t("renderer.footer")}
         </footer>
     );
 }

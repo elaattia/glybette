@@ -7,6 +7,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { ConfirmActionDialog, type ConfirmActionTone } from "@/components/ui/confirm-action-dialog";
 import { Input } from "@/components/ui/input";
 import { AdminTableSkeleton } from "@/pages/app/admin/components/admin-skeletons";
+import { useLocale } from "@/hooks/useLocale";
 
 type AdminUser = {
     id: string;
@@ -28,6 +29,7 @@ type ConfirmState = {
 };
 
 export default function AdminUsersManagementPage() {
+    const { t } = useLocale("admin");
     const queryClient = useQueryClient();
     const [search, setSearch] = useState("");
     const [confirmState, setConfirmState] = useState<ConfirmState | null>(null);
@@ -99,14 +101,14 @@ export default function AdminUsersManagementPage() {
     return (
         <Card className="border-[var(--gb-border)] bg-[var(--gb-app-panel-bg)]">
             <CardHeader className="px-5 pt-5 md:px-6">
-                <CardTitle className="text-base text-[var(--gb-text)]">Users management</CardTitle>
+                <CardTitle className="text-base text-[var(--gb-text)]">{t("users.title")}</CardTitle>
             </CardHeader>
             <CardContent className="px-5 pb-5 md:px-6 md:pb-6">
                 <div className="mb-3">
                     <Input
                         value={search}
                         onChange={(event) => setSearch(event.currentTarget.value)}
-                        placeholder="Search by name, email, role, status, or user id"
+                        placeholder={t("users.searchPlaceholder")}
                         className="max-w-xl"
                     />
                 </div>
@@ -114,154 +116,186 @@ export default function AdminUsersManagementPage() {
                     <table className="w-full min-w-[980px] text-left text-sm">
                         <thead className="bg-[var(--gb-app-hover)] text-xs uppercase tracking-[0.08em] text-[var(--gb-muted)]">
                             <tr>
-                                <th className="px-3 py-2">Display name</th>
-                                <th className="px-3 py-2">Email</th>
-                                <th className="px-3 py-2">Base role</th>
-                                <th className="px-3 py-2">Admin</th>
-                                <th className="px-3 py-2">Status</th>
-                                <th className="px-3 py-2">Verified</th>
-                                <th className="px-3 py-2">Actions</th>
+                                <th className="px-3 py-2">{t("common.displayName")}</th>
+                                <th className="px-3 py-2">{t("common.email")}</th>
+                                <th className="px-3 py-2">{t("common.baseRole")}</th>
+                                <th className="px-3 py-2">{t("common.admin")}</th>
+                                <th className="px-3 py-2">{t("common.status")}</th>
+                                <th className="px-3 py-2">{t("common.verified")}</th>
+                                <th className="px-3 py-2">{t("common.actions")}</th>
                             </tr>
                         </thead>
                         <tbody>
                             {usersQuery.isPending ? <AdminTableSkeleton columns={7} /> : null}
                             {!usersQuery.isPending
-                                ? filteredUsers.map((user) => (
-                                <tr key={user.id} className="border-t border-[var(--gb-border)] text-[var(--gb-text)]">
-                                    <td className="px-3 py-2">
-                                        <p className="font-medium">{user.displayName}</p>
-                                        <Badge variant="outline" appearance="metadata" className="mt-1">
-                                            {user.id}
-                                        </Badge>
-                                    </td>
-                                    <td className="px-3 py-2 text-[var(--gb-muted)]">
-                                        {user.email ? (
-                                            user.email
-                                        ) : (
-                                            <Badge variant="outline" className="border-[var(--gb-border)] text-[var(--gb-muted)]">
-                                                No email
-                                            </Badge>
-                                        )}
-                                    </td>
-                                    <td className="px-3 py-2">
-                                        <Badge variant="outline" tone={user.baseRole === "enterprise" ? "info" : "neutral"}>
-                                            {user.baseRole}
-                                        </Badge>
-                                    </td>
-                                    <td className="px-3 py-2">
-                                        <Badge
-                                            variant={user.isAdmin ? "default" : "secondary"}
-                                            tone={user.isAdmin ? "warning" : "neutral"}>
-                                            {user.isAdmin ? "Admin" : "Member"}
-                                        </Badge>
-                                    </td>
-                                    <td className="px-3 py-2">
-                                        <Badge variant="outline" tone={user.accountStatus === "banned" ? "error" : "success"}>
-                                            {user.accountStatus}
-                                        </Badge>
-                                    </td>
-                                    <td className="px-3 py-2">
-                                        <Badge
-                                            variant={user.emailVerified ? "default" : "outline"}
-                                            tone={user.emailVerified ? "success" : "neutral"}>
-                                            {user.emailVerified ? "Verified" : "Unverified"}
-                                        </Badge>
-                                    </td>
-                                    <td className="px-3 py-2">
-                                        <div className="flex flex-wrap gap-2">
-                                            <Button
-                                                size="sm"
-                                                variant="outline"
-                                                onClick={() =>
-                                                    setConfirmState({
-                                                        title: `${user.accountStatus === "banned" ? "Unban" : "Ban"} user`,
-                                                        description: `Are you sure you want to ${user.accountStatus === "banned" ? "unban" : "ban"} ${user.displayName}?`,
-                                                        confirmLabel: user.accountStatus === "banned" ? "Confirm unban" : "Confirm ban",
-                                                        tone: "danger",
-                                                        onConfirm: () =>
-                                                            statusMutation.mutate({
-                                                                id: user.id,
-                                                                accountStatus: user.accountStatus === "banned" ? "active" : "banned",
-                                                            }),
-                                                    })
-                                                }>
-                                                {user.accountStatus === "banned" ? "Unban" : "Ban"}
-                                            </Button>
-                                            <Button
-                                                size="sm"
-                                                variant="outline"
-                                                onClick={() =>
-                                                    setConfirmState({
-                                                        title: `${user.emailVerified ? "Revoke verification" : "Verify"} user`,
-                                                        description: `Confirm ${user.emailVerified ? "verification revocation" : "verification"} for ${user.displayName}.`,
-                                                        confirmLabel: user.emailVerified ? "Revoke verification" : "Verify user",
-                                                        onConfirm: () =>
-                                                            verifyMutation.mutate({
-                                                                id: user.id,
-                                                                emailVerified: !user.emailVerified,
-                                                            }),
-                                                    })
-                                                }>
-                                                {user.emailVerified ? "Revoke verification" : "Verify"}
-                                            </Button>
-                                            <Button
-                                                size="sm"
-                                                variant="outline"
-                                                onClick={() =>
-                                                    setConfirmState({
-                                                        title: "Switch base role",
-                                                        description: `Move ${user.displayName} to ${user.baseRole === "student" ? "enterprise" : "student"} role?`,
-                                                        confirmLabel: "Confirm role switch",
-                                                        onConfirm: () =>
-                                                            roleMutation.mutate({
-                                                                id: user.id,
-                                                                baseRole: user.baseRole === "student" ? "enterprise" : "student",
-                                                            }),
-                                                    })
-                                                }>
-                                                Switch role
-                                            </Button>
-                                            <Button
-                                                size="sm"
-                                                variant="outline"
-                                                onClick={() =>
-                                                    setConfirmState({
-                                                        title: `${user.isAdmin ? "Revoke" : "Grant"} admin access`,
-                                                        description: `Confirm admin privilege change for ${user.displayName}.`,
-                                                        confirmLabel: user.isAdmin ? "Revoke admin" : "Grant admin",
-                                                        tone: "danger",
-                                                        onConfirm: () =>
-                                                            adminMutation.mutate({
-                                                                id: user.id,
-                                                                isAdmin: !user.isAdmin,
-                                                            }),
-                                                    })
-                                                }>
-                                                {user.isAdmin ? "Revoke admin" : "Grant admin"}
-                                            </Button>
-                                            <Button
-                                                size="sm"
-                                                variant="destructive"
-                                                onClick={() =>
-                                                    setConfirmState({
-                                                        title: "Delete user account",
-                                                        description: `This will permanently delete ${user.displayName}. This action cannot be undone.`,
-                                                        confirmLabel: "Delete user",
-                                                        tone: "danger",
-                                                        onConfirm: () => deleteMutation.mutate(user.id),
-                                                    })
-                                                }>
-                                                Delete
-                                            </Button>
-                                        </div>
-                                    </td>
-                                </tr>
-                            ))
+                                ? filteredUsers.map((user) => {
+                                      const nextRole = user.baseRole === "student" ? "enterprise" : "student";
+                                      return (
+                                          <tr key={user.id} className="border-t border-[var(--gb-border)] text-[var(--gb-text)]">
+                                              <td className="px-3 py-2">
+                                                  <p className="font-medium">{user.displayName}</p>
+                                                  <Badge variant="outline" appearance="metadata" className="mt-1">
+                                                      {user.id}
+                                                  </Badge>
+                                              </td>
+                                              <td className="px-3 py-2 text-[var(--gb-muted)]">
+                                                  {user.email ? (
+                                                      user.email
+                                                  ) : (
+                                                      <Badge variant="outline" className="border-[var(--gb-border)] text-[var(--gb-muted)]">
+                                                          {t("common.noEmail")}
+                                                      </Badge>
+                                                  )}
+                                              </td>
+                                              <td className="px-3 py-2">
+                                                  <Badge variant="outline" tone={user.baseRole === "enterprise" ? "info" : "neutral"}>
+                                                      {t(`common.roles.${user.baseRole}`)}
+                                                  </Badge>
+                                              </td>
+                                              <td className="px-3 py-2">
+                                                  <Badge
+                                                      variant={user.isAdmin ? "default" : "secondary"}
+                                                      tone={user.isAdmin ? "warning" : "neutral"}
+                                                  >
+                                                      {t(`common.adminBadge.${user.isAdmin ? "admin" : "member"}`)}
+                                                  </Badge>
+                                              </td>
+                                              <td className="px-3 py-2">
+                                                  <Badge variant="outline" tone={user.accountStatus === "banned" ? "error" : "success"}>
+                                                      {t(`common.accountStatus.${user.accountStatus}`)}
+                                                  </Badge>
+                                              </td>
+                                              <td className="px-3 py-2">
+                                                  <Badge
+                                                      variant={user.emailVerified ? "default" : "outline"}
+                                                      tone={user.emailVerified ? "success" : "neutral"}
+                                                  >
+                                                      {t(`common.verification.${user.emailVerified ? "verified" : "unverified"}`)}
+                                                  </Badge>
+                                              </td>
+                                              <td className="px-3 py-2">
+                                                  <div className="flex flex-wrap gap-2">
+                                                      <Button
+                                                          size="sm"
+                                                          variant="outline"
+                                                          onClick={() =>
+                                                              setConfirmState({
+                                                                  title:
+                                                                      user.accountStatus === "banned"
+                                                                          ? t("users.confirm.unbanTitle")
+                                                                          : t("users.confirm.banTitle"),
+                                                                  description:
+                                                                      user.accountStatus === "banned"
+                                                                          ? t("users.confirm.unbanDescription", { name: user.displayName })
+                                                                          : t("users.confirm.banDescription", { name: user.displayName }),
+                                                                  confirmLabel:
+                                                                      user.accountStatus === "banned"
+                                                                          ? t("users.confirm.confirmUnban")
+                                                                          : t("users.confirm.confirmBan"),
+                                                                  tone: "danger",
+                                                                  onConfirm: () =>
+                                                                      statusMutation.mutate({
+                                                                          id: user.id,
+                                                                          accountStatus: user.accountStatus === "banned" ? "active" : "banned",
+                                                                      }),
+                                                              })
+                                                          }
+                                                      >
+                                                          {user.accountStatus === "banned" ? t("users.unban") : t("users.ban")}
+                                                      </Button>
+                                                      <Button
+                                                          size="sm"
+                                                          variant="outline"
+                                                          onClick={() =>
+                                                              setConfirmState({
+                                                                  title: user.emailVerified
+                                                                      ? t("users.confirm.revokeVerificationTitle")
+                                                                      : t("users.confirm.verifyTitle"),
+                                                                  description: user.emailVerified
+                                                                      ? t("users.confirm.revokeVerificationDescription", { name: user.displayName })
+                                                                      : t("users.confirm.verifyDescription", { name: user.displayName }),
+                                                                  confirmLabel: user.emailVerified
+                                                                      ? t("users.confirm.revokeVerificationLabel")
+                                                                      : t("users.confirm.verifyUser"),
+                                                                  onConfirm: () =>
+                                                                      verifyMutation.mutate({
+                                                                          id: user.id,
+                                                                          emailVerified: !user.emailVerified,
+                                                                      }),
+                                                              })
+                                                          }
+                                                      >
+                                                          {user.emailVerified ? t("users.revokeVerification") : t("users.verify")}
+                                                      </Button>
+                                                      <Button
+                                                          size="sm"
+                                                          variant="outline"
+                                                          onClick={() =>
+                                                              setConfirmState({
+                                                                  title: t("users.confirm.switchRoleTitle"),
+                                                                  description: t("users.confirm.switchRoleDescription", {
+                                                                      name: user.displayName,
+                                                                      role: t(`common.roles.${nextRole}`),
+                                                                  }),
+                                                                  confirmLabel: t("users.confirm.confirmRoleSwitch"),
+                                                                  onConfirm: () =>
+                                                                      roleMutation.mutate({
+                                                                          id: user.id,
+                                                                          baseRole: nextRole,
+                                                                      }),
+                                                              })
+                                                          }
+                                                      >
+                                                          {t("users.switchRole")}
+                                                      </Button>
+                                                      <Button
+                                                          size="sm"
+                                                          variant="outline"
+                                                          onClick={() =>
+                                                              setConfirmState({
+                                                                  title: user.isAdmin
+                                                                      ? t("users.confirm.revokeAdminTitle")
+                                                                      : t("users.confirm.grantAdminTitle"),
+                                                                  description: t("users.confirm.adminChangeDescription", { name: user.displayName }),
+                                                                  confirmLabel: user.isAdmin
+                                                                      ? t("users.confirm.revokeAdminLabel")
+                                                                      : t("users.confirm.grantAdminLabel"),
+                                                                  tone: "danger",
+                                                                  onConfirm: () =>
+                                                                      adminMutation.mutate({
+                                                                          id: user.id,
+                                                                          isAdmin: !user.isAdmin,
+                                                                      }),
+                                                              })
+                                                          }
+                                                      >
+                                                          {user.isAdmin ? t("users.revokeAdmin") : t("users.grantAdmin")}
+                                                      </Button>
+                                                      <Button
+                                                          size="sm"
+                                                          variant="destructive"
+                                                          onClick={() =>
+                                                              setConfirmState({
+                                                                  title: t("users.confirm.deleteTitle"),
+                                                                  description: t("users.confirm.deleteDescription", { name: user.displayName }),
+                                                                  confirmLabel: t("users.confirm.deleteUser"),
+                                                                  tone: "danger",
+                                                                  onConfirm: () => deleteMutation.mutate(user.id),
+                                                              })
+                                                          }
+                                                      >
+                                                          {t("common.delete")}
+                                                      </Button>
+                                                  </div>
+                                              </td>
+                                          </tr>
+                                      );
+                                  })
                                 : null}
                             {!usersQuery.isPending && filteredUsers.length === 0 ? (
                                 <tr>
                                     <td colSpan={7} className="px-3 py-6 text-center text-sm text-[var(--gb-muted)]">
-                                        No users found for this search.
+                                        {t("users.empty")}
                                     </td>
                                 </tr>
                             ) : null}
@@ -276,7 +310,7 @@ export default function AdminUsersManagementPage() {
                 }}
                 title={confirmState?.title ?? ""}
                 description={confirmState?.description ?? ""}
-                confirmLabel={confirmState?.confirmLabel ?? "Confirm"}
+                confirmLabel={confirmState?.confirmLabel ?? t("common.confirm")}
                 tone={confirmState?.tone}
                 onConfirm={() => confirmState?.onConfirm()}
                 isLoading={isMutating}

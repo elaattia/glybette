@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { Trash2 } from "lucide-react";
+import { useLocale } from "@/hooks/useLocale";
 import { Input, AddButton, itemBox, delBtn } from "./primitives";
 import type { SkillGroup } from "../../types/cv.types";
 
@@ -9,6 +10,7 @@ interface SkillsProps {
 }
 
 export function SkillsSection({ data, onChange }: SkillsProps) {
+    const { t } = useLocale("cvBuilder");
     const [inputs, setInputs] = useState<Record<string, string>>({});
 
     const addGroup = () => onChange([...data, { id: crypto.randomUUID(), category: "", skills: [] }]);
@@ -30,7 +32,7 @@ export function SkillsSection({ data, onChange }: SkillsProps) {
                     <div style={{ display: "flex", gap: "7px", alignItems: "center", marginBottom: "9px" }}>
                         <Input
                             value={group.category}
-                            placeholder="Catégorie (ex: Frontend, DevOps…)"
+                            placeholder={t("sections.skills.categoryPlaceholder")}
                             onChange={(e) => updCategory(group.id, e.target.value)}
                             style={{ flex: 1 }}
                         />
@@ -49,18 +51,18 @@ export function SkillsSection({ data, onChange }: SkillsProps) {
                     <div style={{ display: "flex", gap: "6px" }}>
                         <Input
                             value={inputs[group.id] ?? ""}
-                            placeholder="Ajouter… (Entrée pour valider)"
+                            placeholder={t("sections.skills.addSkillPlaceholder")}
                             onChange={(e) => setInputs((p) => ({ ...p, [group.id]: e.target.value }))}
                             onKeyDown={(e) => { if (e.key === "Enter") { e.preventDefault(); addSkill(group.id); } }}
                             style={{ flex: 1, fontSize: "12px" }}
                         />
                         <button onClick={() => addSkill(group.id)} style={{ background: "var(--gb-surface)", border: "1px solid var(--gb-border)", borderRadius: "9px", padding: "0 12px", cursor: "pointer", color: "var(--gb-text-off)", fontSize: "12px", flexShrink: 0 }}>
-                            + Add
+                            {t("sections.skills.addSkillButton")}
                         </button>
                     </div>
                 </div>
             ))}
-            <AddButton label="Ajouter une catégorie" onClick={addGroup} />
+            <AddButton label={t("sections.skills.addCategory")} onClick={addGroup} />
         </div>
     );
 }

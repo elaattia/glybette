@@ -1,4 +1,5 @@
 import type { ReactNode } from "react";
+import { useTranslation } from "react-i18next";
 
 interface AuthButtonProps {
     onClick?: () => void;
@@ -10,6 +11,8 @@ interface AuthButtonProps {
 }
 
 export function AuthButton({ onClick, disabled, icon, label, variant, isLoading }: AuthButtonProps) {
+    const { t } = useTranslation("auth");
+
     const baseClasses =
         "group relative w-full flex items-center justify-center gap-3 rounded-xl py-4 px-6 font-medium text-[15px] transition-all duration-300 overflow-hidden disabled:cursor-not-allowed cursor-pointer";
 
@@ -37,11 +40,13 @@ export function AuthButton({ onClick, disabled, icon, label, variant, isLoading 
                 {icon}
             </span>
 
-            <span className="relative z-10 font-['DM_Sans'] tracking-wide">{isLoading ? "Please wait..." : label}</span>
+            <span className="relative z-10 font-['DM_Sans'] tracking-wide">
+                {isLoading ? t("login.pleaseWait") : label}
+            </span>
 
             {disabled && variant !== "google" && (
                 <span className="absolute top-1/2 -translate-y-1/2 right-3 text-[10px] font-semibold uppercase tracking-wider text-[var(--gb-muted2)] opacity-60">
-                    Soon
+                    {t("login.soon")}
                 </span>
             )}
         </button>

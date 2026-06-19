@@ -1,0 +1,85 @@
+{
+    "dashboard": {
+        "createOffer": {
+            "title": "Créer une nouvelle offre",
+            "description": "Publiez des offres qui seront mises en avant auprès des candidats Glybette.",
+            "successMessage": "Votre offre a été publiée avec succès ! Elle est maintenant visible par les étudiants.",
+            "jobTitle": "Titre du poste",
+            "jobTitlePlaceholder": "Ex: Developpeur Fullstack React/Node",
+            "location": "Localisation",
+            "locationPlaceholder": "Ex: Paris, France",
+            "contractType": "Type de contrat",
+            "remoteWork": "Télétravail",
+            "descriptionLabel": "Description",
+            "descriptionPlaceholder": "Décrivez les missions, le profil recherché...",
+            "publishOffer": "Publier l'offre",
+            "required": "*"
+        },
+        "contractTypes": {
+            "emploi": "CDI / CDD (Emploi)",
+            "stage": "Stage / Alternance",
+            "pfe": "Projet de fin d'études (PFE)"
+        },
+        "remoteOptions": {
+            "hybrid": "Hybride",
+            "remote": "100% Remote",
+            "onsite": "Sur site"
+        },
+        "myOffers": {
+            "title": "Mes offres publiées ({{count}})",
+            "description": "Gérez vos offres d'emploi et consultez les candidatures reçues.",
+            "loading": "Chargement des offres...",
+            "emptyTitle": "Aucune offre publiée pour le moment",
+            "emptyHint": "Créez votre première offre ci-dessus",
+            "active": "Actif",
+            "candidates": "{{count}} candidats",
+            "viewMore": "Voir plus →"
+        },
+        "defaultCompanyName": "Entreprise partenaire"
+    },
+    "applications": {
+        "title": "Gestion des Candidatures",
+        "descriptionAll": "Consultez et gérez les candidatures reçues pour vos offres.",
+        "descriptionFiltered": "Candidatures reçues pour l'offre : {{title}}",
+        "stats": {
+            "total": "Total",
+            "pending": "En attente",
+            "viewed": "Consulté",
+            "accepted": "Accepté",
+            "rejected": "Rejeté"
+        },
+        "filters": {
+            "all": "Tous",
+            "pending": "En attente",
+            "viewed": "Consulté",
+            "accepted": "Accepté",
+            "rejected": "Rejeté"
+        },
+        "loading": "Chargement des candidatures...",
+        "loadError": "Erreur lors du chargement des candidatures",
+        "updateError": "Erreur lors de la mise à jour",
+        "emptyFiltered": "Aucune candidature avec ce statut",
+        "emptyAll": "Aucune candidature reçue",
+        "card": {
+            "candidate": "Candidat",
+            "pdfDocuments": "Documents PDF",
+            "viewResume": "Voir le CV",
+            "resumeNotProvided": "CV non fourni",
+            "viewCoverLetter": "Voir la lettre de motivation",
+            "coverLetterNotProvided": "Lettre non fournie",
+            "coverLetter": "Lettre de motivation",
+            "noCoverLetter": "(Pas de lettre fournie)",
+            "recruiterNotes": "Notes du recruteur",
+            "recruiterNotesPlaceholder": "Ajoutez vos notes sur cette candidature...",
+            "rating": "Notation (0-5)",
+            "changeStatus": "Changez le statut",
+            "statusActions": {
+                "pending": "En attente",
+                "viewed": "Consulté",
+                "accepted": "Accepter",
+                "rejected": "Rejeter"
+            },
+            "updating": "..."
+        }
+    }
+}

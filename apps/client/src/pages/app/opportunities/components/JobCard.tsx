@@ -1,7 +1,9 @@
 import React, { useState } from "react";
 import { MapPin, Clock, Globe, DollarSign, Sparkles } from "lucide-react";
+import { useLocale } from "@/hooks/useLocale";
+import { timeAgo } from "@/lib/locale-format";
 import type { OffreWithScore } from "../types";
-import { getTypeColors, timeAgo, SOURCE_ICONS, SOURCE_LABELS } from "../constants";
+import { getTypeColors, getSourceLabel, getFilterLabel, SOURCE_ICONS } from "../constants";
 import { listStyles as s } from "../styles";
 
 export function SkeletonCard() {
@@ -31,9 +33,15 @@ interface JobCardProps {
 
 export const JobCard = React.memo(function JobCard({ offre, onClick }: JobCardProps) {
     const [hovered, setHovered] = useState(false);
+    const { t, locale } = useLocale("opportunities");
     const colors = getTypeColors(offre.type_offre);
     const icon = SOURCE_ICONS[offre.source_site] ?? <Globe size={16} />;
     const isRecommended = offre._isRecommended === true;
+    const typeLabel = getFilterLabel(t, "type_offre", offre.type_offre);
+    const sourceLabel = getSourceLabel(t, offre.source_site);
+    const teletravailLabel = (offre as any).teletravail
+        ? getFilterLabel(t, "teletravail", (offre as any).teletravail)
+        : null;
 
     return (
         <div
@@ -60,8 +68,6 @@ export const JobCard = React.memo(function JobCard({ offre, onClick }: JobCardPr
             }}>
             {hovered && <div style={s.cardTopLine} />}
 
-            
-
             <div style={s.cardTop}>
                 <div style={s.cardLogo}>
                     {offre.lien_image ? (
@@ -77,7 +83,7 @@ export const JobCard = React.memo(function JobCard({ offre, onClick }: JobCardPr
                 </div>
                 <div style={{ flex: 1, minWidth: 0 }}>
                     <div style={s.cardTitle}>{offre.titre}</div>
-                    <div style={s.cardCompany}>{offre.entreprise ?? SOURCE_LABELS[offre.source_site]}</div>
+                    <div style={s.cardCompany}>{offre.entreprise ?? sourceLabel}</div>
                 </div>
                 {isRecommended && (
                     <div style={{
@@ -99,12 +105,12 @@ export const JobCard = React.memo(function JobCard({ offre, onClick }: JobCardPr
             <div style={s.cardTags}>
                 <span style={s.typeTag(colors)}>
                     <span style={{ width: 5, height: 5, borderRadius: "50%", background: colors.dot, flexShrink: 0 }} />
-                    {offre.type_offre}
+                    {typeLabel}
                 </span>
                 {offre.type_contrat && <span style={s.outlineTag}>{offre.type_contrat}</span>}
-                {(offre as any).teletravail && (
+                {teletravailLabel && (
                     <span style={{ ...s.outlineTag, color: "#38bdf8", borderColor: "rgba(2,132,199,0.3)" }}>
-                        <Globe size={12} /> {(offre as any).teletravail}
+                        <Globe size={12} /> {teletravailLabel}
                     </span>
                 )}
                 {offre.domaine && <span style={s.outlineTag}>{offre.domaine}</span>}
@@ -134,13 +140,13 @@ export const JobCard = React.memo(function JobCard({ offre, onClick }: JobCardPr
                         </span>
                     )}
                     <span style={s.timeTag}>
-                        <Clock size={10} />{timeAgo((offre as any).date_publication ?? offre.date_scraped)}
+                        <Clock size={10} />{timeAgo((offre as any).date_publication ?? offre.date_scraped, t, locale)}
                     </span>
                 </div>
-                <span style={s.sourceTag}>{icon} {SOURCE_LABELS[offre.source_site]}</span>
+                <span style={s.sourceTag}>{icon} {sourceLabel}</span>
             </div>
 
-            {hovered && <div style={s.viewHint}>Voir les détails →</div>}
+            {hovered && <div style={s.viewHint}>{t("jobCard.viewDetails")}</div>}
         </div>
     );
 });

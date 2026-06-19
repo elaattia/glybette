@@ -1,4 +1,5 @@
 import { AlertTriangle } from "lucide-react";
+import { useTranslation } from "react-i18next";
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 
@@ -25,6 +26,8 @@ export function ConfirmActionDialog({
     onConfirm,
     isLoading = false,
 }: ConfirmActionDialogProps) {
+    const { t } = useTranslation("common");
+
     const handleConfirm = () => {
         onConfirm();
         onOpenChange(false);
@@ -44,7 +47,7 @@ export function ConfirmActionDialog({
                 </DialogHeader>
                 <DialogFooter className="mt-4">
                     <Button type="button" variant="outline" onClick={() => onOpenChange(false)} disabled={isLoading}>
-                        Cancel
+                        {t("actions.cancel")}
                     </Button>
                     <Button type="button" variant={tone === "danger" ? "destructive" : "default"} onClick={handleConfirm} disabled={isLoading}>
                         {confirmLabel}

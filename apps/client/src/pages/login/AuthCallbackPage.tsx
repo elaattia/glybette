@@ -1,4 +1,5 @@
 import { useEffect } from "react";
+import { useTranslation } from "react-i18next";
 import { useLocation, useNavigate } from "react-router-dom";
 import { useAuth } from "@/hooks/useAuth";
 import { useEmailVerification } from "@/hooks/useEmailVerification";
@@ -6,6 +7,7 @@ import { useUser } from "@/hooks/useUser";
 import { resolveAuthenticatedDestination } from "@/lib/auth-return-path";
 
 export function AuthCallbackPage() {
+    const { t } = useTranslation("auth");
     const navigate = useNavigate();
     const location = useLocation();
     const auth = useAuth();
@@ -38,20 +40,20 @@ export function AuthCallbackPage() {
         verification.requiresEmailVerification,
     ]);
 
+    const statusMessage = auth.isChecking
+        ? t("callback.checking")
+        : verification.isPending
+          ? t("callback.pending")
+          : t("callback.notFound");
+
     return (
         <main className="min-h-screen flex items-center justify-center px-6">
             <div className="w-full max-w-lg rounded-2xl border border-[var(--gb-border)] bg-[var(--gb-surface)] p-8 text-center">
-                <p className="gb-sec-label mb-3">Auth callback</p>
+                <p className="gb-sec-label mb-3">{t("callback.label")}</p>
                 <h1 className="font-['Bricolage_Grotesque'] text-3xl font-bold text-[var(--gb-text)]">
-                    Finalizing your session
+                    {t("callback.title")}
                 </h1>
-                <p className="mt-3 text-sm text-[var(--gb-muted)]">
-                    {auth.isChecking
-                        ? "Waiting for session confirmation from Better Auth."
-                        : verification.isPending
-                          ? "Waiting for session confirmation from Better Auth."
-                          : "Session not found. Redirecting to the login page."}
-                </p>
+                <p className="mt-3 text-sm text-[var(--gb-muted)]">{statusMessage}</p>
             </div>
         </main>
     );

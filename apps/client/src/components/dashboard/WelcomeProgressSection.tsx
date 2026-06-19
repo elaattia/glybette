@@ -1,4 +1,5 @@
 import { CircleCheckBig, Plus } from "lucide-react";
+import { useTranslation } from "react-i18next";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Progress } from "@/components/ui/progress";
 import { Badge } from "@/components/ui/badge";
@@ -10,27 +11,29 @@ import type { UserProfileData } from "@/hooks/useUserProfile";
 
 function computeCompletion(profile: UserProfileData) {
     const checks = [
-        { label: "Personal info", done: Boolean(profile.firstName || profile.lastName) },
-        { label: "Background", done: Boolean(profile.domain) },
-        { label: "Journey", done: Boolean(profile.journey) },
-        { label: "Looking for", done: Boolean((profile.opportunities as string[] | undefined)?.length) },
-        { label: "Academic", done: Boolean(profile.university || profile.degree) },
+        { key: "personalInfo" as const, done: Boolean(profile.firstName || profile.lastName) },
+        { key: "background" as const, done: Boolean(profile.domain) },
+        { key: "journey" as const, done: Boolean(profile.journey) },
+        { key: "lookingFor" as const, done: Boolean((profile.opportunities as string[] | undefined)?.length) },
+        { key: "academic" as const, done: Boolean(profile.university || profile.degree) },
     ];
     const score = Math.round((checks.filter((c) => c.done).length / checks.length) * 100);
     return { score, checks };
 }
 
 export default function WelcomeProgressSection() {
+    const { t } = useTranslation("dashboard");
+    const { t: tCommon } = useTranslation("common");
     const navigate = useNavigate();
     const auth = useAuth();
-    
+
     const { profile } = useFullProfile();
 
     const displayName =
         (profile.firstName && `${profile.firstName}${profile.lastName ? ` ${profile.lastName}` : ""}`) ||
         auth.user?.name?.trim() ||
         auth.user?.email?.split("@")[0] ||
-        "there";
+        tCommon("user.fallbackName");
 
     const { score, checks } = computeCompletion(profile);
 
@@ -39,14 +42,16 @@ export default function WelcomeProgressSection() {
             <CardHeader className="px-5 pt-5 md:px-6">
                 <div className="flex flex-wrap items-center justify-between gap-3">
                     <div>
-                        <p className="text-xs uppercase tracking-[0.14em] text-[var(--gb-muted)]">Profile Completion</p>
+                        <p className="text-xs uppercase tracking-[0.14em] text-[var(--gb-muted)]">
+                            {t("welcomeProgress.label")}
+                        </p>
                         <CardTitle className="mt-1 text-2xl font-bold text-[var(--gb-text)]">
-                            Good morning, {displayName}!
+                            {t("welcomeProgress.greeting", { name: displayName })}
                         </CardTitle>
                         <p className="mt-1 text-sm text-[var(--gb-muted)]">
                             {score === 100
-                                ? "Your profile is complete 🎉"
-                                : `Your profile is ${score}% ready — complete it for better matches.`}
+                                ? t("welcomeProgress.complete")
+                                : t("welcomeProgress.incomplete", { score })}
                         </p>
                     </div>
                     {score < 100 && (
@@ -55,7 +60,7 @@ export default function WelcomeProgressSection() {
                             className="gb-btn-primary h-10 px-4 py-0 text-sm"
                             onClick={() => navigate("/onboarding")}>
                             <Plus className="h-4 w-4" />
-                            Complete profile
+                            {t("welcomeProgress.completeProfile")}
                         </Button>
                     )}
                 </div>
@@ -66,7 +71,7 @@ export default function WelcomeProgressSection() {
                 <div className="flex flex-wrap gap-2">
                     {checks.map((item) => (
                         <Badge
-                            key={item.label}
+                            key={item.key}
                             variant="outline"
                             className="h-7 rounded-full border-[var(--gb-border)] bg-[var(--gb-bg)] px-3 text-xs text-[var(--gb-text-off)]">
                             {item.done ? (
@@ -74,7 +79,7 @@ export default function WelcomeProgressSection() {
                             ) : (
                                 <Plus className="h-3.5 w-3.5 text-[#0284C7]" />
                             )}
-                            {item.label}
+                            {t(`welcomeProgress.checks.${item.key}`)}
                         </Badge>
                     ))}
                 </div>

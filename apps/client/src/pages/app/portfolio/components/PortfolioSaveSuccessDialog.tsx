@@ -8,6 +8,7 @@ import {
     DialogHeader,
     DialogTitle,
 } from "@/components/ui/dialog";
+import { useLocale } from "@/hooks/useLocale";
 import { premiumPortfolioUrl, publicPortfolioUrl } from "@/lib/portfolio-urls";
 import { cn } from "@/lib/utils";
 
@@ -30,6 +31,8 @@ export function PortfolioSaveSuccessDialog({
     onCopy,
     onClose,
 }: PortfolioSaveSuccessDialogProps) {
+    const { t } = useLocale("portfolio");
+
     return (
         <Dialog
             open={open}
@@ -47,16 +50,18 @@ export function PortfolioSaveSuccessDialog({
                             <div className="flex size-11 items-center justify-center rounded-2xl bg-[#16A34A]/12 text-[#16A34A]">
                                 <Check className="size-5" />
                             </div>
-                            <p className="gb-sec-label">Portfolio saved</p>
+                            <p className="gb-sec-label">{t("builder.saveSuccess.sectionLabel")}</p>
                         </div>
-                        <DialogTitle>Your live portfolio is updated.</DialogTitle>
+                        <DialogTitle>{t("builder.saveSuccess.title")}</DialogTitle>
                         <DialogDescription id="portfolio-save-success-description" className="mt-1">
-                            Share this link anywhere. Visitors will see the latest saved version of your portfolio.
+                            {t("builder.saveSuccess.description")}
                         </DialogDescription>
                     </DialogHeader>
 
                     <div className="mt-5 rounded-2xl border border-[var(--gb-border)] bg-[var(--gb-bg)] p-4">
-                        <p className="text-xs uppercase tracking-[0.24em] text-[var(--gb-muted)]">Public link</p>
+                        <p className="text-xs uppercase tracking-[0.24em] text-[var(--gb-muted)]">
+                            {t("builder.saveSuccess.publicLink")}
+                        </p>
                         <p className="mt-2 break-all font-medium text-[var(--gb-text)]">
                             {publicPortfolioUrl(slug, isPremium, true)}
                         </p>
@@ -68,10 +73,10 @@ export function PortfolioSaveSuccessDialog({
                                 <Sparkles className="mt-0.5 size-4 text-[#16A34A]" />
                                 <div>
                                     <p className="text-sm font-semibold text-[var(--gb-text)]">
-                                        Upgrade to Pro for a cleaner portfolio domain.
+                                        {t("builder.saveSuccess.proUpgradeTitle")}
                                     </p>
                                     <p className="mt-1 break-all text-xs leading-5 text-[var(--gb-muted)]">
-                                        Your Pro URL would be {premiumPortfolioUrl(slug)}.
+                                        {t("builder.saveSuccess.proUpgradeHint", { url: premiumPortfolioUrl(slug) })}
                                     </p>
                                 </div>
                             </div>
@@ -85,7 +90,7 @@ export function PortfolioSaveSuccessDialog({
                             asChild>
                             <a href={url} target="_blank" rel="noreferrer">
                                 <ExternalLink className="size-4" />
-                                Open portfolio
+                                {t("builder.saveSuccess.openPortfolio")}
                             </a>
                         </Button>
                         <Button
@@ -98,7 +103,7 @@ export function PortfolioSaveSuccessDialog({
                             )}
                             onClick={onCopy}>
                             {copied ? <Check className="size-4" /> : <Copy className="size-4" />}
-                            {copied ? "Copied" : "Share"}
+                            {copied ? t("builder.saveSuccess.copied") : t("builder.saveSuccess.share")}
                         </Button>
                     </DialogFooter>
                 </div>

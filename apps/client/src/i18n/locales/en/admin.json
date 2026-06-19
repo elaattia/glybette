@@ -1,0 +1,203 @@
+{
+    "common": {
+        "manage": "Manage",
+        "scraping": "Scraping",
+        "noData": "No data yet.",
+        "delete": "Delete",
+        "confirm": "Confirm",
+        "unknownOwner": "Unknown owner",
+        "unknownCompany": "Unknown company",
+        "noEmail": "No email",
+        "entityId": "Entity ID",
+        "title": "Title",
+        "status": "Status",
+        "user": "User",
+        "actions": "Actions",
+        "updated": "Updated",
+        "metric": "Metric",
+        "value": "Value",
+        "company": "Company",
+        "displayName": "Display name",
+        "email": "Email",
+        "baseRole": "Base role",
+        "admin": "Admin",
+        "verified": "Verified",
+        "slug": "Slug",
+        "roles": {
+            "student": "Student",
+            "enterprise": "Enterprise"
+        },
+        "projectStatus": {
+            "draft": "Draft",
+            "published": "Published",
+            "archived": "Archived"
+        },
+        "accountStatus": {
+            "active": "active",
+            "banned": "banned"
+        },
+        "adminBadge": {
+            "admin": "Admin",
+            "member": "Member"
+        },
+        "verification": {
+            "verified": "Verified",
+            "unverified": "Unverified"
+        },
+        "jobStatus": {
+            "active": "active",
+            "archived": "archived"
+        },
+        "deltaThisWeek": "+{{count}} this week",
+        "newLast24h": "{{count}} new (24h)"
+    },
+    "dashboard": {
+        "title": "Admin dashboard",
+        "description": "Platform-wide metrics, moderation signals, and growth over the last 30 days.",
+        "loadError": "Failed to load overview statistics. Try refreshing the page.",
+        "kpi": {
+            "accounts": "Accounts",
+            "projects": "Projects",
+            "jobs": "Jobs",
+            "portfolios": "Portfolios",
+            "cvs": "CVs"
+        },
+        "charts": {
+            "contentVolume": "Content volume",
+            "accountsByRole": "Accounts by role",
+            "accountHealth": "Account health",
+            "offersBySource": "Offers by source",
+            "offersByType": "Offers by type",
+            "jobPipeline": "Job pipeline",
+            "projectsByStatus": "Projects by status",
+            "moderationQueue": "Moderation queue",
+            "growth": "Growth (last 30 days)"
+        },
+        "contentVolume": {
+            "projects": "Projects",
+            "cvs": "CVs",
+            "portfolios": "Portfolios",
+            "activeJobs": "Active jobs"
+        },
+        "accountHealth": {
+            "verified": "Verified",
+            "unverified": "Unverified",
+            "banned": "Banned",
+            "admins": "Admins"
+        },
+        "jobPipeline": {
+            "activeOffers": "Active offers",
+            "archivedOffers": "Archived offers",
+            "new24h": "New (24h)"
+        },
+        "moderation": {
+            "pendingJoinRequests": "Pending join requests",
+            "projectsWithPending": "Projects with pending requests"
+        },
+        "growthSeries": {
+            "accounts": "Accounts",
+            "projects": "Projects",
+            "cvs": "CVs",
+            "portfolios": "Portfolios"
+        }
+    },
+    "users": {
+        "title": "Users management",
+        "searchPlaceholder": "Search by name, email, role, status, or user id",
+        "empty": "No users found for this search.",
+        "ban": "Ban",
+        "unban": "Unban",
+        "verify": "Verify",
+        "revokeVerification": "Revoke verification",
+        "switchRole": "Switch role",
+        "grantAdmin": "Grant admin",
+        "revokeAdmin": "Revoke admin",
+        "confirm": {
+            "banTitle": "Ban user",
+            "unbanTitle": "Unban user",
+            "banDescription": "Are you sure you want to ban {{name}}?",
+            "unbanDescription": "Are you sure you want to unban {{name}}?",
+            "confirmBan": "Confirm ban",
+            "confirmUnban": "Confirm unban",
+            "verifyTitle": "Verify user",
+            "revokeVerificationTitle": "Revoke verification",
+            "verifyDescription": "Confirm verification for {{name}}.",
+            "revokeVerificationDescription": "Confirm verification revocation for {{name}}.",
+            "verifyUser": "Verify user",
+            "revokeVerificationLabel": "Revoke verification",
+            "switchRoleTitle": "Switch base role",
+            "switchRoleDescription": "Move {{name}} to {{role}} role?",
+            "confirmRoleSwitch": "Confirm role switch",
+            "grantAdminTitle": "Grant admin access",
+            "revokeAdminTitle": "Revoke admin access",
+            "adminChangeDescription": "Confirm admin privilege change for {{name}}.",
+            "grantAdminLabel": "Grant admin",
+            "revokeAdminLabel": "Revoke admin",
+            "deleteTitle": "Delete user account",
+            "deleteDescription": "This will permanently delete {{name}}. This action cannot be undone.",
+            "deleteUser": "Delete user"
+        }
+    },
+    "projects": {
+        "title": "Projects management",
+        "searchPlaceholder": "Search by title, user, status, or project id",
+        "empty": "No projects found for this search.",
+        "deleteTitle": "Delete project",
+        "deleteDescription": "Delete project \"{{title}}\" ({{id}})? This cannot be undone.",
+        "deleteProject": "Delete project"
+    },
+    "portfolio": {
+        "title": "Portfolio management",
+        "searchPlaceholder": "Search by slug, user, or portfolio id",
+        "empty": "No portfolios found for this search.",
+        "deleteTitle": "Delete portfolio",
+        "deleteDescription": "Delete portfolio \"{{slug}}\" ({{id}})? This cannot be undone.",
+        "deletePortfolio": "Delete portfolio"
+    },
+    "cv": {
+        "title": "CV management",
+        "searchPlaceholder": "Search by title, user, or CV id",
+        "empty": "No CVs found for this search.",
+        "deleteTitle": "Delete CV",
+        "deleteDescription": "Delete CV \"{{title}}\" ({{id}})? This cannot be undone.",
+        "deleteCv": "Delete CV"
+    },
+    "jobs": {
+        "title": "Jobs management",
+        "searchPlaceholder": "Search by title, company, status, or job id",
+        "empty": "No jobs found for this search.",
+        "archive": "Archive",
+        "activate": "Activate",
+        "confirm": {
+            "archiveTitle": "Archive job",
+            "activateTitle": "Activate job",
+            "archiveDescription": "Confirm archiving for \"{{title}}\".",
+            "activateDescription": "Confirm activation for \"{{title}}\".",
+            "archiveJob": "Archive job",
+            "activateJob": "Activate job",
+            "deleteTitle": "Delete job",
+            "deleteDescription": "Delete \"{{title}}\" permanently? This action cannot be undone.",
+            "deleteJob": "Delete job"
+        }
+    },
+    "scraping": {
+        "title": "Scraping management",
+        "searchPlaceholder": "Search metrics",
+        "empty": "No metrics found for this search.",
+        "metrics": {
+            "activeOffers": "Active offers",
+            "archivedOffers": "Archived offers",
+            "newOffers24h": "New offers (24h)"
+        },
+        "triggerAll": "Trigger all sources",
+        "triggerLinkedIn": "Trigger LinkedIn",
+        "triggerIndeed": "Trigger Indeed",
+        "confirmTitle": "Trigger scraping job",
+        "confirmDescription": "Run scraping for \"{{source}}\" now?",
+        "confirmLabel": "Run scraping"
+    },
+    "notifications": {
+        "title": "Notifications management",
+        "description": "In-app notifications are live. Delivery logs and admin controls are still deferred."
+    }
+}

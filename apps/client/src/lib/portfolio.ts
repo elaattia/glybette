@@ -1,3 +1,4 @@
+import type { TFunction } from "i18next";
 import type {
     PortfolioBlock,
     PortfolioBlockType,
@@ -8,6 +9,10 @@ import type {
     SavePortfolioRequest,
 } from "@glybette/contracts";
 import { getTemplate } from "@/components/portfolio/template-config";
+
+function tr(t: TFunction | undefined, key: string, fallback: string): string {
+    return t ? t(key, { defaultValue: fallback }) : fallback;
+}
 
 export { getTemplate, portfolioTemplates } from "@/components/portfolio/template-config";
 export type { PortfolioTemplateDefinition } from "@/components/portfolio/template-config";
@@ -76,7 +81,7 @@ function createId(prefix: string) {
     return `${prefix}-${Date.now()}-${Math.random().toString(16).slice(2)}`;
 }
 
-export function createPortfolioTab(label = "About"): PortfolioTab {
+export function createPortfolioTab(label = "About", _t?: TFunction): PortfolioTab {
     const slug = normalizePortfolioSlug(label) || "section";
     return {
         id: createId("tab"),
@@ -86,20 +91,20 @@ export function createPortfolioTab(label = "About"): PortfolioTab {
     };
 }
 
-export function createPortfolioIdentity(slug: string): PortfolioIdentity {
+export function createPortfolioIdentity(slug: string, t?: TFunction): PortfolioIdentity {
     return {
         displayName:
             slug
                 .split("-")
                 .filter(Boolean)
                 .map((word) => word.charAt(0).toUpperCase() + word.slice(1))
-                .join(" ") || "Your Name",
-        eyebrowText: "Independent portfolio",
+                .join(" ") || tr(t, "blocks.defaults.displayNameFallback", "Your Name"),
+        eyebrowText: tr(t, "blocks.defaults.eyebrowText", "Independent portfolio"),
         eyebrowPlacement: "above",
     };
 }
 
-export function createPortfolioBlock(type: PortfolioBlockType, row = 1): PortfolioBlock {
+export function createPortfolioBlock(type: PortfolioBlockType, row = 1, t?: TFunction): PortfolioBlock {
     const base = {
         id: createId("block"),
         type,
@@ -111,17 +116,20 @@ export function createPortfolioBlock(type: PortfolioBlockType, row = 1): Portfol
         case "markdown":
             return {
                 ...base,
-                title: "About me",
+                title: tr(t, "blocks.defaults.markdownTitle", "About me"),
                 grid: { column: 1, row, columnSpan: 2, rowSpan: 1 },
                 data: {
-                    markdown:
+                    markdown: tr(
+                        t,
+                        "blocks.defaults.markdownBody",
                         "Write a concise intro. Mention your craft, the problems you like solving, and what makes your work distinct.",
+                    ),
                 },
             };
         case "socialLinks":
             return {
                 ...base,
-                title: "Find me",
+                title: tr(t, "blocks.defaults.socialLinksTitle", "Find me"),
                 data: {
                     links: [
                         { label: "GitHub", url: "https://github.com/", icon: "github" },
@@ -133,7 +141,7 @@ export function createPortfolioBlock(type: PortfolioBlockType, row = 1): Portfol
         case "projectList":
             return {
                 ...base,
-                title: "Selected projects",
+                title: tr(t, "blocks.defaults.projectListTitle", "Selected projects"),
                 grid: { column: 1, row, columnSpan: 2, rowSpan: 1 },
                 data: {
                     projects: [
@@ -149,7 +157,7 @@ export function createPortfolioBlock(type: PortfolioBlockType, row = 1): Portfol
         case "experienceTimeline":
             return {
                 ...base,
-                title: "Experience",
+                title: tr(t, "blocks.defaults.experienceTitle", "Experience"),
                 grid: { column: 1, row, columnSpan: 2, rowSpan: 1 },
                 data: {
                     items: [
@@ -165,7 +173,7 @@ export function createPortfolioBlock(type: PortfolioBlockType, row = 1): Portfol
         case "skills":
             return {
                 ...base,
-                title: "Skills",
+                title: tr(t, "blocks.defaults.skillsTitle", "Skills"),
                 grid: { column: 1, row, columnSpan: 2, rowSpan: 1 },
                 data: {
                     skills: ["React", "TypeScript", "Product thinking", "APIs"],
@@ -178,54 +186,54 @@ export function createPortfolioBlock(type: PortfolioBlockType, row = 1): Portfol
         case "contactCta":
             return {
                 ...base,
-                title: "Work together",
+                title: tr(t, "blocks.defaults.contactCtaTitle", "Work together"),
                 grid: { column: 1, row, columnSpan: 2, rowSpan: 1 },
                 data: {
-                    heading: "Have a role or project in mind?",
-                    body: "Send a note and I will reply with availability and next steps.",
-                    label: "Contact me",
+                    heading: tr(t, "blocks.defaults.contactCtaHeading", "Have a role or project in mind?"),
+                    body: tr(t, "blocks.defaults.contactCtaBody", "Send a note and I will reply with availability and next steps."),
+                    label: tr(t, "blocks.defaults.contactCtaLabel", "Contact me"),
                     url: "mailto:hello@example.com",
                 },
             };
         case "media":
             return {
                 ...base,
-                title: "Media",
+                title: tr(t, "blocks.defaults.mediaTitle", "Media"),
                 grid: { column: 1, row, columnSpan: 2, rowSpan: 1 },
                 data: {
                     imageUrl: "https://images.unsplash.com/photo-1497366754035-f200968a6e72",
-                    caption: "Add an external image URL that supports your story.",
+                    caption: tr(t, "blocks.defaults.mediaCaption", "Add an external image URL that supports your story."),
                 },
             };
         case "customLink":
             return {
                 ...base,
-                title: "Featured link",
+                title: tr(t, "blocks.defaults.customLinkTitle", "Featured link"),
                 grid: { column: 1, row, columnSpan: 2, rowSpan: 1 },
-                data: { label: "View resume", url: "https://example.com" },
+                data: { label: tr(t, "blocks.defaults.customLinkLabel", "View resume"), url: "https://example.com" },
             };
     }
 }
 
-export function createStarterPortfolio(slug: string, templateId: PortfolioTemplateId): SavePortfolioRequest {
+export function createStarterPortfolio(slug: string, templateId: PortfolioTemplateId, t?: TFunction): SavePortfolioRequest {
     const template = getTemplate(templateId);
-    const aboutTab = createPortfolioTab("About");
+    const aboutTab = createPortfolioTab(tr(t, "blocks.defaults.tabAbout", "About"), t);
     aboutTab.blocks = [
-        createPortfolioBlock("markdown", 1),
-        createPortfolioBlock("socialLinks", 1),
-        createPortfolioBlock("projectList", 4),
+        createPortfolioBlock("markdown", 1, t),
+        createPortfolioBlock("socialLinks", 1, t),
+        createPortfolioBlock("projectList", 4, t),
     ];
 
     return {
         slug,
-        identity: createPortfolioIdentity(slug),
+        identity: createPortfolioIdentity(slug, t),
         templateId,
         style: template.defaultStyle,
         tabs: [
             aboutTab,
             {
-                ...createPortfolioTab("Experience"),
-                blocks: [createPortfolioBlock("experienceTimeline", 1), createPortfolioBlock("skills", 1)],
+                ...createPortfolioTab(tr(t, "blocks.defaults.tabExperience", "Experience"), t),
+                blocks: [createPortfolioBlock("experienceTimeline", 1, t), createPortfolioBlock("skills", 1, t)],
             },
         ],
     };

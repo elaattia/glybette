@@ -1,4 +1,5 @@
-import { Sparkles, MapPin, ExternalLink } from "lucide-react";
+import { Sparkles } from "lucide-react";
+import { useTranslation } from "react-i18next";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -6,6 +7,8 @@ import { useNavigate } from "react-router-dom";
 import { useState, useEffect, useRef } from "react";
 import { useFullProfile } from "@/hooks/useUserProfile";
 import { useAuth } from "@/hooks/useAuth";
+import type { AppLocale } from "@/i18n";
+import { formatDate } from "@/lib/locale-format";
 
 const API_BASE = (import.meta as any).env?.VITE_API_URL ?? "http://localhost:3000/api";
 
@@ -30,13 +33,14 @@ function scoreColor(score: number) {
 }
 
 export default function RecommendedJobsSection() {
+    const { t, i18n } = useTranslation("dashboard");
+    const locale = (i18n.language === "fr" ? "fr" : "en") as AppLocale;
     const navigate = useNavigate();
     const { isAuthenticated } = useAuth();
     const { profile, hasProfile } = useFullProfile();
 
     const [matches, setMatches] = useState<JobMatch[]>([]);
     const [loading, setLoading] = useState(false);
-    const [error, setError] = useState<string | null>(null);
 
     const profileKey = JSON.stringify({
         summary: profile.summary,
@@ -69,7 +73,6 @@ export default function RecommendedJobsSection() {
         };
 
         setLoading(true);
-        setError(null);
 
         fetch(`${API_BASE}/jobs/matching/top`, {
             method: "POST",
@@ -84,8 +87,7 @@ export default function RecommendedJobsSection() {
             .then((data) => {
                 setMatches((data.matches ?? []).slice(0, 3));
             })
-            .catch(async (e) => {
-                setError(e.message);
+            .catch(async () => {
                 try {
                     const res2 = await fetch(`${API_BASE}/jobs/offres?limit=3`, {
                         credentials: "include",
@@ -109,31 +111,33 @@ export default function RecommendedJobsSection() {
         opportunite: "#fb923c",
     };
 
+    const background = profile.domain ?? profile.journey ?? t("recommendedJobs.defaultBackground");
+
     return (
         <Card className="border-[var(--gb-border)] bg-[var(--gb-app-panel-bg)] py-0 shadow-none">
             <CardHeader className="px-5 pt-5 md:px-6">
                 <div className="flex items-center justify-between gap-2">
                     <div className="flex items-center gap-2">
                         <Sparkles className="h-4 w-4 text-[#a78bfa]" />
-                        <CardTitle className="text-lg text-[var(--gb-text)]">Recommended for You</CardTitle>
+                        <CardTitle className="text-lg text-[var(--gb-text)]">{t("recommendedJobs.title")}</CardTitle>
                     </div>
                     <Button
                         variant="link"
                         className="h-auto p-0 text-sm text-[#16A34A]"
                         onClick={() => navigate("/app/opportunities")}>
-                        See all →
+                        {t("recommendedJobs.seeAll")}
                     </Button>
                 </div>
                 <p className="text-sm text-[var(--gb-muted)]">
                     {hasProfile
-                        ? `Matched to your ${profile.domain ?? profile.journey ?? "profile"} background.`
-                        : "Based on latest opportunities — complete your profile for personalized matches."}
+                        ? t("recommendedJobs.matchedSubtitle", { background })
+                        : t("recommendedJobs.genericSubtitle")}
                 </p>
             </CardHeader>
 
             <CardContent className="px-5 pb-5 md:px-6 md:pb-6">
                 {!isAuthenticated ? (
-                    <p className="text-sm text-[var(--gb-muted)]">Sign in to see personalized recommendations.</p>
+                    <p className="text-sm text-[var(--gb-muted)]">{t("recommendedJobs.signInPrompt")}</p>
                 ) : loading ? (
                     <div className="grid gap-3 md:grid-cols-3">
                         {[1, 2, 3].map((i) => (
@@ -145,13 +149,13 @@ export default function RecommendedJobsSection() {
                     </div>
                 ) : matches.length === 0 ? (
                     <div className="text-center py-8">
-                        <p className="text-sm text-[var(--gb-muted)] mb-3">No recommendations yet.</p>
+                        <p className="text-sm text-[var(--gb-muted)] mb-3">{t("recommendedJobs.empty")}</p>
                         <Button
                             variant="outline"
                             size="sm"
                             onClick={() => navigate("/app/opportunities")}
                             className="border-[var(--gb-border)]">
-                            Browse all opportunities
+                            {t("recommendedJobs.browseAll")}
                         </Button>
                     </div>
                 ) : (
@@ -171,7 +175,7 @@ export default function RecommendedJobsSection() {
                                             border: `1px solid ${scoreColor(match.score)}44`,
                                         }}>
                                         <Sparkles className="h-2.5 w-2.5 mr-1" />
-                                        {match.score}% match
+                                        {t("recommendedJobs.matchBadge", { score: match.score })}
                                     </Badge>
                                 )}
 
@@ -179,7 +183,7 @@ export default function RecommendedJobsSection() {
                                     {offre.titre}
                                 </h3>
                                 <p className="text-xs text-[var(--gb-muted)] mb-2">
-                                    {offre.entreprise ?? "—"}
+                                    {offre.entreprise ?? t("recommendedJobs.unknownCompany")}
                                     {offre.localisation ? ` • ${offre.localisation}` : ""}
                                 </p>
 
@@ -205,7 +209,7 @@ export default function RecommendedJobsSection() {
 
                                 <div className="flex items-center justify-between">
                                     <span className="text-[10px] text-[var(--gb-muted)]">
-                                        {new Date(offre.date_scraped).toLocaleDateString("fr-FR", {
+                                        {formatDate(offre.date_scraped, locale, {
                                             day: "numeric",
                                             month: "short",
                                         })}
@@ -218,7 +222,7 @@ export default function RecommendedJobsSection() {
                                             e.stopPropagation();
                                             navigate(`/app/opportunities/${offre._id}`);
                                         }}>
-                                        View →
+                                        {t("recommendedJobs.view")}
                                     </Button>
                                 </div>
                             </article>

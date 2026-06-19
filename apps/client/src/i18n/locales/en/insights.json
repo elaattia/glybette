@@ -1,0 +1,86 @@
+{
+    "page": {
+        "title": "Career Insights",
+        "subtitle": "Real-time statistical analysis of scraped offers — sources, domains, skills, salaries and data freshness."
+    },
+    "loading": "Loading data...",
+    "error": "Error: {{message}}",
+    "stats": {
+        "activeOffers": {
+            "label": "Active offers",
+            "sub": "in your pipeline"
+        },
+        "uniqueCompanies": {
+            "label": "Unique companies",
+            "sub": "that published at least one offer"
+        },
+        "locations": {
+            "label": "Locations",
+            "sub": "distinct cities and regions"
+        },
+        "distinctSkills": {
+            "label": "Distinct skills",
+            "sub": "mentioned in offers"
+        }
+    },
+    "charts": {
+        "freshness": {
+            "title": "Offer freshness",
+            "last24h": "Last 24 h",
+            "last3days": "Last 3 days",
+            "lastWeek": "Last week",
+            "older": "More than a week"
+        },
+        "salary": {
+            "title": "Salary data",
+            "empty": "No structured salary data available at the moment.",
+            "minimum": "Minimum",
+            "average": "Average",
+            "maximum": "Maximum",
+            "basedOn": "Based on {{count}} offer with salary listed",
+            "basedOn_other": "Based on {{count}} offers with salary listed",
+            "ofTotal": "({{percent}} of total)."
+        },
+        "completeness": {
+            "title": "Data completeness",
+            "withDescription": "With description",
+            "withCompany": "Company filled in",
+            "withSalary": "Salary filled in",
+            "withSkills": "Skills listed",
+            "withTelework": "Remote work info",
+            "withExpLevel": "Experience level"
+        },
+        "sources": {
+            "title": "Scraping sources",
+            "empty": "No source detected."
+        },
+        "offerTypes": {
+            "title": "Offer types",
+            "empty": "No type detected."
+        },
+        "contractTypes": {
+            "title": "Contract types",
+            "empty": "No contract type detected."
+        },
+        "expLevels": {
+            "title": "Experience levels",
+            "empty": "No experience level detected."
+        },
+        "remote": {
+            "title": "Remote work breakdown",
+            "empty": "No remote work information."
+        },
+        "locations": {
+            "title": "Top locations",
+            "empty": "No location detected."
+        },
+        "skills": {
+            "title": "Most in-demand skills",
+            "empty": "No skill detected."
+        },
+        "domains": {
+            "title": "Trending domains",
+            "empty": "No domain detected."
+        }
+    }
+}

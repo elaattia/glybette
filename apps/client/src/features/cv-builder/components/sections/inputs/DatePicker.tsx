@@ -1,9 +1,8 @@
-import { useState, useRef, useEffect } from "react";
+import { useState, useRef, useEffect, useMemo } from "react";
 import { Calendar, ChevronDown, ChevronLeft, ChevronRight } from "lucide-react";
+import { useLocale } from "@/hooks/useLocale";
+import { formatDate } from "@/lib/locale-format";
 import { inputCss } from "../primitives";
-
-const MONTHS_FR = ["Janv.", "Févr.", "Mars", "Avr.", "Mai", "Juin", "Juil.", "Août", "Sept.", "Oct.", "Nov.", "Déc."];
-const MONTHS_EN = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
 
 type PickerMode = "month" | "year" | "decade";
 
@@ -15,7 +14,14 @@ export interface DatePickerProps {
     showDay?: boolean;
 }
 
-export function DatePicker({ value, onChange, placeholder = "Mois AAAA", disabled, showDay = false }: DatePickerProps) {
+export function DatePicker({ value, onChange, placeholder, disabled, showDay = false }: DatePickerProps) {
+    const { t, locale } = useLocale("cvBuilder");
+    const defaultPlaceholder = t("sections.datePicker.default");
+    const resolvedPlaceholder = placeholder ?? defaultPlaceholder;
+    const months = useMemo(
+        () => Array.from({ length: 12 }, (_, i) => formatDate(new Date(2000, i, 1), locale, { month: "short" })),
+        [locale],
+    );
     const [open, setOpen] = useState(false);
     const [mode, setMode] = useState<PickerMode>("month");
 
@@ -38,9 +44,8 @@ export function DatePicker({ value, onChange, placeholder = "Mois AAAA", disable
 
     const currentMonthIdx = (() => {
         if (!value) return -1;
-        for (let i = 0; i < MONTHS_FR.length; i++) {
-            if (value.toLowerCase().includes(MONTHS_FR[i].toLowerCase().slice(0, 3))) return i;
-            if (value.toLowerCase().includes(MONTHS_EN[i].toLowerCase())) return i;
+        for (let i = 0; i < months.length; i++) {
+            if (value.toLowerCase().includes(months[i].toLowerCase().slice(0, 3))) return i;
         }
         return -1;
     })();
@@ -60,7 +65,7 @@ export function DatePicker({ value, onChange, placeholder = "Mois AAAA", disable
         if (showDay && selectedDay) {
             onChange(`${String(selectedDay).padStart(2, "0")}/${String(monthIdx + 1).padStart(2, "0")}/${displayYear}`);
         } else {
-            onChange(`${MONTHS_FR[monthIdx]} ${displayYear}`);
+            onChange(`${months[monthIdx]} ${displayYear}`);
         }
         setOpen(false);
         setMode("month");
@@ -105,7 +110,7 @@ export function DatePicker({ value, onChange, placeholder = "Mois AAAA", disable
                 <div style={{ display: "flex", alignItems: "center", gap: "6px" }}>
                     <Calendar style={{ width: 13, height: 13, color: "var(--gb-muted)", flexShrink: 0 }} />
                     <span style={{ color: value ? "var(--gb-text)" : "var(--gb-muted)", fontSize: "13px" }}>
-                        {value || placeholder}
+                        {value || resolvedPlaceholder}
                     </span>
                 </div>
                 <div style={{ display: "flex", alignItems: "center", gap: "4px" }}>
@@ -167,7 +172,7 @@ export function DatePicker({ value, onChange, placeholder = "Mois AAAA", disable
                             </div>
 
                             <div style={{ display: "grid", gridTemplateColumns: "repeat(4, 1fr)", gap: "4px" }}>
-                                {MONTHS_FR.map((m, idx) => {
+                                {months.map((m, idx) => {
                                     const isSelected = idx === currentMonthIdx && displayYear === currentYear;
                                     const isToday = idx === new Date().getMonth() && displayYear === new Date().getFullYear();
                                     return (

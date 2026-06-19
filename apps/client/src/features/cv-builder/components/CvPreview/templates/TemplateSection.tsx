@@ -2,6 +2,7 @@ import type {
     PersonalInfoData, ExperienceItem, EducationItem,
     SkillGroup, ProjectItem, LanguageItem, CertificationItem,
 } from "../../../types/cv.types";
+import { useLocale } from "@/hooks/useLocale";
 
 export interface TemplateProps {
     personal: PersonalInfoData | null;
@@ -18,6 +19,7 @@ export interface TemplateProps {
 }
 
 export function EmptyState() {
+    const { t } = useLocale("cvBuilder");
     return (
         <div style={{
             textAlign: "center",
@@ -25,13 +27,13 @@ export function EmptyState() {
             color: "#bbb",
             fontSize: "13px",
         }}>
-            Remplissez le formulaire pour voir votre CV ici
+            {t("editor.previewEmpty")}
         </div>
     );
 }
 
 export function Avatar({
-    photo, firstName, lastName, size = 72, accent, bg,
+    photo, firstName, lastName, size = 72, accent,
 }: {
     photo?: string | null;
     firstName?: string;

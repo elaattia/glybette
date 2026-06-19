@@ -1,4 +1,5 @@
 import React from "react";
+import { useTranslation } from "react-i18next";
 import { Building2, UserCircle2 } from "lucide-react";
 import { StepFooter } from "@/components/onboarding/StepFooter";
 
@@ -7,6 +8,7 @@ interface StepRoleSelectProps {
 }
 
 export function StepRoleSelect({ onNext }: StepRoleSelectProps) {
+    const { t } = useTranslation("onboarding");
     const [selectedRole, setSelectedRole] = React.useState<"student" | "enterprise" | null>(null);
 
     return (
@@ -15,11 +17,9 @@ export function StepRoleSelect({ onNext }: StepRoleSelectProps) {
                 <div className="max-w-2xl mx-auto space-y-6">
                     <div>
                         <h2 className="text-2xl font-bold tracking-tight text-[var(--gb-text)]">
-                            Comment souhaitez-vous utiliser Glybette ?
+                            {t("roleSelect.title")}
                         </h2>
-                        <p className="mt-2 text-[var(--gb-muted)]">
-                            Sélectionnez votre rôle pour nous aider à personnaliser votre expérience.
-                        </p>
+                        <p className="mt-2 text-[var(--gb-muted)]">{t("roleSelect.subtitle")}</p>
                     </div>
 
                     <div className="grid gap-4 md:grid-cols-2 mt-8">
@@ -38,9 +38,11 @@ export function StepRoleSelect({ onNext }: StepRoleSelectProps) {
                                     <UserCircle2 size={40} />
                                 </div>
                                 <div>
-                                    <h3 className="text-lg font-semibold text-[var(--gb-text)]">Étudiant / Candidat</h3>
+                                    <h3 className="text-lg font-semibold text-[var(--gb-text)]">
+                                        {t("roleSelect.student.title")}
+                                    </h3>
                                     <p className="mt-2 text-sm text-[var(--gb-muted)]">
-                                        Je cherche à créer mon CV, trouver des offres et préparer mes entretiens.
+                                        {t("roleSelect.student.description")}
                                     </p>
                                 </div>
                             </div>
@@ -61,9 +63,11 @@ export function StepRoleSelect({ onNext }: StepRoleSelectProps) {
                                     <Building2 size={40} />
                                 </div>
                                 <div>
-                                    <h3 className="text-lg font-semibold text-[var(--gb-text)]">Entreprise</h3>
+                                    <h3 className="text-lg font-semibold text-[var(--gb-text)]">
+                                        {t("roleSelect.enterprise.title")}
+                                    </h3>
                                     <p className="mt-2 text-sm text-[var(--gb-muted)]">
-                                        Je souhaite publier des offres de stage / emploi et recruter de nouveaux talents.
+                                        {t("roleSelect.enterprise.description")}
                                     </p>
                                 </div>
                             </div>

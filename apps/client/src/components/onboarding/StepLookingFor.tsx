@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { useTranslation } from "react-i18next";
 import { BookOpen, Briefcase, Globe, Zap, Sparkles, GraduationCap } from "lucide-react";
 import type { LookingForPayload, OpportunityType } from "@glybette/types";
 import { cn } from "@/lib/utils";
@@ -6,57 +7,50 @@ import { StepFooter } from "./StepFooter";
 
 const OPTIONS: {
     value: OpportunityType;
+    key: "internship" | "pfe" | "job" | "remote" | "freelance" | "other";
     icon: React.ReactNode;
-    title: string;
-    description: string;
     iconBgVar: string;
     iconColorVar: string;
 }[] = [
     {
         value: "Internship",
+        key: "internship",
         icon: <GraduationCap className="w-5 h-5" />,
-        title: "Internship",
-        description: "Short-term professional experience",
         iconBgVar: "var(--ob-icon-bg-green)",
         iconColorVar: "var(--ob-icon-green)",
     },
     {
         value: "PFE",
+        key: "pfe",
         icon: <BookOpen className="w-5 h-5" />,
-        title: "PFE",
-        description: "End-of-study project",
         iconBgVar: "var(--ob-icon-bg-blue)",
         iconColorVar: "var(--ob-icon-blue)",
     },
     {
         value: "Job",
+        key: "job",
         icon: <Briefcase className="w-5 h-5" />,
-        title: "Job",
-        description: "Full-time position",
         iconBgVar: "var(--ob-icon-bg-yellow)",
         iconColorVar: "var(--ob-icon-yellow)",
     },
     {
         value: "Remote",
+        key: "remote",
         icon: <Globe className="w-5 h-5" />,
-        title: "Remote",
-        description: "Work from anywhere",
         iconBgVar: "var(--ob-icon-bg-teal)",
         iconColorVar: "var(--ob-icon-teal)",
     },
     {
         value: "Freelance",
+        key: "freelance",
         icon: <Zap className="w-5 h-5" />,
-        title: "Freelance",
-        description: "Independent missions",
         iconBgVar: "var(--ob-icon-bg-purple)",
         iconColorVar: "var(--ob-icon-purple)",
     },
     {
         value: "Other",
+        key: "other",
         icon: <Sparkles className="w-5 h-5" />,
-        title: "Other",
-        description: "Something else entirely",
         iconBgVar: "var(--ob-icon-bg-red)",
         iconColorVar: "var(--ob-icon-red)",
     },
@@ -68,6 +62,7 @@ interface Props {
 }
 
 export function StepLookingFor({ onNext, onSkip }: Props) {
+    const { t } = useTranslation("onboarding");
     const [selected, setSelected] = useState<OpportunityType[]>([]);
 
     function toggle(value: OpportunityType) {
@@ -77,9 +72,9 @@ export function StepLookingFor({ onNext, onSkip }: Props) {
     return (
         <div>
             <div className="ob-step-head ob-step-head--tight">
-                <div className="gb-sec-label justify-center w-full">Opportunities</div>
-                <h1 className="ob-step-title">What are you looking for?</h1>
-                <p className="ob-step-sub">Select all that apply. You can change this later.</p>
+                <div className="gb-sec-label justify-center w-full">{t("lookingFor.label")}</div>
+                <h1 className="ob-step-title">{t("lookingFor.title")}</h1>
+                <p className="ob-step-sub">{t("lookingFor.subtitle")}</p>
             </div>
 
             <div className="ob-looking-grid">
@@ -98,8 +93,8 @@ export function StepLookingFor({ onNext, onSkip }: Props) {
                             </div>
 
                             <div className="ob-looking-text">
-                                <p className="ob-looking-title">{option.title}</p>
-                                <p className="ob-looking-desc">{option.description}</p>
+                                <p className="ob-looking-title">{t(`lookingFor.options.${option.key}.title`)}</p>
+                                <p className="ob-looking-desc">{t(`lookingFor.options.${option.key}.description`)}</p>
                             </div>
 
                             <div className="ob-looking-check" aria-hidden>

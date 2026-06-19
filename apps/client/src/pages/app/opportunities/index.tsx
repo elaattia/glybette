@@ -3,7 +3,8 @@ import { useNavigate } from "react-router-dom";
 import { useOffres } from "@/hooks/useJobs";
 import { useJobsRealtime } from "@/hooks/useJobsRealtime";
 import { useFullProfile } from "@/hooks/useUserProfile";
-import { useAuth } from "@/hooks/useAuth";
+import { useLocale } from "@/hooks/useLocale";
+import { formatNumber, timeAgo } from "@/lib/locale-format";
 import type { OffresFilters } from "@glybette/types";
 import { Sparkles, Bell, RefreshCw, X, AlertTriangle } from "lucide-react";
 
@@ -13,7 +14,6 @@ import { StatsBar } from "./components/StatsBar";
 import { Pagination } from "./components/Pagination";
 import { EmptyState } from "./components/EmptyState";
 import { listStyles as styles } from "./styles";
-import { timeAgo } from "./constants";
 import type { OffreWithScore } from "./types";
 import {
     computeRecommendationScore,
@@ -24,9 +24,8 @@ import {
 
 export default function OpportunitiesPage() {
     const navigate = useNavigate();
-    const { isAuthenticated } = useAuth();
     const { profile } = useFullProfile();
-
+    const { t, locale } = useLocale("opportunities");
 
     const [filters, setFilters] = useState<OffresFilters>({ page: 1, limit: 100 });
     const [searchInput, setSearchInput] = useState("");
@@ -151,11 +150,11 @@ export default function OpportunitiesPage() {
                     <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
                         <Bell size={15} style={{ color: "#22c55e" }} />
                         <span style={{ fontWeight: 600, fontSize: 13 }}>
-                            {newOffresCount} nouvelle{newOffresCount > 1 ? "s" : ""} offre{newOffresCount > 1 ? "s" : ""} disponible{newOffresCount > 1 ? "s" : ""} !
+                            {t("list.newBanner", { count: newOffresCount })}
                         </span>
                     </div>
                     <button onClick={handleRefreshNewOffres} style={styles.newBannerBtn}>
-                        <RefreshCw size={13} /> Afficher
+                        <RefreshCw size={13} /> {t("list.showNew")}
                     </button>
                     <button onClick={() => setShowNewBanner(false)} style={styles.newBannerClose}>
                         <X size={13} />
@@ -164,28 +163,30 @@ export default function OpportunitiesPage() {
             )}
 
             <div style={styles.header}>
-                <div style={styles.label}>Découvrir</div>
-                <h1 style={styles.title}>Opportunités</h1>
+                <div style={styles.label}>{t("list.label")}</div>
+                <h1 style={styles.title}>{t("list.title")}</h1>
                 <div style={styles.headerSub}>
                     <p style={{ color: "var(--gb-muted)", fontSize: 14, margin: 0 }}>
-                        {loading ? "Chargement..." : `${total.toLocaleString("fr-FR")} offres disponibles`}
+                        {loading
+                            ? t("list.loading")
+                            : t("list.offersAvailable", { count: formatNumber(total, locale) })}
                         {recommendedCount > 0 && !loading && (
                             <span style={{ marginLeft: 10, color: "#22c55e", fontWeight: 600 }}>
-                                · {recommendedCount} recommandées pour vous
+                                · {t("list.recommendedForYou", { count: recommendedCount })}
                             </span>
                         )}
                     </p>
                     <span style={styles.liveBadge}>
                         <span style={styles.liveDot} />
-                        LIVE
+                        {t("list.live")}
                     </span>
                     {lastPolledAt && (
                         <span
                             style={{ fontSize: 11, color: "var(--gb-muted)", cursor: "pointer", display: "flex", alignItems: "center", gap: 4 }}
                             onClick={pollNow}
-                            title="Vérifier les nouvelles offres">
+                            title={t("list.checkNewOffersTitle")}>
                             <RefreshCw size={10} />
-                            Mis à jour {timeAgo(lastPolledAt.toISOString())}
+                            {t("list.updated", { time: timeAgo(lastPolledAt.toISOString(), t, locale) })}
                         </span>
                     )}
                 </div>
@@ -206,7 +207,7 @@ export default function OpportunitiesPage() {
                         transition: "all 0.2s"
                     }}
                 >
-                    Toutes les offres
+                    {t("list.sourceTabs.all")}
                 </button>
                 <button
                     onClick={() => setFilter("source", "entreprise_partenaire")}
@@ -225,7 +226,7 @@ export default function OpportunitiesPage() {
                         transition: "all 0.2s"
                     }}
                 >
-                    <Sparkles size={14} /> Offres Partenaires
+                    <Sparkles size={14} /> {t("list.sourceTabs.partner")}
                 </button>
                 <button
                     onClick={() => setFilter("source", "scraped")}
@@ -241,7 +242,7 @@ export default function OpportunitiesPage() {
                         transition: "all 0.2s"
                     }}
                 >
-                    Offres Scrapées
+                    {t("list.sourceTabs.scraped")}
                 </button>
             </div>
 
@@ -269,7 +270,7 @@ export default function OpportunitiesPage() {
             {error && (
                 <div style={styles.errorBox}>
                     <AlertTriangle size={14} style={{ marginRight: 8 }} />
-                    Impossible de charger les offres. Vérifiez que le jobs-service est démarré.
+                    {t("list.error")}
                 </div>
             )}
 
@@ -278,7 +279,7 @@ export default function OpportunitiesPage() {
                     <div style={styles.sectionSepLine} />
                     <span style={styles.sectionSepLabel}>
                         <Sparkles size={11} />
-                        Recommandées pour vous ({recommendedCount})
+                        {t("list.sections.recommended", { count: recommendedCount })}
                     </span>
                     <div style={styles.sectionSepLine} />
                 </div>
@@ -296,7 +297,7 @@ export default function OpportunitiesPage() {
                                 <div style={{ gridColumn: "1 / -1", ...styles.sectionSeparator, margin: "4px 0" }}>
                                     <div style={styles.sectionSepLine} />
                                     <span style={{ ...styles.sectionSepLabel, color: "var(--gb-muted)" }}>
-                                        Autres offres ({offres.length - recommendedCount})
+                                        {t("list.sections.other", { count: offres.length - recommendedCount })}
                                     </span>
                                     <div style={styles.sectionSepLine} />
                                 </div>

@@ -1,7 +1,8 @@
 import React from "react";
 import { Search, SlidersHorizontal, X } from "lucide-react";
 import type { OffresFilters } from "@glybette/types";
-import { FILTER_LABELS } from "../constants";
+import { useLocale } from "@/hooks/useLocale";
+import { getFilterLabel } from "../constants";
 import { listStyles as s } from "../styles";
 
 interface FiltersPanelProps {
@@ -17,11 +18,30 @@ interface FiltersPanelProps {
     onSearch: (e: React.FormEvent) => void;
 }
 
+type FilterGroupKey = "type_offre" | "source" | "teletravail" | "date_posted" | "niveau_experience" | "tri";
+
+const FILTER_GROUPS: { key: FilterGroupKey; values: string[]; allKey?: "all" | "allFeminine" | "allPeriod" }[] = [
+    { key: "type_offre", values: ["", "emploi", "stage", "pfe", "opportunite"], allKey: "all" },
+    { key: "source", values: ["", "indeed", "linkedin", "welcometothejungle", "pfebooks.com"], allKey: "allFeminine" },
+    { key: "teletravail", values: ["", "remote", "hybrid", "onsite"], allKey: "all" },
+    { key: "date_posted", values: ["", "this_hour", "today", "3days", "this_week"], allKey: "allPeriod" },
+    { key: "niveau_experience", values: ["", "junior", "mid", "senior"], allKey: "all" },
+    { key: "tri", values: ["recent", "vues"] },
+];
+
 export function FiltersPanel({
     filters, searchInput, setSearchInput,
     showFilters, setShowFilters,
     activeFilters, setFilter, removeFilter, resetAll, onSearch,
 }: FiltersPanelProps) {
+    const { t } = useLocale("opportunities");
+
+    const optionLabel = (groupKey: FilterGroupKey, value: string, allKey?: string) => {
+        if (value === "" && allKey) return t(`filters.options.${allKey}`);
+        if (groupKey === "tri") return t(`filters.options.${value}`);
+        return getFilterLabel(t, groupKey, value);
+    };
+
     return (
         <>
             <form onSubmit={onSearch} style={s.searchRow}>
@@ -30,12 +50,12 @@ export function FiltersPanel({
                     <input
                         type="text"
                         style={s.searchInput}
-                        placeholder="Rechercher un poste, entreprise, compétence..."
+                        placeholder={t("filters.searchPlaceholder")}
                         value={searchInput}
                         onChange={(e) => setSearchInput(e.target.value)}
                     />
                 </div>
-                <button type="submit" style={s.searchBtn}>Rechercher</button>
+                <button type="submit" style={s.searchBtn}>{t("filters.search")}</button>
                 <button
                     type="button"
                     onClick={() => setShowFilters(!showFilters)}
@@ -46,38 +66,33 @@ export function FiltersPanel({
                         background: showFilters ? "rgba(22,163,74,0.08)" : "transparent",
                     }}>
                     <SlidersHorizontal size={14} />
-                    Filtres {activeFilters.length > 0 && <span style={s.filterCount}>{activeFilters.length}</span>}
+                    {t("filters.filters")} {activeFilters.length > 0 && <span style={s.filterCount}>{activeFilters.length}</span>}
                 </button>
             </form>
 
             {showFilters && (
                 <div style={s.filtersPanel}>
                     <div style={s.filtersGrid}>
-                        {[
-                            { label: "Type d'offre", key: "type_offre", options: [["", "Tous"], ["emploi", "Emploi"], ["stage", "Stage"], ["pfe", "PFE"], ["opportunite", "Opportunité"]] },
-                            { label: "Source",        key: "source",     options: [["", "Toutes"], ["indeed", "Indeed"], ["linkedin", "LinkedIn"], ["welcometothejungle", "WTTJ"], ["pfebooks.com", "PFEBooks"]] },
-                            { label: "Mode de travail", key: "teletravail", options: [["", "Tous"], ["remote", "Full Remote"], ["hybrid", "Hybride"], ["onsite", "Présentiel"]] },
-                            { label: "Publié",        key: "date_posted", options: [["", "Toute période"], ["this_hour", "Cette heure"], ["today", "Aujourd'hui"], ["3days", "3 derniers jours"], ["this_week", "Cette semaine"]] },
-                            { label: "Niveau",        key: "niveau_experience", options: [["", "Tous"], ["junior", "Junior"], ["mid", "Intermédiaire"], ["senior", "Senior"]] },
-                            { label: "Trier par",     key: "tri",        options: [["recent", "Plus récents"], ["vues", "Plus vus"]] },
-                        ].map(({ label, key, options }) => (
+                        {FILTER_GROUPS.map(({ key, values, allKey }) => (
                             <div key={key} style={s.filterGroup}>
-                                <div style={s.filterLabel}>{label}</div>
+                                <div style={s.filterLabel}>{t(`filters.groups.${key}`)}</div>
                                 <select
                                     style={s.select}
-                                    value={(filters as any)[key] ?? ""}
+                                    value={(filters as any)[key] ?? (key === "tri" ? "recent" : "")}
                                     onChange={(e) => setFilter(key as keyof OffresFilters, e.target.value)}>
-                                    {options.map(([val, lbl]) => (
-                                        <option key={val} value={val}>{lbl}</option>
+                                    {values.map((val) => (
+                                        <option key={val || "all"} value={val}>
+                                            {optionLabel(key, val, allKey)}
+                                        </option>
                                     ))}
                                 </select>
                             </div>
                         ))}
                         <div style={s.filterGroup}>
-                            <div style={s.filterLabel}>Localisation</div>
+                            <div style={s.filterLabel}>{t("filters.groups.localisation")}</div>
                             <input
                                 type="text"
-                                placeholder="Ex: Tunis, Paris..."
+                                placeholder={t("filters.locationPlaceholder")}
                                 value={filters.localisation ?? ""}
                                 onChange={(e) => setFilter("localisation", e.target.value)}
                                 style={{ ...s.select, appearance: "none" as any }}
@@ -86,7 +101,7 @@ export function FiltersPanel({
                     </div>
                     {activeFilters.length > 0 && (
                         <button onClick={resetAll} style={s.resetBtn}>
-                            <X size={12} /> Réinitialiser tous les filtres
+                            <X size={12} /> {t("filters.resetAll")}
                         </button>
                     )}
                 </div>
@@ -95,7 +110,7 @@ export function FiltersPanel({
             {activeFilters.length > 0 && (
                 <div style={s.activeFilters}>
                     {activeFilters.map(([key, value]) => {
-                        const label = FILTER_LABELS[key]?.[value] ?? value;
+                        const label = getFilterLabel(t, key as string, value) || value;
                         return (
                             <div key={key} style={s.filterChip}>
                                 {label}

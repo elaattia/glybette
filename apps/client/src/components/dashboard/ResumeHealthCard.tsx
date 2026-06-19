@@ -1,10 +1,10 @@
 import { AlertTriangle, Check, CircleDashed, Info, ShieldCheck, Loader, ExternalLink } from "lucide-react";
+import { useTranslation } from "react-i18next";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { useQuery } from "@tanstack/react-query";
 import { cvApi } from "@/features/cv-builder";
 import { useAuth } from "@/hooks/useAuth";
 import { useNavigate } from "react-router-dom";
-
 
 function scoreColor(score: number) {
     if (score >= 80) return "#16A34A";
@@ -21,48 +21,43 @@ function scoreGrade(score: number): string {
     return "D";
 }
 
-function scoreSummary(score: number): string {
-    if (score >= 85) return "Excellent score ATS";
-    if (score >= 70) return "Bon score ATS";
-    if (score >= 55) return "Score passable";
-    return "Nécessite des améliorations";
-}
+type ScoreTier = "excellent" | "good" | "fair" | "needsImprovement";
 
-function scoreDetails(score: number): string {
-    if (score >= 85) return "Votre CV est très bien structuré et lisible par les ATS.";
-    if (score >= 70) return "Votre CV est bien lu par les ATS, quelques améliorations possibles.";
-    if (score >= 55) return "Certains éléments réduisent la compatibilité ATS de votre CV.";
-    return "Votre CV nécessite des améliorations pour être lu correctement par les ATS.";
+function getScoreTier(score: number): ScoreTier {
+    if (score >= 85) return "excellent";
+    if (score >= 70) return "good";
+    if (score >= 55) return "fair";
+    return "needsImprovement";
 }
 
 interface CheckItem {
-    label: string;
-    status: string;
+    key: "keywords" | "formatting" | "completeness";
+    statusKey: string;
     ok: boolean;
 }
 
 function buildChecks(score: number): CheckItem[] {
     return [
         {
-            label: "Mots-clés",
-            status: score >= 75 ? "Optimisés" : score >= 55 ? "Partiels" : "Insuffisants",
+            key: "keywords",
+            statusKey: score >= 75 ? "optimized" : score >= 55 ? "partial" : "insufficient",
             ok: score >= 75,
         },
         {
-            label: "Mise en forme",
-            status: score >= 70 ? "Compatible" : "À revoir",
+            key: "formatting",
+            statusKey: score >= 70 ? "compatible" : "needsReview",
             ok: score >= 70,
         },
         {
-            label: "Complétude",
-            status: score >= 80 ? "Complète" : score >= 60 ? "Partielle" : "Incomplète",
+            key: "completeness",
+            statusKey: score >= 80 ? "complete" : score >= 60 ? "partial" : "incomplete",
             ok: score >= 80,
         },
     ];
 }
 
-
 export default function ResumeHealthCard() {
+    const { t } = useTranslation("dashboard");
     const { isAuthenticated } = useAuth();
     const navigate = useNavigate();
 
@@ -82,6 +77,7 @@ export default function ResumeHealthCard() {
     const color = hasScore ? scoreColor(score) : "#94a3b8";
     const grade = hasScore ? scoreGrade(score) : "—";
     const checks = hasScore ? buildChecks(score) : [];
+    const scoreTier = hasScore ? getScoreTier(score) : null;
 
     return (
         <Card className="h-full border-[var(--gb-border)] bg-[var(--gb-app-panel-bg)] py-0 shadow-none">
@@ -89,15 +85,16 @@ export default function ResumeHealthCard() {
                 <div className="flex items-center justify-between gap-2">
                     <div className="flex items-center gap-2">
                         <ShieldCheck className="h-4 w-4" style={{ color }} />
-                        <CardTitle className="text-base text-[var(--gb-text)]">ATS Resume Health</CardTitle>
+                        <CardTitle className="text-base text-[var(--gb-text)]">{t("resumeHealth.title")}</CardTitle>
                     </div>
-                    <span title="Score basé sur la lisibilité de votre dernier CV par les systèmes ATS.">
+                    <span title={t("resumeHealth.tooltip")}>
                         <Info className="h-4 w-4 text-[var(--gb-muted)]" />
                     </span>
                 </div>
                 {latestCv && (
                     <p className="text-xs text-[var(--gb-muted)] mt-1 truncate">
-                        Basé sur : <span className="font-medium text-[var(--gb-text-off)]">{latestCv.title}</span>
+                        {t("resumeHealth.basedOn")}{" "}
+                        <span className="font-medium text-[var(--gb-text-off)]">{latestCv.title}</span>
                     </p>
                 )}
             </CardHeader>
@@ -110,7 +107,7 @@ export default function ResumeHealthCard() {
                             <Loader className="h-5 w-5 text-[var(--gb-muted)] animate-spin" />
                         </div>
                         <div>
-                            <p className="font-semibold text-[var(--gb-muted)]">Chargement…</p>
+                            <p className="font-semibold text-[var(--gb-muted)]">{t("resumeHealth.loading")}</p>
                         </div>
                     </div>
                 )}
@@ -118,14 +115,14 @@ export default function ResumeHealthCard() {
                 {!isLoading && !latestCv && (
                     <div className="text-center py-4">
                         <p className="text-sm text-[var(--gb-muted)] mb-3">
-                            Créez votre premier CV pour voir votre score ATS ici.
+                            {t("resumeHealth.empty")}
                         </p>
                         <button
                             onClick={() => navigate("/app/cv/create")}
                             className="text-sm font-semibold"
                             style={{ color: "#16A34A", background: "none", border: "none", cursor: "pointer" }}
                         >
-                            Créer un CV →
+                            {t("resumeHealth.createCv")}
                         </button>
                     </div>
                 )}
@@ -140,9 +137,9 @@ export default function ResumeHealthCard() {
                                 —
                             </div>
                             <div>
-                                <p className="font-semibold text-[var(--gb-text)]">Score non disponible</p>
+                                <p className="font-semibold text-[var(--gb-text)]">{t("resumeHealth.scoreUnavailable")}</p>
                                 <p className="text-sm text-[var(--gb-muted)]">
-                                    Ouvrez votre CV et analysez sa lisibilité ATS.
+                                    {t("resumeHealth.analyzePrompt")}
                                 </p>
                             </div>
                         </div>
@@ -152,12 +149,12 @@ export default function ResumeHealthCard() {
                             style={{ color: "#16A34A", background: "none", border: "none", cursor: "pointer" }}
                         >
                             <CircleDashed className="h-4 w-4" />
-                            Analyser mon CV
+                            {t("resumeHealth.analyzeButton")}
                         </button>
                     </div>
                 )}
 
-                {!isLoading && latestCv && hasScore && (
+                {!isLoading && latestCv && hasScore && scoreTier && (
                     <>
                         <div className="flex items-center gap-4">
                             <div
@@ -167,14 +164,18 @@ export default function ResumeHealthCard() {
                                 {grade}
                             </div>
                             <div>
-                                <p className="font-semibold text-[var(--gb-text)]">{scoreSummary(score)}</p>
-                                <p className="text-sm text-[var(--gb-muted)]">{scoreDetails(score)}</p>
+                                <p className="font-semibold text-[var(--gb-text)]">
+                                    {t(`resumeHealth.scoreSummary.${scoreTier}`)}
+                                </p>
+                                <p className="text-sm text-[var(--gb-muted)]">
+                                    {t(`resumeHealth.scoreDetails.${scoreTier}`)}
+                                </p>
                             </div>
                         </div>
 
                         <div>
                             <div className="flex justify-between mb-1">
-                                <span className="text-xs text-[var(--gb-muted)]">Score global</span>
+                                <span className="text-xs text-[var(--gb-muted)]">{t("resumeHealth.overallScore")}</span>
                                 <span className="text-xs font-bold" style={{ color }}>{score}/100</span>
                             </div>
                             <div
@@ -199,16 +200,18 @@ export default function ResumeHealthCard() {
 
                         <div className="space-y-2">
                             {checks.map((check) => (
-                                <div key={check.label} className="flex items-center justify-between text-sm">
+                                <div key={check.key} className="flex items-center justify-between text-sm">
                                     <div className="flex items-center gap-2 text-[var(--gb-text-off)]">
                                         {check.ok ? (
                                             <Check className="h-3.5 w-3.5" style={{ color: "#16A34A" }} />
                                         ) : (
                                             <AlertTriangle className="h-3.5 w-3.5 text-amber-500" />
                                         )}
-                                        {check.label}
+                                        {t(`resumeHealth.checks.${check.key}.label`)}
                                     </div>
-                                    <span className="text-[var(--gb-muted)]">{check.status}</span>
+                                    <span className="text-[var(--gb-muted)]">
+                                        {t(`resumeHealth.checks.${check.key}.${check.statusKey}`)}
+                                    </span>
                                 </div>
                             ))}
                         </div>
@@ -219,7 +222,7 @@ export default function ResumeHealthCard() {
                             style={{ color: "#16A34A", background: "none", border: "none", cursor: "pointer" }}
                         >
                             <ExternalLink className="h-4 w-4" />
-                            Voir le rapport complet
+                            {t("resumeHealth.viewFullReport")}
                         </button>
                     </>
                 )}

@@ -1,17 +1,20 @@
+import { useLocale } from "@/hooks/useLocale";
+import { useSectionLabels } from "../../lib/cv-i18n";
 import type { TemplateInfo } from "../../types/cv.types";
 
 interface MiniTemplatePreviewProps {
     template: TemplateInfo;
 }
 
-const NAME_F = "Prénom";
-const NAME_L = "NOM";
-const ROLE   = "Titre du poste visé";
-const EMAIL  = "email@exemple.com";
-const PHONE  = "+216 00 000 000";
-const LOC    = "Tunis, Tunisie";
-
 export function MiniTemplatePreview({ template }: MiniTemplatePreviewProps) {
+    const { t } = useLocale("cvBuilder");
+    const labels = useSectionLabels(t);
+    const NAME_F = t("card.placeholders.firstName");
+    const NAME_L = t("card.placeholders.lastName").toUpperCase();
+    const ROLE = t("card.placeholders.roleTitle");
+    const EMAIL = "email@exemple.com";
+    const PHONE = "+216 00 000 000";
+    const LOC = "Tunis, Tunisie";
     const { id, accentColor: A, previewBg: BG } = template;
 
     switch (id) {
@@ -24,17 +27,17 @@ export function MiniTemplatePreview({ template }: MiniTemplatePreviewProps) {
                         </div>
                         <div style={{ fontSize: "6.5px", fontWeight: 700, color: "#fff", textAlign: "center", marginBottom: "1px" }}>{NAME_F} {NAME_L}</div>
                         <div style={{ fontSize: "4.5px", color: A, textAlign: "center", marginBottom: "5px" }}>{ROLE}</div>
-                        <SideLabel A={A} text="Contact" />
+                        <SideLabel A={A} text={labels.personalInfo} />
                         {[EMAIL, PHONE, LOC].map((v, i) => (
                             <div key={i} style={{ fontSize: "4px", color: "rgba(255,255,255,0.75)", marginBottom: "2px" }}>{v}</div>
                         ))}
-                        <SideLabel A={A} text="Compétences" />
+                        <SideLabel A={A} text={labels.skills} />
                         <div style={{ display: "flex", flexWrap: "wrap", gap: "2px" }}>
                             {["React", "TypeScript", "Node.js"].map((s) => (
                                 <span key={s} style={{ background: "rgba(255,255,255,0.15)", borderRadius: "99px", padding: "1px 4px", fontSize: "3.5px", color: "rgba(255,255,255,0.85)" }}>{s}</span>
                             ))}
                         </div>
-                        <SideLabel A={A} text="Langues" />
+                        <SideLabel A={A} text={labels.languages} />
                         {[{ l: "Arabe", p: "100%" }, { l: "Français", p: "85%" }, { l: "Anglais", p: "70%" }].map((item) => (
                             <div key={item.l} style={{ marginBottom: "3px" }}>
                                 <div style={{ display: "flex", justifyContent: "space-between", marginBottom: "1px" }}>
@@ -48,10 +51,10 @@ export function MiniTemplatePreview({ template }: MiniTemplatePreviewProps) {
                         ))}
                     </div>
                     <div style={{ flex: 1, padding: "8px 7px", background: "#fff" }}>
-                        <MiniMainSection title="Profil" A={A} />
+                        <MiniMainSection title={labels.summary} A={A} />
                         <MiniLines lines={[90, 78, 65]} color="#dde" />
                         <div style={{ marginTop: "5px" }} />
-                        <MiniMainSection title="Expérience" A={A} />
+                        <MiniMainSection title={labels.experience} A={A} />
                         {[1, 2].map((i) => (
                             <div key={i} style={{ marginBottom: "4px" }}>
                                 <div style={{ display: "flex", justifyContent: "space-between" }}>
@@ -62,7 +65,7 @@ export function MiniTemplatePreview({ template }: MiniTemplatePreviewProps) {
                                 <MiniLines lines={[80, 65]} color="#dde" />
                             </div>
                         ))}
-                        <MiniMainSection title="Formation" A={A} />
+                        <MiniMainSection title={labels.education} A={A} />
                         <div>
                             <MiniBlock w={50} h={3.5} color="#1a1a2e" />
                             <MiniBlock w={32} h={3} color={A} style={{ margin: "1px 0" }} />
@@ -86,9 +89,9 @@ export function MiniTemplatePreview({ template }: MiniTemplatePreviewProps) {
                             </div>
                         </div>
                         {[
-                            { label: "Profil", lines: [90, 78, 68] },
-                            { label: "Expérience", lines: [85, 72, 80, 65] },
-                            { label: "Formation", lines: [60, 48] },
+                            { label: labels.summary, lines: [90, 78, 68] },
+                            { label: labels.experience, lines: [85, 72, 80, 65] },
+                            { label: labels.education, lines: [60, 48] },
                         ].map((s) => (
                             <div key={s.label} style={{ marginBottom: "6px" }}>
                                 <div style={{ display: "flex", alignItems: "center", gap: "5px", marginBottom: "3px" }}>
@@ -101,14 +104,14 @@ export function MiniTemplatePreview({ template }: MiniTemplatePreviewProps) {
                         <div style={{ display: "grid", gridTemplateColumns: "1.2fr 1fr", gap: "5px" }}>
                             <div>
                                 <div style={{ display: "flex", alignItems: "center", gap: "5px", marginBottom: "3px" }}>
-                                    <span style={{ fontSize: "4px", fontWeight: 700, letterSpacing: "1.5px", textTransform: "uppercase", color: A }}>Compétences</span>
+                                    <span style={{ fontSize: "4px", fontWeight: 700, letterSpacing: "1.5px", textTransform: "uppercase", color: A }}>{labels.skills}</span>
                                     <div style={{ flex: 1, height: "1px", background: "#e8e8e8" }} />
                                 </div>
                                 <MiniLines lines={[55, 48, 60]} color="#ccc" />
                             </div>
                             <div>
                                 <div style={{ display: "flex", alignItems: "center", gap: "5px", marginBottom: "3px" }}>
-                                    <span style={{ fontSize: "4px", fontWeight: 700, letterSpacing: "1.5px", textTransform: "uppercase", color: A }}>Langues</span>
+                                    <span style={{ fontSize: "4px", fontWeight: 700, letterSpacing: "1.5px", textTransform: "uppercase", color: A }}>{labels.languages}</span>
                                     <div style={{ flex: 1, height: "1px", background: "#e8e8e8" }} />
                                 </div>
                                 <MiniLines lines={[50, 45, 40]} color="#ccc" />
@@ -138,13 +141,13 @@ export function MiniTemplatePreview({ template }: MiniTemplatePreviewProps) {
                     <div style={{ height: "2.5px", background: `linear-gradient(90deg, ${A}, ${A}80)` }} />
                     <div style={{ display: "flex" }}>
                         <div style={{ width: "36%", background: "#f8f9fa", borderRight: "1px solid #eee", padding: "6px 5px" }}>
-                            <SidebarSection title="Compétences" A={A} />
+                            <SidebarSection title={labels.skills} A={A} />
                             <div style={{ display: "flex", flexWrap: "wrap", gap: "2px", marginBottom: "6px" }}>
                                 {["React", "Node", "SQL", "Git"].map((s) => (
                                     <span key={s} style={{ background: `${A}15`, color: A, border: `1px solid ${A}35`, borderRadius: "3px", padding: "1px 4px", fontSize: "3.5px", fontWeight: 500 }}>{s}</span>
                                 ))}
                             </div>
-                            <SidebarSection title="Langues" A={A} />
+                            <SidebarSection title={labels.languages} A={A} />
                             {[{ l: "Arabe", p: "100%" }, { l: "Anglais", p: "70%" }].map((item) => (
                                 <div key={item.l} style={{ marginBottom: "3px" }}>
                                     <div style={{ fontSize: "3.5px", color: "#333", marginBottom: "1px" }}>{item.l}</div>
@@ -153,16 +156,16 @@ export function MiniTemplatePreview({ template }: MiniTemplatePreviewProps) {
                                     </div>
                                 </div>
                             ))}
-                            <SidebarSection title="Formation" A={A} />
+                            <SidebarSection title={labels.education} A={A} />
                             <MiniBlock w={90} h={3.5} color="#1a1a2e" style={{ marginBottom: "1px" }} />
                             <MiniBlock w={70} h={3} color={A} style={{ marginBottom: "1px" }} />
                             <MiniBlock w={40} h={2.5} color="#888" />
                         </div>
                         <div style={{ flex: 1, padding: "6px 6px" }}>
-                            <ImpactSection title="Profil" A={A} BG={BG} />
+                            <ImpactSection title={labels.summary} A={A} BG={BG} />
                             <MiniLines lines={[90, 75]} color="#dde" />
                             <div style={{ marginTop: "4px" }} />
-                            <ImpactSection title="Expérience" A={A} BG={BG} />
+                            <ImpactSection title={labels.experience} A={A} BG={BG} />
                             {[1, 2].map((i) => (
                                 <div key={i} style={{ marginBottom: "4px" }}>
                                     <div style={{ display: "flex", justifyContent: "space-between" }}>
@@ -193,11 +196,11 @@ export function MiniTemplatePreview({ template }: MiniTemplatePreviewProps) {
                         </div>
                     </div>
                     <div style={{ padding: "5px 8px" }}>
-                        <div style={{ fontSize: "4.5px", color: A, fontWeight: 700, marginBottom: "3px" }}>// COMPÉTENCES</div>
+                        <div style={{ fontSize: "4.5px", color: A, fontWeight: 700, marginBottom: "3px" }}>{`// ${labels.skills.toUpperCase()}`}</div>
                         {["Frontend: React · Vue · TypeScript", "Backend: Node · Python · SQL"].map((row, i) => (
                             <div key={i} style={{ fontSize: "3.5px", color: "#cbd5e1", marginBottom: "2px" }}>{row}</div>
                         ))}
-                        <div style={{ fontSize: "4.5px", color: A, fontWeight: 700, margin: "5px 0 3px" }}>// EXPÉRIENCE</div>
+                        <div style={{ fontSize: "4.5px", color: A, fontWeight: 700, margin: "5px 0 3px" }}>{`// ${labels.experience.toUpperCase()}`}</div>
                         {[1, 2].map((i) => (
                             <div key={i} style={{ background: "#1e293b", borderRadius: "3px", padding: "3px 4px", marginBottom: "3px", borderLeft: `1.5px solid ${A}40` }}>
                                 <div style={{ display: "flex", justifyContent: "space-between" }}>
@@ -208,7 +211,7 @@ export function MiniTemplatePreview({ template }: MiniTemplatePreviewProps) {
                                 <MiniBlock w={78} h={2} color="#334155" />
                             </div>
                         ))}
-                        <div style={{ fontSize: "4.5px", color: A, fontWeight: 700, margin: "4px 0 3px" }}>// PROJETS</div>
+                        <div style={{ fontSize: "4.5px", color: A, fontWeight: 700, margin: "4px 0 3px" }}>{`// ${labels.projects.toUpperCase()}`}</div>
                         <div style={{ background: "#1e293b", borderRadius: "3px", padding: "3px 4px" }}>
                             <MiniBlock w={38} h={3} color="#f1f5f9" style={{ marginBottom: "1px" }} />
                             <div style={{ display: "flex", gap: "2px" }}>
@@ -239,8 +242,8 @@ export function MiniTemplatePreview({ template }: MiniTemplatePreviewProps) {
                             </div>
                         </div>
                         {[
-                            { label: "Résumé Professionnel", lines: [90, 80, 72] },
-                            { label: "Expérience Professionnelle", lines: [] },
+                            { label: labels.summary, lines: [90, 80, 72] },
+                            { label: labels.experience, lines: [] },
                         ].map((s) => (
                             <div key={s.label} style={{ marginBottom: "5px" }}>
                                 <div style={{ fontSize: "5px", fontWeight: 700, fontVariant: "small-caps", color: BG, borderBottom: `1px solid ${A}55`, paddingBottom: "1.5px", marginBottom: "3px", letterSpacing: "0.5px" }}>
@@ -264,11 +267,11 @@ export function MiniTemplatePreview({ template }: MiniTemplatePreviewProps) {
                         ))}
                         <div style={{ display: "grid", gridTemplateColumns: "1.2fr 1fr", gap: "5px" }}>
                             <div>
-                                <div style={{ fontSize: "5px", fontWeight: 700, fontVariant: "small-caps", color: BG, borderBottom: `1px solid ${A}55`, paddingBottom: "1.5px", marginBottom: "3px" }}>Compétences</div>
+                                <div style={{ fontSize: "5px", fontWeight: 700, fontVariant: "small-caps", color: BG, borderBottom: `1px solid ${A}55`, paddingBottom: "1.5px", marginBottom: "3px" }}>{labels.skills}</div>
                                 <MiniLines lines={[55, 48, 62, 40]} color="#ddd" />
                             </div>
                             <div>
-                                <div style={{ fontSize: "5px", fontWeight: 700, fontVariant: "small-caps", color: BG, borderBottom: `1px solid ${A}55`, paddingBottom: "1.5px", marginBottom: "3px" }}>Langues</div>
+                                <div style={{ fontSize: "5px", fontWeight: 700, fontVariant: "small-caps", color: BG, borderBottom: `1px solid ${A}55`, paddingBottom: "1.5px", marginBottom: "3px" }}>{labels.languages}</div>
                                 <MiniLines lines={[50, 45, 42]} color="#ddd" />
                             </div>
                         </div>

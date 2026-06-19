@@ -1,17 +1,9 @@
+import { useLocale } from "@/hooks/useLocale";
 import { Label, AddButton, DeleteButton, itemBox } from "./primitives";
 import { LanguagePicker } from "./inputs/LanguagePicker";
 import type { LanguageItem } from "../../types/cv.types";
 
 const LEVELS: LanguageItem["level"][] = ["A1", "A2", "B1", "B2", "C1", "C2", "Native"];
-const levelLabel: Record<LanguageItem["level"], string> = {
-    A1: "A1 – Débutant",
-    A2: "A2 – Élémentaire",
-    B1: "B1 – Intermédiaire",
-    B2: "B2 – Avancé",
-    C1: "C1 – Courant",
-    C2: "C2 – Maîtrise",
-    Native: "Langue maternelle",
-};
 
 interface LanguagesProps {
     data: LanguageItem[];
@@ -19,6 +11,7 @@ interface LanguagesProps {
 }
 
 export function LanguagesSection({ data, onChange }: LanguagesProps) {
+    const { t } = useLocale("cvBuilder");
     const add = () => onChange([...data, { id: crypto.randomUUID(), language: "", level: "B2" }]);
     const upd = (id: string, k: keyof LanguageItem, v: unknown) =>
         onChange(data.map((i) => (i.id === id ? { ...i, [k]: v } : i)));
@@ -30,7 +23,7 @@ export function LanguagesSection({ data, onChange }: LanguagesProps) {
                 <div key={item.id} style={{ ...itemBox, display: "flex", flexDirection: "column", gap: "9px" }}>
                     <div style={{ display: "flex", alignItems: "flex-start", gap: "9px" }}>
                         <div style={{ flex: 1 }}>
-                            <Label>Langue</Label>
+                            <Label>{t("sections.languages.language")}</Label>
                             <LanguagePicker value={item.language} onChange={(v) => upd(item.id, "language", v)} />
                         </div>
                         <div style={{ marginTop: "24px" }}>
@@ -38,7 +31,7 @@ export function LanguagesSection({ data, onChange }: LanguagesProps) {
                         </div>
                     </div>
                     <div>
-                        <Label>Niveau</Label>
+                        <Label>{t("sections.languages.level")}</Label>
                         <div style={{ display: "flex", gap: "4px", flexWrap: "wrap" }}>
                             {LEVELS.map((l) => (
                                 <button
@@ -62,13 +55,13 @@ export function LanguagesSection({ data, onChange }: LanguagesProps) {
                         </div>
                         {item.level && (
                             <p style={{ fontSize: "10.5px", color: "var(--gb-muted)", margin: "4px 0 0" }}>
-                                {levelLabel[item.level]}
+                                {t(`sections.languages.levels.${item.level}`)}
                             </p>
                         )}
                     </div>
                 </div>
             ))}
-            <AddButton label="Ajouter une langue" onClick={add} />
+            <AddButton label={t("sections.languages.add")} onClick={add} />
         </div>
     );
 }

@@ -1,6 +1,7 @@
 import React from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { useFullProfile } from "@/hooks/useUserProfile";
+import { useLocale } from "@/hooks/useLocale";
 import { ArrowLeft, Mic, FileText, Brain, Target, ChevronRight } from "lucide-react";
 
 import { useJobDetail } from "./hooks/useJobDetail";
@@ -20,6 +21,7 @@ export default function JobDetailPage() {
     const { id } = useParams<{ id: string }>();
     const navigate = useNavigate();
     const { profile, profileText } = useFullProfile();
+    const { t } = useLocale("opportunities");
     const [isApplyModalOpen, setIsApplyModalOpen] = React.useState(false);
 
     const [activeTab, setActiveTab] = React.useState<Tab>("overview");
@@ -62,48 +64,48 @@ export default function JobDetailPage() {
         return (
             <div style={styles.loadingPage}>
                 <div style={styles.spinner} />
-                <p style={{ color: "var(--gb-muted)", fontSize: 13 }}>Chargement de l'offre...</p>
+                <p style={{ color: "var(--gb-muted)", fontSize: 13 }}>{t("detail.loading")}</p>
             </div>
         );
     }
     if (!offre) {
         return (
             <div style={styles.loadingPage}>
-                <p style={{ color: "var(--gb-text)", marginBottom: 14 }}>Offre introuvable.</p>
+                <p style={{ color: "var(--gb-text)", marginBottom: 14 }}>{t("detail.notFound")}</p>
                 <button onClick={() => navigate("/app/opportunities")} style={styles.backBtn}>
-                    ← Retour aux offres
+                    {t("detail.backToOffers")}
                 </button>
             </div>
         );
     }
 
     const tabs = [
-        { id: "overview", label: "Vue d'ensemble", icon: <Target size={14} /> },
-        { id: "interview", label: "Entretien", icon: <Mic size={14} /> },
-        { id: "cover-letter", label: "Lettre", icon: <FileText size={14} /> },
-        { id: "cv-adapt", label: "Adapter CV", icon: <Brain size={14} /> },
+        { id: "overview", label: t("detail.tabs.overview"), icon: <Target size={14} /> },
+        { id: "interview", label: t("detail.tabs.interview"), icon: <Mic size={14} /> },
+        { id: "cover-letter", label: t("detail.tabs.coverLetter"), icon: <FileText size={14} /> },
+        { id: "cv-adapt", label: t("detail.tabs.cvAdapt"), icon: <Brain size={14} /> },
     ] as const;
 
     const actions = [
-        { tab: "interview" as Tab, icon: <Mic size={16} />, label: "Préparer l'entretien", color: "#38bdf8", bg: "rgba(2,132,199,0.1)" },
-        { tab: "cover-letter" as Tab, icon: <FileText size={16} />, label: "Lettre de motivation", color: "#a78bfa", bg: "rgba(139,92,246,0.1)" },
-        { tab: "cv-adapt" as Tab, icon: <Brain size={16} />, label: "Adapter mon CV", color: "#22c55e", bg: "rgba(22,163,74,0.1)" },
+        { tab: "interview" as Tab, icon: <Mic size={16} />, label: t("detail.actions.prepareInterview"), color: "#38bdf8", bg: "rgba(2,132,199,0.1)" },
+        { tab: "cover-letter" as Tab, icon: <FileText size={16} />, label: t("detail.actions.coverLetter"), color: "#a78bfa", bg: "rgba(139,92,246,0.1)" },
+        { tab: "cv-adapt" as Tab, icon: <Brain size={16} />, label: t("detail.actions.adaptCv"), color: "#22c55e", bg: "rgba(22,163,74,0.1)" },
     ];
 
     const applicationStatusLabel = userApplicationStatus === "pending"
-        ? "En attente"
+        ? t("detail.applicationStatus.pending")
         : userApplicationStatus === "viewed"
-            ? "Consulté"
+            ? t("detail.applicationStatus.viewed")
             : userApplicationStatus === "accepted"
-                ? "Accepté"
+                ? t("detail.applicationStatus.accepted")
                 : userApplicationStatus === "rejected"
-                    ? "Refusé"
+                    ? t("detail.applicationStatus.rejected")
                     : null;
 
     return (
         <div style={styles.page}>
             <button onClick={() => navigate("/app/opportunities")} style={styles.backLink}>
-                <ArrowLeft size={15} /> Retour aux offres
+                <ArrowLeft size={15} /> {t("detail.backToOffers").replace(/^←\s*/, "")}
             </button>
 
             {applicationStatusLabel && (
@@ -122,7 +124,7 @@ export default function JobDetailPage() {
                     padding: "14px 16px",
                     marginBottom: 16,
                 }}>
-                    <strong>Statut de votre candidature :</strong> {applicationStatusLabel}
+                    <strong>{t("detail.applicationStatus.label")}</strong> {applicationStatusLabel}
                 </div>
             )}
 
@@ -140,7 +142,7 @@ export default function JobDetailPage() {
                     />
 
                     <div style={styles.actionsCard}>
-                        <div style={styles.sectionTitle}>Actions IA</div>
+                        <div style={styles.sectionTitle}>{t("detail.actions.title")}</div>
                         {actions.map((a) => (
                             <button
                                 key={a.tab}

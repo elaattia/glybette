@@ -1,5 +1,6 @@
-import { useState } from "react";
+import { useMemo, useState } from "react";
 import { Plus, Trash2, Type, AlignLeft, Calendar, MapPin, List, Link } from "lucide-react";
+import { useLocale } from "@/hooks/useLocale";
 import { Input, Textarea, Label, addBtn, delBtn, itemBox } from "./primitives";
 import { DatePicker } from "./inputs/DatePicker";
 import { LocationPicker } from "./inputs/LocationPicker";
@@ -18,19 +19,16 @@ export interface CustomSectionDataV2 {
     fields: CustomField[];
 }
 
-const FIELD_TYPES: {
-    type: CustomFieldType;
-    label: string;
-    Icon: React.ComponentType<{ size?: number }>;
-    desc: string;
-}[] = [
-        { type: "text", label: "Texte court", Icon: Type, desc: "Une ligne de texte" },
-        { type: "textarea", label: "Texte long", Icon: AlignLeft, desc: "Paragraphe/description" },
-        { type: "date", label: "Date", Icon: Calendar, desc: "Mois et année" },
-        { type: "location", label: "Lieu", Icon: MapPin, desc: "Ville, pays" },
-        { type: "list", label: "Liste", Icon: List, desc: "Éléments séparés" },
-        { type: "link", label: "Lien URL", Icon: Link, desc: "Site web, profil…" },
-    ];
+const FIELD_TYPE_ICONS: Record<CustomFieldType, React.ComponentType<{ size?: number }>> = {
+    text: Type,
+    textarea: AlignLeft,
+    date: Calendar,
+    location: MapPin,
+    list: List,
+    link: Link,
+};
+
+const FIELD_TYPE_KEYS: CustomFieldType[] = ["text", "textarea", "date", "location", "list", "link"];
 
 interface CustomSectionEditorProps {
     data: CustomSectionDataV2;
@@ -38,11 +36,23 @@ interface CustomSectionEditorProps {
 }
 
 export function CustomSectionEditor({ data, onChange }: CustomSectionEditorProps) {
+    const { t } = useLocale("cvBuilder");
     const [addingType, setAddingType] = useState(false);
     const [listInputs, setListInputs] = useState<Record<string, string>>({});
 
+    const fieldTypes = useMemo(
+        () =>
+            FIELD_TYPE_KEYS.map((type) => ({
+                type,
+                label: t(`sections.custom.fieldTypes.${type}.label`),
+                desc: t(`sections.custom.fieldTypes.${type}.desc`),
+                Icon: FIELD_TYPE_ICONS[type],
+            })),
+        [t],
+    );
+
     const addField = (type: CustomFieldType) => {
-        const typeInfo = FIELD_TYPES.find((t) => t.type === type)!;
+        const typeInfo = fieldTypes.find((ft) => ft.type === type)!;
         onChange({ ...data, fields: [...data.fields, { id: crypto.randomUUID(), type, label: typeInfo.label, value: "" }] });
         setAddingType(false);
     };
@@ -71,16 +81,16 @@ export function CustomSectionEditor({ data, onChange }: CustomSectionEditorProps
     return (
         <div>
             <div style={{ marginBottom: "14px" }}>
-                <Label>Titre de la section</Label>
+                <Label>{t("sections.custom.sectionTitle")}</Label>
                 <Input
                     value={data.title}
-                    placeholder="Ex: Bénévolat, Publications, Réalisations…"
+                    placeholder={t("sections.custom.sectionTitlePlaceholder")}
                     onChange={(e) => onChange({ ...data, title: e.target.value })}
                 />
             </div>
 
             {data.fields.map((field) => {
-                const fieldType = FIELD_TYPES.find((t) => t.type === field.type);
+                const fieldType = fieldTypes.find((ft) => ft.type === field.type);
                 const FieldIcon = fieldType?.Icon;
                 return (
                     <div key={field.id} style={{ ...itemBox, marginBottom: "8px" }}>
@@ -91,7 +101,7 @@ export function CustomSectionEditor({ data, onChange }: CustomSectionEditorProps
                             <input
                                 value={field.label}
                                 onChange={(e) => updField(field.id, "label", e.target.value)}
-                                placeholder="Nom du champ"
+                                placeholder={t("sections.custom.fieldNamePlaceholder")}
                                 style={{ flex: 1, background: "transparent", border: "none", outline: "none", fontSize: "12px", fontWeight: 600, color: "var(--gb-text)", fontFamily: "inherit" }}
                             />
                             <button style={delBtn} onClick={() => delField(field.id)}>
@@ -99,11 +109,11 @@ export function CustomSectionEditor({ data, onChange }: CustomSectionEditorProps
                             </button>
                         </div>
 
-                        {field.type === "text" && <Input value={field.value} placeholder="Valeur…" onChange={(e) => updField(field.id, "value", e.target.value)} />}
-                        {field.type === "textarea" && <Textarea value={field.value} rows={3} placeholder="Description…" onChange={(e) => updField(field.id, "value", e.target.value)} />}
+                        {field.type === "text" && <Input value={field.value} placeholder={t("sections.custom.placeholders.value")} onChange={(e) => updField(field.id, "value", e.target.value)} />}
+                        {field.type === "textarea" && <Textarea value={field.value} rows={3} placeholder={t("sections.custom.placeholders.description")} onChange={(e) => updField(field.id, "value", e.target.value)} />}
                         {field.type === "date" && <DatePicker value={field.value} onChange={(v) => updField(field.id, "value", v)} />}
                         {field.type === "location" && <LocationPicker value={field.value} onChange={(v) => updField(field.id, "value", v)} />}
-                        {field.type === "link" && <Input value={field.value} placeholder="https://…" onChange={(e) => updField(field.id, "value", e.target.value)} />}
+                        {field.type === "link" && <Input value={field.value} placeholder={t("sections.custom.placeholders.link")} onChange={(e) => updField(field.id, "value", e.target.value)} />}
                         {field.type === "list" && (
                             <div>
                                 <div style={{ display: "flex", flexWrap: "wrap", gap: "5px", marginBottom: "7px" }}>
@@ -117,7 +127,7 @@ export function CustomSectionEditor({ data, onChange }: CustomSectionEditorProps
                                 <div style={{ display: "flex", gap: "6px" }}>
                                     <Input
                                         value={listInputs[field.id] ?? ""}
-                                        placeholder="Ajouter un élément…"
+                                        placeholder={t("sections.custom.placeholders.listItem")}
                                         onChange={(e) => setListInputs((p) => ({ ...p, [field.id]: e.target.value }))}
                                         onKeyDown={(e) => { if (e.key === "Enter") { e.preventDefault(); addListItem(field.id); } }}
                                         style={{ flex: 1, fontSize: "12px" }}
@@ -135,13 +145,13 @@ export function CustomSectionEditor({ data, onChange }: CustomSectionEditorProps
                     onMouseEnter={(e) => { e.currentTarget.style.borderColor = "rgba(22,163,74,0.4)"; e.currentTarget.style.color = "#16A34A"; }}
                     onMouseLeave={(e) => { e.currentTarget.style.borderColor = "var(--gb-border2)"; e.currentTarget.style.color = "var(--gb-muted)"; }}
                     onClick={() => setAddingType(true)}>
-                    <Plus style={{ width: 13, height: 13 }} /> Ajouter un champ
+                    <Plus style={{ width: 13, height: 13 }} /> {t("sections.custom.addField")}
                 </button>
             ) : (
                 <div style={{ background: "var(--gb-app-hover)", border: "1px solid var(--gb-border)", borderRadius: "12px", padding: "12px" }}>
-                    <p style={{ fontSize: "11px", fontWeight: 700, color: "var(--gb-muted)", textTransform: "uppercase", letterSpacing: "0.06em", margin: "0 0 10px" }}>Type de champ</p>
+                    <p style={{ fontSize: "11px", fontWeight: 700, color: "var(--gb-muted)", textTransform: "uppercase", letterSpacing: "0.06em", margin: "0 0 10px" }}>{t("sections.custom.fieldType")}</p>
                     <div style={{ display: "grid", gridTemplateColumns: "repeat(3, 1fr)", gap: "6px" }}>
-                        {FIELD_TYPES.map((ft) => {
+                        {fieldTypes.map((ft) => {
                             const FtIcon = ft.Icon;
                             return (
                                 <button key={ft.type} onClick={() => addField(ft.type)}
@@ -156,7 +166,7 @@ export function CustomSectionEditor({ data, onChange }: CustomSectionEditorProps
                         })}
                     </div>
                     <button onClick={() => setAddingType(false)} style={{ marginTop: "8px", width: "100%", background: "transparent", border: "none", fontSize: "12px", color: "var(--gb-muted)", cursor: "pointer", padding: "4px" }}>
-                        Annuler
+                        {t("sections.custom.cancel")}
                     </button>
                 </div>
             )}

@@ -1,0 +1,114 @@
+{
+    "actions": {
+        "back": "← Retour",
+        "cancel": "Annuler",
+        "close": "Fermer",
+        "continue": "Continuer →",
+        "deletePermanently": "Supprimer définitivement",
+        "deleting": "Suppression...",
+        "gotIt": "Compris",
+        "loading": "Chargement...",
+        "save": "Enregistrer",
+        "saveAccount": "Enregistrer le compte",
+        "saveContactProfile": "Enregistrer le profil de contact",
+        "saving": "Enregistrement...",
+        "skipForNow": "Passer pour l'instant",
+        "updating": "Mise à jour...",
+        "upgradeNow": "Passer à Pro"
+    },
+    "brand": {
+        "name": "Glybette"
+    },
+    "language": {
+        "label": "Langue",
+        "description": "Choisissez la langue de l'interface Glybette.",
+        "en": "English",
+        "fr": "Français"
+    },
+    "timeAgo": {
+        "recently": "Récemment",
+        "justNow": "À l'instant",
+        "minutesAgo": "Il y a {{count}} min",
+        "hoursAgo": "Il y a {{count}} h",
+        "daysAgo": "Il y a {{count}} j"
+    },
+    "user": {
+        "unknown": "Inconnu",
+        "noEmail": "Aucun e-mail disponible",
+        "fallbackName": "vous"
+    },
+    "settings": {
+        "account": {
+            "title": "Compte",
+            "description": "Mettez à jour votre identité et votre adresse e-mail.",
+            "firstNamePlaceholder": "Prénom",
+            "lastNamePlaceholder": "Nom",
+            "emailPlaceholder": "E-mail",
+            "verifiedEmail": "E-mail vérifié",
+            "verificationRequired": "Vérification e-mail requise",
+            "fullNameBadge": "Nom complet : {{name}}",
+            "updated": "Informations du compte mises à jour.",
+            "updateError": "Impossible de mettre à jour le compte."
+        },
+        "contact": {
+            "title": "Profil de contact",
+            "description": "Gérez le téléphone et la localisation utilisés sur votre compte.",
+            "phonePlaceholder": "Numéro de téléphone",
+            "locationPlaceholder": "Localisation",
+            "loading": "Chargement du profil de contact...",
+            "updated": "Informations de contact mises à jour.",
+            "updateError": "Impossible de mettre à jour le profil."
+        },
+        "security": {
+            "title": "Sécurité",
+            "changePasswordDescription": "Changez votre mot de passe pour la connexion e-mail/mot de passe.",
+            "setPasswordDescription": "Définissez un mot de passe pour activer la connexion e-mail/mot de passe.",
+            "currentPasswordPlaceholder": "Mot de passe actuel",
+            "newPasswordPlaceholder": "Nouveau mot de passe",
+            "confirmPasswordPlaceholder": "Confirmer le nouveau mot de passe",
+            "passwordMismatch": "Le nouveau mot de passe et la confirmation doivent correspondre.",
+            "passwordUpdated": "Mot de passe mis à jour avec succès.",
+            "passwordSet": "Mot de passe défini avec succès.",
+            "changePasswordError": "Impossible de changer le mot de passe.",
+            "setPasswordError": "Impossible de définir le mot de passe.",
+            "changePassword": "Changer le mot de passe",
+            "setPassword": "Définir le mot de passe"
+        },
+        "providers": {
+            "title": "Comptes connectés",
+            "description": "Gérez les fournisseurs de connexion liés à votre compte.",
+            "google": "Google",
+            "github": "GitHub",
+            "linkedin": "LinkedIn",
+            "connected": "Connecté à {{provider}}",
+            "connect": "Connecter {{provider}}"
+        },
+        "dangerZone": {
+            "title": "Zone dangereuse",
+            "description": "Supprimez définitivement votre compte et toutes les sessions actives.",
+            "deleteAccount": "Supprimer le compte"
+        },
+        "deleteDialog": {
+            "title": "Supprimer le compte",
+            "descriptionPrefix": "Saisissez {{phrase}} pour confirmer.",
+            "descriptionSuffixPasswordRequired": "Entrez votre mot de passe actuel pour continuer.",
+            "descriptionSuffixPasswordOptional": "Le mot de passe est optionnel pour ce fournisseur.",
+            "confirmPhrase": "DELETE MY ACCOUNT",
+            "passwordRequiredPlaceholder": "Mot de passe actuel (requis)",
+            "passwordOptionalPlaceholder": "Mot de passe actuel (optionnel)",
+            "confirmPhraseError": "Veuillez saisir exactement : {{phrase}}",
+            "passwordRequiredError": "Le mot de passe actuel est requis pour les comptes e-mail/mot de passe.",
+            "deleteError": "Impossible de supprimer le compte."
+        },
+        "route": {
+            "title": "Paramètres",
+            "subtitle": "Gérez les préférences du compte et la personnalisation de l'espace de travail."
+        }
+    },
+    "confirm": {
+        "title": "Êtes-vous sûr ?",
+        "description": "Cette action est irréversible.",
+        "confirm": "Confirmer",
+        "cancel": "Annuler"
+    }
+}

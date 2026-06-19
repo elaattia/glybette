@@ -1,9 +1,13 @@
 import type { TemplateProps } from "./TemplateSection";
 
+import { useLocale } from "@/hooks/useLocale";
+import { useSectionLabels } from "../../../lib/cv-i18n";
 export function TechTemplate({
     personal, summary, experience, education,
     skills, projects, languages, certs, accent, bg,
 }: TemplateProps) {
+    const { t } = useLocale("cvBuilder");
+    const labels = useSectionLabels(t);
     const A = accent; // #38bdf8
 
     return (
@@ -79,7 +83,7 @@ export function TechTemplate({
                 )}
 
                 {skills.length > 0 && (
-                    <TechSection title="// COMPÉTENCES" accent={A}>
+                    <TechSection title={`// ${labels.skills.toUpperCase()}`} accent={A}>
                         {skills.map((g) => (
                             <div key={g.id} style={{ marginBottom: "7px" }}>
                                 {g.category && (
@@ -101,7 +105,7 @@ export function TechTemplate({
                 )}
 
                 {experience.length > 0 && (
-                    <TechSection title="// EXPÉRIENCE" accent={A}>
+                    <TechSection title={`// ${labels.experience.toUpperCase()}`} accent={A}>
                         {experience.map((e) => (
                             <div key={e.id} style={{
                                 background: "#1e293b",
@@ -134,7 +138,7 @@ export function TechTemplate({
                 )}
 
                 {projects.length > 0 && (
-                    <TechSection title="// PROJETS" accent={A}>
+                    <TechSection title={`// ${labels.projects.toUpperCase()}`} accent={A}>
                         {projects.map((p) => (
                             <div key={p.id} style={{
                                 background: "#1e293b",
@@ -176,7 +180,7 @@ export function TechTemplate({
 
                 <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "20px" }}>
                     {education.length > 0 && (
-                        <TechSection title="// FORMATION" accent={A}>
+                        <TechSection title={`// ${labels.education.toUpperCase()}`} accent={A}>
                             {education.map((e) => (
                                 <div key={e.id} style={{ marginBottom: "8px" }}>
                                     <strong style={{ color: "#f1f5f9", fontSize: `calc(9pt * var(--cv-body-scale, 1))` }}>

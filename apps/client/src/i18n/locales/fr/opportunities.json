@@ -1,0 +1,290 @@
+{
+    "constants": {
+        "sourceLabels": {
+            "entreprise_partenaire": "Partenaire Glybette",
+            "indeed": "Indeed",
+            "linkedin": "LinkedIn",
+            "welcometothejungle": "WTTJ",
+            "pfebooks.com": "PFEBooks"
+        },
+        "filterLabels": {
+            "type_offre": {
+                "emploi": "Emploi",
+                "stage": "Stage",
+                "pfe": "PFE",
+                "opportunite": "Opportunité"
+            },
+            "source": {
+                "entreprise_partenaire": "Partenaire Glybette",
+                "indeed": "Indeed",
+                "linkedin": "LinkedIn",
+                "welcometothejungle": "WTTJ",
+                "pfebooks.com": "PFEBooks"
+            },
+            "date_posted": {
+                "today": "Aujourd'hui",
+                "this_week": "Cette semaine",
+                "3days": "3 derniers jours",
+                "this_hour": "Cette heure"
+            },
+            "teletravail": {
+                "remote": "Full Remote",
+                "hybrid": "Hybride",
+                "onsite": "Présentiel"
+            },
+            "niveau_experience": {
+                "junior": "Junior",
+                "mid": "Intermédiaire",
+                "senior": "Senior"
+            }
+        },
+        "scoreLabel": {
+            "excellent": "Excellent match",
+            "good": "Bon match",
+            "partial": "Match partiel"
+        },
+        "timeAgo": {
+            "recently": "Récemment",
+            "justNow": "À l'instant",
+            "minutesAgo": "Il y a {{count}}min",
+            "hoursAgo": "Il y a {{count}}h",
+            "daysAgo": "Il y a {{count}}j"
+        }
+    },
+    "list": {
+        "label": "Découvrir",
+        "title": "Opportunités",
+        "loading": "Chargement...",
+        "offersAvailable": "{{count}} offres disponibles",
+        "recommendedForYou": "{{count}} recommandées pour vous",
+        "live": "LIVE",
+        "updated": "Mis à jour {{time}}",
+        "checkNewOffersTitle": "Vérifier les nouvelles offres",
+        "newBanner": {
+            "one": "{{count}} nouvelle offre disponible !",
+            "other": "{{count}} nouvelles offres disponibles !"
+        },
+        "showNew": "Afficher",
+        "sourceTabs": {
+            "all": "Toutes les offres",
+            "partner": "Offres Partenaires",
+            "scraped": "Offres Scrapées"
+        },
+        "statsBar": {
+            "visibleOfTotal": "{{visible}} affichées sur {{total}}",
+            "recommended": "recommandées pour vous"
+        },
+        "sections": {
+            "recommended": "Recommandées pour vous ({{count}})",
+            "other": "Autres offres ({{count}})"
+        },
+        "error": "Impossible de charger les offres. Vérifiez que le jobs-service est démarré.",
+        "empty": {
+            "title": "Aucune offre trouvée",
+            "description": "Essayez de modifier vos filtres ou votre recherche.",
+            "resetFilters": "Réinitialiser les filtres"
+        }
+    },
+    "filters": {
+        "searchPlaceholder": "Rechercher un poste, entreprise, compétence...",
+        "search": "Rechercher",
+        "filters": "Filtres",
+        "resetAll": "Réinitialiser tous les filtres",
+        "locationPlaceholder": "Ex: Tunis, Paris...",
+        "groups": {
+            "type_offre": "Type d'offre",
+            "source": "Source",
+            "teletravail": "Mode de travail",
+            "date_posted": "Publié",
+            "niveau_experience": "Niveau",
+            "tri": "Trier par",
+            "localisation": "Localisation"
+        },
+        "options": {
+            "all": "Tous",
+            "allFeminine": "Toutes",
+            "allPeriod": "Toute période",
+            "recent": "Plus récents",
+            "vues": "Plus vus"
+        }
+    },
+    "jobCard": {
+        "viewDetails": "Voir les détails →"
+    },
+    "detail": {
+        "loading": "Chargement de l'offre...",
+        "notFound": "Offre introuvable.",
+        "backToOffers": "← Retour aux offres",
+        "applicationStatus": {
+            "label": "Statut de votre candidature :",
+            "pending": "En attente",
+            "viewed": "Consulté",
+            "accepted": "Accepté",
+            "rejected": "Refusé"
+        },
+        "tabs": {
+            "overview": "Vue d'ensemble",
+            "interview": "Entretien",
+            "coverLetter": "Lettre",
+            "cvAdapt": "Adapter CV"
+        },
+        "actions": {
+            "title": "Actions IA",
+            "prepareInterview": "Préparer l'entretien",
+            "coverLetter": "Lettre de motivation",
+            "adaptCv": "Adapter mon CV"
+        },
+        "header": {
+            "defaultCompany": "Entreprise",
+            "views": "{{count}} vues",
+            "applyNow": "Postuler maintenant"
+        },
+        "matching": {
+            "title": "AI Match Score",
+            "calculating": "Calcul en cours...",
+            "notCalculated": "Score non calculé",
+            "calculate": "Calculer",
+            "strengths": "Points forts",
+            "improvements": "Axes d'amélioration",
+            "missingSkills": "Skills manquantes",
+            "matchingSkills": "Skills correspondantes",
+            "recommendations": "Recommandations"
+        },
+        "overview": {
+            "requiredSkills": "Compétences requises",
+            "description": "Description du poste",
+            "expand": "Voir plus",
+            "collapse": "Réduire",
+            "aboutCompany": "À propos de l'entreprise",
+            "info": "Informations",
+            "contact": "Contact",
+            "fields": {
+                "source": "Source",
+                "type": "Type",
+                "domain": "Domaine",
+                "size": "Taille",
+                "level": "Niveau",
+                "contract": "Contrat"
+            }
+        },
+        "coverLetter": {
+            "toneTitle": "Ton de la lettre",
+            "tones": {
+                "professional": "Formel",
+                "enthusiastic": "Enthousiaste",
+                "concise": "Concis"
+            },
+            "generating": "Génération...",
+            "generate": "Générer la lettre",
+            "regenerate": "Regénérer",
+            "yourLetter": "Votre lettre de motivation",
+            "downloadingPdf": "PDF...",
+            "downloadPdf": "Télécharger PDF",
+            "copied": "✓ Copié!",
+            "copy": "Copier",
+            "send": "Envoyer",
+            "defaultProfile": "Profil candidat non renseigné"
+        },
+        "interview": {
+            "subTabs": {
+                "questions": "Questions d'entretien",
+                "chat": "Chat IA"
+            },
+            "generatingQuestions": "Génération des questions...",
+            "generateQuestions": "Générer les questions d'entretien",
+            "categories": {
+                "behavioural": "Comportemental",
+                "technical": "Technique",
+                "situational": "Situationnel"
+            },
+            "questionNumber": "Question {{current}}/{{total}}",
+            "previous": "← Précédente",
+            "next": "Suivante →",
+            "yourAnswer": "Votre réponse",
+            "voiceStop": "Arrêter",
+            "voiceStart": "Répondre vocalement",
+            "answerPlaceholder": "Rédigez ou dictez votre réponse... (méthode STAR recommandée)",
+            "evaluating": "Évaluation...",
+            "submitEvaluation": "Soumettre pour évaluation IA",
+            "evaluation": "Évaluation",
+            "evalStrengths": "Points forts",
+            "evalImprove": "À améliorer",
+            "keywords": "Mots-clés",
+            "suggestedAnswer": "Réponse suggérée",
+            "tips": "Conseils"
+        },
+        "chat": {
+            "title": "Assistant Carrière IA",
+            "online": "En ligne · Spécialisé sur cette offre",
+            "listening": "Écoute…",
+            "welcome": "Bonjour ! Je suis votre assistant carrière pour cette opportunité chez **{{company}}** ({{title}}).\n\nJe peux vous aider à :\n• Comprendre les exigences du poste\n• Préparer vos réponses d'entretien\n• Analyser votre compatibilité avec l'offre\n• Répondre à toutes vos questions\n\nQue souhaitez-vous savoir ?",
+            "defaultCompany": "l'entreprise",
+            "noResponse": "Je n'ai pas pu générer une réponse.",
+            "error": "Désolé, une erreur s'est produite. Vérifiez que le service IA est démarré.",
+            "suggestedQuestions": "Questions suggérées",
+            "suggestions": [
+                "Quelles compétences sont les plus importantes pour ce poste ?",
+                "Comment préparer mon entretien pour cette offre ?",
+                "Quelles questions pourraient m'être posées ?",
+                "Comment mettre en valeur mon profil pour ce poste ?",
+                "Quel salaire est envisageable pour ce type de poste ?"
+            ],
+            "placeholderActive": "Parlez maintenant… (ou tapez votre message)",
+            "placeholderIdle": "Posez une question sur cette offre… (Entrée pour envoyer)",
+            "stopMicTitle": "Arrêter le micro",
+            "startMicTitle": "Dicter un message",
+            "rec": "REC",
+            "footer": "Entrée pour envoyer · Maj+Entrée pour nouvelle ligne",
+            "micActive": "Cliquez sur le micro pour arrêter",
+            "micAvailable": "Micro disponible"
+        },
+        "cvAdapt": {
+            "importTitle": "Importer votre CV",
+            "importDescription": "Uploadez votre CV (PDF, DOCX ou TXT) pour des recommandations personnalisées.",
+            "parsingFile": "Lecture du fichier...",
+            "charactersClickToChange": "{{count}} caractères · Cliquez pour changer",
+            "dropTitle": "Glissez-déposez votre CV ici",
+            "dropHint": "PDF, DOCX, TXT · max 5 MB",
+            "analyzing": "Analyse de votre CV...",
+            "atsScoreTitle": "Score ATS estimé",
+            "basedOnUpload": "Basé sur votre CV uploadé",
+            "basedOnProfile": "Basé sur votre profil",
+            "keywordsToAdd": "Mots-clés à ajouter",
+            "adaptedSummary": "Résumé adapté",
+            "skillsToAdd": "Skills à ajouter",
+            "currentVersion": "Version actuelle",
+            "improvedVersion": "Version améliorée",
+            "generalAdvice": "Conseil général",
+            "createAdaptedTitle": "Créer un CV adapté à cette offre",
+            "createAdaptedDescription": "L'IA va générer un CV complet optimisé pour **{{title}}**{{companySuffix}}.",
+            "companySuffix": " chez {{company}}",
+            "cvCreatedRedirect": "CV créé ! Redirection...",
+            "generating": "Génération en cours...",
+            "createAdaptedCv": "Créer mon CV adapté",
+            "rerunAnalysis": "Relancer l'analyse",
+            "analyzeForOffer": "Analyser mon CV pour cette offre",
+            "uploadHint": "Uploadez votre CV ci-dessus pour une analyse précise,<br />ou lancez avec votre profil actuel.",
+            "createError": "Erreur lors de la création du CV. Veuillez réessayer.",
+            "defaultProfile": "Profil candidat non renseigné",
+            "defaultSummary": "Candidat motivé pour le poste de {{title}}{{companySuffix}}. {{skillsPrefix}}",
+            "skillsPrefix": "Maîtrise de {{skills}}.",
+            "skillCategories": {
+                "skills": "Compétences",
+                "technical": "Compétences techniques",
+                "required": "Compétences requises"
+            },
+            "cvTitle": "CV adapté - {{title}}{{companySuffix}}"
+        },
+        "applyForm": {
+            "resumeLabel": "CV (PDF)",
+            "coverLetterLabel": "Lettre de motivation (PDF)",
+            "filesRequired": "Veuillez télécharger votre CV et votre lettre de motivation au format PDF.",
+            "successTitle": "✓ Candidature envoyée avec succès !",
+            "successSubtitle": "L'entreprise examinera votre candidature bientôt.",
+            "cancel": "Annuler",
+            "submitting": "Envoi...",
+            "submit": "Postuler",
+            "genericError": "Une erreur est survenue"
+        }
+    }
+}

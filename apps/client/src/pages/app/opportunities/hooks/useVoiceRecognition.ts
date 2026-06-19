@@ -1,9 +1,12 @@
 import { useState, useCallback, useRef, useEffect } from "react";
+import { getIntlLocale } from "@/lib/locale-format";
+import type { AppLocale } from "@/i18n";
 
-export function useVoiceRecognition(onTranscript: (text: string) => void) {
+export function useVoiceRecognition(onTranscript: (text: string) => void, locale: AppLocale = "en") {
     const recognitionRef = useRef<any>(null);
     const [isListening, setIsListening] = useState(false);
     const [isSupported, setIsSupported] = useState(false);
+    const speechLang = getIntlLocale(locale);
 
     useEffect(() => {
         setIsSupported(
@@ -15,7 +18,7 @@ export function useVoiceRecognition(onTranscript: (text: string) => void) {
         const SR = (window as any).SpeechRecognition || (window as any).webkitSpeechRecognition;
         if (!SR) return;
         const r = new SR();
-        r.lang = "fr-FR";
+        r.lang = speechLang;
         r.continuous = true;
         r.interimResults = true;
         r.onstart = () => setIsListening(true);
@@ -30,7 +33,7 @@ export function useVoiceRecognition(onTranscript: (text: string) => void) {
         };
         r.start();
         recognitionRef.current = r;
-    }, [onTranscript]);
+    }, [onTranscript, speechLang]);
 
     const stop = useCallback(() => {
         recognitionRef.current?.stop();

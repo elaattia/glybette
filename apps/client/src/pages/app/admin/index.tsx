@@ -27,23 +27,15 @@ import {
     TimeSeriesChart,
 } from "@/components/charts";
 import { AdminStatCardSkeleton } from "@/pages/app/admin/components/admin-skeletons";
+import { useLocale } from "@/hooks/useLocale";
+import type { AppLocale } from "@/i18n";
+import type { TFunction } from "i18next";
 
 const ACCENT = "#16A34A";
 
-const ROLE_LABELS: Record<string, string> = {
-    student: "Student",
-    enterprise: "Enterprise",
-};
-
-const PROJECT_STATUS_LABELS: Record<string, string> = {
-    draft: "Draft",
-    published: "Published",
-    archived: "Archived",
-};
-
-function formatDelta(value: number) {
+function formatDelta(value: number, locale: AppLocale, t: TFunction<"admin">) {
     if (value <= 0) return null;
-    return `+${fmt(value)} this week`;
+    return t("common.deltaThisWeek", { count: fmt(value, locale) });
 }
 
 type ChartCardProps = {
@@ -51,9 +43,9 @@ type ChartCardProps = {
     icon: ElementType;
     accent?: string;
     to?: string;
-    linkLabel?: string;
+    linkLabel: string;
     isLoading: boolean;
-    emptyMessage?: string;
+    emptyMessage: string;
     isEmpty?: boolean;
     children: ReactNode;
     skeletonRows?: number;
@@ -64,9 +56,9 @@ function OverviewChartCard({
     icon,
     accent = ACCENT,
     to,
-    linkLabel = "Manage",
+    linkLabel,
     isLoading,
-    emptyMessage = "No data yet.",
+    emptyMessage,
     isEmpty = false,
     children,
     skeletonRows = 4,
@@ -99,6 +91,7 @@ function OverviewChartCard({
 }
 
 export default function AdminDashboardPage() {
+    const { locale, t } = useLocale("admin");
     const overviewQuery = useQuery({
         queryKey: ["admin", "overview"],
         queryFn: () => apiRequest<AdminOverviewStats>("/api/admin/overview"),
@@ -110,22 +103,22 @@ export default function AdminDashboardPage() {
     const contentVolume = useMemo(() => {
         if (!data) return [];
         return [
-            { label: "Projects", count: data.totals.projects },
-            { label: "CVs", count: data.totals.cvs },
-            { label: "Portfolios", count: data.totals.portfolios },
-            { label: "Active jobs", count: data.totals.jobsActive },
+            { label: t("dashboard.contentVolume.projects"), count: data.totals.projects },
+            { label: t("dashboard.contentVolume.cvs"), count: data.totals.cvs },
+            { label: t("dashboard.contentVolume.portfolios"), count: data.totals.portfolios },
+            { label: t("dashboard.contentVolume.activeJobs"), count: data.totals.jobsActive },
         ].filter((row) => row.count > 0);
-    }, [data]);
+    }, [data, t]);
 
     const roleEntries = useMemo(
         () =>
             data
                 ? recordToEntries(data.users.byBaseRole).map((entry) => ({
                       ...entry,
-                      label: ROLE_LABELS[entry.label] ?? entry.label,
+                      label: t(`common.roles.${entry.label}`, { defaultValue: entry.label }),
                   }))
                 : [],
-        [data],
+        [data, t],
     );
 
     const projectStatusEntries = useMemo(
@@ -133,10 +126,10 @@ export default function AdminDashboardPage() {
             data
                 ? recordToEntries(data.projects.byStatus).map((entry) => ({
                       ...entry,
-                      label: PROJECT_STATUS_LABELS[entry.label] ?? entry.label,
+                      label: t(`common.projectStatus.${entry.label}`, { defaultValue: entry.label }),
                   }))
                 : [],
-        [data],
+        [data, t],
     );
 
     const jobSourceEntries = useMemo(() => (data ? recordToEntries(data.jobs.parSource, 10) : []), [data]);
@@ -145,70 +138,74 @@ export default function AdminDashboardPage() {
     const accountHealthRows = useMemo(() => {
         if (!data) return [];
         return [
-            { label: "Verified", count: data.users.verified, accent: "#16A34A" },
-            { label: "Unverified", count: data.users.unverified, accent: "#f97316" },
-            { label: "Banned", count: data.users.banned, accent: "#ef4444" },
-            { label: "Admins", count: data.users.admins, accent: "#8b5cf6" },
+            { label: t("dashboard.accountHealth.verified"), count: data.users.verified, accent: "#16A34A" },
+            { label: t("dashboard.accountHealth.unverified"), count: data.users.unverified, accent: "#f97316" },
+            { label: t("dashboard.accountHealth.banned"), count: data.users.banned, accent: "#ef4444" },
+            { label: t("dashboard.accountHealth.admins"), count: data.users.admins, accent: "#8b5cf6" },
         ].filter((row) => row.count > 0);
-    }, [data]);
+    }, [data, t]);
 
     const pipelineRows = useMemo(() => {
         if (!data) return [];
         return [
-            { label: "Active offers", count: data.totals.jobsActive },
-            { label: "Archived offers", count: data.totals.jobsArchived },
-            { label: "New (24h)", count: data.jobs.newLast24h },
+            { label: t("dashboard.jobPipeline.activeOffers"), count: data.totals.jobsActive },
+            { label: t("dashboard.jobPipeline.archivedOffers"), count: data.totals.jobsArchived },
+            { label: t("dashboard.jobPipeline.new24h"), count: data.jobs.newLast24h },
         ];
-    }, [data]);
+    }, [data, t]);
 
     const growthSeries = useMemo(() => {
         if (!data) return [];
         return [
-            { key: "users", label: "Accounts", color: "#16A34A", data: data.growth.usersByDay },
-            { key: "projects", label: "Projects", color: "#2563eb", data: data.growth.projectsByDay },
-            { key: "cvs", label: "CVs", color: "#8b5cf6", data: data.growth.cvsByDay },
-            { key: "portfolios", label: "Portfolios", color: "#f97316", data: data.growth.portfoliosByDay },
+            { key: "users", label: t("dashboard.growthSeries.accounts"), color: "#16A34A", data: data.growth.usersByDay },
+            { key: "projects", label: t("dashboard.growthSeries.projects"), color: "#2563eb", data: data.growth.projectsByDay },
+            { key: "cvs", label: t("dashboard.growthSeries.cvs"), color: "#8b5cf6", data: data.growth.cvsByDay },
+            { key: "portfolios", label: t("dashboard.growthSeries.portfolios"), color: "#f97316", data: data.growth.portfoliosByDay },
         ];
-    }, [data]);
+    }, [data, t]);
 
     const kpiStats = useMemo(
         () => [
             {
-                label: "Accounts",
+                label: t("dashboard.kpi.accounts"),
                 value: data?.totals.users ?? 0,
-                delta: data ? formatDelta(data.deltas.usersThisWeek) : null,
+                delta: data ? formatDelta(data.deltas.usersThisWeek, locale, t) : null,
                 to: "/app/admin/users",
             },
             {
-                label: "Projects",
+                label: t("dashboard.kpi.projects"),
                 value: data?.totals.projects ?? 0,
-                delta: data ? formatDelta(data.deltas.projectsThisWeek) : null,
+                delta: data ? formatDelta(data.deltas.projectsThisWeek, locale, t) : null,
                 to: "/app/admin/projects",
             },
             {
-                label: "Jobs",
+                label: t("dashboard.kpi.jobs"),
                 value: data?.totals.jobsActive ?? 0,
-                delta: data?.jobs.newLast24h ? `${fmt(data.jobs.newLast24h)} new (24h)` : null,
+                delta: data?.jobs.newLast24h
+                    ? t("common.newLast24h", { count: fmt(data.jobs.newLast24h, locale) })
+                    : null,
                 to: "/app/admin/jobs",
             },
             {
-                label: "Portfolios",
+                label: t("dashboard.kpi.portfolios"),
                 value: data?.totals.portfolios ?? 0,
-                delta: data ? formatDelta(data.deltas.portfoliosThisWeek) : null,
+                delta: data ? formatDelta(data.deltas.portfoliosThisWeek, locale, t) : null,
                 to: "/app/admin/portfolio",
             },
             {
-                label: "CVs",
+                label: t("dashboard.kpi.cvs"),
                 value: data?.totals.cvs ?? 0,
-                delta: data ? formatDelta(data.deltas.cvsThisWeek) : null,
+                delta: data ? formatDelta(data.deltas.cvsThisWeek, locale, t) : null,
                 to: "/app/admin/cv",
             },
         ],
-        [data],
+        [data, locale, t],
     );
 
     const usersTotal = data?.totals.users ?? 1;
     const projectsTotal = data?.totals.projects ?? 1;
+    const chartLinkLabel = t("common.manage");
+    const chartEmptyMessage = t("common.noData");
 
     return (
         <div className="space-y-5">
@@ -216,18 +213,18 @@ export default function AdminDashboardPage() {
                 <CardHeader className="px-5 pt-5 md:px-6">
                     <CardTitle className="flex items-center gap-2 text-lg text-[var(--gb-text)]">
                         <Shield className="h-4 w-4 text-[#16A34A]" />
-                        Admin dashboard
+                        {t("dashboard.title")}
                     </CardTitle>
                 </CardHeader>
                 <CardContent className="px-5 pb-5 text-sm text-[var(--gb-muted)] md:px-6 md:pb-6">
-                    Platform-wide metrics, moderation signals, and growth over the last 30 days.
+                    {t("dashboard.description")}
                 </CardContent>
             </Card>
 
             {overviewQuery.isError ? (
                 <Card className="border-destructive/30 bg-[var(--gb-app-panel-bg)]">
                     <CardContent className="px-5 py-4 text-sm text-destructive">
-                        Failed to load overview statistics. Try refreshing the page.
+                        {t("dashboard.loadError")}
                     </CardContent>
                 </Card>
             ) : null}
@@ -245,7 +242,7 @@ export default function AdminDashboardPage() {
                                       {stat.label}
                                   </p>
                                   <p className="text-2xl font-bold tabular-nums text-[var(--gb-text)]">
-                                      {fmt(stat.value)}
+                                      {fmt(stat.value, locale)}
                                   </p>
                                   {stat.delta ? (
                                       <p className="text-xs text-[var(--gb-muted)]">{stat.delta}</p>
@@ -257,10 +254,12 @@ export default function AdminDashboardPage() {
 
             <section className="grid gap-4 lg:grid-cols-2 xl:grid-cols-3">
                 <OverviewChartCard
-                    title="Content volume"
+                    title={t("dashboard.charts.contentVolume")}
                     icon={TrendingUp}
                     accent="#2563eb"
                     to="/app/admin/projects"
+                    linkLabel={chartLinkLabel}
+                    emptyMessage={chartEmptyMessage}
                     isLoading={isLoading}
                     isEmpty={contentVolume.length === 0}
                 >
@@ -278,9 +277,11 @@ export default function AdminDashboardPage() {
                 </OverviewChartCard>
 
                 <OverviewChartCard
-                    title="Accounts by role"
+                    title={t("dashboard.charts.accountsByRole")}
                     icon={Users}
                     to="/app/admin/users"
+                    linkLabel={chartLinkLabel}
+                    emptyMessage={chartEmptyMessage}
                     isLoading={isLoading}
                     isEmpty={roleEntries.length === 0}
                     skeletonRows={2}
@@ -300,10 +301,12 @@ export default function AdminDashboardPage() {
                 </OverviewChartCard>
 
                 <OverviewChartCard
-                    title="Account health"
+                    title={t("dashboard.charts.accountHealth")}
                     icon={UserCheck}
                     accent="#8b5cf6"
                     to="/app/admin/users"
+                    linkLabel={chartLinkLabel}
+                    emptyMessage={chartEmptyMessage}
                     isLoading={isLoading}
                     isEmpty={accountHealthRows.length === 0}
                 >
@@ -324,11 +327,12 @@ export default function AdminDashboardPage() {
 
             <section className="grid gap-4 lg:grid-cols-2 xl:grid-cols-3">
                 <OverviewChartCard
-                    title="Offers by source"
+                    title={t("dashboard.charts.offersBySource")}
                     icon={BriefcaseBusiness}
                     accent="#14b8a6"
                     to="/app/admin/scraping"
-                    linkLabel="Scraping"
+                    linkLabel={t("common.scraping")}
+                    emptyMessage={chartEmptyMessage}
                     isLoading={isLoading}
                     isEmpty={jobSourceEntries.length === 0}
                 >
@@ -346,10 +350,12 @@ export default function AdminDashboardPage() {
                 </OverviewChartCard>
 
                 <OverviewChartCard
-                    title="Offers by type"
+                    title={t("dashboard.charts.offersByType")}
                     icon={BriefcaseBusiness}
                     accent="#8b5cf6"
                     to="/app/admin/jobs"
+                    linkLabel={chartLinkLabel}
+                    emptyMessage={chartEmptyMessage}
                     isLoading={isLoading}
                     isEmpty={jobTypeEntries.length === 0}
                 >
@@ -367,10 +373,12 @@ export default function AdminDashboardPage() {
                 </OverviewChartCard>
 
                 <OverviewChartCard
-                    title="Job pipeline"
+                    title={t("dashboard.charts.jobPipeline")}
                     icon={Workflow}
                     accent="#f97316"
                     to="/app/admin/jobs"
+                    linkLabel={chartLinkLabel}
+                    emptyMessage={chartEmptyMessage}
                     isLoading={isLoading}
                     isEmpty={pipelineRows.every((row) => row.count === 0)}
                     skeletonRows={3}
@@ -391,9 +399,11 @@ export default function AdminDashboardPage() {
 
             <section className="grid gap-4 lg:grid-cols-2">
                 <OverviewChartCard
-                    title="Projects by status"
+                    title={t("dashboard.charts.projectsByStatus")}
                     icon={Handshake}
                     to="/app/admin/projects"
+                    linkLabel={chartLinkLabel}
+                    emptyMessage={chartEmptyMessage}
                     isLoading={isLoading}
                     isEmpty={projectStatusEntries.length === 0}
                     skeletonRows={3}
@@ -413,25 +423,31 @@ export default function AdminDashboardPage() {
                 </OverviewChartCard>
 
                 <OverviewChartCard
-                    title="Moderation queue"
+                    title={t("dashboard.charts.moderationQueue")}
                     icon={FolderKanban}
                     accent="#ef4444"
                     to="/app/admin/projects"
+                    linkLabel={chartLinkLabel}
+                    emptyMessage={chartEmptyMessage}
                     isLoading={isLoading}
                     isEmpty={!data?.projects.pendingJoinRequests && !data?.projects.projectsWithPending}
                     skeletonRows={2}
                 >
                     <div className="space-y-4">
                         <div className="rounded-xl border border-[var(--gb-border)] px-4 py-3">
-                            <p className="text-xs text-[var(--gb-muted)]">Pending join requests</p>
+                            <p className="text-xs text-[var(--gb-muted)]">
+                                {t("dashboard.moderation.pendingJoinRequests")}
+                            </p>
                             <p className="mt-1 text-2xl font-semibold tabular-nums text-[var(--gb-text)]">
-                                {fmt(data?.projects.pendingJoinRequests ?? 0)}
+                                {fmt(data?.projects.pendingJoinRequests ?? 0, locale)}
                             </p>
                         </div>
                         <div className="rounded-xl border border-[var(--gb-border)] px-4 py-3">
-                            <p className="text-xs text-[var(--gb-muted)]">Projects with pending requests</p>
+                            <p className="text-xs text-[var(--gb-muted)]">
+                                {t("dashboard.moderation.projectsWithPending")}
+                            </p>
                             <p className="mt-1 text-2xl font-semibold tabular-nums text-[var(--gb-text)]">
-                                {fmt(data?.projects.projectsWithPending ?? 0)}
+                                {fmt(data?.projects.projectsWithPending ?? 0, locale)}
                             </p>
                         </div>
                     </div>
@@ -443,7 +459,7 @@ export default function AdminDashboardPage() {
             ) : (
                 <Card className="border-[var(--gb-border)] bg-[var(--gb-app-panel-bg)] shadow-none">
                     <CardHeader className="px-5 pt-5 pb-0 md:px-6">
-                        <ChartSection title="Growth (last 30 days)" icon={FileUser} accent={ACCENT} />
+                        <ChartSection title={t("dashboard.charts.growth")} icon={FileUser} accent={ACCENT} />
                     </CardHeader>
                     <CardContent className="px-5 pb-5 md:px-6 md:pb-6">
                         <TimeSeriesChart series={growthSeries} />

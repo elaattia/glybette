@@ -1,4 +1,5 @@
 import { Sparkles, Loader } from "lucide-react";
+import { useLocale } from "@/hooks/useLocale";
 
 interface AiEnhanceButtonProps {
     onClick: () => void;
@@ -7,7 +8,9 @@ interface AiEnhanceButtonProps {
     disabled?: boolean;
 }
 
-export function AiEnhanceButton({ onClick, isLoading, label = "AI Enhance", disabled }: AiEnhanceButtonProps) {
+export function AiEnhanceButton({ onClick, isLoading, label, disabled }: AiEnhanceButtonProps) {
+    const { t } = useLocale("cvBuilder");
+    const displayLabel = label ?? t("ai.enhance.defaultLabel");
     const busy = isLoading || disabled;
     return (
         <button
@@ -39,7 +42,7 @@ export function AiEnhanceButton({ onClick, isLoading, label = "AI Enhance", disa
             ) : (
                 <Sparkles style={{ width: 11, height: 11 }} />
             )}
-            {isLoading ? "En cours..." : label}
+            {isLoading ? t("ai.enhance.loading") : displayLabel}
             <style>{`@keyframes spin { to { transform: rotate(360deg); } }`}</style>
         </button>
     );

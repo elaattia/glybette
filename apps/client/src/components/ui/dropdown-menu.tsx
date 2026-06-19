@@ -21,7 +21,7 @@ function DropdownMenuContent({
                 data-slot="dropdown-menu-content"
                 sideOffset={sideOffset}
                 className={cn(
-                    "z-50 min-w-52 origin-top-right overflow-hidden rounded-xl border border-[var(--gb-border)] bg-[var(--gb-app-panel-bg)] p-1.5 text-[var(--gb-text)] shadow-[var(--gb-shadow)] will-change-transform will-change-opacity",
+                    "z-[1100] min-w-52 origin-top-right rounded-xl border border-[var(--gb-border)] bg-[var(--gb-app-panel-bg)] p-1.5 text-[var(--gb-text)] shadow-[var(--gb-shadow)] will-change-transform will-change-opacity",
                     className,
                 )}
                 {...props}
@@ -64,6 +64,53 @@ function DropdownMenuSeparator({ className, ...props }: React.ComponentProps<typ
     );
 }
 
+function DropdownMenuSub({ ...props }: React.ComponentProps<typeof DropdownMenuPrimitive.Sub>) {
+    return <DropdownMenuPrimitive.Sub data-slot="dropdown-menu-sub" {...props} />;
+}
+
+function DropdownMenuSubTrigger({
+    className,
+    children,
+    ...props
+}: React.ComponentProps<typeof DropdownMenuPrimitive.SubTrigger>) {
+    return (
+        <DropdownMenuPrimitive.SubTrigger
+            data-slot="dropdown-menu-sub-trigger"
+            className={cn(
+                "relative flex w-full cursor-pointer select-none items-center gap-2 rounded-lg px-2.5 py-2 text-sm outline-none transition",
+                "focus:bg-[var(--gb-app-hover)] focus:text-[var(--gb-text)] data-[state=open]:bg-[var(--gb-app-hover)] data-[state=open]:text-[var(--gb-text)]",
+                className,
+            )}
+            {...props}>
+            {children}
+        </DropdownMenuPrimitive.SubTrigger>
+    );
+}
+
+function DropdownMenuSubContent({
+    className,
+    sideOffset = 4,
+    alignOffset = -4,
+    ...props
+}: React.ComponentProps<typeof DropdownMenuPrimitive.SubContent>) {
+    return (
+        <DropdownMenuPrimitive.Portal>
+            <DropdownMenuPrimitive.SubContent
+                data-slot="dropdown-menu-sub-content"
+                sideOffset={sideOffset}
+                alignOffset={alignOffset}
+                collisionPadding={8}
+                className={cn(
+                    "z-[1100] min-w-40 overflow-hidden rounded-xl border border-[var(--gb-border)] bg-[var(--gb-app-panel-bg)] p-1.5 text-[var(--gb-text)] shadow-[var(--gb-shadow)]",
+                    "data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0 data-[state=closed]:zoom-out-95 data-[state=open]:zoom-in-95",
+                    className,
+                )}
+                {...props}
+            />
+        </DropdownMenuPrimitive.Portal>
+    );
+}
+
 export {
     DropdownMenu,
     DropdownMenuTrigger,
@@ -71,4 +118,7 @@ export {
     DropdownMenuLabel,
     DropdownMenuItem,
     DropdownMenuSeparator,
+    DropdownMenuSub,
+    DropdownMenuSubTrigger,
+    DropdownMenuSubContent,
 };

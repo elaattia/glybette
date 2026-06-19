@@ -5,16 +5,18 @@ import { PortfolioBuilderRightPanel } from "@/pages/app/portfolio/components/Por
 import { PortfolioEditorTopbar } from "@/pages/app/portfolio/components/PortfolioEditorTopbar";
 import { PortfolioSlugStep } from "@/pages/app/portfolio/components/PortfolioSlugStep";
 import { PortfolioTemplateStep } from "@/pages/app/portfolio/components/PortfolioTemplateStep";
+import { useLocale } from "@/hooks/useLocale";
 import { usePortfolioBuilderState } from "@/hooks/usePortfolioBuilderState";
 
 export default function PortfolioBuilderPage() {
+    const { t } = useLocale("portfolio");
     const builder = usePortfolioBuilderState();
 
     if (builder.currentPortfolio.isPending) {
         return (
             <div className="grid min-h-[60vh] place-items-center text-[var(--gb-muted)]">
                 <Loader2 className="mb-3 size-5 animate-spin" />
-                Loading portfolio workspace...
+                {t("builder.loading")}
             </div>
         );
     }

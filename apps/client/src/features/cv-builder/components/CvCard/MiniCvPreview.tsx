@@ -1,4 +1,5 @@
-import type { CvSection } from "../../types/cv.types";
+import { useLocale } from "@/hooks/useLocale";
+import { useSectionLabels } from "../../lib/cv-i18n";
 
 interface MiniCvPreviewProps {
     templateId: string;
@@ -11,6 +12,8 @@ interface MiniCvPreviewProps {
 }
 
 export function MiniCvPreview({ templateId, accent, bg, firstName, lastName, roleTitle, sections }: MiniCvPreviewProps) {
+    const { t } = useLocale("cvBuilder");
+    const labels = useSectionLabels(t);
     const A = accent;
     const BG = bg;
 
@@ -20,7 +23,7 @@ export function MiniCvPreview({ templateId, accent, bg, firstName, lastName, rol
     const edu       = (sections.find((s) => s.type === "education")?.data ?? []) as Array<{ degree?: string; institution?: string }>;
     const skills    = (sections.find((s) => s.type === "skills")?.data ?? []) as Array<{ category?: string; skills?: string[] }>;
 
-    const name  = [firstName, lastName].filter(Boolean).join(" ") || "Votre Nom";
+    const name  = [firstName, lastName].filter(Boolean).join(" ") || t("card.placeholders.firstName");
     const initials = `${firstName?.[0] ?? ""}${lastName?.[0] ?? ""}`.toUpperCase() || "?";
     const email = personal.email || "";
     const loc   = personal.location || "";
@@ -47,18 +50,18 @@ export function MiniCvPreview({ templateId, accent, bg, firstName, lastName, rol
                 <div style={{ flex: 1, padding: "7px 6px", background: "#fff" }}>
                     {summary?.text && (
                         <div style={{ marginBottom: "4px" }}>
-                            <SectionBar title="Profil" A={A} />
+                            <SectionBar title={labels.summary} A={A} />
                             <MiniPara text={summary.text} color="#444" />
                         </div>
                     )}
-                    <SectionBar title="Expérience" A={A} />
+                    <SectionBar title={labels.experience} A={A} />
                     {exp.slice(0, 2).map((e, i) => (
                         <div key={i} style={{ marginBottom: "3px", paddingLeft: "4px", borderLeft: `1.5px solid ${A}30` }}>
                             <MiniRow color="#111" text={e.position || ""} bold />
                             <MiniRow color={A} text={e.company || ""} />
                         </div>
                     ))}
-                    <SectionBar title="Formation" A={A} />
+                    <SectionBar title={labels.education} A={A} />
                     {edu.slice(0, 1).map((e, i) => (
                         <div key={i}>
                             <MiniRow color="#111" text={e.degree || ""} bold />
@@ -125,13 +128,13 @@ export function MiniCvPreview({ templateId, accent, bg, firstName, lastName, rol
                 <div style={{ height: "2px", background: A }} />
                 <div style={{ display: "flex" }}>
                     <div style={{ width: "35%", background: "#f8f9fa", borderRight: "1px solid #eee", padding: "5px 4px" }}>
-                        <div style={{ fontSize: "3.5px", fontWeight: 700, color: A, borderBottom: `1px solid ${A}`, paddingBottom: "1px", marginBottom: "3px", textTransform: "uppercase" }}>Compétences</div>
+                        <div style={{ fontSize: "3.5px", fontWeight: 700, color: A, borderBottom: `1px solid ${A}`, paddingBottom: "1px", marginBottom: "3px", textTransform: "uppercase" }}>{labels.skills}</div>
                         <div style={{ display: "flex", flexWrap: "wrap", gap: "2px", marginBottom: "4px" }}>
                             {skills.flatMap((g) => g.skills ?? []).slice(0, 4).map((s, i) => (
                                 <span key={i} style={{ background: `${A}15`, color: A, borderRadius: "3px", padding: "1px 3px", fontSize: "3px" }}>{s}</span>
                             ))}
                         </div>
-                        <div style={{ fontSize: "3.5px", fontWeight: 700, color: A, borderBottom: `1px solid ${A}`, paddingBottom: "1px", marginBottom: "3px", textTransform: "uppercase" }}>Formation</div>
+                        <div style={{ fontSize: "3.5px", fontWeight: 700, color: A, borderBottom: `1px solid ${A}`, paddingBottom: "1px", marginBottom: "3px", textTransform: "uppercase" }}>{labels.education}</div>
                         {edu.slice(0, 1).map((e, i) => (
                             <div key={i}>
                                 <div style={{ fontSize: "4px", fontWeight: 700, color: "#1a1a2e" }}>{e.degree}</div>
@@ -164,21 +167,21 @@ export function MiniCvPreview({ templateId, accent, bg, firstName, lastName, rol
                     <div style={{ color: A, fontSize: "5px" }}>&gt; {roleTitle}</div>
                 </div>
                 <div style={{ padding: "4px 7px" }}>
-                    <div style={{ fontSize: "4px", color: A, fontWeight: 700, marginBottom: "2px" }}>// COMPÉTENCES</div>
+                    <div style={{ fontSize: "4px", color: A, fontWeight: 700, marginBottom: "2px" }}>{`// ${labels.skills.toUpperCase()}`}</div>
                     {skills.slice(0, 2).map((g, i) => (
                         <div key={i} style={{ fontSize: "3.5px", color: "#cbd5e1", marginBottom: "1.5px" }}>
                             {g.category ? <span style={{ color: A }}>{g.category}: </span> : null}
                             {(g.skills ?? []).slice(0, 4).join(" · ")}
                         </div>
                     ))}
-                    <div style={{ fontSize: "4px", color: A, fontWeight: 700, margin: "3px 0 2px" }}>// EXPÉRIENCE</div>
+                    <div style={{ fontSize: "4px", color: A, fontWeight: 700, margin: "3px 0 2px" }}>{`// ${labels.experience.toUpperCase()}`}</div>
                     {exp.slice(0, 2).map((e, i) => (
                         <div key={i} style={{ background: "#1e293b", borderRadius: "3px", padding: "2px 3px", marginBottom: "2px" }}>
                             <MiniRow color="#f1f5f9" text={e.position || ""} />
                             <MiniRow color={A} text={e.company || ""} />
                         </div>
                     ))}
-                    <div style={{ fontSize: "4px", color: A, fontWeight: 700, margin: "3px 0 2px" }}>// FORMATION</div>
+                    <div style={{ fontSize: "4px", color: A, fontWeight: 700, margin: "3px 0 2px" }}>{`// ${labels.education.toUpperCase()}`}</div>
                     {edu.slice(0, 1).map((e, i) => (
                         <div key={i}>
                             <MiniRow color="#f1f5f9" text={e.degree || ""} />

@@ -1,97 +1,51 @@
 import { useMemo, useState } from "react";
+import { useTranslation } from "react-i18next";
 import { Outlet, useLocation } from "react-router-dom";
 import AppSidebar from "@/components/app-shell/AppSidebar";
 import AppTopbar from "@/components/app-shell/AppTopbar";
 
-const routeMeta: Record<string, { title: string; subtitle: string }> = {
-    "/app/dashboard": {
-        title: "Welcome back",
-        subtitle: "Your opportunity pipeline is active and ready for updates.",
-    },
-    "/app/insights": {
-        title: "Career Insights",
-        subtitle: "Visualisez les tendances de marché et les données de vos offres scrappées.",
-    },
-    "/app/cv": {
-        title: "CV Builder",
-        subtitle: "Create and tailor CV versions for each target role.",
-    },
-    "/app/cv/create": {
-        title: "New CV",
-        subtitle: "Choose a template and start building.",
-    },
-    "/app/portfolio": {
-        title: "Portfolio",
-        subtitle: "Showcase projects with measurable outcomes and clear impact.",
-    },
-    "/app/opportunities": {
-        title: "Opportunities",
-        subtitle: "Track roles, interviews, and recruiter conversations in one place.",
-    },
-    "/app/projects": {
-        title: "Projects",
-        subtitle: "Look for projects to contribute to.",
-    },
-    "/app/projects/create": {
-        title: "Create Project",
-        subtitle: "Describe your concept and define the team you'll recruit.",
-    },
-    "/app/settings": {
-        title: "Settings",
-        subtitle: "Control account preferences and workspace personalization.",
-    },
-    "/app/enterprise": {
-        title: "Enterprise",
-        subtitle: "Enterprise-facing features are being prepared.",
-    },
-    "/app/admin": {
-        title: "Admin Dashboard",
-        subtitle: "Monitor platform health and access management operations.",
-    },
-    "/app/admin/users": {
-        title: "Admin · Users",
-        subtitle: "Moderate accounts, roles, status, and verification.",
-    },
-    "/app/admin/projects": {
-        title: "Admin · Projects",
-        subtitle: "Inspect and moderate projects across the platform.",
-    },
-    "/app/admin/jobs": {
-        title: "Admin · Jobs",
-        subtitle: "Manage opportunities visibility and lifecycle.",
-    },
-    "/app/admin/portfolio": {
-        title: "Admin · Portfolio",
-        subtitle: "Review and moderate portfolio pages.",
-    },
-    "/app/admin/cv": {
-        title: "Admin · CV",
-        subtitle: "Review and moderate CV content.",
-    },
-    "/app/admin/scraping": {
-        title: "Admin · Scraping",
-        subtitle: "Control scraping operations and monitor feed stats.",
-    },
+const routeMetaKeys: Record<string, { titleKey: string; subtitleKey: string }> = {
+    "/app/dashboard": { titleKey: "routes.dashboard.title", subtitleKey: "routes.dashboard.subtitle" },
+    "/app/insights": { titleKey: "routes.insights.title", subtitleKey: "routes.insights.subtitle" },
+    "/app/cv": { titleKey: "routes.cv.title", subtitleKey: "routes.cv.subtitle" },
+    "/app/cv/create": { titleKey: "routes.cvCreate.title", subtitleKey: "routes.cvCreate.subtitle" },
+    "/app/portfolio": { titleKey: "routes.portfolio.title", subtitleKey: "routes.portfolio.subtitle" },
+    "/app/opportunities": { titleKey: "routes.opportunities.title", subtitleKey: "routes.opportunities.subtitle" },
+    "/app/projects": { titleKey: "routes.projects.title", subtitleKey: "routes.projects.subtitle" },
+    "/app/projects/create": { titleKey: "routes.projectsCreate.title", subtitleKey: "routes.projectsCreate.subtitle" },
+    "/app/settings": { titleKey: "routes.settings.title", subtitleKey: "routes.settings.subtitle" },
+    "/app/enterprise": { titleKey: "routes.enterprise.title", subtitleKey: "routes.enterprise.subtitle" },
+    "/app/admin": { titleKey: "routes.admin.title", subtitleKey: "routes.admin.subtitle" },
+    "/app/admin/users": { titleKey: "routes.adminUsers.title", subtitleKey: "routes.adminUsers.subtitle" },
+    "/app/admin/projects": { titleKey: "routes.adminProjects.title", subtitleKey: "routes.adminProjects.subtitle" },
+    "/app/admin/jobs": { titleKey: "routes.adminJobs.title", subtitleKey: "routes.adminJobs.subtitle" },
+    "/app/admin/portfolio": { titleKey: "routes.adminPortfolio.title", subtitleKey: "routes.adminPortfolio.subtitle" },
+    "/app/admin/cv": { titleKey: "routes.adminCv.title", subtitleKey: "routes.adminCv.subtitle" },
+    "/app/admin/scraping": { titleKey: "routes.adminScraping.title", subtitleKey: "routes.adminScraping.subtitle" },
     "/app/admin/notifications": {
-        title: "Admin · Notifications",
-        subtitle: "Notifications administration stub.",
+        titleKey: "routes.adminNotifications.title",
+        subtitleKey: "routes.adminNotifications.subtitle",
     },
 };
 
 export default function AppShellLayout() {
+    const { t } = useTranslation("shell");
     const location = useLocation();
     const [mobileOpen, setMobileOpen] = useState(false);
 
     const { title, subtitle } = useMemo(() => {
-        if (routeMeta[location.pathname]) return routeMeta[location.pathname];
+        const keys = routeMetaKeys[location.pathname];
+        if (keys) {
+            return { title: t(keys.titleKey), subtitle: t(keys.subtitleKey) };
+        }
         if (/^\/app\/cv\/[^/]+$/.test(location.pathname)) {
-            return { title: "CV Editor", subtitle: "Edit, preview and export your CV." };
+            return { title: t("routes.cvEditor.title"), subtitle: t("routes.cvEditor.subtitle") };
         }
         if (/^\/app\/projects\/[^/]+$/.test(location.pathname)) {
-            return { title: "Project Details", subtitle: "Review milestones, team and community feedback." };
+            return { title: t("routes.projectDetails.title"), subtitle: t("routes.projectDetails.subtitle") };
         }
-        return { title: "Glybette workspace", subtitle: "Build your career assets and stay discoverable." };
-    }, [location.pathname]);
+        return { title: t("routes.fallback.title"), subtitle: t("routes.fallback.subtitle") };
+    }, [location.pathname, t]);
 
     return (
         <div className="min-h-screen bg-[var(--gb-bg)] text-[var(--gb-text)]">
@@ -114,7 +68,7 @@ export default function AppShellLayout() {
                         type="button"
                         className="absolute inset-0 bg-black/55"
                         onClick={() => setMobileOpen(false)}
-                        aria-label="Close navigation panel"
+                        aria-label={t("topbar.closeNavigation")}
                     />
                     <div className="absolute left-0 top-0 h-full w-[285px]">
                         <AppSidebar layout="drawer" onNavigate={() => setMobileOpen(false)} />

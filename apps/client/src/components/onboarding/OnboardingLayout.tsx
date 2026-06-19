@@ -1,5 +1,6 @@
 import "@/styles/onboarding/onboarding.css";
 import { useState, type CSSProperties } from "react";
+import { useTranslation } from "react-i18next";
 import { X } from "lucide-react";
 
 interface OnboardingLayoutProps {
@@ -19,6 +20,7 @@ export function OnboardingLayout({
     onBack,
     children,
 }: OnboardingLayoutProps) {
+    const { t } = useTranslation("onboarding");
     const [showWhyMatters, setShowWhyMatters] = useState(false);
 
     return (
@@ -26,10 +28,12 @@ export function OnboardingLayout({
             <div className="ob-header">
                 <div className="ob-header-row">
                     <span className="ob-kicker">
-                        STEP <strong>{String(currentStep).padStart(2, "0")}</strong> of{" "}
-                        {String(totalSteps).padStart(2, "0")}
+                        {t("layout.stepOf", {
+                            current: String(currentStep).padStart(2, "0"),
+                            total: String(totalSteps).padStart(2, "0"),
+                        })}
                     </span>
-                    <span className="ob-kicker">{progress}% COMPLETE</span>
+                    <span className="ob-kicker">{t("layout.percentComplete", { progress })}</span>
                 </div>
                 <div className="ob-progress-track" style={{ "--ob-progress": `${progress}%` } as CSSProperties}>
                     <div className="ob-progress-fill" />
@@ -41,7 +45,7 @@ export function OnboardingLayout({
                     {showBack && (
                         <div className="ob-back-wrap">
                             <button type="button" className="ob-back-btn" onClick={onBack}>
-                                ← Back
+                                {t("layout.back")}
                             </button>
                         </div>
                     )}
@@ -53,7 +57,7 @@ export function OnboardingLayout({
             <div className="ob-footer-actions">
                 <button type="button" className="ob-why-wrap" onClick={() => setShowWhyMatters(true)}>
                     <span className="ob-why-icon">?</span>
-                    Why this matters
+                    {t("layout.whyThisMatters")}
                 </button>
             </div>
 
@@ -67,26 +71,20 @@ export function OnboardingLayout({
                     <div className="ob-modal" onClick={(e) => e.stopPropagation()}>
                         <div className="ob-modal-head">
                             <h3 id="ob-why-title" className="ob-modal-title">
-                                Why this matters
+                                {t("layout.whyModal.title")}
                             </h3>
                             <button
                                 type="button"
                                 className="ob-modal-close"
                                 onClick={() => setShowWhyMatters(false)}
-                                aria-label="Close">
+                                aria-label={t("layout.close")}>
                                 <X className="w-[18px] h-[18px]" />
                             </button>
                         </div>
-                        <p className="ob-modal-body">
-                            We ask a few questions to better understand you. This helps us personalize your profile and
-                            recommend opportunities that match your interests and goals.
-                        </p>
-                        <p className="ob-modal-body">
-                            Since our platform supports different types of users, this information allows us to show the
-                            most relevant opportunities first, so you can quickly find what you're looking for.
-                        </p>
+                        <p className="ob-modal-body">{t("layout.whyModal.body1")}</p>
+                        <p className="ob-modal-body">{t("layout.whyModal.body2")}</p>
                         <button type="button" className="ob-modal-primary" onClick={() => setShowWhyMatters(false)}>
-                            Got it
+                            {t("layout.whyModal.gotIt")}
                         </button>
                     </div>
                 </div>

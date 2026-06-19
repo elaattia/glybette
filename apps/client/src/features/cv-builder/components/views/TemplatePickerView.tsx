@@ -1,8 +1,10 @@
 import { useState } from "react";
 import { ArrowLeft } from "lucide-react";
+import { useLocale } from "@/hooks/useLocale";
+import { getDomainLabel } from "../../lib/cv-i18n";
 import { TemplateCard } from "../TemplateCard/TemplateCard";
 import { CreationOptionsModal } from "./CreationOptionsModal";
-import { TEMPLATES, DOMAIN_LABELS, filterTemplates } from "../../templates";
+import { TEMPLATES, filterTemplates } from "../../templates";
 import type { CvTemplateCategory, CvTemplateDomain, TemplateInfo } from "../../types/cv.types";
 
 interface TemplatePickerViewProps {
@@ -14,6 +16,7 @@ interface TemplatePickerViewProps {
 const ALL_DOMAINS = Array.from(new Set(TEMPLATES.flatMap((t) => t.domains))) as CvTemplateDomain[];
 
 export function TemplatePickerView({ onBack, onReady, isUploading = false }: TemplatePickerViewProps) {
+    const { t } = useLocale("cvBuilder");
     const [category, setCategory] = useState<CvTemplateCategory | "all">("all");
     const [domain, setDomain] = useState<CvTemplateDomain | "all">("all");
     const [selected, setSelected] = useState<TemplateInfo | null>(null);
@@ -45,7 +48,7 @@ export function TemplatePickerView({ onBack, onReady, isUploading = false }: Tem
                 }}
                 onMouseEnter={(e) => (e.currentTarget.style.color = "var(--gb-text)")}
                 onMouseLeave={(e) => (e.currentTarget.style.color = "var(--gb-muted)")}>
-                <ArrowLeft style={{ width: 14, height: 14 }} /> Retour
+                <ArrowLeft style={{ width: 14, height: 14 }} /> {t("templates.back")}
             </button>
 
             <h1
@@ -57,10 +60,10 @@ export function TemplatePickerView({ onBack, onReady, isUploading = false }: Tem
                     letterSpacing: "-0.03em",
                     margin: "0 0 6px",
                 }}>
-                Galerie de Templates
+                {t("templates.galleryTitle")}
             </h1>
             <p style={{ fontSize: "13.5px", color: "var(--gb-muted)", marginBottom: "22px" }}>
-                Tous nos templates sont optimisés ATS et conçus pour maximiser vos chances.
+                {t("templates.gallerySubtitle")}
             </p>
 
             <div style={{ display: "flex", gap: "12px", marginBottom: "24px", flexWrap: "wrap", alignItems: "center" }}>
@@ -89,7 +92,7 @@ export function TemplatePickerView({ onBack, onReady, isUploading = false }: Tem
                                 transition: "all 0.15s",
                                 fontFamily: "inherit",
                             }}>
-                            {cat === "all" ? "Tous" : cat === "ats" ? "ATS" : "Fancy"}
+                            {t(`templates.categories.${cat}`)}
                         </button>
                     ))}
                 </div>
@@ -109,7 +112,7 @@ export function TemplatePickerView({ onBack, onReady, isUploading = false }: Tem
                             transition: "all 0.15s",
                             fontFamily: "inherit",
                         }}>
-                        Tous les domaines
+                        {t("templates.allDomains")}
                     </button>
                     {ALL_DOMAINS.map((d) => (
                         <button
@@ -127,15 +130,14 @@ export function TemplatePickerView({ onBack, onReady, isUploading = false }: Tem
                                 transition: "all 0.15s",
                                 fontFamily: "inherit",
                             }}>
-                            {DOMAIN_LABELS[d]}
+                            {getDomainLabel(t, d)}
                         </button>
                     ))}
                 </div>
             </div>
 
             <p style={{ fontSize: "12px", color: "var(--gb-muted)", marginBottom: "14px" }}>
-                {filtered.length} template{filtered.length !== 1 ? "s" : ""} disponible
-                {filtered.length !== 1 ? "s" : ""}
+                {t("templates.availableCount", { count: filtered.length })}
             </p>
 
             {filtered.length === 0 ? (
@@ -148,7 +150,7 @@ export function TemplatePickerView({ onBack, onReady, isUploading = false }: Tem
                         borderRadius: "16px",
                     }}>
                     <p style={{ fontSize: "14px", color: "var(--gb-muted)" }}>
-                        Aucun template pour cette combinaison de filtres.
+                        {t("templates.emptyFilters")}
                     </p>
                     <button
                         onClick={() => {
@@ -166,7 +168,7 @@ export function TemplatePickerView({ onBack, onReady, isUploading = false }: Tem
                             cursor: "pointer",
                             fontFamily: "inherit",
                         }}>
-                        Réinitialiser les filtres
+                        {t("templates.resetFilters")}
                     </button>
                 </div>
             ) : (
@@ -176,12 +178,12 @@ export function TemplatePickerView({ onBack, onReady, isUploading = false }: Tem
                         gridTemplateColumns: "repeat(auto-fill, minmax(170px, 1fr))",
                         gap: "14px",
                     }}>
-                    {filtered.map((t) => (
+                    {filtered.map((tpl) => (
                         <TemplateCard
-                            key={t.id}
-                            template={t}
-                            isSelected={selected?.id === t.id}
-                            onClick={() => handleCardClick(t)}
+                            key={tpl.id}
+                            template={tpl}
+                            isSelected={selected?.id === tpl.id}
+                            onClick={() => handleCardClick(tpl)}
                         />
                     ))}
                 </div>

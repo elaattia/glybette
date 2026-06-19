@@ -7,6 +7,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { ConfirmActionDialog } from "@/components/ui/confirm-action-dialog";
 import { Input } from "@/components/ui/input";
 import { AdminTableSkeleton } from "@/pages/app/admin/components/admin-skeletons";
+import { useLocale } from "@/hooks/useLocale";
 
 type AdminProjectsResponse = {
     items: Array<{
@@ -19,6 +20,7 @@ type AdminProjectsResponse = {
 };
 
 export default function AdminProjectsManagementPage() {
+    const { t } = useLocale("admin");
     const queryClient = useQueryClient();
     const [search, setSearch] = useState("");
     const [targetProject, setTargetProject] = useState<AdminProjectsResponse["items"][number] | null>(null);
@@ -42,14 +44,14 @@ export default function AdminProjectsManagementPage() {
     return (
         <Card className="border-[var(--gb-border)] bg-[var(--gb-app-panel-bg)]">
             <CardHeader className="px-5 pt-5 md:px-6">
-                <CardTitle className="text-base text-[var(--gb-text)]">Projects management</CardTitle>
+                <CardTitle className="text-base text-[var(--gb-text)]">{t("projects.title")}</CardTitle>
             </CardHeader>
             <CardContent className="px-5 pb-5 md:px-6 md:pb-6">
                 <div className="mb-3">
                     <Input
                         value={search}
                         onChange={(event) => setSearch(event.currentTarget.value)}
-                        placeholder="Search by title, user, status, or project id"
+                        placeholder={t("projects.searchPlaceholder")}
                         className="max-w-xl"
                     />
                 </div>
@@ -57,59 +59,60 @@ export default function AdminProjectsManagementPage() {
                     <table className="w-full min-w-[760px] text-left text-sm">
                         <thead className="bg-[var(--gb-app-hover)] text-xs uppercase tracking-[0.08em] text-[var(--gb-muted)]">
                             <tr>
-                                <th className="px-3 py-2">Entity ID</th>
-                                <th className="px-3 py-2">Title</th>
-                                <th className="px-3 py-2">Status</th>
-                                <th className="px-3 py-2">User</th>
-                                <th className="px-3 py-2">Actions</th>
+                                <th className="px-3 py-2">{t("common.entityId")}</th>
+                                <th className="px-3 py-2">{t("common.title")}</th>
+                                <th className="px-3 py-2">{t("common.status")}</th>
+                                <th className="px-3 py-2">{t("common.user")}</th>
+                                <th className="px-3 py-2">{t("common.actions")}</th>
                             </tr>
                         </thead>
                         <tbody>
                             {query.isPending ? <AdminTableSkeleton columns={5} /> : null}
                             {!query.isPending
                                 ? filteredItems.map((item) => (
-                                <tr key={item.id} className="border-t border-[var(--gb-border)] text-[var(--gb-text)]">
-                                    <td className="px-3 py-2 text-[var(--gb-muted)]">
-                                        <Badge variant="outline" appearance="metadata">
-                                            {item.id}
-                                        </Badge>
-                                    </td>
-                                    <td className="px-3 py-2 font-medium">{item.title}</td>
-                                    <td className="px-3 py-2">
-                                        <Badge
-                                            variant="outline"
-                                            tone={
-                                                item.status === "published" || item.status === "active"
-                                                    ? "success"
-                                                    : item.status === "draft" || item.status === "archived"
-                                                      ? "warning"
-                                                      : "neutral"
-                                            }>
-                                            {item.status}
-                                        </Badge>
-                                    </td>
-                                    <td className="px-3 py-2">
-                                        <div className="flex flex-wrap items-center gap-1.5">
-                                            <Badge variant="secondary" tone="neutral">
-                                                {item.owner?.displayName ?? "Unknown owner"}
-                                            </Badge>
-                                            <Badge variant="outline" appearance="metadata">
-                                                {item.owner?.id ?? item.ownerId}
-                                            </Badge>
-                                        </div>
-                                    </td>
-                                    <td className="px-3 py-2">
-                                        <Button size="sm" variant="destructive" onClick={() => setTargetProject(item)}>
-                                            Delete
-                                        </Button>
-                                    </td>
-                                </tr>
-                            ))
+                                      <tr key={item.id} className="border-t border-[var(--gb-border)] text-[var(--gb-text)]">
+                                          <td className="px-3 py-2 text-[var(--gb-muted)]">
+                                              <Badge variant="outline" appearance="metadata">
+                                                  {item.id}
+                                              </Badge>
+                                          </td>
+                                          <td className="px-3 py-2 font-medium">{item.title}</td>
+                                          <td className="px-3 py-2">
+                                              <Badge
+                                                  variant="outline"
+                                                  tone={
+                                                      item.status === "published" || item.status === "active"
+                                                          ? "success"
+                                                          : item.status === "draft" || item.status === "archived"
+                                                            ? "warning"
+                                                            : "neutral"
+                                                  }
+                                              >
+                                                  {t(`common.projectStatus.${item.status}`, { defaultValue: item.status })}
+                                              </Badge>
+                                          </td>
+                                          <td className="px-3 py-2">
+                                              <div className="flex flex-wrap items-center gap-1.5">
+                                                  <Badge variant="secondary" tone="neutral">
+                                                      {item.owner?.displayName ?? t("common.unknownOwner")}
+                                                  </Badge>
+                                                  <Badge variant="outline" appearance="metadata">
+                                                      {item.owner?.id ?? item.ownerId}
+                                                  </Badge>
+                                              </div>
+                                          </td>
+                                          <td className="px-3 py-2">
+                                              <Button size="sm" variant="destructive" onClick={() => setTargetProject(item)}>
+                                                  {t("common.delete")}
+                                              </Button>
+                                          </td>
+                                      </tr>
+                                  ))
                                 : null}
                             {!query.isPending && filteredItems.length === 0 ? (
                                 <tr>
                                     <td colSpan={5} className="px-3 py-6 text-center text-sm text-[var(--gb-muted)]">
-                                        No projects found for this search.
+                                        {t("projects.empty")}
                                     </td>
                                 </tr>
                             ) : null}
@@ -122,13 +125,13 @@ export default function AdminProjectsManagementPage() {
                 onOpenChange={(open) => {
                     if (!open) setTargetProject(null);
                 }}
-                title="Delete project"
+                title={t("projects.deleteTitle")}
                 description={
                     targetProject
-                        ? `Delete project "${targetProject.title}" (${targetProject.id})? This cannot be undone.`
+                        ? t("projects.deleteDescription", { title: targetProject.title, id: targetProject.id })
                         : ""
                 }
-                confirmLabel="Delete project"
+                confirmLabel={t("projects.deleteProject")}
                 tone="danger"
                 onConfirm={() => {
                     if (targetProject) {

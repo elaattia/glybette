@@ -1,4 +1,6 @@
+import type { TFunction } from "i18next";
 import type { TemplateInfo, CvSection, CvTemplateDomain } from "./types/cv.types";
+import { getDefaultSkillGroups } from "./lib/cv-i18n";
 
 
 export const TEMPLATES: TemplateInfo[] = [
@@ -91,7 +93,11 @@ const BASE_SECTIONS = (): CvSection[] => [
     { type: "skills", order: 4, data: [] },
 ];
 
-const TECH_SECTIONS = (): CvSection[] => [
+const TECH_SECTIONS = (t?: TFunction): CvSection[] => {
+    const [hard, soft, devops] = t
+        ? getDefaultSkillGroups(t)
+        : (["Hard Skills", "Soft Skills", "DevOps & Tools"] as [string, string, string]);
+    return [
     {
         type: "personal-info",
         order: 0,
@@ -113,9 +119,9 @@ const TECH_SECTIONS = (): CvSection[] => [
         type: "skills",
         order: 2,
         data: [
-            { id: "sg1", category: "Hard Skills", skills: [] },
-            { id: "sg2", category: "Soft Skills", skills: [] },
-            { id: "sg3", category: "DevOps & Tools", skills: [] },
+            { id: "sg1", category: hard, skills: [] },
+            { id: "sg2", category: soft, skills: [] },
+            { id: "sg3", category: devops, skills: [] },
         ],
     },
     { type: "experience", order: 3, data: [] },
@@ -123,7 +129,8 @@ const TECH_SECTIONS = (): CvSection[] => [
     { type: "education", order: 5, data: [] },
     { type: "certifications", order: 6, data: [] },
     { type: "languages", order: 7, data: [] },
-];
+    ];
+};
 
 const IMPACT_SECTIONS = (): CvSection[] => [
     {
@@ -189,10 +196,10 @@ export function filterTemplates(
     });
 }
 
-export function makeDefaultSections(templateId?: string): CvSection[] {
+export function makeDefaultSections(templateId?: string, t?: TFunction): CvSection[] {
     switch (templateId) {
         case "tech":
-            return TECH_SECTIONS();
+            return TECH_SECTIONS(t);
         case "impact":
             return IMPACT_SECTIONS();
         case "classique":

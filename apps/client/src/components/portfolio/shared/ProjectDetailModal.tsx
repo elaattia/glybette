@@ -2,6 +2,7 @@ import { ExternalLink, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import type { PortfolioChrome, ProjectItem } from "@/components/portfolio/renderer-types";
 import type { PortfolioTemplateDefinition } from "@/components/portfolio/template-config";
+import { useLocale } from "@/hooks/useLocale";
 import { cn } from "@/lib/utils";
 
 type ProjectDetailModalProps = {
@@ -110,6 +111,8 @@ export function ProjectDetailModal({
     surfaceClassName,
     onClose,
 }: ProjectDetailModalProps) {
+    const { t } = useLocale("portfolio");
+
     if (!project) {
         return null;
     }
@@ -146,7 +149,7 @@ export function ProjectDetailModal({
                 ) : null}
                 {theme.decoration === "mono" ? (
                     <div className="pointer-events-none absolute right-4 top-4 text-xs font-black uppercase tracking-[0.24em] opacity-30">
-                        Case file
+                        {t("renderer.projectModal.caseFile")}
                     </div>
                 ) : null}
 
@@ -157,11 +160,11 @@ export function ProjectDetailModal({
                         theme.closeClassName,
                     )}
                     onClick={onClose}
-                    aria-label="Close project detail">
+                    aria-label={t("renderer.projectModal.closeAria")}>
                     <X className="size-4" />
                 </button>
 
-                <p className={cn("pr-12", theme.eyebrowClassName)}>Project details</p>
+                <p className={cn("pr-12", theme.eyebrowClassName)}>{t("renderer.projectModal.eyebrow")}</p>
                 <h2 id="project-detail-title" className={cn("pr-10", theme.titleClassName)}>
                     {project.title}
                 </h2>
@@ -171,12 +174,12 @@ export function ProjectDetailModal({
                         <Button className={theme.primaryClassName} asChild>
                             <a href={project.url} target="_blank" rel="noreferrer">
                                 <ExternalLink />
-                                Open project
+                                {t("renderer.projectModal.openProject")}
                             </a>
                         </Button>
                     ) : null}
                     <Button variant="outline" className={theme.secondaryClassName} onClick={onClose}>
-                        Close
+                        {t("renderer.projectModal.close")}
                     </Button>
                 </div>
             </div>

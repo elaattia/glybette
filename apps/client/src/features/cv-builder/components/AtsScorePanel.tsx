@@ -1,5 +1,7 @@
 import { useState } from "react";
 import { Target, ChevronDown, ChevronUp, AlertCircle, Lightbulb, Sparkles, Loader, CheckCircle, CheckSquare, AlertTriangle, ArrowUpCircle } from "lucide-react";
+import { useLocale } from "@/hooks/useLocale";
+import { getAtsBreakdownLabel } from "../lib/cv-i18n";
 import type { AtsScoreResult } from "../types/cv.types";
 
 interface AtsScorePanelProps {
@@ -11,6 +13,7 @@ interface AtsScorePanelProps {
 }
 
 export function AtsScorePanel({ score, result, isLoading, hasCvId, onCheck }: AtsScorePanelProps) {
+    const { t } = useLocale("cvBuilder");
     const [expanded, setExpanded] = useState(false);
     const [showInput, setShowInput] = useState(false);
     const [jobDesc, setJobDesc] = useState("");
@@ -47,7 +50,7 @@ export function AtsScorePanel({ score, result, isLoading, hasCvId, onCheck }: At
                 }}>
                 <div style={{ display: "flex", alignItems: "center", gap: "7px" }}>
                     <Target style={{ width: 14, height: 14, color }} />
-                    <span style={{ fontSize: "12.5px", fontWeight: 600, color: "var(--gb-text)" }}>ATS Score</span>
+                    <span style={{ fontSize: "12.5px", fontWeight: 600, color: "var(--gb-text)" }}>{t("ats.jobMatch.title")}</span>
                 </div>
                 <div style={{ display: "flex", alignItems: "center", gap: "8px" }}>
                     {displayScore != null && (
@@ -110,7 +113,7 @@ export function AtsScorePanel({ score, result, isLoading, hasCvId, onCheck }: At
                                 marginBottom: result ? "12px" : 0,
                             }}>
                             <Sparkles style={{ width: 12, height: 12 }} />
-                            {result ? "Analyser une autre offre" : "Analyser avec une offre"}
+                            {result ? t("ats.jobMatch.analyzeAnother") : t("ats.jobMatch.analyzeWithOffer")}
                         </button>
                     )}
 
@@ -126,12 +129,12 @@ export function AtsScorePanel({ score, result, isLoading, hasCvId, onCheck }: At
                                     letterSpacing: "0.05em",
                                     marginBottom: "6px",
                                 }}>
-                                Description du poste
+                                {t("ats.jobMatch.jobDescription")}
                             </label>
                             <textarea
                                 value={jobDesc}
                                 onChange={(e) => setJobDesc(e.target.value)}
-                                placeholder="Collez la description de l'offre ici..."
+                                placeholder={t("ats.jobMatch.jobDescriptionPlaceholder")}
                                 rows={4}
                                 style={{
                                     width: "100%",
@@ -176,7 +179,7 @@ export function AtsScorePanel({ score, result, isLoading, hasCvId, onCheck }: At
                                     ) : (
                                         <Target style={{ width: 12, height: 12 }} />
                                     )}
-                                    {isLoading ? "Analyse..." : "Analyser"}
+                                    {isLoading ? t("ats.jobMatch.analyzing") : t("ats.jobMatch.analyze")}
                                 </button>
                                 <button
                                     onClick={() => setShowInput(false)}
@@ -189,7 +192,7 @@ export function AtsScorePanel({ score, result, isLoading, hasCvId, onCheck }: At
                                         color: "var(--gb-muted)",
                                         cursor: "pointer",
                                     }}>
-                                    Annuler
+                                    {t("ats.jobMatch.cancel")}
                                 </button>
                             </div>
                         </div>
@@ -205,12 +208,6 @@ export function AtsScorePanel({ score, result, isLoading, hasCvId, onCheck }: At
                                         gap: "6px",
                                     }}>
                                     {Object.entries(result.breakdown).map(([key, val]) => {
-                                        const labels: Record<string, string> = {
-                                            keywordMatch: "Mots-clés",
-                                            formatting: "Mise en forme",
-                                            completeness: "Complétude",
-                                            relevance: "Pertinence",
-                                        };
                                         const c = val >= 80 ? "#16A34A" : val >= 60 ? "#ca8a04" : "#dc2626";
                                         return (
                                             <div
@@ -227,7 +224,7 @@ export function AtsScorePanel({ score, result, isLoading, hasCvId, onCheck }: At
                                                         marginBottom: "4px",
                                                     }}>
                                                     <span style={{ fontSize: "10.5px", color: "var(--gb-muted)" }}>
-                                                        {labels[key] ?? key}
+                                                        {getAtsBreakdownLabel(t, key)}
                                                     </span>
                                                     <span style={{ fontSize: "11px", fontWeight: 700, color: c }}>
                                                         {val}%
@@ -270,7 +267,7 @@ export function AtsScorePanel({ score, result, isLoading, hasCvId, onCheck }: At
                                             letterSpacing: "0.05em",
                                         }}>
                                         <AlertCircle style={{ width: 11, height: 11, color: "#ca8a04" }} />
-                                        Mots-clés manquants
+                                        {t("ats.missingKeywords")}
                                     </p>
                                     <div style={{ display: "flex", flexWrap: "wrap", gap: "4px" }}>
                                         {result.missingKeywords.map((kw) => (
@@ -306,7 +303,7 @@ export function AtsScorePanel({ score, result, isLoading, hasCvId, onCheck }: At
                                             letterSpacing: "0.05em",
                                         }}>
                                         <CheckCircle style={{ width: 11, height: 11, color: "#16A34A" }} />
-                                        Mots-clés présents
+                                        {t("ats.matchedKeywords")}
                                     </p>
                                     <div style={{ display: "flex", flexWrap: "wrap", gap: "4px" }}>
                                         {result.matchedKeywords.map((kw) => (
@@ -331,7 +328,7 @@ export function AtsScorePanel({ score, result, isLoading, hasCvId, onCheck }: At
                                 <div>
                                     <p style={{ display: "flex", alignItems: "center", gap: "4px", fontSize: "11px", fontWeight: 700, color: "var(--gb-muted)", margin: "0 0 6px", textTransform: "uppercase", letterSpacing: "0.05em" }}>
                                         <CheckSquare style={{ width: 11, height: 11, color: "#16A34A" }} />
-                                        Points forts
+                                        {t("ats.strengths")}
                                     </p>
                                     {(result as any).strengths.map((s: string, i: number) => (
                                         <div key={i} style={{ background: "rgba(22,163,74,0.06)", border: "1px solid rgba(22,163,74,0.15)", borderRadius: "8px", padding: "8px 10px", marginBottom: "5px", fontSize: "11.5px", color: "var(--gb-text-off)", lineHeight: 1.5 }}>
@@ -345,7 +342,7 @@ export function AtsScorePanel({ score, result, isLoading, hasCvId, onCheck }: At
                                 <div>
                                     <p style={{ display: "flex", alignItems: "center", gap: "4px", fontSize: "11px", fontWeight: 700, color: "var(--gb-muted)", margin: "0 0 6px", textTransform: "uppercase", letterSpacing: "0.05em" }}>
                                         <AlertTriangle style={{ width: 11, height: 11, color: "#dc2626" }} />
-                                        Points faibles
+                                        {t("ats.weaknesses")}
                                     </p>
                                     {(result as any).weaknesses.map((w: string, i: number) => (
                                         <div key={i} style={{ background: "rgba(220,38,38,0.06)", border: "1px solid rgba(220,38,38,0.15)", borderRadius: "8px", padding: "8px 10px", marginBottom: "5px", fontSize: "11.5px", color: "var(--gb-text-off)", lineHeight: 1.5 }}>
@@ -359,7 +356,7 @@ export function AtsScorePanel({ score, result, isLoading, hasCvId, onCheck }: At
                                 <div>
                                     <p style={{ display: "flex", alignItems: "center", gap: "4px", fontSize: "11px", fontWeight: 700, color: "var(--gb-muted)", margin: "0 0 6px", textTransform: "uppercase", letterSpacing: "0.05em" }}>
                                         <Lightbulb style={{ width: 11, height: 11, color: "#0284C7" }} />
-                                        Conseils d'amélioration
+                                        {t("ats.tips")}
                                     </p>
                                     {(result as any).tips.map((t: string, i: number) => (
                                         <div key={i} style={{ background: "rgba(2,132,199,0.06)", border: "1px solid rgba(2,132,199,0.15)", borderRadius: "8px", padding: "8px 10px", marginBottom: "5px", fontSize: "11.5px", color: "var(--gb-text-off)", lineHeight: 1.5 }}>
@@ -373,7 +370,7 @@ export function AtsScorePanel({ score, result, isLoading, hasCvId, onCheck }: At
                                 <div>
                                     <p style={{ display: "flex", alignItems: "center", gap: "4px", fontSize: "11px", fontWeight: 700, color: "var(--gb-muted)", margin: "0 0 6px", textTransform: "uppercase", letterSpacing: "0.05em" }}>
                                         <ArrowUpCircle style={{ width: 11, height: 11, color: "#16A34A" }} />
-                                        Suggestions
+                                        {t("ats.suggestions")}
                                     </p>
                                     {result.suggestions.map((s: string, i: number) => (
                                         <div key={i} style={{ background: "rgba(22,163,74,0.06)", border: "1px solid rgba(22,163,74,0.15)", borderRadius: "8px", padding: "8px 10px", marginBottom: "5px", fontSize: "11.5px", color: "var(--gb-text-off)", lineHeight: 1.5 }}>

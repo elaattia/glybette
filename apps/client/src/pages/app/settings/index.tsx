@@ -1,4 +1,5 @@
 import { type ReactNode, useEffect, useMemo, useState } from "react";
+import { useTranslation } from "react-i18next";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useNavigate } from "react-router-dom";
 import { CheckCircle2 } from "lucide-react";
@@ -7,10 +8,13 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { GitHubIcon, GoogleIcon, LinkedInIcon } from "@/components/auth/AuthProviderIcons";
 import { useAuth } from "@/hooks/useAuth";
 import { useEmailVerification, verificationQueryKeys } from "@/hooks/useEmailVerification";
+import { useLocale } from "@/hooks/useLocale";
 import { useUser, userQueryKeys } from "@/hooks/useUser";
+import type { AppLocale } from "@/i18n";
 import { ApiError, apiRequest } from "@/lib/api";
 import { cn } from "@/lib/utils";
 import type { AuthProvider, OwnAccountResponse, OwnProfileResponse } from "@glybette/contracts";
@@ -25,27 +29,23 @@ const CONNECTED_PROVIDER_BUTTON =
 
 const CONNECTABLE_PROVIDERS: Array<{
     provider: Extract<AuthProvider, "google" | "github" | "linkedin">;
-    label: string;
     icon: ReactNode;
     disconnectClassName: string;
 }> = [
     {
         provider: "google",
-        label: "Google",
         icon: <GoogleIcon />,
         disconnectClassName:
             "border-[#dadce0] bg-white text-[#1f1f1f] hover:border-[#aecbfa] hover:bg-[#f8f9fa] hover:shadow-[0_1px_2px_rgba(66,133,244,0.2)] dark:border-[var(--gb-border)] dark:bg-[var(--gb-surface2)] dark:text-[var(--gb-text)] dark:hover:border-[#4285f4]/45 dark:hover:bg-[#4285f4]/10",
     },
     {
         provider: "github",
-        label: "GitHub",
         icon: <GitHubIcon />,
         disconnectClassName:
             "border-[#30363d] bg-[#0d1117] text-[#f0f6fc] hover:border-[#8b949e] hover:bg-[#161b22] hover:shadow-[0_1px_2px_rgba(0,0,0,0.35)] dark:border-[#30363d] dark:bg-[#0d1117] dark:text-[#f0f6fc] dark:hover:border-[#8b949e] dark:hover:bg-[#161b22]",
     },
     {
         provider: "linkedin",
-        label: "LinkedIn",
         icon: <LinkedInIcon />,
         disconnectClassName:
             "border-[#0a66c2] bg-[#0a66c2] text-white hover:border-[#004182] hover:bg-[#004182] hover:shadow-[0_1px_2px_rgba(0,65,130,0.35)] dark:border-[#0a66c2] dark:bg-[#0a66c2] dark:text-white dark:hover:border-[#93c5fd] dark:hover:bg-[#004182]",
@@ -53,6 +53,8 @@ const CONNECTABLE_PROVIDERS: Array<{
 ];
 
 export default function SettingsPage() {
+    const { t } = useTranslation("common");
+    const { locale, setLocale } = useLocale("common");
     const navigate = useNavigate();
     const queryClient = useQueryClient();
     const auth = useAuth();
@@ -111,7 +113,7 @@ export default function SettingsPage() {
         onSuccess: async (result) => {
             await queryClient.invalidateQueries({ queryKey: userQueryKeys.me });
             await queryClient.invalidateQueries({ queryKey: verificationQueryKeys.status });
-            setAccountFeedback("Account details updated.");
+            setAccountFeedback(t("settings.account.updated"));
 
             if (result.requiresEmailVerification) {
                 try {
@@ -131,7 +133,7 @@ export default function SettingsPage() {
                 body: JSON.stringify({ profile: payload }),
             }),
         onSuccess: () => {
-            setProfileFeedback("Contact information updated.");
+            setProfileFeedback(t("settings.contact.updated"));
             void queryClient.invalidateQueries({ queryKey: ["user", "settings-profile"] });
         },
     });
@@ -144,7 +146,9 @@ export default function SettingsPage() {
             });
         },
         onSuccess: async () => {
-            setPasswordFeedback(hasPasswordCredentials ? "Password updated successfully." : "Password set successfully.");
+            setPasswordFeedback(
+                hasPasswordCredentials ? t("settings.security.passwordUpdated") : t("settings.security.passwordSet"),
+            );
             setPasswordForm({ currentPassword: "", newPassword: "", confirmPassword: "" });
             await queryClient.invalidateQueries({ queryKey: userQueryKeys.me });
         },
@@ -174,8 +178,8 @@ export default function SettingsPage() {
         <div className="mx-auto max-w-4xl space-y-4">
             <Card className="border-[var(--gb-border)] bg-[var(--gb-app-panel-bg)]">
                 <CardHeader className="px-5 pt-5 md:px-6">
-                    <CardTitle className="text-base text-[var(--gb-text)]">Account</CardTitle>
-                    <CardDescription>Update your identity and email address.</CardDescription>
+                    <CardTitle className="text-base text-[var(--gb-text)]">{t("settings.account.title")}</CardTitle>
+                    <CardDescription>{t("settings.account.description")}</CardDescription>
                 </CardHeader>
                 <CardContent className="px-5 pb-5 md:px-6 md:pb-6">
                     <form
@@ -191,7 +195,7 @@ export default function SettingsPage() {
                                         email: accountForm.email.trim(),
                                     });
                                 } catch (error) {
-                                    setAccountFeedback(handleApiError(error, "Unable to update account."));
+                                    setAccountFeedback(handleApiError(error, t("settings.account.updateError")));
                                 }
                             };
                             void run();
@@ -200,13 +204,13 @@ export default function SettingsPage() {
                             <Input
                                 value={accountForm.firstName}
                                 onChange={(event) => setAccountForm((prev) => ({ ...prev, firstName: event.target.value }))}
-                                placeholder="First name"
+                                placeholder={t("settings.account.firstNamePlaceholder")}
                                 required
                             />
                             <Input
                                 value={accountForm.lastName}
                                 onChange={(event) => setAccountForm((prev) => ({ ...prev, lastName: event.target.value }))}
-                                placeholder="Last name"
+                                placeholder={t("settings.account.lastNamePlaceholder")}
                                 required
                             />
                         </div>
@@ -214,22 +218,24 @@ export default function SettingsPage() {
                             type="email"
                             value={accountForm.email}
                             onChange={(event) => setAccountForm((prev) => ({ ...prev, email: event.target.value }))}
-                            placeholder="Email"
+                            placeholder={t("settings.account.emailPlaceholder")}
                             required
                         />
                         <div className="flex flex-wrap items-center gap-2">
                             <Badge variant="outline" tone={user?.emailVerified ? "success" : "warning"}>
-                                {user?.emailVerified ? "Verified email" : "Email verification required"}
+                                {user?.emailVerified
+                                    ? t("settings.account.verifiedEmail")
+                                    : t("settings.account.verificationRequired")}
                             </Badge>
                             {accountNamePreview ? (
                                 <Badge variant="outline" tone="neutral">
-                                    Full Name: {accountNamePreview}
+                                    {t("settings.account.fullNameBadge", { name: accountNamePreview })}
                                 </Badge>
                             ) : null}
                         </div>
                         {accountFeedback ? <p className="text-sm text-[var(--gb-muted)]">{accountFeedback}</p> : null}
                         <Button type="submit" disabled={accountMutation.isPending}>
-                            {accountMutation.isPending ? "Saving..." : "Save account"}
+                            {accountMutation.isPending ? t("actions.saving") : t("actions.saveAccount")}
                         </Button>
                     </form>
                 </CardContent>
@@ -237,8 +243,26 @@ export default function SettingsPage() {
 
             <Card className="border-[var(--gb-border)] bg-[var(--gb-app-panel-bg)]">
                 <CardHeader className="px-5 pt-5 md:px-6">
-                    <CardTitle className="text-base text-[var(--gb-text)]">Contact profile</CardTitle>
-                    <CardDescription>Manage phone and location used across your account.</CardDescription>
+                    <CardTitle className="text-base text-[var(--gb-text)]">{t("language.label")}</CardTitle>
+                    <CardDescription>{t("language.description")}</CardDescription>
+                </CardHeader>
+                <CardContent className="px-5 pb-5 md:px-6 md:pb-6">
+                    <Select value={locale} onValueChange={(value) => setLocale(value as AppLocale)}>
+                        <SelectTrigger className="w-full max-w-xs">
+                            <SelectValue />
+                        </SelectTrigger>
+                        <SelectContent>
+                            <SelectItem value="en">{t("language.en")}</SelectItem>
+                            <SelectItem value="fr">{t("language.fr")}</SelectItem>
+                        </SelectContent>
+                    </Select>
+                </CardContent>
+            </Card>
+
+            <Card className="border-[var(--gb-border)] bg-[var(--gb-app-panel-bg)]">
+                <CardHeader className="px-5 pt-5 md:px-6">
+                    <CardTitle className="text-base text-[var(--gb-text)]">{t("settings.contact.title")}</CardTitle>
+                    <CardDescription>{t("settings.contact.description")}</CardDescription>
                 </CardHeader>
                 <CardContent className="px-5 pb-5 md:px-6 md:pb-6">
                     <form
@@ -253,7 +277,7 @@ export default function SettingsPage() {
                                         location: profileForm.location.trim() || undefined,
                                     });
                                 } catch (error) {
-                                    setProfileFeedback(handleApiError(error, "Unable to update profile."));
+                                    setProfileFeedback(handleApiError(error, t("settings.contact.updateError")));
                                 }
                             };
                             void run();
@@ -261,17 +285,19 @@ export default function SettingsPage() {
                         <Input
                             value={profileForm.phone}
                             onChange={(event) => setProfileForm((prev) => ({ ...prev, phone: event.target.value }))}
-                            placeholder="Phone number"
+                            placeholder={t("settings.contact.phonePlaceholder")}
                         />
                         <Input
                             value={profileForm.location}
                             onChange={(event) => setProfileForm((prev) => ({ ...prev, location: event.target.value }))}
-                            placeholder="Location"
+                            placeholder={t("settings.contact.locationPlaceholder")}
                         />
-                        {profileQuery.isPending ? <p className="text-sm text-[var(--gb-muted)]">Loading contact profile...</p> : null}
+                        {profileQuery.isPending ? (
+                            <p className="text-sm text-[var(--gb-muted)]">{t("settings.contact.loading")}</p>
+                        ) : null}
                         {profileFeedback ? <p className="text-sm text-[var(--gb-muted)]">{profileFeedback}</p> : null}
                         <Button type="submit" disabled={profileMutation.isPending}>
-                            {profileMutation.isPending ? "Saving..." : "Save contact profile"}
+                            {profileMutation.isPending ? t("actions.saving") : t("actions.saveContactProfile")}
                         </Button>
                     </form>
                 </CardContent>
@@ -279,11 +305,11 @@ export default function SettingsPage() {
 
             <Card className="border-[var(--gb-border)] bg-[var(--gb-app-panel-bg)]">
                 <CardHeader className="px-5 pt-5 md:px-6">
-                    <CardTitle className="text-base text-[var(--gb-text)]">Security</CardTitle>
+                    <CardTitle className="text-base text-[var(--gb-text)]">{t("settings.security.title")}</CardTitle>
                     <CardDescription>
                         {hasPasswordCredentials
-                            ? "Change your password for email/password sign-in."
-                            : "Set a password to enable email/password sign-in for this account."}
+                            ? t("settings.security.changePasswordDescription")
+                            : t("settings.security.setPasswordDescription")}
                     </CardDescription>
                 </CardHeader>
                 <CardContent className="px-5 pb-5 md:px-6 md:pb-6">
@@ -293,7 +319,7 @@ export default function SettingsPage() {
                             event.preventDefault();
                             setPasswordFeedback(null);
                             if (passwordForm.newPassword !== passwordForm.confirmPassword) {
-                                setPasswordFeedback("New password and confirmation must match.");
+                                setPasswordFeedback(t("settings.security.passwordMismatch"));
                                 return;
                             }
                             const run = async () => {
@@ -306,7 +332,9 @@ export default function SettingsPage() {
                                     setPasswordFeedback(
                                         handleApiError(
                                             error,
-                                            hasPasswordCredentials ? "Unable to change password." : "Unable to set password.",
+                                            hasPasswordCredentials
+                                                ? t("settings.security.changePasswordError")
+                                                : t("settings.security.setPasswordError"),
                                         ),
                                     );
                                 }
@@ -320,7 +348,7 @@ export default function SettingsPage() {
                                 onChange={(event) =>
                                     setPasswordForm((prev) => ({ ...prev, currentPassword: event.target.value }))
                                 }
-                                placeholder="Current password"
+                                placeholder={t("settings.security.currentPasswordPlaceholder")}
                                 required
                             />
                         ) : null}
@@ -328,7 +356,7 @@ export default function SettingsPage() {
                             type="password"
                             value={passwordForm.newPassword}
                             onChange={(event) => setPasswordForm((prev) => ({ ...prev, newPassword: event.target.value }))}
-                            placeholder="New password"
+                            placeholder={t("settings.security.newPasswordPlaceholder")}
                             required
                         />
                         <Input
@@ -337,12 +365,16 @@ export default function SettingsPage() {
                             onChange={(event) =>
                                 setPasswordForm((prev) => ({ ...prev, confirmPassword: event.target.value }))
                             }
-                            placeholder="Confirm new password"
+                            placeholder={t("settings.security.confirmPasswordPlaceholder")}
                             required
                         />
                         {passwordFeedback ? <p className="text-sm text-[var(--gb-muted)]">{passwordFeedback}</p> : null}
                         <Button type="submit" disabled={passwordMutation.isPending}>
-                            {passwordMutation.isPending ? "Updating..." : hasPasswordCredentials ? "Change password" : "Set password"}
+                            {passwordMutation.isPending
+                                ? t("actions.updating")
+                                : hasPasswordCredentials
+                                  ? t("settings.security.changePassword")
+                                  : t("settings.security.setPassword")}
                         </Button>
                     </form>
                 </CardContent>
@@ -350,12 +382,13 @@ export default function SettingsPage() {
 
             <Card className="border-[var(--gb-border)] bg-[var(--gb-app-panel-bg)]">
                 <CardHeader className="px-5 pt-5 md:px-6">
-                    <CardTitle className="text-base text-[var(--gb-text)]">Connected accounts</CardTitle>
-                    <CardDescription>Manage sign-in providers linked to your account.</CardDescription>
+                    <CardTitle className="text-base text-[var(--gb-text)]">{t("settings.providers.title")}</CardTitle>
+                    <CardDescription>{t("settings.providers.description")}</CardDescription>
                 </CardHeader>
                 <CardContent className="grid gap-3 px-5 pb-5 md:grid-cols-2 md:px-6 md:pb-6">
                     {CONNECTABLE_PROVIDERS.map((providerItem) => {
                         const isConnected = connectedProviders.has(providerItem.provider);
+                        const providerLabel = t(`settings.providers.${providerItem.provider}`);
                         return (
                             <button
                                 key={providerItem.provider}
@@ -369,10 +402,10 @@ export default function SettingsPage() {
                                 {isConnected ? (
                                     <span className="inline-flex items-center gap-1.5">
                                         <CheckCircle2 className="h-4 w-4 shrink-0 text-white dark:text-emerald-50" aria-hidden />
-                                        <span>{`Connected to ${providerItem.label}`}</span>
+                                        <span>{t("settings.providers.connected", { provider: providerLabel })}</span>
                                     </span>
                                 ) : (
-                                    <span>{`Connect to ${providerItem.label}`}</span>
+                                    <span>{t("settings.providers.connect", { provider: providerLabel })}</span>
                                 )}
                             </button>
                         );
@@ -382,12 +415,12 @@ export default function SettingsPage() {
 
             <Card className="border-red-500/30 bg-[var(--gb-app-panel-bg)]">
                 <CardHeader className="px-5 pt-5 md:px-6">
-                    <CardTitle className="text-base text-red-400">Danger zone</CardTitle>
-                    <CardDescription>Permanently delete your account and all active sessions.</CardDescription>
+                    <CardTitle className="text-base text-red-400">{t("settings.dangerZone.title")}</CardTitle>
+                    <CardDescription>{t("settings.dangerZone.description")}</CardDescription>
                 </CardHeader>
                 <CardContent className="px-5 pb-5 md:px-6 md:pb-6">
                     <Button type="button" variant="destructive" onClick={() => setDeleteOpen(true)}>
-                        Delete account
+                        {t("settings.dangerZone.deleteAccount")}
                     </Button>
                 </CardContent>
             </Card>
@@ -403,10 +436,12 @@ export default function SettingsPage() {
                 }}>
                 <DialogContent showCloseButton={false}>
                     <DialogHeader>
-                        <DialogTitle className="text-2xl">Delete account</DialogTitle>
+                        <DialogTitle className="text-2xl">{t("settings.deleteDialog.title")}</DialogTitle>
                         <DialogDescription>
-                            Type <span className="font-semibold">{ACCOUNT_DELETE_PHRASE}</span> to confirm.
-                            {requiresPasswordForDelete ? " Enter your current password to continue." : " Password is optional for this provider."}
+                            {t("settings.deleteDialog.descriptionPrefix", { phrase: ACCOUNT_DELETE_PHRASE })}
+                            {requiresPasswordForDelete
+                                ? ` ${t("settings.deleteDialog.descriptionSuffixPasswordRequired")}`
+                                : ` ${t("settings.deleteDialog.descriptionSuffixPasswordOptional")}`}
                         </DialogDescription>
                     </DialogHeader>
 
@@ -422,14 +457,18 @@ export default function SettingsPage() {
                             type="password"
                             value={deleteForm.password}
                             onChange={(event) => setDeleteForm((prev) => ({ ...prev, password: event.target.value }))}
-                            placeholder={requiresPasswordForDelete ? "Current password (required)" : "Current password (optional)"}
+                            placeholder={
+                                requiresPasswordForDelete
+                                    ? t("settings.deleteDialog.passwordRequiredPlaceholder")
+                                    : t("settings.deleteDialog.passwordOptionalPlaceholder")
+                            }
                         />
                         {deleteFeedback ? <p className="text-sm text-red-300">{deleteFeedback}</p> : null}
                     </div>
 
                     <DialogFooter>
                         <Button type="button" variant="outline" onClick={() => setDeleteOpen(false)} disabled={deleteMutation.isPending}>
-                            Cancel
+                            {t("actions.cancel")}
                         </Button>
                         <Button
                             type="button"
@@ -438,11 +477,13 @@ export default function SettingsPage() {
                             onClick={() => {
                                 setDeleteFeedback(null);
                                 if (deleteForm.confirmText.trim() !== ACCOUNT_DELETE_PHRASE) {
-                                    setDeleteFeedback(`Please type exactly: ${ACCOUNT_DELETE_PHRASE}`);
+                                    setDeleteFeedback(
+                                        t("settings.deleteDialog.confirmPhraseError", { phrase: ACCOUNT_DELETE_PHRASE }),
+                                    );
                                     return;
                                 }
                                 if (requiresPasswordForDelete && !deleteForm.password) {
-                                    setDeleteFeedback("Current password is required for email/password accounts.");
+                                    setDeleteFeedback(t("settings.deleteDialog.passwordRequiredError"));
                                     return;
                                 }
                                 const run = async () => {
@@ -451,12 +492,12 @@ export default function SettingsPage() {
                                             password: deleteForm.password.trim() || undefined,
                                         });
                                     } catch (error) {
-                                        setDeleteFeedback(handleApiError(error, "Unable to delete account."));
+                                        setDeleteFeedback(handleApiError(error, t("settings.deleteDialog.deleteError")));
                                     }
                                 };
                                 void run();
                             }}>
-                            {deleteMutation.isPending ? "Deleting..." : "Delete permanently"}
+                            {deleteMutation.isPending ? t("actions.deleting") : t("actions.deletePermanently")}
                         </Button>
                     </DialogFooter>
                 </DialogContent>

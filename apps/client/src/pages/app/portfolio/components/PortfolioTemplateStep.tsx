@@ -1,23 +1,25 @@
 import type { CSSProperties } from "react";
 import type { PortfolioTemplateId } from "@glybette/contracts";
-import { portfolioTemplates } from "@/components/portfolio/template-config";
+import { getLocalizedTemplates } from "@/components/portfolio/portfolio-i18n";
 import { cn } from "@/lib/utils";
+import { useLocale } from "@/hooks/useLocale";
 
 type PortfolioTemplateStepProps = {
     onChooseTemplate: (templateId: PortfolioTemplateId) => void;
 };
 
 export function PortfolioTemplateStep({ onChooseTemplate }: PortfolioTemplateStepProps) {
+    const { t } = useLocale("portfolio");
+    const portfolioTemplates = getLocalizedTemplates(t);
+
     return (
         <div className="space-y-5">
             <div>
-                <p className="gb-sec-label">Portfolio templates</p>
+                <p className="gb-sec-label">{t("builder.templateStep.sectionLabel")}</p>
                 <h1 className="font-['Bricolage_Grotesque'] text-3xl font-semibold tracking-[-0.04em]">
-                    Pick a starting point
+                    {t("builder.templateStep.title")}
                 </h1>
-                <p className="mt-2 text-sm text-[var(--gb-muted)]">
-                    Templates define layout rules, component styling, and the grid your blocks snap to.
-                </p>
+                <p className="mt-2 text-sm text-[var(--gb-muted)]">{t("builder.templateStep.description")}</p>
             </div>
             <div className="grid gap-4 lg:grid-cols-3">
                 {portfolioTemplates.map((template) => (

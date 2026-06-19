@@ -17,6 +17,7 @@ export type {
     SuggestionsResult,
     EnhanceResult,
     CoverLetterResult,
+    TailorResult,
     ExtractResult,
     ThemeSettings,
 } from "@glybette/types";

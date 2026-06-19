@@ -1,5 +1,4 @@
-import { API_BASE_URL } from "../../../config";
-import type { ApplicationsResponse, EnterpriseApplicationsResponse } from "@glybette/contracts";
+import { API_BASE_URL } from "@/config";
 
 const JOBS_API = `${API_BASE_URL}/api/jobs`;
 

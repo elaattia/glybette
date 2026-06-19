@@ -1,4 +1,5 @@
 import "@/styles/home/cta.css";
+import { useTranslation } from "react-i18next";
 
 function useReveal() {
     return (el: HTMLElement | null) => {
@@ -18,30 +19,29 @@ function useReveal() {
 }
 
 export default function CTA() {
+    const { t } = useTranslation("landing");
     const reveal = useReveal();
+
     return (
         <div className="gb-cta-wrap" ref={reveal}>
             <div className="gb-cta-box">
                 <div className="gb-cta-deco-1" />
                 <div className="gb-cta-deco-2" />
                 <h2>
-                    Ready to start
+                    {t("cta.titleLine1")}
                     <br />
-                    your journey?
+                    {t("cta.titleLine2")}
                 </h2>
-                <p>
-                    Join thousands of students and professionals using Glybette to find their next career defining
-                    opportunity.
-                </p>
+                <p>{t("cta.subtitle")}</p>
                 <div className="gb-cta-actions">
                     <a href="/onboarding" className="gb-cta-primary">
-                        Create My Free Profile <span className="gb-arr">→</span>
+                        {t("cta.createProfile")} <span className="gb-arr">→</span>
                     </a>
                     <a href="#features" className="gb-cta-secondary">
-                        See Features
+                        {t("cta.seeFeatures")}
                     </a>
                 </div>
-                <p className="gb-cta-note">Free to start · No credit card · Takes 2 minutes</p>
+                <p className="gb-cta-note">{t("cta.note")}</p>
             </div>
         </div>
     );

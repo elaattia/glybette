@@ -1,4 +1,5 @@
 import type { ReactNode } from "react";
+import type { TFunction } from "i18next";
 import { Globe, Briefcase, BookOpen, Leaf, Sparkles } from "lucide-react";
 import React from "react";
 
@@ -22,45 +23,30 @@ export const SOURCE_ICONS: Record<string, ReactNode> = {
     "pfebooks.com":    React.createElement(BookOpen, { size: 16 }),
 };
 
-export const SOURCE_LABELS: Record<string, string> = {
-    entreprise_partenaire: "Partenaire Glybette", indeed: "Indeed", linkedin: "LinkedIn", welcometothejungle: "WTTJ", "pfebooks.com": "PFEBooks",
-};
+export function getFilterLabel(t: TFunction, category: string, value: string): string {
+    const key = `constants.filterLabels.${category}.${value}`;
+    const translated = t(key, { defaultValue: "" });
+    return translated || value;
+}
 
-export const FILTER_LABELS: Record<string, Record<string, string>> = {
-    type_offre:        { emploi: "Emploi", stage: "Stage", pfe: "PFE", opportunite: "Opportunité" },
-    source:            { entreprise_partenaire: "Partenaire Glybette", indeed: "Indeed", linkedin: "LinkedIn", welcometothejungle: "WTTJ", "pfebooks.com": "PFEBooks" },
-    date_posted:       { today: "Aujourd'hui", this_week: "Cette semaine", "3days": "3 derniers jours", this_hour: "Cette heure" },
-    teletravail:       { remote: "Full Remote", hybrid: "Hybride", onsite: "Présentiel" },
-    niveau_experience: { junior: "Junior", mid: "Intermédiaire", senior: "Senior" },
-};
+export function getSourceLabel(t: TFunction, source: string): string {
+    return t(`constants.sourceLabels.${source}`, { defaultValue: source });
+}
+
+export function getScoreLabel(t: TFunction, score: number): string {
+    if (score >= 85) return t("constants.scoreLabel.excellent");
+    if (score >= 65) return t("constants.scoreLabel.good");
+    return t("constants.scoreLabel.partial");
+}
 
 export function getTypeColors(type: string) {
     return TYPE_COLORS[type?.toLowerCase()] ?? FALLBACK_COLORS;
-}
-
-export function timeAgo(dateStr?: string | null): string {
-    if (!dateStr) return "Récemment";
-    const date = new Date(dateStr);
-    if (isNaN(date.getTime())) return "Récemment";
-    const diff = Math.floor((Date.now() - date.getTime()) / 1000);
-    if (diff < 0) return "À l'instant";
-    if (diff < 60) return "À l'instant";
-    if (diff < 3600) return `Il y a ${Math.floor(diff / 60)}min`;
-    if (diff < 86400) return `Il y a ${Math.floor(diff / 3600)}h`;
-    if (diff < 604800) return `Il y a ${Math.floor(diff / 86400)}j`;
-    return date.toLocaleDateString("fr-FR", { day: "numeric", month: "short" });
 }
 
 export function scoreColor(score: number) {
     if (score >= 85) return "#22c55e";
     if (score >= 65) return "#f59e0b";
     return "#ef4444";
-}
-
-export function scoreLabel(score: number) {
-    if (score >= 85) return "Excellent match";
-    if (score >= 65) return "Bon match";
-    return "Match partiel";
 }
 
 export function buildPageRange(current: number, total: number): (number | "…")[] {

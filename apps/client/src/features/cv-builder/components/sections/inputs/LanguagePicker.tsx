@@ -1,5 +1,6 @@
 import { useState, useRef, useEffect } from "react";
 import { Globe, ChevronDown, Search } from "lucide-react";
+import { useLocale } from "@/hooks/useLocale";
 import { inputCss } from "../primitives";
 
 const LANGUAGES_LIST = [
@@ -16,6 +17,7 @@ interface LanguagePickerProps {
 }
 
 export function LanguagePicker({ value, onChange }: LanguagePickerProps) {
+    const { t } = useLocale("cvBuilder");
     const [open, setOpen] = useState(false);
     const [search, setSearch] = useState("");
     const ref = useRef<HTMLDivElement>(null);
@@ -39,7 +41,7 @@ export function LanguagePicker({ value, onChange }: LanguagePickerProps) {
                 <div style={{ display: "flex", alignItems: "center", gap: "6px" }}>
                     <Globe style={{ width: 13, height: 13, color: "var(--gb-muted)", flexShrink: 0 }} />
                     <span style={{ color: value ? "var(--gb-text)" : "var(--gb-muted)", fontSize: "13px" }}>
-                        {value || "Sélectionner une langue"}
+                        {value || t("sections.languages.picker.select")}
                     </span>
                 </div>
                 <ChevronDown style={{ width: 13, height: 13, color: "var(--gb-muted)", transform: open ? "rotate(180deg)" : "none", transition: "transform 0.2s" }} />
@@ -53,7 +55,7 @@ export function LanguagePicker({ value, onChange }: LanguagePickerProps) {
                             <input
                                 value={search}
                                 onChange={(e) => setSearch(e.target.value)}
-                                placeholder="Rechercher une langue…"
+                                placeholder={t("sections.languages.picker.search")}
                                 style={{ background: "none", border: "none", outline: "none", fontSize: "12px", color: "var(--gb-text)", width: "100%" }}
                                 autoFocus
                             />
@@ -73,7 +75,7 @@ export function LanguagePicker({ value, onChange }: LanguagePickerProps) {
                             <button type="button"
                                 onClick={() => { onChange(search); setOpen(false); }}
                                 style={{ width: "100%", textAlign: "left", padding: "7px 10px", background: "rgba(22,163,74,0.06)", color: "#16A34A", border: "none", borderRadius: "7px", cursor: "pointer", fontSize: "12.5px", fontWeight: 500 }}>
-                                + Ajouter "{search}"
+                                {`+ "${search}"`}
                             </button>
                         )}
                     </div>

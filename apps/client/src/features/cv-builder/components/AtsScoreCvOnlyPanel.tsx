@@ -4,6 +4,8 @@ import {
     AlertCircle, CheckCircle, Lightbulb, RefreshCw, Info,
     CheckSquare, AlertTriangle, ArrowUpCircle
 } from "lucide-react";
+import { useLocale } from "@/hooks/useLocale";
+import { getAtsBreakdownLabel, getAtsScoreLabel } from "../lib/cv-i18n";
 import type { AtsScoreResult } from "../types/cv.types";
 
 interface AtsScoreCvOnlyPanelProps {
@@ -15,24 +17,10 @@ interface AtsScoreCvOnlyPanelProps {
     defaultExpanded?: boolean;
 }
 
-const BREAKDOWN_LABELS: Record<string, string> = {
-    keywordMatch: "Mots-clés",
-    formatting: "Mise en forme",
-    completeness: "Complétude",
-    relevance: "Structure",
-};
-
 function scoreColor(score: number) {
     if (score >= 80) return "#16A34A";
     if (score >= 60) return "#ca8a04";
     return "#dc2626";
-}
-
-function scoreLabel(score: number) {
-    if (score >= 85) return "Excellent";
-    if (score >= 70) return "Bon";
-    if (score >= 55) return "Passable";
-    return "À améliorer";
 }
 
 export function AtsScoreCvOnlyPanel({
@@ -43,6 +31,7 @@ export function AtsScoreCvOnlyPanel({
     onCheck,
     defaultExpanded,
 }: AtsScoreCvOnlyPanelProps) {
+    const { t } = useLocale("cvBuilder");
     const [expanded, setExpanded] = useState(defaultExpanded ?? false);
 
     const displayScore = result?.score ?? savedScore;
@@ -72,10 +61,10 @@ export function AtsScoreCvOnlyPanel({
                 <div style={{ display: "flex", alignItems: "center", gap: "7px" }}>
                     <ShieldCheck style={{ width: 14, height: 14, color }} />
                     <span style={{ fontSize: "12.5px", fontWeight: 600, color: "var(--gb-text)" }}>
-                        Score ATS — Lisibilité du CV
+                        {t("ats.cvOnly.title")}
                     </span>
                     <span
-                        title="Ce score mesure la compatibilité structurelle de votre CV avec les systèmes ATS, indépendamment de toute offre d'emploi."
+                        title={t("ats.cvOnly.tooltip")}
                         style={{ cursor: "help", display: "flex" }}
                     >
                         <Info style={{ width: 11, height: 11, color: "var(--gb-muted)" }} />
@@ -95,7 +84,7 @@ export function AtsScoreCvOnlyPanel({
                                     padding: "2px 7px",
                                 }}
                             >
-                                {scoreLabel(displayScore)}
+                                {getAtsScoreLabel(t, displayScore)}
                             </span>
                             <span style={{ fontSize: "13px", fontWeight: 800, color }}>{displayScore}/100</span>
                         </>
@@ -163,15 +152,15 @@ export function AtsScoreCvOnlyPanel({
                             <RefreshCw style={{ width: 12, height: 12 }} />
                         )}
                         {isLoading
-                            ? "Analyse en cours…"
+                            ? t("ats.cvOnly.analyzing")
                             : result
-                            ? "Ré-analyser"
-                            : "Analyser la lisibilité ATS"}
+                            ? t("ats.cvOnly.reanalyze")
+                            : t("ats.cvOnly.analyzeReadability")}
                     </button>
 
                     {!hasCvId && (
                         <p style={{ fontSize: "11px", color: "var(--gb-muted)", marginTop: "6px" }}>
-                            Sauvegardez votre CV pour activer l'analyse.
+                            {t("ats.cvOnly.saveFirst")}
                         </p>
                     )}
 
@@ -192,7 +181,7 @@ export function AtsScoreCvOnlyPanel({
                                             >
                                                 <div style={{ display: "flex", justifyContent: "space-between", marginBottom: "4px" }}>
                                                     <span style={{ fontSize: "10.5px", color: "var(--gb-muted)" }}>
-                                                        {BREAKDOWN_LABELS[key] ?? key}
+                                                        {getAtsBreakdownLabel(t, key)}
                                                     </span>
                                                     <span style={{ fontSize: "11px", fontWeight: 700, color: c }}>{val}%</span>
                                                 </div>
@@ -235,7 +224,7 @@ export function AtsScoreCvOnlyPanel({
                                         }}
                                     >
                                         <AlertCircle style={{ width: 11, height: 11, color: "#ca8a04" }} />
-                                        Points à améliorer
+                                        {t("ats.pointsToImprove")}
                                     </p>
                                     <div style={{ display: "flex", flexWrap: "wrap", gap: "4px" }}>
                                         {result.missingKeywords.map((kw) => (
@@ -273,7 +262,7 @@ export function AtsScoreCvOnlyPanel({
                                         }}
                                     >
                                         <CheckCircle style={{ width: 11, height: 11, color: "#16A34A" }} />
-                                        Éléments présents
+                                        {t("ats.presentElements")}
                                     </p>
                                     <div style={{ display: "flex", flexWrap: "wrap", gap: "4px" }}>
                                         {result.matchedKeywords.map((kw) => (
@@ -299,7 +288,7 @@ export function AtsScoreCvOnlyPanel({
                                 <div>
                                     <p style={{ display: "flex", alignItems: "center", gap: "4px", fontSize: "11px", fontWeight: 700, color: "var(--gb-muted)", margin: "0 0 6px", textTransform: "uppercase", letterSpacing: "0.05em" }}>
                                         <CheckSquare style={{ width: 11, height: 11, color: "#16A34A" }} />
-                                        Points forts
+                                        {t("ats.strengths")}
                                     </p>
                                     {(result as any).strengths.map((s: string, i: number) => (
                                         <div key={i} style={{ background: "rgba(22,163,74,0.06)", border: "1px solid rgba(22,163,74,0.15)", borderRadius: "8px", padding: "8px 10px", marginBottom: "5px", fontSize: "11.5px", color: "var(--gb-text-off)", lineHeight: 1.5 }}>
@@ -313,7 +302,7 @@ export function AtsScoreCvOnlyPanel({
                                 <div>
                                     <p style={{ display: "flex", alignItems: "center", gap: "4px", fontSize: "11px", fontWeight: 700, color: "var(--gb-muted)", margin: "0 0 6px", textTransform: "uppercase", letterSpacing: "0.05em" }}>
                                         <AlertTriangle style={{ width: 11, height: 11, color: "#dc2626" }} />
-                                        Points faibles
+                                        {t("ats.weaknesses")}
                                     </p>
                                     {(result as any).weaknesses.map((w: string, i: number) => (
                                         <div key={i} style={{ background: "rgba(220,38,38,0.06)", border: "1px solid rgba(220,38,38,0.15)", borderRadius: "8px", padding: "8px 10px", marginBottom: "5px", fontSize: "11.5px", color: "var(--gb-text-off)", lineHeight: 1.5 }}>
@@ -327,7 +316,7 @@ export function AtsScoreCvOnlyPanel({
                                 <div>
                                     <p style={{ display: "flex", alignItems: "center", gap: "4px", fontSize: "11px", fontWeight: 700, color: "var(--gb-muted)", margin: "0 0 6px", textTransform: "uppercase", letterSpacing: "0.05em" }}>
                                         <Lightbulb style={{ width: 11, height: 11, color: "#0284C7" }} />
-                                        Conseils d'amélioration
+                                        {t("ats.tips")}
                                     </p>
                                     {(result as any).tips.map((t: string, i: number) => (
                                         <div key={i} style={{ background: "rgba(2,132,199,0.06)", border: "1px solid rgba(2,132,199,0.15)", borderRadius: "8px", padding: "8px 10px", marginBottom: "5px", fontSize: "11.5px", color: "var(--gb-text-off)", lineHeight: 1.5 }}>
@@ -341,7 +330,7 @@ export function AtsScoreCvOnlyPanel({
                                 <div>
                                     <p style={{ display: "flex", alignItems: "center", gap: "4px", fontSize: "11px", fontWeight: 700, color: "var(--gb-muted)", margin: "0 0 6px", textTransform: "uppercase", letterSpacing: "0.05em" }}>
                                         <ArrowUpCircle style={{ width: 11, height: 11, color: "#16A34A" }} />
-                                        Suggestions
+                                        {t("ats.suggestions")}
                                     </p>
                                     {result.suggestions.map((s: string, i: number) => (
                                         <div key={i} style={{ background: "rgba(22,163,74,0.06)", border: "1px solid rgba(22,163,74,0.15)", borderRadius: "8px", padding: "8px 10px", marginBottom: "5px", fontSize: "11.5px", color: "var(--gb-text-off)", lineHeight: 1.5 }}>

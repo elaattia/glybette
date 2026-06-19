@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { X, Wand2, Loader, Copy, Check } from "lucide-react";
+import { useLocale } from "@/hooks/useLocale";
 import type { TailorResult } from "../../types/cv.types";
 
 interface AiTailorPanelProps {
@@ -21,6 +22,7 @@ export function AiTailorPanel({
     onTailor,
     onApplySummary,
 }: AiTailorPanelProps) {
+    const { t } = useLocale("cvBuilder");
     const [jobDesc, setJobDesc] = useState("");
     const [copied, setCopied] = useState(false);
 
@@ -81,10 +83,10 @@ export function AiTailorPanel({
                         </div>
                         <div>
                             <h3 style={{ margin: 0, fontSize: "14px", fontWeight: 700, color: "var(--gb-text)" }}>
-                                Adapter à l'offre
+                                {t("ai.tailor.title")}
                             </h3>
                             <p style={{ margin: 0, fontSize: "11px", color: "var(--gb-muted)" }}>
-                                Personnalisez votre CV pour une offre ciblée
+                                {t("ai.tailor.subtitle")}
                             </p>
                         </div>
                     </div>
@@ -130,12 +132,12 @@ export function AiTailorPanel({
                                 letterSpacing: "0.06em",
                                 marginBottom: "6px",
                             }}>
-                            Description du poste
+                            {t("ai.tailor.jobDescription")}
                         </label>
                         <textarea
                             value={jobDesc}
                             onChange={(e) => setJobDesc(e.target.value)}
-                            placeholder="Collez la description complète du poste ici..."
+                            placeholder={t("ai.tailor.jobDescriptionPlaceholder")}
                             rows={6}
                             style={{
                                 width: "100%",
@@ -180,7 +182,7 @@ export function AiTailorPanel({
                         ) : (
                             <Wand2 style={{ width: 14, height: 14 }} />
                         )}
-                        {isLoading ? "Adaptation en cours..." : "Adapter mon CV"}
+                        {isLoading ? t("ai.tailor.adapting") : t("ai.tailor.adaptCv")}
                     </button>
 
                     {result && !isLoading && (
@@ -208,7 +210,7 @@ export function AiTailorPanel({
                                                 textTransform: "uppercase",
                                                 letterSpacing: "0.06em",
                                             }}>
-                                            Résumé suggéré
+                                            {t("ai.tailor.suggestedSummary")}
                                         </span>
                                         <div style={{ display: "flex", gap: "6px" }}>
                                             <button
@@ -230,7 +232,7 @@ export function AiTailorPanel({
                                                 ) : (
                                                     <Copy style={{ width: 11, height: 11 }} />
                                                 )}
-                                                Copier
+                                                {t("ai.tailor.copy")}
                                             </button>
                                             {onApplySummary && (
                                                 <button
@@ -245,7 +247,7 @@ export function AiTailorPanel({
                                                         cursor: "pointer",
                                                         fontWeight: 600,
                                                     }}>
-                                                    Appliquer
+                                                    {t("ai.tailor.apply")}
                                                 </button>
                                             )}
                                         </div>
@@ -279,7 +281,7 @@ export function AiTailorPanel({
                                             letterSpacing: "0.06em",
                                             margin: "0 0 8px",
                                         }}>
-                                        Compétences à ajouter
+                                        {t("ai.tailor.skillsToAdd")}
                                     </p>
                                     <div style={{ display: "flex", flexWrap: "wrap", gap: "5px" }}>
                                         {result.suggestedSkills.map((s) => (
@@ -317,7 +319,7 @@ export function AiTailorPanel({
                                             letterSpacing: "0.06em",
                                             margin: "0 0 8px",
                                         }}>
-                                        Mots-clés importants
+                                        {t("ai.tailor.importantKeywords")}
                                     </p>
                                     <div style={{ display: "flex", flexWrap: "wrap", gap: "5px" }}>
                                         {result.suggestedKeywords.map((k) => (
