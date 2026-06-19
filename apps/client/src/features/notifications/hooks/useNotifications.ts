@@ -4,7 +4,7 @@ import { notificationsApi } from "@/features/notifications/api/notifications.api
 const NOTIFICATIONS_QUERY_KEY = ["notifications"] as const;
 const UNREAD_COUNT_QUERY_KEY = ["notifications", "unread-count"] as const;
 
-const POLL_INTERVAL_MS = 30_000;
+const POLL_INTERVAL_MS = 5_000;
 
 export function useNotifications() {
     return useQuery({

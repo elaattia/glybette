@@ -1,4 +1,3 @@
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import WelcomeProgressSection from "@/components/dashboard/WelcomeProgressSection";
 import RecommendedJobsSection from "@/components/dashboard/RecommendedJobsSection";
 import ResumeHealthCard from "@/components/dashboard/ResumeHealthCard";
@@ -14,15 +13,6 @@ export default function DashboardPage() {
                 <ResumeHealthCard />
                 <RecentActivityCard />
             </section>
-
-            <Card className="border-[var(--gb-border)] bg-[var(--gb-app-panel-bg)] py-0 shadow-none">
-                <CardHeader className="px-5 pt-5 md:px-6">
-                    <CardTitle className="text-base text-[var(--gb-text)]">Coming next in Phase 2</CardTitle>
-                </CardHeader>
-                <CardContent className="px-5 pb-5 text-sm text-[var(--gb-muted)] md:px-6 md:pb-6">
-                    Skills market trend, pipeline analytics, and personalized application strategy widgets.
-                </CardContent>
-            </Card>
         </div>
     );
 }
