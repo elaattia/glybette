@@ -51,6 +51,9 @@ async function connectProjectsRabbitMqWithWarnings(rabbitMqUrl: string) {
 async function main() {
     const env = loadProjectsServiceEnv();
     await connectDb(env);
+    if (!env.RABBITMQ_URL) {
+        console.warn("[projects-service] RABBITMQ_URL is not set. Project events will not be emitted.");
+    }
     const rabbit = env.RABBITMQ_URL ? await connectProjectsRabbitMqWithWarnings(env.RABBITMQ_URL) : null;
     const usersServiceBaseUrl = (env.USERS_SERVICE_URL ?? `http://localhost:${env.PORT_USERS_SERVICE}`).replace(/\/$/, "");
 
