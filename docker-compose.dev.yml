@@ -41,7 +41,7 @@ services:
             PORT_API_GATEWAY: 3000
             USERS_SERVICE_URL: http://users-service:3001
             SCRAPING_SERVICE_URL: http://scraping-service:3002
-            EMAIL_SERVICE_URL: http://email-service:3003
+            NOTIFICATIONS_SERVICE_URL: http://notifications-service:3003
             PORTFOLIO_SERVICE_URL: http://portfolio-service:3004
             JOBS_SERVICE_URL: http://jobs-service:3005
             PROJECTS_SERVICE_URL: http://projects-service:3008
@@ -63,7 +63,7 @@ services:
                 condition: service_started
             scraping-service:
                 condition: service_started
-            email-service:
+            notifications-service:
                 condition: service_started
             portfolio-service:
                 condition: service_started
@@ -141,20 +141,22 @@ services:
             timeout: 5s
             retries: 8
 
-    email-service:
+    notifications-service:
         build:
             context: .
             dockerfile: Dockerfile.dev
         working_dir: /workspace
-        command: bash -lc "pnpm --filter \"@glybette/email-service\" dev"
+        command: bash -lc "pnpm --filter \"@glybette/notifications-service\" dev"
         ports:
             - "3003:3003"
         env_file:
             - .env
         environment:
             NODE_ENV: development
-            PORT_EMAIL_SERVICE: 3003
+            PORT_NOTIFICATIONS_SERVICE: 3003
             RABBITMQ_URL: amqp://rabbitmq:5672
+            PROJECTS_SERVICE_URL: http://projects-service:3008
+            USERS_SERVICE_URL: http://users-service:3001
             CHOKIDAR_USEPOLLING: "1"
             CHOKIDAR_INTERVAL: "300"
             WATCHPACK_POLLING: "true"
@@ -167,6 +169,8 @@ services:
                 condition: service_completed_successfully
             rabbitmq:
                 condition: service_healthy
+            projects-service:
+                condition: service_started
         healthcheck:
             test: [ "CMD", "node", "-e", "fetch('http://localhost:3003/health').then(r=>process.exit(r.ok?0:1)).catch(()=>process.exit(1))" ]
             interval: 15s

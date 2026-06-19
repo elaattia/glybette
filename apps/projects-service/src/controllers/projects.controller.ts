@@ -27,6 +27,7 @@ export class ProjectsController {
         private readonly uploadProvider: UploadProvider,
         private readonly uploadDiskDir: string,
         private readonly uploadMaxMb: number,
+        private readonly internalServiceSecret: string,
     ) {}
 
     async list(c: Context): Promise<Response> {
@@ -141,6 +142,19 @@ export class ProjectsController {
         return c.json(await this.projectsService.deleteComment(projectId, commentId, auth.userId), 200);
     }
 
+    async notificationContext(c: Context): Promise<Response> {
+        this.requireInternalSecret(c);
+        const body = (await c.req.json().catch(() => null)) as {
+            projectId?: string;
+            requestId?: string;
+            commentId?: string;
+        } | null;
+        const projectId = validateObjectIdParam(body?.projectId, "project id");
+        const requestId = body?.requestId ? validateObjectIdParam(body.requestId, "request id") : undefined;
+        const commentId = body?.commentId ? validateObjectIdParam(body.commentId, "comment id") : undefined;
+        return c.json(await this.projectsService.getNotificationContext(projectId, requestId, commentId), 200);
+    }
+
     async serveMedia(c: Context): Promise<Response> {
         const rawPath = decodeURIComponent(new URL(c.req.url).pathname);
         const marker = "/projects/media/";
@@ -213,5 +227,12 @@ export class ProjectsController {
             throw new UnauthorizedError("Admin role required");
         }
         return auth;
+    }
+
+    private requireInternalSecret(c: Context): void {
+        const secret = c.req.header("x-internal-secret");
+        if (!secret || secret !== this.internalServiceSecret) {
+            throw new UnauthorizedError("Invalid internal service secret.");
+        }
     }
 }

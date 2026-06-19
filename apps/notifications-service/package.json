@@ -1,16 +1,20 @@
 {
-    "name": "@glybette/email-service",
+    "name": "@glybette/notifications-service",
     "type": "module",
     "scripts": {
         "dev": "tsx watch src/index.ts",
         "build": "tsc",
-        "start": "node dist/index.js"
+        "start": "node dist/index.js",
+        "test": "tsx --test src/**/*.test.ts"
     },
     "dependencies": {
+        "@glybette/contracts": "workspace:*",
         "@glybette/env": "workspace:*",
         "@glybette/messaging": "workspace:*",
+        "@glybette/utils": "workspace:*",
         "@hono/node-server": "^1.19.9",
         "hono": "^4.12.2",
+        "mongoose": "^9.3.0",
         "resend": "^6.6.0"
     },
     "devDependencies": {

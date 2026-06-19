@@ -6,7 +6,7 @@ import { createAuth } from "./config/auth.js";
 import { AuthController } from "./controllers/auth.controller.js";
 import { OtpController } from "./controllers/otp.controller.js";
 import { UserController } from "./controllers/user.controller.js";
-import { connectRabbitMq, ensureAuthEmailTopology, ensureUsersTopology } from "@glybette/messaging";
+import { connectRabbitMq, ensureNotificationsAuthOtpTopology, ensureUsersTopology } from "@glybette/messaging";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
 import { OtpService } from "./services/otp.service.js";
@@ -29,7 +29,7 @@ import { errorHandler } from "./middleware/error-handler.js";
 async function connectRabbitMqWithWarnings(otpService: OtpService, userService: UserService, rabbitMqUrl: string): Promise<void> {
     try {
         const rabbit = await connectRabbitMq(rabbitMqUrl);
-        await ensureAuthEmailTopology(rabbit.channel);
+        await ensureNotificationsAuthOtpTopology(rabbit.channel);
         await ensureUsersTopology(rabbit.channel);
         otpService.setRabbitClient(rabbit);
         userService.setRabbitClient(rabbit);
@@ -54,7 +54,7 @@ async function main() {
     if (env.EMAIL_DELIVERY_MODE === "file") {
         const logPath = path.join(resolveEmailLogDir(env.EMAIL_LOG_DIR), "logs.txt");
         console.warn(
-            `[users-service] EMAIL_DELIVERY_MODE=file. OTP emails append to ${logPath} (email-service is bypassed).`,
+            `[users-service] EMAIL_DELIVERY_MODE=file. OTP emails append to ${logPath} (notifications-service is bypassed).`,
         );
     }
 

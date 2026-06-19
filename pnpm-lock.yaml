@@ -7,6 +7,13 @@ settings:
 importers:
 
   .:
+    dependencies:
+      html2canvas:
+        specifier: ^1.4.1
+        version: 1.4.1
+      jspdf:
+        specifier: ^4.2.1
+        version: 4.2.1
     devDependencies:
       prettier:
         specifier: ^3.5.3
@@ -259,34 +266,6 @@ importers:
         specifier: ^5.8.3
         version: 5.9.3
 
-  apps/email-service:
-    dependencies:
-      '@glybette/env':
-        specifier: workspace:*
-        version: link:../../packages/env
-      '@glybette/messaging':
-        specifier: workspace:*
-        version: link:../../packages/messaging
-      '@hono/node-server':
-        specifier: ^1.19.9
-        version: 1.19.9(hono@4.12.2)
-      hono:
-        specifier: ^4.12.2
-        version: 4.12.2
-      resend:
-        specifier: ^6.6.0
-        version: 6.12.2
-    devDependencies:
-      '@types/node':
-        specifier: ^20.11.17
-        version: 20.19.33
-      tsx:
-        specifier: ^4.7.1
-        version: 4.21.0
-      typescript:
-        specifier: ^5.8.3
-        version: 5.9.3
-
   apps/jobs-service:
     dependencies:
       '@glybette/contracts':
@@ -329,6 +308,43 @@ importers:
       '@types/amqplib':
         specifier: ^0.10.5
         version: 0.10.8
+      '@types/node':
+        specifier: ^20.11.17
+        version: 20.19.39
+      tsx:
+        specifier: ^4.7.1
+        version: 4.21.0
+      typescript:
+        specifier: ^5.8.3
+        version: 5.9.3
+
+  apps/notifications-service:
+    dependencies:
+      '@glybette/contracts':
+        specifier: workspace:*
+        version: link:../../packages/contracts
+      '@glybette/env':
+        specifier: workspace:*
+        version: link:../../packages/env
+      '@glybette/messaging':
+        specifier: workspace:*
+        version: link:../../packages/messaging
+      '@glybette/utils':
+        specifier: workspace:*
+        version: link:../../packages/utils
+      '@hono/node-server':
+        specifier: ^1.19.9
+        version: 1.19.9(hono@4.12.2)
+      hono:
+        specifier: ^4.12.2
+        version: 4.12.2
+      mongoose:
+        specifier: ^9.3.0
+        version: 9.3.0(socks@2.8.7)
+      resend:
+        specifier: ^6.6.0
+        version: 6.12.2
+    devDependencies:
       '@types/node':
         specifier: ^20.11.17
         version: 20.19.39
@@ -3729,6 +3745,7 @@ packages:
 
   uuid@10.0.0:
     resolution: {integrity: sha512-8XkAphELsDnEGrDxUOHB3RGvXz6TeuYSGEZBOjtTtPm2lwhGBjLgOzLHB63IUWfBpNucQjND6d3AOudO+H3RWQ==}
+    deprecated: uuid@10 and below is no longer supported.  For ESM codebases, update to uuid@latest.  For CommonJS codebases, use uuid@11 (but be aware this version will likely be deprecated in 2028).
     hasBin: true
 
   vary@1.1.2:

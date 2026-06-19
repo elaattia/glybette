@@ -5,7 +5,7 @@ export const gatewayEnvSchema = baseEnvSchema.extend({
     SCRAPING_SERVICE_URL: z.string().url().optional(),
     CV_SERVICE_URL: z.string().url().optional(),
     INTERNAL_SERVICE_SECRET: z.string().min(1).default("dev-secret-change-in-prod"),
-    EMAIL_SERVICE_URL: z.string().url().optional(),
+    NOTIFICATIONS_SERVICE_URL: z.string().url().optional(),
     PORTFOLIO_SERVICE_URL: z.string().url().optional(),
     JOBS_SERVICE_URL: z.string().url().optional(),
     PROJECTS_SERVICE_URL: z.string().url().optional(),

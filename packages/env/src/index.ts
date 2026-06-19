@@ -50,7 +50,7 @@ export const baseEnvSchema = z.object({
     PORT_API_GATEWAY: z.coerce.number().default(3000),
     PORT_USERS_SERVICE: z.coerce.number().default(3001),
     PORT_SCRAPING_SERVICE: z.coerce.number().default(3002),
-    PORT_EMAIL_SERVICE: z.coerce.number().default(3003),
+    PORT_NOTIFICATIONS_SERVICE: z.coerce.number().default(3003),
     PORT_PORTFOLIO_SERVICE: z.coerce.number().default(3004),
     PORT_JOBS_SERVICE: z.coerce.number().default(3005),
     PORT_CV_SERVICE: z.coerce.number().default(3006),

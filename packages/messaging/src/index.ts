@@ -14,9 +14,9 @@ export {
 export {
     AUTH_EXCHANGE,
     AUTH_EXCHANGE_TYPE,
-    AUTH_EMAIL_QUEUE,
-    AUTH_EMAIL_QUEUE_DLQ,
-    AUTH_EMAIL_QUEUE_DLX,
+    NOTIFICATIONS_AUTH_OTP_QUEUE,
+    NOTIFICATIONS_AUTH_OTP_QUEUE_DLQ,
+    NOTIFICATIONS_AUTH_OTP_QUEUE_DLX,
     ROUTING_KEY_AUTH_OTP_SEND,
     PROJECTS_EXCHANGE,
     PROJECTS_EXCHANGE_TYPE,
@@ -24,6 +24,9 @@ export {
     ROUTING_KEY_PROJECT_JOIN_REQUEST_APPROVED,
     ROUTING_KEY_PROJECT_JOIN_REQUEST_REJECTED,
     ROUTING_KEY_PROJECT_COMMENT_CREATED,
+    NOTIFICATIONS_PROJECTS_QUEUE,
+    NOTIFICATIONS_PROJECTS_QUEUE_DLQ,
+    NOTIFICATIONS_PROJECTS_QUEUE_DLX,
     USERS_EXCHANGE,
     USERS_EXCHANGE_TYPE,
     ROUTING_KEY_USERS_PROFILE_UPSERTED,
@@ -39,7 +42,8 @@ export {
 } from "./topology.js";
 export {
     connectRabbitMq,
-    ensureAuthEmailTopology,
+    ensureNotificationsAuthOtpTopology,
+    ensureNotificationsProjectsTopology,
     ensureProjectsTopology,
     ensureUsersTopology,
     ensureProjectsUserProjectionTopology,

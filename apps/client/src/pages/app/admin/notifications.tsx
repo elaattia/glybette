@@ -11,7 +11,7 @@ export default function AdminNotificationsManagementPage() {
                 </CardTitle>
             </CardHeader>
             <CardContent className="px-5 pb-5 text-sm text-[var(--gb-muted)] md:px-6 md:pb-6">
-                Notifications service is not wired in this repository yet. The admin dashboard keeps this page as a stub entrypoint.
+                In-app notifications are live. Delivery logs and admin controls are still deferred.
             </CardContent>
         </Card>
     );

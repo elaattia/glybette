@@ -14,6 +14,7 @@ import {
     type ProjectJoinRequestDTO,
     type ProjectJoinRequestsResponse,
     type ProjectMembershipRole,
+    type ProjectNotificationContextResponse,
     type ProjectResponse,
     type ProjectStatus,
     type ProjectSummaryDTO,
@@ -806,6 +807,53 @@ export class ProjectsService {
             this.commentsCollection().deleteMany({ projectId: projectObjectId }),
         ]);
         return { ok: true };
+    }
+
+    async getNotificationContext(
+        projectId: string,
+        requestId?: string,
+        commentId?: string,
+    ): Promise<ProjectNotificationContextResponse> {
+        const projectObjectId = new mongoose.Types.ObjectId(projectId);
+        const project = await this.projectsCollection().findOne({ _id: projectObjectId });
+        if (!project) {
+            throw new NotFoundError("Project not found.");
+        }
+
+        const members = await this.membershipsCollection().find({ projectId: projectObjectId }).toArray();
+        const memberUserIds = [...new Set([project.ownerId, ...members.map((member) => member.userId)])];
+
+        let joinRequestMessage: string | undefined;
+        if (requestId) {
+            const request = await this.joinRequestsCollection().findOne({
+                _id: new mongoose.Types.ObjectId(requestId),
+                projectId: projectObjectId,
+            });
+            joinRequestMessage = request?.message;
+        }
+
+        let commentContent: string | undefined;
+        let parentCommentAuthorId: string | undefined;
+        if (commentId) {
+            const comment = await this.commentsCollection().findOne({
+                _id: new mongoose.Types.ObjectId(commentId),
+                projectId: projectObjectId,
+            });
+            commentContent = comment?.content;
+            if (comment?.parentId) {
+                const parent = await this.commentsCollection().findOne({ _id: comment.parentId, projectId: projectObjectId });
+                parentCommentAuthorId = parent?.authorId;
+            }
+        }
+
+        return {
+            projectTitle: project.title,
+            ownerId: project.ownerId,
+            memberUserIds,
+            joinRequestMessage,
+            commentContent,
+            parentCommentAuthorId,
+        };
     }
 
     private async ensureOwnerAccess(projectId: string, ownerId: string): Promise<ProjectDocument> {

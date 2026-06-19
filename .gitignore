@@ -11,7 +11,7 @@ __pycache__/
 *.pyo
 logs/
 apps/users-service/logs/
-apps/email-service/logs.txt
+apps/notifications-service/logs.txt
 
 .venv/
 .pnpm-store/

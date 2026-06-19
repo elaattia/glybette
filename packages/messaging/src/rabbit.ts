@@ -1,14 +1,17 @@
 import amqp from "amqplib";
 import type { Channel, ConsumeMessage } from "amqplib";
 import {
-    AUTH_EMAIL_QUEUE,
-    AUTH_EMAIL_QUEUE_DLX,
-    AUTH_EMAIL_QUEUE_DLQ,
     AUTH_EXCHANGE,
     AUTH_EXCHANGE_TYPE,
     CV_USER_PROJECTION_QUEUE,
     CV_USER_PROJECTION_QUEUE_DLQ,
     CV_USER_PROJECTION_QUEUE_DLX,
+    NOTIFICATIONS_AUTH_OTP_QUEUE,
+    NOTIFICATIONS_AUTH_OTP_QUEUE_DLQ,
+    NOTIFICATIONS_AUTH_OTP_QUEUE_DLX,
+    NOTIFICATIONS_PROJECTS_QUEUE,
+    NOTIFICATIONS_PROJECTS_QUEUE_DLQ,
+    NOTIFICATIONS_PROJECTS_QUEUE_DLX,
     PORTFOLIO_USER_PROJECTION_QUEUE,
     PORTFOLIO_USER_PROJECTION_QUEUE_DLQ,
     PORTFOLIO_USER_PROJECTION_QUEUE_DLX,
@@ -18,6 +21,10 @@ import {
     PROJECTS_USER_PROJECTION_QUEUE_DLX,
     PROJECTS_USER_PROJECTION_QUEUE_DLQ,
     ROUTING_KEY_AUTH_OTP_SEND,
+    ROUTING_KEY_PROJECT_COMMENT_CREATED,
+    ROUTING_KEY_PROJECT_JOIN_REQUEST_APPROVED,
+    ROUTING_KEY_PROJECT_JOIN_REQUEST_CREATED,
+    ROUTING_KEY_PROJECT_JOIN_REQUEST_REJECTED,
     ROUTING_KEY_USERS_PROFILE_UPSERTED,
     USERS_EXCHANGE,
     USERS_EXCHANGE_TYPE,
@@ -82,17 +89,43 @@ export async function connectRabbitMq(url: string): Promise<RabbitMqClient> {
     };
 }
 
-export async function ensureAuthEmailTopology(channel: Channel): Promise<void> {
+export async function ensureNotificationsAuthOtpTopology(channel: Channel): Promise<void> {
     await channel.assertExchange(AUTH_EXCHANGE, AUTH_EXCHANGE_TYPE, { durable: true });
-    await channel.assertExchange(AUTH_EMAIL_QUEUE_DLX, AUTH_EXCHANGE_TYPE, { durable: true });
-    await channel.assertQueue(AUTH_EMAIL_QUEUE_DLQ, { durable: true });
-    await channel.bindQueue(AUTH_EMAIL_QUEUE_DLQ, AUTH_EMAIL_QUEUE_DLX, ROUTING_KEY_AUTH_OTP_SEND);
+    await channel.assertExchange(NOTIFICATIONS_AUTH_OTP_QUEUE_DLX, AUTH_EXCHANGE_TYPE, { durable: true });
+    await channel.assertQueue(NOTIFICATIONS_AUTH_OTP_QUEUE_DLQ, { durable: true });
+    await channel.bindQueue(NOTIFICATIONS_AUTH_OTP_QUEUE_DLQ, NOTIFICATIONS_AUTH_OTP_QUEUE_DLX, ROUTING_KEY_AUTH_OTP_SEND);
 
-    await channel.assertQueue(AUTH_EMAIL_QUEUE, {
+    await channel.assertQueue(NOTIFICATIONS_AUTH_OTP_QUEUE, {
         durable: true,
-        deadLetterExchange: AUTH_EMAIL_QUEUE_DLX,
+        deadLetterExchange: NOTIFICATIONS_AUTH_OTP_QUEUE_DLX,
     });
-    await channel.bindQueue(AUTH_EMAIL_QUEUE, AUTH_EXCHANGE, ROUTING_KEY_AUTH_OTP_SEND);
+    await channel.bindQueue(NOTIFICATIONS_AUTH_OTP_QUEUE, AUTH_EXCHANGE, ROUTING_KEY_AUTH_OTP_SEND);
+}
+
+export async function ensureNotificationsProjectsTopology(channel: Channel): Promise<void> {
+    await channel.assertExchange(PROJECTS_EXCHANGE, PROJECTS_EXCHANGE_TYPE, { durable: true });
+    await channel.assertExchange(NOTIFICATIONS_PROJECTS_QUEUE_DLX, PROJECTS_EXCHANGE_TYPE, { durable: true });
+    await channel.assertQueue(NOTIFICATIONS_PROJECTS_QUEUE_DLQ, { durable: true });
+
+    const projectRoutingKeys = [
+        ROUTING_KEY_PROJECT_JOIN_REQUEST_CREATED,
+        ROUTING_KEY_PROJECT_JOIN_REQUEST_APPROVED,
+        ROUTING_KEY_PROJECT_JOIN_REQUEST_REJECTED,
+        ROUTING_KEY_PROJECT_COMMENT_CREATED,
+    ];
+
+    for (const routingKey of projectRoutingKeys) {
+        await channel.bindQueue(NOTIFICATIONS_PROJECTS_QUEUE_DLQ, NOTIFICATIONS_PROJECTS_QUEUE_DLX, routingKey);
+    }
+
+    await channel.assertQueue(NOTIFICATIONS_PROJECTS_QUEUE, {
+        durable: true,
+        deadLetterExchange: NOTIFICATIONS_PROJECTS_QUEUE_DLX,
+    });
+
+    for (const routingKey of projectRoutingKeys) {
+        await channel.bindQueue(NOTIFICATIONS_PROJECTS_QUEUE, PROJECTS_EXCHANGE, routingKey);
+    }
 }
 
 export async function ensureProjectsTopology(channel: Channel): Promise<void> {

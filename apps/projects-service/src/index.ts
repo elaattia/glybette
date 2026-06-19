@@ -117,6 +117,7 @@ async function main() {
             uploadProvider,
             env.PROJECTS_UPLOAD_DISK_DIR,
             env.PROJECTS_UPLOAD_MAX_MB,
+            env.INTERNAL_SERVICE_SECRET,
         ),
     );
 

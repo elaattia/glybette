@@ -98,7 +98,7 @@ pnpm docker:dev:down
 - Uses `docker-compose.dev.yml` with hot-reload service commands.
 - Includes frontend (`client`) in Docker, exposed on `http://localhost:5173`.
 - Uses Atlas (`MONGODB_URI`) instead of local MongoDB.
-- Runs core services by default: `client`, `api-gateway`, `users-service`, `scraping-service`, `email-service`, `portfolio-service`, `cv-service`, `rabbitmq`.
+- Runs core services by default: `client`, `api-gateway`, `users-service`, `scraping-service`, `notifications-service`, `portfolio-service`, `cv-service`, `rabbitmq`.
 - `ai-service` is opt-in:
 
 ```bash

@@ -26,4 +26,6 @@ export function registerProjectsRoutes(app: Hono, controller: ProjectsController
     app.get("/projects/:id/comments", (c) => controller.listComments(c));
     app.post("/projects/:id/comments", (c) => controller.createComment(c));
     app.delete("/projects/:id/comments/:commentId", (c) => controller.deleteComment(c));
+
+    app.post("/internal/projects/notification-context", (c) => controller.notificationContext(c));
 }

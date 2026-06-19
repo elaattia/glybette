@@ -53,7 +53,7 @@ services:
             - NODE_ENV=production
             - USERS_SERVICE_URL=http://users-service:3001
             - SCRAPING_SERVICE_URL=http://scraping-service:3002
-            - EMAIL_SERVICE_URL=http://email-service:3003
+            - NOTIFICATIONS_SERVICE_URL=http://notifications-service:3003
             - PORTFOLIO_SERVICE_URL=http://portfolio-service:3004
             - AI_SERVICE_URL=http://ai-service:3007
             - CV_SERVICE_URL=http://cv-service:3006
@@ -66,7 +66,7 @@ services:
             - rabbitmq
             - users-service
             - scraping-service
-            - email-service
+            - notifications-service
             - portfolio-service
             - cv-service
             - ai-service
@@ -92,19 +92,21 @@ services:
         depends_on:
             - rabbitmq
 
-    email-service:
+    notifications-service:
         build:
             context: .
             dockerfile: Dockerfile
             args:
-                APP_NAME: email-service
+                APP_NAME: notifications-service
         ports:
             - "3003:3003"
         environment:
             - PORT=3003
-            - PORT_EMAIL_SERVICE=3003
+            - PORT_NOTIFICATIONS_SERVICE=3003
             - NODE_ENV=production
             - RABBITMQ_URL=amqp://rabbitmq:5672
+            - PROJECTS_SERVICE_URL=http://projects-service:3008
+            - USERS_SERVICE_URL=http://users-service:3001
             - EMAIL_PROVIDER=${EMAIL_PROVIDER:-mock}
             - EMAIL_FROM=${EMAIL_FROM:-no-reply@glybette.dev}
             - RESEND_API_KEY=${RESEND_API_KEY:-}
@@ -113,6 +115,7 @@ services:
             - .env
         depends_on:
             - rabbitmq
+            - projects-service
 
     portfolio-service:
         build:
