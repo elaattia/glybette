@@ -1,10 +1,12 @@
 import { Hono } from "hono";
 import { zValidator } from "@hono/zod-validator";
 import { z } from "zod";
+import type { AiProvider } from "../lib/ai-provider.types.js";
 import { JobsAiService } from "../services/jobs-ai.service.js";
 
-const svc = new JobsAiService();
-export const jobsRoutes = new Hono();
+export function createJobsRoutes(provider: AiProvider): Hono {
+    const svc = new JobsAiService(provider);
+    const jobsRoutes = new Hono();
 
 jobsRoutes.post(
     "/matching",
@@ -121,3 +123,6 @@ jobsRoutes.post(
         return c.json(result);
     },
 );
+
+    return jobsRoutes;
+}

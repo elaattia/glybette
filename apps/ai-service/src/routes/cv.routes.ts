@@ -1,10 +1,12 @@
 import { Hono } from "hono";
 import { zValidator } from "@hono/zod-validator";
 import { z } from "zod";
+import type { AiProvider } from "../lib/ai-provider.types.js";
 import { CvAiService } from "../services/cv-ai.service.js";
 
-const svc = new CvAiService();
-export const cvRoutes = new Hono();
+export function createCvRoutes(provider: AiProvider): Hono {
+    const svc = new CvAiService(provider);
+    const cvRoutes = new Hono();
 
 cvRoutes.post(
     "/ats-score-cv",
@@ -124,3 +126,6 @@ cvRoutes.post(
         return c.json({ skills });
     },
 );
+
+    return cvRoutes;
+}

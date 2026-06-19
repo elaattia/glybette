@@ -1,4 +1,4 @@
-import { callOllama, callOllamaJson } from "../lib/ollama.js";
+import type { AiProvider } from "../lib/ai-provider.types.js";
 
 interface ChatMessage {
     role: "user" | "assistant";
@@ -6,6 +6,7 @@ interface ChatMessage {
 }
 
 export class JobsAiService {
+    constructor(private readonly provider: AiProvider) {}
 
     async computeMatching(profileText: string, offreText: string) {
         const prompt = `Tu es un expert RH et recrutement. Analyse la compatibilité entre ce profil et cette offre.
@@ -26,7 +27,7 @@ Retourne UNIQUEMENT ce JSON, sans explication ni markdown :
   "skillsCorrespondantes": ["skill3", "skill4"],
   "explication": "Explication concise en 2-3 phrases du score."
 }`;
-        return callOllamaJson<any>(prompt, { maxTokens: 800 });
+        return this.provider.generateJson<any>(prompt, { maxTokens: 800 });
     }
 
     async generateInterviewQuestions(offreText: string, userProfile: any) {
@@ -46,7 +47,7 @@ Retourne UNIQUEMENT ce JSON :
   "situational": ["Question situationnelle 1", "Question situationnelle 2"],
   "tips": ["Conseil de préparation 1", "Conseil 2", "Conseil 3"]
 }`;
-        return callOllamaJson<any>(prompt, { maxTokens: 1000 });
+        return this.provider.generateJson<any>(prompt, { maxTokens: 1000 });
     }
 
     async evaluateInterviewAnswer(question: string, answer: string, jobContext: string) {
@@ -65,7 +66,7 @@ Retourne UNIQUEMENT ce JSON en ${lang === "fr" ? "français" : "English"} :
   "suggestedAnswer": "Version améliorée de la réponse...",
   "keywords": ["mot-clé 1", "mot-clé 2", "mot-clé 3"]
 }`;
-        return callOllamaJson<any>(prompt, { maxTokens: 800 });
+        return this.provider.generateJson<any>(prompt, { maxTokens: 800 });
     }
 
     async getInterviewPreparationPlan(offreText: string, userProfile: any) {
@@ -89,7 +90,7 @@ Retourne UNIQUEMENT ce JSON :
   "doList": ["À faire 1", "À faire 2"],
   "dontList": ["À éviter 1", "À éviter 2"]
 }`;
-        return callOllamaJson<any>(prompt, { maxTokens: 1000 });
+        return this.provider.generateJson<any>(prompt, { maxTokens: 1000 });
     }
 
     async chatAboutJob(offreText: string, messages: ChatMessage[], userProfile?: any) {
@@ -111,41 +112,16 @@ Tu peux répondre à toutes les questions du candidat sur :
 Réponds toujours en français, de façon concise et pratique. Sois encourageant et bienveillant.
 Si tu ne sais pas quelque chose sur l'entreprise spécifique, dis-le honnêtement.`;
 
-        const ollamaMessages = [
-            { role: "system" as const, content: systemPrompt },
-            ...messages.map((m) => ({
-                role: m.role as "user" | "assistant",
-                content: m.content,
-            })),
-        ];
-
-        const BASE_URL = process.env.OLLAMA_BASE_URL ?? "http://localhost:11434";
-        const MODEL = process.env.OLLAMA_MODEL ?? "mistral";
-
-        const res = await fetch(`${BASE_URL}/api/chat`, {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({
-                model: MODEL,
-                messages: ollamaMessages,
-                stream: false,
-                options: {
-                    num_predict: 800,
-                    temperature: 0.7,
-                    top_p: 0.9,
-                },
-            }),
-        });
-
-        if (!res.ok) {
-            const err = await res.text();
-            throw new Error(`Ollama error (${res.status}): ${err}`);
-        }
-
-        const data = (await res.json()) as { message?: { content?: string } };
-        const content = data.message?.content?.trim();
-
-        if (!content) throw new Error("Empty response from Ollama");
+        const content = await this.provider.chat(
+            [
+                { role: "system", content: systemPrompt },
+                ...messages.map((m) => ({
+                    role: m.role as "user" | "assistant",
+                    content: m.content,
+                })),
+            ],
+            { maxTokens: 800, temperature: 0.7 },
+        );
 
         return { content, role: "assistant" as const };
     }
@@ -197,7 +173,7 @@ IMPORTANT:
 - N'invente pas de fausses expériences
 - Priorise les compétences mentionnées dans l'offre`;
 
-        return callOllamaJson<any>(prompt, { maxTokens: 2000 });
+        return this.provider.generateJson<any>(prompt, { maxTokens: 2000 });
     }
 
     async generateJobCoverLetter(params: {
@@ -227,7 +203,7 @@ ${cvText.slice(0, 3000)}
 ${offreText.slice(0, 1500)}
 
 Retourne UNIQUEMENT le texte de la lettre, sans objet ni markdown.`;
-        const content = await callOllama(prompt, { maxTokens: 800 });
+        const content = await this.provider.generateText(prompt, { maxTokens: 800 });
         return { content: content.trim() };
     }
 
@@ -244,7 +220,7 @@ Contexte offre:
 ${params.offreText.slice(0, 500)}
 
 Retourne UNIQUEMENT la lettre révisée, sans markdown.`;
-        const content = await callOllama(prompt, { maxTokens: 800 });
+        const content = await this.provider.generateText(prompt, { maxTokens: 800 });
         return { content: content.trim() };
     }
 
@@ -272,6 +248,6 @@ Retourne UNIQUEMENT ce JSON :
   ],
   "overallAdvice": "Conseil général en 2-3 phrases."
 }`;
-        return callOllamaJson<any>(prompt, { maxTokens: 1200 });
+        return this.provider.generateJson<any>(prompt, { maxTokens: 1200 });
     }
 }

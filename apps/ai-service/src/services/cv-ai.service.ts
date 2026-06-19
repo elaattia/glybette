@@ -1,4 +1,4 @@
-import { callOllama, callOllamaJson } from "../lib/ollama.js";
+import type { AiProvider } from "../lib/ai-provider.types.js";
 
 export interface AtsScoreResult {
     score: number;
@@ -61,6 +61,7 @@ export interface ExtractResult {
 }
 
 export class CvAiService {
+    constructor(private readonly provider: AiProvider) {}
     async scoreAtsCvOnly(cvText: string): Promise<AtsScoreResult> {
         const prompt = `You are an ATS (Applicant Tracking System) expert.
 Analyze ONLY the CV below. Do NOT compare it to any job description.
@@ -108,7 +109,7 @@ Return ONLY this JSON object, no explanation, no markdown fences:
 
 === CV TEXT ===
 ${cvText.slice(0, 4000)}`;
-        return callOllamaJson<AtsScoreResult>(prompt, { maxTokens: 1200 });
+        return this.provider.generateJson<AtsScoreResult>(prompt, { maxTokens: 1200 });
     }
 
     async scoreAts(cvText: string, jobDescription: string): Promise<AtsScoreResult> {
@@ -131,7 +132,7 @@ Return ONLY this JSON object, no explanation, no markdown:
   "tips": ["Add the specific CRM tools you used in your past roles."],
   "breakdown": { "keywordMatch": 70, "formatting": 80, "completeness": 75, "relevance": 75 }
 }`;
-        return callOllamaJson<AtsScoreResult>(prompt, { maxTokens: 1200 });
+        return this.provider.generateJson<AtsScoreResult>(prompt, { maxTokens: 1200 });
     }
 
     async suggestImprovements(cvText: string): Promise<SuggestionsResult> {
@@ -147,7 +148,7 @@ Return ONLY this JSON object, no explanation, no markdown:
   ]
 }
 Priority must be "high", "medium", or "low". Provide exactly 5 suggestions.`;
-        return callOllamaJson<SuggestionsResult>(prompt, { maxTokens: 1000 });
+        return this.provider.generateJson<SuggestionsResult>(prompt, { maxTokens: 1000 });
     }
 
     async enhanceText(text: string, sectionType: string, context?: { jobTitle?: string }): Promise<EnhanceResult> {
@@ -174,7 +175,7 @@ ${text}
 
 === REWRITTEN TEXT ===`;
 
-        const enhanced = await callOllama(prompt, { maxTokens: 500 });
+        const enhanced = await this.provider.generateText(prompt, { maxTokens: 500 });
         const clean = enhanced
             .replace(/^(texte réécrit|rewritten text|enhanced text|résultat|result)[:\s]*/i, "")
             .trim();
@@ -196,7 +197,7 @@ Return ONLY this JSON, no markdown, no explanation:
   "suggestedSkills": ["skill1", "skill2", "skill3"],
   "suggestedKeywords": ["keyword1", "keyword2", "keyword3"]
 }`;
-        return callOllamaJson<TailorResult>(prompt, { maxTokens: 700 });
+        return this.provider.generateJson<TailorResult>(prompt, { maxTokens: 700 });
     }
 
     async generateCoverLetter(
@@ -219,7 +220,7 @@ ${cvText.slice(0, 3000)}
 ${jobDescription.slice(0, 1500)}
 
 Return ONLY the letter text, no subject line, no markdown.`;
-        const content = await callOllama(prompt, { maxTokens: 700 });
+        const content = await this.provider.generateText(prompt, { maxTokens: 700 });
         return { content: content.trim() };
     }
 
@@ -309,19 +310,19 @@ ${text}`;
         } | null = null;
 
         try {
-            p1 = await callOllamaJson(prompt1, { maxTokens: 600 });
+            p1 = await this.provider.generateJson(prompt1, { maxTokens: 600 });
         } catch (e) {
             console.error("[extractFromText] step 1 failed:", e);
         }
 
         try {
-            p2 = await callOllamaJson(prompt2, { maxTokens: 1200 });
+            p2 = await this.provider.generateJson(prompt2, { maxTokens: 1200 });
         } catch (e) {
             console.error("[extractFromText] step 2 failed:", e);
         }
 
         try {
-            p3 = await callOllamaJson(prompt3, { maxTokens: 1000 });
+            p3 = await this.provider.generateJson(prompt3, { maxTokens: 1000 });
         } catch (e) {
             console.error("[extractFromText] step 3 failed:", e);
         }
@@ -345,7 +346,7 @@ ${text}`;
         const prompt = `List 8 relevant technical and professional skills for a "${role}" role.
 ${existing}
 Return ONLY a JSON array of strings, no markdown: ["skill1", "skill2", "skill3"]`;
-        return callOllamaJson<string[]>(prompt, { maxTokens: 200 });
+        return this.provider.generateJson<string[]>(prompt, { maxTokens: 200 });
     }
 }
 

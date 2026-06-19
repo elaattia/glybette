@@ -218,6 +218,7 @@ services:
             - AI_PROVIDER=${AI_PROVIDER}
             - OLLAMA_BASE_URL=${OLLAMA_BASE_URL}
             - OLLAMA_MODEL=${OLLAMA_MODEL}
+            - GEMINI_MODEL=${GEMINI_MODEL:-gemini-2.0-flash}
             - ANTHROPIC_API_KEY=${ANTHROPIC_API_KEY}
             - GEMINI_API_KEY=${GEMINI_API_KEY}
             - INTERNAL_SERVICE_SECRET=${INTERNAL_SERVICE_SECRET}
