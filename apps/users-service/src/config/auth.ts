@@ -1,8 +1,10 @@
 import { betterAuth } from "better-auth";
+import { APIError } from "better-auth/api";
 import mongoose from "mongoose";
 import { mongodbAdapter } from "better-auth/adapters/mongodb";
 import type { UsersServiceEnv } from "./env.js";
 import { resolveBetterAuthTrustedOrigins } from "./env.js";
+import { assertPasswordProvidedForCredentialAccounts } from "./delete-user-policy.js";
 
 /**
  * Create the better-auth instance. Must be called after connectDb() so that
@@ -39,6 +41,18 @@ export function createAuth(env: UsersServiceEnv) {
             modelName: "users",
             deleteUser: {
                 enabled: true,
+                beforeDelete: async (user, request) => {
+                    try {
+                        await assertPasswordProvidedForCredentialAccounts(user.id, request);
+                    } catch (error) {
+                        if (error instanceof Error && error.message === "PASSWORD_REQUIRED_FOR_DELETE") {
+                            throw new APIError("BAD_REQUEST", {
+                                message: "Current password is required to delete this account.",
+                            });
+                        }
+                        throw error;
+                    }
+                },
             },
             additionalFields: {
                 isPremium: {

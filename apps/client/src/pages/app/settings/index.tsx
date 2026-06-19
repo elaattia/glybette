@@ -31,12 +31,15 @@ const CONNECTABLE_PROVIDERS: Array<{
     provider: Extract<AuthProvider, "google" | "github" | "linkedin">;
     icon: ReactNode;
     disconnectClassName: string;
+    connectedClassName?: string;
 }> = [
     {
         provider: "google",
         icon: <GoogleIcon />,
         disconnectClassName:
             "border-[#dadce0] bg-white text-[#1f1f1f] hover:border-[#aecbfa] hover:bg-[#f8f9fa] hover:shadow-[0_1px_2px_rgba(66,133,244,0.2)] dark:border-[var(--gb-border)] dark:bg-[var(--gb-surface2)] dark:text-[var(--gb-text)] dark:hover:border-[#4285f4]/45 dark:hover:bg-[#4285f4]/10",
+        connectedClassName:
+            "border-emerald-600 bg-white text-[#1f1f1f] shadow-sm disabled:opacity-100 disabled:hover:border-emerald-600 disabled:hover:bg-white dark:border-emerald-500 dark:bg-[var(--gb-surface2)] dark:text-[var(--gb-text)] dark:disabled:hover:border-emerald-500 dark:disabled:hover:bg-[var(--gb-surface2)]",
     },
     {
         provider: "github",
@@ -71,8 +74,8 @@ export default function SettingsPage() {
     const [passwordFeedback, setPasswordFeedback] = useState<string | null>(null);
     const [deleteFeedback, setDeleteFeedback] = useState<string | null>(null);
 
-    const requiresPasswordForDelete = user?.provider === "email";
     const hasPasswordCredentials = user?.hasPassword ?? user?.provider === "email";
+    const requiresPasswordForDelete = hasPasswordCredentials;
     const connectedProviderList =
         user?.connectedProviders && user.connectedProviders.length > 0
             ? user.connectedProviders
@@ -396,14 +399,32 @@ export default function SettingsPage() {
                                 disabled={isConnected}
                                 className={cn(
                                     PROVIDER_BUTTON_BASE,
-                                    isConnected ? CONNECTED_PROVIDER_BUTTON : providerItem.disconnectClassName,
+                                    isConnected
+                                        ? (providerItem.connectedClassName ?? CONNECTED_PROVIDER_BUTTON)
+                                        : providerItem.disconnectClassName,
                                 )}>
                                 <span className="flex h-5 w-5 shrink-0 items-center justify-center">{providerItem.icon}</span>
                                 {isConnected ? (
-                                    <span className="inline-flex items-center gap-1.5">
-                                        <CheckCircle2 className="h-4 w-4 shrink-0 text-white dark:text-emerald-50" aria-hidden />
-                                        <span>{t("settings.providers.connected", { provider: providerLabel })}</span>
-                                    </span>
+                                    providerItem.provider === "google" ? (
+                                        <>
+                                            <span className="min-w-0 flex-1 text-left">
+                                                {t("settings.providers.connected", { provider: providerLabel })}
+                                            </span>
+                                            <span
+                                                className="inline-flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-emerald-600 text-white dark:bg-emerald-500"
+                                                aria-hidden>
+                                                <CheckCircle2 className="h-4 w-4" />
+                                            </span>
+                                        </>
+                                    ) : (
+                                        <span className="inline-flex items-center gap-1.5">
+                                            <CheckCircle2
+                                                className="h-4 w-4 shrink-0 text-white dark:text-emerald-50"
+                                                aria-hidden
+                                            />
+                                            <span>{t("settings.providers.connected", { provider: providerLabel })}</span>
+                                        </span>
+                                    )
                                 ) : (
                                     <span>{t("settings.providers.connect", { provider: providerLabel })}</span>
                                 )}
@@ -434,18 +455,18 @@ export default function SettingsPage() {
                         setDeleteForm({ password: "", confirmText: "" });
                     }
                 }}>
-                <DialogContent showCloseButton={false}>
+                <DialogContent showCloseButton={false} className="flex flex-col gap-6">
                     <DialogHeader>
                         <DialogTitle className="text-2xl">{t("settings.deleteDialog.title")}</DialogTitle>
                         <DialogDescription>
                             {t("settings.deleteDialog.descriptionPrefix", { phrase: ACCOUNT_DELETE_PHRASE })}
                             {requiresPasswordForDelete
                                 ? ` ${t("settings.deleteDialog.descriptionSuffixPasswordRequired")}`
-                                : ` ${t("settings.deleteDialog.descriptionSuffixPasswordOptional")}`}
+                                : null}
                         </DialogDescription>
                     </DialogHeader>
 
-                    <div className="space-y-3">
+                    <div className="space-y-4">
                         <Input
                             value={deleteForm.confirmText}
                             onChange={(event) =>
@@ -453,20 +474,21 @@ export default function SettingsPage() {
                             }
                             placeholder={ACCOUNT_DELETE_PHRASE}
                         />
-                        <Input
-                            type="password"
-                            value={deleteForm.password}
-                            onChange={(event) => setDeleteForm((prev) => ({ ...prev, password: event.target.value }))}
-                            placeholder={
-                                requiresPasswordForDelete
-                                    ? t("settings.deleteDialog.passwordRequiredPlaceholder")
-                                    : t("settings.deleteDialog.passwordOptionalPlaceholder")
-                            }
-                        />
+                        {requiresPasswordForDelete ? (
+                            <Input
+                                type="password"
+                                value={deleteForm.password}
+                                onChange={(event) =>
+                                    setDeleteForm((prev) => ({ ...prev, password: event.target.value }))
+                                }
+                                placeholder={t("settings.deleteDialog.passwordRequiredPlaceholder")}
+                                required
+                            />
+                        ) : null}
                         {deleteFeedback ? <p className="text-sm text-red-300">{deleteFeedback}</p> : null}
                     </div>
 
-                    <DialogFooter>
+                    <DialogFooter className="gap-3">
                         <Button type="button" variant="outline" onClick={() => setDeleteOpen(false)} disabled={deleteMutation.isPending}>
                             {t("actions.cancel")}
                         </Button>

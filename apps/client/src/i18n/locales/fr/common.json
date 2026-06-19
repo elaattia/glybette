@@ -92,12 +92,10 @@
             "title": "Supprimer le compte",
             "descriptionPrefix": "Saisissez {{phrase}} pour confirmer.",
             "descriptionSuffixPasswordRequired": "Entrez votre mot de passe actuel pour continuer.",
-            "descriptionSuffixPasswordOptional": "Le mot de passe est optionnel pour ce fournisseur.",
             "confirmPhrase": "DELETE MY ACCOUNT",
-            "passwordRequiredPlaceholder": "Mot de passe actuel (requis)",
-            "passwordOptionalPlaceholder": "Mot de passe actuel (optionnel)",
+            "passwordRequiredPlaceholder": "Mot de passe actuel",
             "confirmPhraseError": "Veuillez saisir exactement : {{phrase}}",
-            "passwordRequiredError": "Le mot de passe actuel est requis pour les comptes e-mail/mot de passe.",
+            "passwordRequiredError": "Entrez votre mot de passe actuel pour continuer.",
             "deleteError": "Impossible de supprimer le compte."
         },
         "route": {

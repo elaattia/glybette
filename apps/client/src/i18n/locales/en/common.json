@@ -92,12 +92,10 @@
             "title": "Delete account",
             "descriptionPrefix": "Type {{phrase}} to confirm.",
             "descriptionSuffixPasswordRequired": "Enter your current password to continue.",
-            "descriptionSuffixPasswordOptional": "Password is optional for this provider.",
             "confirmPhrase": "DELETE MY ACCOUNT",
-            "passwordRequiredPlaceholder": "Current password (required)",
-            "passwordOptionalPlaceholder": "Current password (optional)",
+            "passwordRequiredPlaceholder": "Current password",
             "confirmPhraseError": "Please type exactly: {{phrase}}",
-            "passwordRequiredError": "Current password is required for email/password accounts.",
+            "passwordRequiredError": "Enter your current password to continue.",
             "deleteError": "Unable to delete account."
         },
         "route": {
