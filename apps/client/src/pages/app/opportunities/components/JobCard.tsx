@@ -33,14 +33,16 @@ interface JobCardProps {
 
 export const JobCard = React.memo(function JobCard({ offre, onClick }: JobCardProps) {
     const [hovered, setHovered] = useState(false);
+    const [failedImageSrc, setFailedImageSrc] = useState<string | null>(null);
     const { t, locale } = useLocale("opportunities");
     const colors = getTypeColors(offre.type_offre);
     const icon = SOURCE_ICONS[offre.source_site] ?? <Globe size={16} />;
+    const shouldShowImage = Boolean(offre.lien_image) && failedImageSrc !== offre.lien_image;
     const isRecommended = offre._isRecommended === true;
     const typeLabel = getFilterLabel(t, "type_offre", offre.type_offre);
     const sourceLabel = getSourceLabel(t, offre.source_site);
-    const teletravailLabel = (offre as any).teletravail
-        ? getFilterLabel(t, "teletravail", (offre as any).teletravail)
+    const teletravailLabel = offre.teletravail
+        ? getFilterLabel(t, "teletravail", offre.teletravail)
         : null;
 
     return (
@@ -70,12 +72,12 @@ export const JobCard = React.memo(function JobCard({ offre, onClick }: JobCardPr
 
             <div style={s.cardTop}>
                 <div style={s.cardLogo}>
-                    {offre.lien_image ? (
+                    {shouldShowImage ? (
                         <img
-                            src={offre.lien_image}
+                            src={offre.lien_image ?? undefined}
                             alt=""
                             style={{ width: "100%", height: "100%", objectFit: "cover" }}
-                            onError={(e) => { (e.currentTarget as HTMLImageElement).style.display = "none"; }}
+                            onError={() => setFailedImageSrc(offre.lien_image ?? null)}
                         />
                     ) : (
                         <span style={{ fontSize: 18 }}>{icon}</span>
@@ -140,7 +142,7 @@ export const JobCard = React.memo(function JobCard({ offre, onClick }: JobCardPr
                         </span>
                     )}
                     <span style={s.timeTag}>
-                        <Clock size={10} />{timeAgo((offre as any).date_publication ?? offre.date_scraped, t, locale)}
+                        <Clock size={10} />{timeAgo(offre.date_publication ?? offre.date_scraped, t, locale)}
                     </span>
                 </div>
                 <span style={s.sourceTag}>{icon} {sourceLabel}</span>
