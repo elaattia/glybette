@@ -39,15 +39,18 @@ export function useAuthBootstrap() {
     const sessionQuery = authClient.useSession();
 
     useEffect(() => {
+        // Better Auth can report "no session" without exposing React Query's fetched flags,
+        // so we only gate on the initial pending state and then settle auth explicitly.
         if (sessionQuery.isPending) {
             return;
         }
 
         if (sessionQuery.data?.session) {
             setAuthenticated(sessionQuery.data);
-        } else {
-            setUnauthenticated();
+            return;
         }
+
+        setUnauthenticated();
     }, [
         sessionQuery.data,
         sessionQuery.isPending,

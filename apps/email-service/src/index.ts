@@ -20,7 +20,7 @@ function createEmailProvider(env: ReturnType<typeof loadEmailServiceEnv>): Email
         return new ResendEmailProvider(env.RESEND_API_KEY, env.EMAIL_FROM);
     }
 
-    return new MockEmailProvider();
+    return new MockEmailProvider(env.EMAIL_FROM);
 }
 
 async function main() {

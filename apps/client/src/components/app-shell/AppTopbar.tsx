@@ -1,5 +1,6 @@
-import { Bell, Menu, Search } from "lucide-react";
+import { Menu, Search } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import NotificationsMenu from "@/components/app-shell/NotificationsMenu";
 import UserMenu from "@/components/app-shell/UserMenu";
 
 type AppTopbarProps = {
@@ -32,9 +33,7 @@ export default function AppTopbar({ title, subtitle, onMenuClick }: AppTopbarPro
                         />
                     </div>
 
-                    <Button type="button" variant="ghost" size="icon-sm">
-                        <Bell className="h-4 w-4" />
-                    </Button>
+                    <NotificationsMenu />
                     <UserMenu />
                 </div>
             </div>

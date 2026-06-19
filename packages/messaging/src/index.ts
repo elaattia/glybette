@@ -4,7 +4,13 @@ export {
     type OtpEmailRequestedEvent,
     isOtpEmailRequestedEvent,
 } from "./contracts.js";
-export { buildEmailVerificationOtpContent, type OtpEmailContent, type OtpEmailContentInput } from "./email-content.js";
+export {
+    buildEmailVerificationOtpContent,
+    buildEmailVerificationOtpPlainText,
+    formatOtpEmailLog,
+    type OtpEmailContent,
+    type OtpEmailContentInput,
+} from "./email-content.js";
 export {
     AUTH_EXCHANGE,
     AUTH_EXCHANGE_TYPE,

@@ -1,13 +1,14 @@
 import { randomUUID } from "node:crypto";
-import { mkdir, writeFile } from "node:fs/promises";
-import { resolve } from "node:path";
+import { appendFile, mkdir } from "node:fs/promises";
+import path from "node:path";
+import { fileURLToPath } from "node:url";
 import mongoose from "mongoose";
 import type { UsersServiceEnv } from "../config/env.js";
 import { BadRequestError, NotFoundError, ServiceUnavailableError } from "@glybette/utils";
 import {
     OTP_PURPOSE_EMAIL_VERIFICATION,
     ROUTING_KEY_AUTH_OTP_SEND,
-    buildEmailVerificationOtpContent,
+    formatOtpEmailLog,
     type OtpEmailRequestedEvent,
     type RabbitMqClient,
 } from "@glybette/messaging";
@@ -35,6 +36,8 @@ type EmailOtpDocument = {
 };
 
 const OTP_COLLECTION = "auth_email_otps";
+const USERS_SERVICE_ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "../..");
+const DEFAULT_EMAIL_FROM = "no-reply@glybette.dev";
 
 export class OtpService {
     constructor(
@@ -222,26 +225,26 @@ export class OtpService {
         });
     }
 
+    private resolveEmailLogDir(): string {
+        if (path.isAbsolute(this.env.EMAIL_LOG_DIR)) {
+            return this.env.EMAIL_LOG_DIR;
+        }
+
+        return path.resolve(USERS_SERVICE_ROOT, this.env.EMAIL_LOG_DIR);
+    }
+
     private async writeOtpToLocalLog(event: OtpEmailRequestedEvent): Promise<void> {
-        const outputDir = resolve(process.cwd(), this.env.EMAIL_LOG_DIR);
-        const timestamp = Date.now();
-        const outputPath = resolve(outputDir, `email${timestamp}.log`);
-        const content = buildEmailVerificationOtpContent({
+        const outputDir = this.resolveEmailLogDir();
+        const outputPath = path.join(outputDir, "logs.txt");
+        const logEntry = formatOtpEmailLog({
+            from: DEFAULT_EMAIL_FROM,
+            to: event.email,
             otpCode: event.otpCode,
             expiresAtIso: event.expiresAtIso,
         });
-        const body = [
-            "From: no-reply@glybette.dev",
-            `To: ${event.email}`,
-            `Subject: ${content.subject}`,
-            "Content-Type: text/html; charset=utf-8",
-            "",
-            content.html.trim(),
-            "",
-        ].join("\n");
 
         await mkdir(outputDir, { recursive: true });
-        await writeFile(outputPath, body, "utf8");
-        console.warn(`[users-service] OTP email written to local log: ${outputPath}`);
+        await appendFile(outputPath, logEntry, "utf8");
+        console.warn(`[users-service] OTP email appended to local log: ${outputPath}`);
     }
 }

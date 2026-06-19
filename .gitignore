@@ -10,6 +10,9 @@ __pycache__/
 *.pyc
 *.pyo
 logs/
+apps/users-service/logs/
+apps/email-service/logs.txt
+
 .venv/
 .pnpm-store/
 .data/

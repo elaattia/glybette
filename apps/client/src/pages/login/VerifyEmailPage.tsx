@@ -9,7 +9,12 @@ import { ApiError } from "@/lib/api";
 import { InputOTP, InputOTPGroup, InputOTPSlot } from "@/components/ui/input-otp";
 import "./login.css";
 
-export function VerifyEmailPage() {
+type VerifyEmailPageProps = {
+    /** Mock/preview route: keep showing the page even when email is already verified. */
+    skipVerifiedRedirect?: boolean;
+};
+
+export function VerifyEmailPage({ skipVerifiedRedirect = false }: VerifyEmailPageProps = {}) {
     const navigate = useNavigate();
     const location = useLocation();
     const auth = useAuth();
@@ -38,7 +43,7 @@ export function VerifyEmailPage() {
             return;
         }
 
-        if (!verification.requiresEmailVerification) {
+        if (!skipVerifiedRedirect && !verification.requiresEmailVerification) {
             const from = (location.state as { from?: string } | null)?.from;
             navigate(resolveAuthenticatedDestination(from, user), { replace: true });
         }
@@ -46,6 +51,7 @@ export function VerifyEmailPage() {
         auth.isAuthenticated,
         location.state,
         navigate,
+        skipVerifiedRedirect,
         user,
         verification.isError,
         verification.isPending,
@@ -71,8 +77,10 @@ export function VerifyEmailPage() {
         setRequestMessage(null);
         try {
             await verification.verifyOtp(code.trim());
-            const from = (location.state as { from?: string } | null)?.from;
-            navigate(resolveAuthenticatedDestination(from, user), { replace: true });
+            if (!skipVerifiedRedirect) {
+                const from = (location.state as { from?: string } | null)?.from;
+                navigate(resolveAuthenticatedDestination(from, user), { replace: true });
+            }
         } catch (error) {
             const message = error instanceof ApiError ? error.message : "Unable to verify OTP code";
             setErrorMessage(message);

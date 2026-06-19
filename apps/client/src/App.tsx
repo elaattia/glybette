@@ -3,6 +3,7 @@ import { Route, Routes, Navigate } from "react-router-dom";
 import LoginPage from "@/pages/login";
 import { AuthCallbackPage } from "@/pages/login/AuthCallbackPage";
 import { VerifyEmailPage } from "@/pages/login/VerifyEmailPage";
+import { VerifyEmailMockPage } from "@/pages/login/VerifyEmailMockPage";
 import { RequireAuth } from "@/components/auth/RequireAuth";
 import { RequireAdmin, RequireBaseRole } from "@/components/auth/RequireRole";
 import { useAuthBootstrap } from "@/hooks/useAuth";
@@ -55,6 +56,7 @@ function App() {
             <Route path="/login" element={<LoginPage />} />
             <Route path="/auth/callback" element={<AuthCallbackPage />} />
             <Route path="/verify-email" element={<VerifyEmailPage />} />
+            <Route path="/verify-email-mock" element={<VerifyEmailMockPage />} />
             <Route element={<RequireAuth />}>
                 <Route path="/app" element={<AppShellLayout />}>
                     <Route index element={<AppHomeRedirect />} />

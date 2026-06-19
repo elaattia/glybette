@@ -22,3 +22,46 @@ export function buildEmailVerificationOtpContent(input: OtpEmailContentInput): O
     `,
     };
 }
+
+export function buildEmailVerificationOtpPlainText(input: OtpEmailContentInput): string {
+    return [
+        "Verify your Glybette email",
+        "",
+        "Use the code below to verify your account:",
+        "",
+        input.otpCode,
+        "",
+        `This code expires at ${new Date(input.expiresAtIso).toLocaleString()}.`,
+        "",
+        "If you did not request this code, you can ignore this email.",
+    ].join("\n");
+}
+
+export function formatOtpEmailLog(input: {
+    from: string;
+    to: string;
+    otpCode: string;
+    expiresAtIso: string;
+}): string {
+    const content = buildEmailVerificationOtpContent({
+        otpCode: input.otpCode,
+        expiresAtIso: input.expiresAtIso,
+    });
+
+    return [
+        "",
+        "----------",
+        `From: ${input.from}`,
+        `To: ${input.to}`,
+        `Subject: ${content.subject}`,
+        `Date: ${new Date().toUTCString()}`,
+        "MIME-Version: 1.0",
+        "Content-Type: text/plain; charset=UTF-8",
+        "",
+        buildEmailVerificationOtpPlainText({
+            otpCode: input.otpCode,
+            expiresAtIso: input.expiresAtIso,
+        }),
+        "",
+    ].join("\n");
+}

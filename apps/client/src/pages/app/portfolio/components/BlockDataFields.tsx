@@ -51,7 +51,7 @@ function SkillsFields({ block, onChange }: BlockDataFieldProps) {
         <div className="space-y-3">
             {groups.map((group, index) => (
                 <div
-                    key={`${group.label}-${index}`}
+                    key={`skill-group-${index}`}
                     className="space-y-2 rounded-xl border border-[var(--gb-border)] p-3">
                     <div className="flex items-center gap-2">
                         <Input
@@ -177,7 +177,7 @@ function SocialLinksFields({ block, updateField }: BlockDataFieldProps) {
         <div className="space-y-3">
             {links.map((link, index) => (
                 <div
-                    key={`${link.label}-${index}`}
+                    key={`social-link-${index}`}
                     className="space-y-2 rounded-xl border border-[var(--gb-border)] p-3">
                     <Input
                         value={link.label ?? ""}
@@ -237,7 +237,7 @@ function ProjectListFields({ block, updateField }: BlockDataFieldProps) {
         <div className="space-y-3">
             {projects.map((project, index) => (
                 <div
-                    key={`${project.title}-${index}`}
+                    key={`project-${index}`}
                     className="space-y-2 rounded-xl border border-[var(--gb-border)] p-3">
                     <Input
                         value={project.title ?? ""}
@@ -295,7 +295,7 @@ function ExperienceTimelineFields({ block, updateField }: BlockDataFieldProps) {
         <div className="space-y-3">
             {items.map((item, index) => (
                 <div
-                    key={`${item.role}-${index}`}
+                    key={`experience-${index}`}
                     className="space-y-2 rounded-xl border border-[var(--gb-border)] p-3">
                     <Input
                         value={item.role ?? ""}

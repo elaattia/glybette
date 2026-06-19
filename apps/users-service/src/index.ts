@@ -7,7 +7,19 @@ import { AuthController } from "./controllers/auth.controller.js";
 import { OtpController } from "./controllers/otp.controller.js";
 import { UserController } from "./controllers/user.controller.js";
 import { connectRabbitMq, ensureAuthEmailTopology, ensureUsersTopology } from "@glybette/messaging";
+import path from "node:path";
+import { fileURLToPath } from "node:url";
 import { OtpService } from "./services/otp.service.js";
+
+const USERS_SERVICE_ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..");
+
+function resolveEmailLogDir(configuredDir: string): string {
+    if (path.isAbsolute(configuredDir)) {
+        return configuredDir;
+    }
+
+    return path.resolve(USERS_SERVICE_ROOT, configuredDir);
+}
 import { UserService } from "./services/user.service.js";
 import { registerAuthRoutes } from "./routes/auth.routes.js";
 import { registerOtpRoutes } from "./routes/otp.routes.js";
@@ -40,7 +52,10 @@ async function main() {
     await otpService.ensureIndexes();
     await connectRabbitMqWithWarnings(otpService, userService, env.RABBITMQ_URL);
     if (env.EMAIL_DELIVERY_MODE === "file") {
-        console.warn(`[users-service] EMAIL_DELIVERY_MODE=file. OTP emails will be written to ${env.EMAIL_LOG_DIR}.`);
+        const logPath = path.join(resolveEmailLogDir(env.EMAIL_LOG_DIR), "logs.txt");
+        console.warn(
+            `[users-service] EMAIL_DELIVERY_MODE=file. OTP emails append to ${logPath} (email-service is bypassed).`,
+        );
     }
 
     const authController = new AuthController(auth);
