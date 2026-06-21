@@ -3,6 +3,8 @@
 Use this as your personal runbook to go from “code is ready” to “production is live.”  
 Detailed reference: [`deployment.md`](deployment.md) · Portfolio routing: [`docs/portfolio-routing.md`](docs/portfolio-routing.md)
 
+**APP_DIR (this VPS):** `/home/glybette/Glybette` — repo is already cloned here. Run all compose/nginx commands from this path.
+
 ## Already done in the repo
 
 - [x] Production `client` image (`apps/client/Dockerfile` + nginx SPA)
@@ -100,11 +102,13 @@ Follow [`deployment.md` §3.2–3.5](deployment.md).
 
 - [ ] Install Jenkins + Java
 - [ ] Add `jenkins` user to docker group: `sudo usermod -aG docker jenkins && sudo systemctl restart jenkins`
-- [ ] Create deploy directory:
+- [ ] Ensure Jenkins can use the existing app directory (`/home/glybette/Glybette`):
 
 ```bash
-sudo mkdir -p /opt/glybette
-sudo chown -R jenkins:jenkins /opt/glybette
+sudo usermod -aG docker jenkins
+# If the pipeline runs as jenkins, grant access to APP_DIR (pick one):
+sudo setfacl -R -m u:jenkins:rwx /home/glybette/Glybette
+# OR update Jenkinsfile APP_DIR and run the job as user glybette
 ```
 
 - [ ] Install Node 22 + pnpm on VPS (for preflight):
@@ -120,7 +124,7 @@ corepack prepare pnpm@10.17.0 --activate
 - [ ] Create Jenkins credentials:
   - [ ] `glybette-git` — SSH private key with read access to the repo (add public key as deploy key on GitHub)
   - [ ] `glybette-env-prod` — Secret file = your production `.env`
-- [ ] Update [`Jenkinsfile`](Jenkinsfile): set `REPO_URL` to your real `git@github.com:ORG/REPO.git`
+- [ ] Update [`Jenkinsfile`](Jenkinsfile): set `REPO_URL` to your real `git@github.com:ORG/REPO.git` and `APP_DIR` to `/home/glybette/Glybette`
 - [ ] Commit and push `Jenkinsfile` change to `main`
 - [ ] Create **Pipeline** job → “Pipeline script from SCM” → point at repo + `Jenkinsfile`
 - [ ] Set job parameter `PORTFOLIO_SMOKE_SLUG` to a **real** portfolio slug in your DB (or accept default `demo` only if that slug exists)
@@ -137,6 +141,7 @@ corepack prepare pnpm@10.17.0 --activate
 - [ ] Copy site config:
 
 ```bash
+cd /home/glybette/Glybette
 sudo cp deploy/nginx/glybette.conf /etc/nginx/sites-available/glybette
 sudo ln -sf /etc/nginx/sites-available/glybette /etc/nginx/sites-enabled/
 sudo rm -f /etc/nginx/sites-enabled/default   # if it conflicts
@@ -170,9 +175,9 @@ You can do **one manual deploy** before relying on Jenkins, to catch issues earl
 ### Option A — Manual (recommended first time)
 
 ```bash
-cd /opt/glybette
-git clone git@github.com:YOUR_ORG/YOUR_REPO.git .
-cp /path/to/your/.env .env
+cd /home/glybette/Glybette
+git pull origin main
+cp /path/to/your/.env .env   # skip if .env already in APP_DIR
 pnpm docker:env:check:prod
 docker compose up -d --build
 ```
@@ -259,3 +264,140 @@ Check in order:
 8. Phase 8 — backups and monitoring  
 
 When everything is green, day-to-day deploys are: **push to `main` → Jenkins runs → smoke tests pass**.
+
+---
+
+## Agent execution (VPS SSH access)
+
+**Short answer:** Yes, with limits. An agent with SSH + `sudo` on the VPS can complete roughly **60–70%** of this handoff autonomously. The rest needs human input (secrets, DNS registrar, GitHub/Jenkins UIs) or will block until you provide those inputs.
+
+Use this section when handing the task to Cursor, Claude, or another agent that can run shell commands on the server.
+
+### What the agent needs upfront (you provide)
+
+| Input | Example | Why |
+|-------|---------|-----|
+| `DOMAIN` | `glybette.com` | Nginx, TLS, env validation |
+| `REPO_URL` | `git@github.com:org/glybette.git` | Clone + Jenkinsfile |
+| `GIT_SSH_KEY` or deploy access | private key path on VPS | `git clone` / Jenkins |
+| Production `.env` | file contents or path on VPS | **Never** commit; place at `/home/glybette/Glybette/.env` |
+| `PORTFOLIO_SMOKE_SLUG` | real slug in DB | Smoke test after deploy |
+| DNS | A records already pointing at VPS IP | Required before HTTPS and public checks |
+| (Optional) DNS API token | Cloudflare etc. | Only if you want the agent to complete Certbot DNS-01 |
+
+Without a filled `.env`, the agent can still install Docker/Nginx and clone the repo, but **cannot** pass `pnpm docker:env:check:prod` or start a healthy stack.
+
+### Step classification
+
+| Phase | Agent (SSH) | Human only |
+|-------|-------------|------------|
+| 0 — Secrets / accounts | Write `.env` if you paste secrets | Create Atlas, Gemini, Resend, verify email domain |
+| 1 — VPS baseline | `apt`, Docker, firewall (`ufw`) | Provision VPS in cloud console |
+| 2 — DNS | `dig` to verify propagation | Create A/CNAME records at registrar |
+| 3 — `.env` | `cp .env.production.example .env`, edit, `pnpm docker:env:check:prod` | Supply secret values |
+| 4 — Jenkins | Install packages, `jenkins` docker group, ACL on `/home/glybette/Glybette` | Jenkins UI: credentials, pipeline job, GitHub webhook |
+| 5 — Nginx | `apt install nginx`, copy `deploy/nginx/glybette.conf`, `nginx -t` | Certbot DNS-01 TXT records (unless DNS API) |
+| 6 — Deploy | `git pull`, `docker compose up -d --build`, curl smoke tests | — |
+| 7 — Verify | `curl` health + portfolio resolve from VPS | Browser: login, signup, upload, AI UX |
+| 8 — Ops | `docker compose logs`, `certbot renew --dry-run` | Atlas backup policy, uptime SaaS |
+
+### Recommended agent path (skip Jenkins on first pass)
+
+Jenkins setup is UI-heavy. For an agent’s **first** run, prefer **Phase 6 Option A** only:
+
+1. Install Docker + Node 22 + pnpm on VPS  
+2. Work in existing clone: `/home/glybette/Glybette` (`git pull` for latest)  
+3. Place `.env` at `/home/glybette/Glybette/.env`  
+4. `pnpm docker:env:check:prod`  
+5. `docker compose up -d --build`  
+6. Run smoke `curl` commands from Phase 6  
+7. Install Nginx + copy site config  
+8. **Pause** for human: DNS-01 wildcard cert + uncomment `ssl_certificate` lines in nginx config  
+9. `nginx -t && systemctl reload nginx`  
+10. Human verifies HTTPS URLs in browser  
+11. **Then** human or agent-with-JCasC sets up Jenkins for webhook deploys  
+
+### Agent prompt template
+
+Copy and fill placeholders when starting an agent session:
+
+```text
+Deploy Glybette to production on this VPS using DEPLOYMENT_HANDOFF.md (Agent execution section).
+
+Constants:
+- DOMAIN=glybette.com
+- APP_DIR=/home/glybette/Glybette
+- REPO_URL=git@github.com:ORG/REPO.git
+- .env is at /home/glybette/Glybette/.env (already uploaded) OR paste secrets into .env from .env.production.example
+
+Do:
+1. Phases 1, 6 Option A (Docker, git pull in APP_DIR, compose up, smoke curls on localhost).
+2. Phase 5 (host nginx from deploy/nginx/glybette.conf) — HTTP only until TLS is done.
+3. Report docker compose ps and all smoke test results.
+
+Do NOT:
+- Commit or print .env secrets.
+- Skip docker:env:check:prod before compose up.
+
+Stop and ask me when:
+- DNS does not resolve to this server's public IP.
+- Certbot DNS-01 needs TXT records (show exact record name/value).
+- Jenkins UI steps are required (unless I said to skip Jenkins).
+- Any smoke test fails — include relevant docker compose logs.
+```
+
+### Commands the agent should run (copy-paste block)
+
+Repo path: `/home/glybette/Glybette` (already cloned). Ensure `.env` is present:
+
+```bash
+set -euo pipefail
+cd /home/glybette/Glybette
+git pull origin main || true
+
+corepack enable
+pnpm docker:env:check:prod
+docker compose up -d --build
+
+# wait for health (up to ~3 min)
+for i in $(seq 1 36); do
+  docker compose ps --format json | grep -q '"Health":"healthy"' && break
+  sleep 5
+done
+
+docker compose ps
+curl -fsS http://127.0.0.1:3000/api/health
+curl -fsS http://127.0.0.1:3007/health
+curl -fsS http://127.0.0.1:3003/health
+curl -fsS http://127.0.0.1:3008/health
+curl -fsS -H "Host: glybette.com" http://127.0.0.1:5173/ -o /dev/null
+
+sudo cp deploy/nginx/glybette.conf /etc/nginx/sites-available/glybette
+sudo ln -sf /etc/nginx/sites-available/glybette /etc/nginx/sites-enabled/
+sudo rm -f /etc/nginx/sites-enabled/default
+# If TLS not ready: comment out listen 443 server block in glybette.conf first
+sudo nginx -t && sudo systemctl reload nginx
+```
+
+Replace `glybette.com` in the `Host` header if `DOMAIN` differs.
+
+### Known blockers for agents
+
+1. **Certbot DNS-01** — `certbot certonly --manual` waits for interactive Enter after you add TXT records. Agent should output the TXT record and **stop** unless you give it a DNS API (e.g. Cloudflare certbot plugin).
+2. **Jenkins credentials + job** — no CLI in this repo; use Jenkins UI or add [JCasC](https://www.jenkins.io/projects/jcasc/) later.
+3. **GitHub webhook** — must be created in GitHub repo settings (human or GitHub API token).
+4. **`Jenkinsfile`** — set `REPO_URL` and `APP_DIR=/home/glybette/Glybette` in git before webhook deploys work.
+5. **Nginx 443 with commented SSL** — current `deploy/nginx/glybette.conf` has SSL paths commented; nginx will fail on `listen 443 ssl` until certs exist. Agent should either use HTTP-only temporarily or enable cert paths after issuance.
+6. **Portfolio slug smoke test** — fails if `PORTFOLIO_SMOKE_SLUG` does not exist in MongoDB.
+
+### Success criteria for an agent run
+
+Agent can mark the task **done** when all of these pass:
+
+- [ ] `pnpm docker:env:check:prod` exits 0  
+- [ ] `docker compose ps` shows core services up (gateway, client, portfolio, ai, etc.)  
+- [ ] Localhost smoke curls in Phase 6 all succeed  
+- [ ] Nginx proxies `/` → `:5173` and `/api/` → `:3000` (test with `curl -H "Host: $DOMAIN" http://127.0.0.1/`)  
+- [ ] Human confirmed HTTPS + browser checks (Phase 7) — agent reports “blocked on human” until then  
+
+Jenkins + webhook auto-deploy is **optional follow-up**, not required for “app is live.”
