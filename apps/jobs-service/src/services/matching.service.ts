@@ -40,7 +40,8 @@ export class MatchingService {
         );
     }
 
-    async getTopMatchesForUser(userId: string, userProfile: UserProfile, limit = 20) {
+    async getTopMatchesForUser(userId: string, userProfile: UserProfile, limit = 3) {
+        // Prefetch recent pool; only up to `limit` uncached offres get AI scoring per request.
         const offres = await OffreModel.find({ status: "active" })
             .sort({ date_scraped: -1 })
             .limit(100)

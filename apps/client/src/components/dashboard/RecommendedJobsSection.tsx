@@ -4,13 +4,15 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { useNavigate } from "react-router-dom";
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect } from "react";
 import { useFullProfile } from "@/hooks/useUserProfile";
 import { useAuth } from "@/hooks/useAuth";
 import type { AppLocale } from "@/i18n";
 import { formatDate } from "@/lib/locale-format";
 
 const API_BASE = (import.meta as any).env?.VITE_API_URL ?? "http://localhost:3000/api";
+const SESSION_MATCHES_KEY = "glybette-dashboard-matches";
+const SESSION_FETCHED_KEY = "glybette-dashboard-matching-fetched";
 
 interface JobMatch {
     match: { score: number; explication: string };
@@ -32,34 +34,39 @@ function scoreColor(score: number) {
     return "#ef4444";
 }
 
+async function fetchOffresFallback(): Promise<JobMatch[]> {
+    const res = await fetch(`${API_BASE}/jobs/offres?limit=3`, { credentials: "include" });
+    const data = await res.json();
+    return (data.offres ?? []).map((o: JobMatch["offre"]) => ({
+        match: { score: 0, explication: "" },
+        offre: o,
+    }));
+}
+
 export default function RecommendedJobsSection() {
     const { t, i18n } = useTranslation("dashboard");
     const locale = (i18n.language === "fr" ? "fr" : "en") as AppLocale;
     const navigate = useNavigate();
     const { isAuthenticated } = useAuth();
-    const { profile, hasProfile } = useFullProfile();
+    const { profile, hasProfile, isProfileReady } = useFullProfile();
 
     const [matches, setMatches] = useState<JobMatch[]>([]);
     const [loading, setLoading] = useState(false);
 
-    const profileKey = JSON.stringify({
-        summary: profile.summary,
-        skills: profile.skills,
-        domain: profile.domain,
-        journey: profile.journey,
-        opportunities: profile.opportunities,
-    });
-
-    const fetchedRef = useRef(false);
-
     useEffect(() => {
-        if (!isAuthenticated) return;
-        fetchedRef.current = false;
-    }, [profileKey, isAuthenticated]);
+        if (!isAuthenticated || !isProfileReady) return;
 
-    useEffect(() => {
-        if (!isAuthenticated || fetchedRef.current) return;
-        fetchedRef.current = true;
+        const cached = sessionStorage.getItem(SESSION_MATCHES_KEY);
+        if (cached) {
+            try {
+                setMatches(JSON.parse(cached));
+                return;
+            } catch {
+                sessionStorage.removeItem(SESSION_MATCHES_KEY);
+            }
+        }
+
+        if (sessionStorage.getItem(SESSION_FETCHED_KEY)) return;
 
         const userProfile = {
             summary: profile.summary ?? "",
@@ -74,6 +81,22 @@ export default function RecommendedJobsSection() {
 
         setLoading(true);
 
+        const loadFallback = () =>
+            fetchOffresFallback()
+                .then((fallback) => {
+                    setMatches(fallback);
+                    sessionStorage.setItem(SESSION_MATCHES_KEY, JSON.stringify(fallback));
+                })
+                .catch(() => {});
+
+        if (!hasProfile) {
+            loadFallback().finally(() => {
+                sessionStorage.setItem(SESSION_FETCHED_KEY, "1");
+                setLoading(false);
+            });
+            return;
+        }
+
         fetch(`${API_BASE}/jobs/matching/top`, {
             method: "POST",
             headers: { "Content-Type": "application/json" },
@@ -85,24 +108,16 @@ export default function RecommendedJobsSection() {
                 return res.json();
             })
             .then((data) => {
-                setMatches((data.matches ?? []).slice(0, 3));
+                const result = (data.matches ?? []).slice(0, 3);
+                setMatches(result);
+                sessionStorage.setItem(SESSION_MATCHES_KEY, JSON.stringify(result));
+                sessionStorage.setItem(SESSION_FETCHED_KEY, "1");
             })
-            .catch(async () => {
-                try {
-                    const res2 = await fetch(`${API_BASE}/jobs/offres?limit=3`, {
-                        credentials: "include",
-                    });
-                    const data2 = await res2.json();
-                    const fallback: JobMatch[] = (data2.offres ?? []).map((o: any) => ({
-                        match: { score: 0, explication: "" },
-                        offre: o,
-                    }));
-                    setMatches(fallback);
-                } catch {
-                }
-            })
+            .catch(() => loadFallback().finally(() => {
+                sessionStorage.setItem(SESSION_FETCHED_KEY, "1");
+            }))
             .finally(() => setLoading(false));
-    }, [isAuthenticated, profileKey]);
+    }, [isAuthenticated, isProfileReady, hasProfile]);
 
     const typeColors: Record<string, string> = {
         emploi: "#22c55e",

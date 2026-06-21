@@ -76,9 +76,7 @@ export function useJobMatching(offreId: string | null, userProfile: any) {
             setLoading(false);
         }
     }, [offreId, JSON.stringify(userProfile)]);
- 
-    useEffect(() => { compute(); }, [compute]);
- 
+
     return { matching, loading, error, refresh: compute };
 }
  

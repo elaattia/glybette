@@ -270,16 +270,6 @@ def get_offres(
     profile_skills = [s.strip() for s in user_skills.split(",") if s.strip()] if user_skills else None
     profile_experience = user_experience.strip() if user_experience else None
 
-    if not profile_skills and not profile_experience and request is not None:
-        try:
-            prof_skills, prof_exp = _fetch_user_profile(request)
-            if prof_skills and not profile_skills:
-                profile_skills = prof_skills
-            if prof_exp and not profile_experience:
-                profile_experience = prof_exp
-        except Exception:
-            pass
-
     sort_map = {
         "recent": [("date_publication", -1), ("date_scraped", -1)],
         "vues":   [("nb_vues", -1)],
@@ -289,34 +279,15 @@ def get_offres(
     col   = col_offres()
     total = col.count_documents(filtre)
 
-    projection = None if (profile_skills or profile_experience) else {"description": 0, "company_about": 0}
-    all_docs = list(
+    projection = {"description": 0, "company_about": 0}
+    docs = list(
         col.find(filtre, projection)
            .sort(sort)
+           .skip((page - 1) * limit)
+           .limit(limit)
     )
 
-    if profile_skills or profile_experience:
-        for doc in all_docs:
-            doc["_matching_score"] = _calculate_matching_score(
-                doc, profile_skills, profile_experience
-            )
-
-        def _sort_key(x):
-            score = x.get("_matching_score", 0)
-            dt = x.get("date_publication") or x.get("date_scraped")
-            ts = dt.timestamp() if isinstance(dt, datetime) else 0
-            return (-score, -ts)
-
-        all_docs.sort(key=_sort_key)
-
-    docs = all_docs[(page - 1) * limit : page * limit]
-
-    serialized_offres = []
-    for d in docs:
-        serialized = _serialize(d)
-        if "_matching_score" in d:
-            serialized["matching_score"] = d["_matching_score"]
-        serialized_offres.append(serialized)
+    serialized_offres = [_serialize(d) for d in docs]
 
     return {
         "total":  total,

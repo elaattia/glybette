@@ -48,9 +48,7 @@ export function useJobDetail(id: string | undefined, userProfile: any): UseJobDe
             setMatching(data.matching);
         } catch (e) { console.error(e); }
         finally { setLoadingMatch(false); }
-    }, [id, profileKey]); 
-
-    useEffect(() => { computeMatching(); }, [computeMatching]);
+    }, [id, profileKey]);
 
     const generateQuestions = useCallback(async () => {
         if (!id || questions) return;

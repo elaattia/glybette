@@ -112,7 +112,7 @@ export function useUserProfile() {
 
 
 export function useFullProfile() {
-    const { profile, buildProfileText } = useUserProfile();
+    const { profile, buildProfileText, isSuccess, isLoading } = useUserProfile();
     const { user } = useUser();
 
     const cvProfile = (() => {
@@ -141,5 +141,7 @@ export function useFullProfile() {
         profile: merged,
         profileText: buildProfileText(merged),
         hasProfile: Boolean(merged.skills?.length || merged.domain || merged.journey),
+        isProfileReady: isSuccess,
+        isProfileLoading: isLoading,
     };
 }

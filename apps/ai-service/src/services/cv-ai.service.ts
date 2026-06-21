@@ -226,10 +226,9 @@ Return ONLY the letter text, no subject line, no markdown.`;
 
     async extractFromText(rawText: string): Promise<ExtractResult> {
         const text = rawText.slice(0, 3000);
-        console.log("[extractFromText] text length:", text.length);
 
-        const prompt1 = `Extract personal information and professional summary from this CV text.
-Return ONLY valid JSON matching this exact structure:
+        const prompt = `Extract all structured information from this CV text.
+Return ONLY valid JSON matching this exact structure (use "" for missing strings, [] for empty arrays, false for current when unknown):
 {
   "personalInfo": {
     "firstName": "",
@@ -242,16 +241,7 @@ Return ONLY valid JSON matching this exact structure:
     "github": "",
     "website": ""
   },
-  "summary": ""
-}
-Use empty string "" for any missing field. No explanation, no markdown fences.
-
-CV TEXT:
-${text}`;
-
-        const prompt2 = `Extract work experience and education from this CV text.
-Return ONLY valid JSON matching this exact structure:
-{
+  "summary": "",
   "experience": [
     {
       "company": "",
@@ -272,16 +262,7 @@ Return ONLY valid JSON matching this exact structure:
       "endDate": "",
       "gpa": ""
     }
-  ]
-}
-Use empty arrays [] if none found. No explanation, no markdown fences.
-
-CV TEXT:
-${text}`;
-
-        const prompt3 = `Extract skills, projects, languages and certifications from this CV text.
-Return ONLY valid JSON matching this exact structure:
-{
+  ],
   "skills": [
     { "category": "", "skills": [] }
   ],
@@ -295,48 +276,36 @@ Return ONLY valid JSON matching this exact structure:
     { "name": "", "issuer": "", "date": "" }
   ]
 }
-Use empty arrays [] if none found. No explanation, no markdown fences.
+No explanation, no markdown fences.
 
 CV TEXT:
 ${text}`;
 
-        let p1: { personalInfo: ExtractResult["personalInfo"]; summary: string } | null = null;
-        let p2: { experience: ExtractResult["experience"]; education: ExtractResult["education"] } | null = null;
-        let p3: {
-            skills: ExtractResult["skills"];
-            projects: ExtractResult["projects"];
-            languages: ExtractResult["languages"];
-            certifications: ExtractResult["certifications"];
-        } | null = null;
-
         try {
-            p1 = await this.provider.generateJson(prompt1, { maxTokens: 600 });
+            const result = await this.provider.generateJson<ExtractResult>(prompt, { maxTokens: 2800 });
+            return {
+                personalInfo: result.personalInfo ?? emptyPersonal(),
+                summary: result.summary ?? "",
+                experience: result.experience ?? [],
+                education: result.education ?? [],
+                skills: result.skills ?? [],
+                projects: result.projects ?? [],
+                languages: result.languages ?? [],
+                certifications: result.certifications ?? [],
+            };
         } catch (e) {
-            console.error("[extractFromText] step 1 failed:", e);
+            console.error("[extractFromText] failed:", e);
+            return {
+                personalInfo: emptyPersonal(),
+                summary: "",
+                experience: [],
+                education: [],
+                skills: [],
+                projects: [],
+                languages: [],
+                certifications: [],
+            };
         }
-
-        try {
-            p2 = await this.provider.generateJson(prompt2, { maxTokens: 1200 });
-        } catch (e) {
-            console.error("[extractFromText] step 2 failed:", e);
-        }
-
-        try {
-            p3 = await this.provider.generateJson(prompt3, { maxTokens: 1000 });
-        } catch (e) {
-            console.error("[extractFromText] step 3 failed:", e);
-        }
-
-        return {
-            personalInfo: p1?.personalInfo ?? emptyPersonal(),
-            summary: p1?.summary ?? "",
-            experience: p2?.experience ?? [],
-            education: p2?.education ?? [],
-            skills: p3?.skills ?? [],
-            projects: p3?.projects ?? [],
-            languages: p3?.languages ?? [],
-            certifications: p3?.certifications ?? [],
-        };
     }
 
     async suggestSkills(role: string, existingSkills: string[]): Promise<string[]> {

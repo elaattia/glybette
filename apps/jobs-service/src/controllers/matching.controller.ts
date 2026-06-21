@@ -33,7 +33,7 @@ matchingController.get("/top", async (c) => {
 
 matchingController.post(
     "/top",
-    zValidator("json", z.object({ userProfile: z.any(), limit: z.number().default(20) })),
+    zValidator("json", z.object({ userProfile: z.any(), limit: z.number().min(1).max(10).default(3) })),
     async (c) => {
         const userId = uid(c);
         const { userProfile, limit } = c.req.valid("json");
