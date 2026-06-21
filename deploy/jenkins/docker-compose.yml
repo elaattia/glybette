@@ -26,7 +26,6 @@ services:
       - /usr/libexec/docker/cli-plugins:/usr/libexec/docker/cli-plugins:ro
     group_add:
       - "987" # host docker group — getent group docker
-    user: "1002:1002" # host glybette user — id -u glybette
 
 volumes:
   jenkins_home:
