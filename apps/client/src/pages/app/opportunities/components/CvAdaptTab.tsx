@@ -9,8 +9,7 @@ import { formatNumber } from "@/lib/locale-format";
 import { detailStyles as styles } from "../styles";
 import { scoreColor } from "../constants";
 import type { Offre, CvImprovement } from "../types";
-
-const API_BASE = (import.meta as any).env?.VITE_API_URL ?? "http://localhost:3000/api";
+import { apiPrefix, getJobsApiUrl } from "@/lib/env";
 
 function buildTailoredSections(tailoredData: any, userProfile: any, offre: Offre, t: TFunction) {
     const uid = () => Math.random().toString(36).slice(2) + Date.now().toString(36);
@@ -123,7 +122,7 @@ export function CvAdaptTab({ offre, userProfile, profileText, matchScore }: CvAd
             } else {
                 const formData = new FormData();
                 formData.append("file", file);
-                const res = await fetch(`${API_BASE}/cvs/extract-text`, { method: "POST", credentials: "include", body: formData });
+                const res = await fetch(`${apiPrefix}/cvs/extract-text`, { method: "POST", credentials: "include", body: formData });
                 if (res.ok) {
                     const data = await res.json();
                     setUploadedCvText(data.text ?? "");
@@ -141,7 +140,7 @@ export function CvAdaptTab({ offre, userProfile, profileText, matchScore }: CvAd
         setLoadingCvImp(true);
         try {
             const cvText = uploadedCvText || profileText || t("detail.cvAdapt.defaultProfile");
-            const res = await fetch(`${API_BASE}/jobs/matching/cv-improvements`, {
+            const res = await fetch(getJobsApiUrl("/matching/cv-improvements"), {
                 method: "POST", headers: { "Content-Type": "application/json" }, credentials: "include",
                 body: JSON.stringify({ offreId: offre._id, cvText }),
             });
@@ -164,7 +163,7 @@ export function CvAdaptTab({ offre, userProfile, profileText, matchScore }: CvAd
 
             let tailoredData: any = null;
             try {
-                const aiRes = await fetch(`${API_BASE}/jobs/cv-tailored-sections`, {
+                const aiRes = await fetch(getJobsApiUrl("/cv-tailored-sections"), {
                     method: "POST", headers: { "Content-Type": "application/json" }, credentials: "include",
                     body: JSON.stringify({ cvText, offreText }),
                 });
@@ -174,7 +173,7 @@ export function CvAdaptTab({ offre, userProfile, profileText, matchScore }: CvAd
             const sections = buildTailoredSections(tailoredData, userProfile, offre, t);
             const cvTitle  = t("detail.cvAdapt.cvTitle", { title: offre.titre, companySuffix });
 
-            const createRes = await fetch(`${API_BASE}/cvs`, {
+            const createRes = await fetch(`${apiPrefix}/cvs`, {
                 method: "POST", headers: { "Content-Type": "application/json" }, credentials: "include",
                 body: JSON.stringify({ title: cvTitle, template: "modern-strategy", sections }),
             });

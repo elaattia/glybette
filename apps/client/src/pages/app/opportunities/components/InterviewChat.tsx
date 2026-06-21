@@ -3,8 +3,7 @@ import { Bot, User, Send, Mic, MicOff, Loader2 } from "lucide-react";
 import { useLocale } from "@/hooks/useLocale";
 import { formatTime, getIntlLocale } from "@/lib/locale-format";
 import type { ChatMessage } from "../types";
-
-const API_BASE = (import.meta as any).env?.VITE_API_URL ?? "http://localhost:3000/api";
+import { getJobsApiUrl } from "@/lib/env";
 
 interface Offre {
     _id: string;
@@ -128,7 +127,7 @@ export function InterviewChat({ offre, userProfile }: InterviewChatProps) {
                 .map((m) => ({ role: m.role, content: m.content }));
             history.push({ role: "user", content: text });
 
-            const res = await fetch(`${API_BASE}/jobs/chat`, {
+            const res = await fetch(getJobsApiUrl("/chat"), {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
                 credentials: "include",

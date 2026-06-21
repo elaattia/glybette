@@ -1,7 +1,6 @@
 import { useState, useEffect, useCallback } from "react";
 import type { Offre, Matching, InterviewQuestions } from "../types";
-
-const API_BASE = (import.meta as any).env?.VITE_API_URL ?? "http://localhost:3000/api";
+import { getJobsApiUrl } from "@/lib/env";
 
 interface UseJobDetailReturn {
     offre: Offre | null;
@@ -27,7 +26,7 @@ export function useJobDetail(id: string | undefined, userProfile: any): UseJobDe
     useEffect(() => {
         if (!id) return;
         setLoadingOffre(true);
-        fetch(`${API_BASE}/jobs/offres/${id}`, { credentials: "include" })
+        fetch(getJobsApiUrl(`/offres/${id}`), { credentials: "include" })
             .then((r) => r.json())
             .then((d) => setOffre(d.offre))
             .catch(console.error)
@@ -38,7 +37,7 @@ export function useJobDetail(id: string | undefined, userProfile: any): UseJobDe
         if (!id) return;
         setLoadingMatch(true);
         try {
-            const res = await fetch(`${API_BASE}/jobs/matching/offre/${id}`, {
+            const res = await fetch(getJobsApiUrl(`/matching/offre/${id}`), {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
                 credentials: "include",
@@ -54,7 +53,7 @@ export function useJobDetail(id: string | undefined, userProfile: any): UseJobDe
         if (!id || questions) return;
         setLoadingQuestions(true);
         try {
-            const res = await fetch(`${API_BASE}/jobs/interview/questions/${id}`, {
+            const res = await fetch(getJobsApiUrl(`/interview/questions/${id}`), {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
                 credentials: "include",

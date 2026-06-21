@@ -3,9 +3,6 @@ import type { TFunction } from "i18next";
 import { Globe, Briefcase, BookOpen, Leaf, Sparkles } from "lucide-react";
 import React from "react";
 
-export const API_BASE =
-    (import.meta as any).env?.VITE_API_URL ?? "http://localhost:3000/api";
-
 export const TYPE_COLORS: Record<string, { bg: string; text: string; dot: string; border: string }> = {
     emploi:      { bg: "rgba(22,163,74,0.12)",  text: "#22c55e", dot: "#22c55e", border: "rgba(22,163,74,0.3)" },
     stage:       { bg: "rgba(2,132,199,0.12)",  text: "#38bdf8", dot: "#38bdf8", border: "rgba(2,132,199,0.3)" },

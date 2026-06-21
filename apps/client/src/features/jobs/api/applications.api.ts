@@ -1,6 +1,6 @@
-import { API_BASE_URL } from "@/config";
+import { jobsApiBase } from "@/lib/env";
 
-const JOBS_API = `${API_BASE_URL}/api/jobs`;
+const JOBS_API = jobsApiBase;
 
 export const applicationsApi = {
     async submitApplication({ offreId, resume, coverLetter }: {

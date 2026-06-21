@@ -1,15 +1,13 @@
 import { useState, useEffect } from "react";
 import type { ScrapingStats } from "@glybette/types";
-
-
-const API_BASE = import.meta.env.VITE_API_URL ?? "http://localhost:3000/api";
+import { apiPrefix } from "@/lib/env";
 
 export function useStats() {
     const [stats, setStats] = useState<ScrapingStats | null>(null);
     const [loading, setLoading] = useState(true);
 
     useEffect(() => {
-        fetch(`${API_BASE}/scraping/stats`)
+        fetch(`${apiPrefix}/scraping/stats`)
             .then((r) => r.json())
             .then(setStats)
             .catch(console.error)
@@ -26,7 +24,7 @@ export function useTriggerScraping() {
     const trigger = async (source: string = "all") => {
         setLoading(true);
         try {
-            const res = await fetch(`${API_BASE}/scraping/trigger`, {
+            const res = await fetch(`${apiPrefix}/scraping/trigger`, {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
                 body: JSON.stringify({ source }),

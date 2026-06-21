@@ -3,8 +3,7 @@ import { Sparkles, Download, Copy, Send, Check } from "lucide-react";
 import { useLocale } from "@/hooks/useLocale";
 import { detailStyles as styles } from "../styles";
 import type { Offre } from "../types";
-
-const API_BASE = (import.meta as any).env?.VITE_API_URL ?? "http://localhost:3000/api";
+import { getJobsApiUrl } from "@/lib/env";
 
 async function downloadCoverLetterPdf(content: string, filename: string) {
     try {
@@ -44,7 +43,7 @@ export function CoverLetterTab({ offre, profileText }: CoverLetterTabProps) {
         setLoading(true); setCoverLetter("");
         try {
             const cvText = profileText || t("detail.coverLetter.defaultProfile");
-            const res = await fetch(`${API_BASE}/jobs/cover-letter/generate`, {
+            const res = await fetch(getJobsApiUrl("/cover-letter/generate"), {
                 method: "POST", headers: { "Content-Type": "application/json" }, credentials: "include",
                 body: JSON.stringify({ offreId: offre._id, cvText, tone: selectedTone, userAchievements: [] }),
             });

@@ -5,8 +5,7 @@ import { getIntlLocale } from "@/lib/locale-format";
 import { InterviewChat } from "./InterviewChat";
 import { detailStyles as styles } from "../styles";
 import type { Offre, InterviewQuestions, AnswerEval } from "../types";
-
-const API_BASE = (import.meta as any).env?.VITE_API_URL ?? "http://localhost:3000/api";
+import { getJobsApiUrl } from "@/lib/env";
 
 interface InterviewTabProps {
     offre: Offre;
@@ -59,7 +58,7 @@ export function InterviewTab({ offre, userProfile, questions, loading, onGenerat
         setLoadingEval(true); setEval(null);
         try {
             const question = questions[category][currentIdx] ?? "";
-            const res = await fetch(`${API_BASE}/jobs/interview/evaluate`, {
+            const res = await fetch(getJobsApiUrl("/interview/evaluate"), {
                 method: "POST", headers: { "Content-Type": "application/json" }, credentials: "include",
                 body: JSON.stringify({ question, answer, jobContext: offre.titre }),
             });

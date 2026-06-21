@@ -9,8 +9,7 @@ import { useFullProfile } from "@/hooks/useUserProfile";
 import { useAuth } from "@/hooks/useAuth";
 import type { AppLocale } from "@/i18n";
 import { formatDate } from "@/lib/locale-format";
-
-const API_BASE = (import.meta as any).env?.VITE_API_URL ?? "http://localhost:3000/api";
+import { getJobsApiUrl } from "@/lib/env";
 const SESSION_MATCHES_KEY = "glybette-dashboard-matches";
 const SESSION_FETCHED_KEY = "glybette-dashboard-matching-fetched";
 
@@ -35,7 +34,7 @@ function scoreColor(score: number) {
 }
 
 async function fetchOffresFallback(): Promise<JobMatch[]> {
-    const res = await fetch(`${API_BASE}/jobs/offres?limit=3`, { credentials: "include" });
+    const res = await fetch(getJobsApiUrl("/offres?limit=3"), { credentials: "include" });
     const data = await res.json();
     return (data.offres ?? []).map((o: JobMatch["offre"]) => ({
         match: { score: 0, explication: "" },
@@ -97,7 +96,7 @@ export default function RecommendedJobsSection() {
             return;
         }
 
-        fetch(`${API_BASE}/jobs/matching/top`, {
+        fetch(getJobsApiUrl("/matching/top"), {
             method: "POST",
             headers: { "Content-Type": "application/json" },
             credentials: "include",

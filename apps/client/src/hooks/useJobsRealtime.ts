@@ -1,6 +1,5 @@
 import { useState, useEffect, useRef, useCallback } from "react";
-
-const API_BASE = (import.meta as any).env?.VITE_API_URL ?? "http://localhost:3000/api";
+import { getJobsApiUrl } from "@/lib/env";
 
 const POLL_INTERVAL_MS = parseInt(
     (import.meta as any).env?.VITE_JOBS_POLL_INTERVAL_MS ?? "30000",
@@ -31,7 +30,7 @@ export function useJobsRealtime(
     const poll = useCallback(async () => {
         setPolling(true);
         try {
-            const res = await fetch(`${API_BASE}/jobs/offres?limit=1&tri=recent`, {
+            const res = await fetch(getJobsApiUrl("/offres?limit=1&tri=recent"), {
                 credentials: "include",
             });
             if (!res.ok) return;
