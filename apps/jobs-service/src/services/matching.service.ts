@@ -1,4 +1,4 @@
-import { MatchingModel } from "../models/Matching.model.js";
+import { MatchingModel, type MatchingDoc } from "../models/Matching.model.js";
 import { OffreModel } from "../models/Offre.model.js";
 import { AiClient } from "./ai.client.js";
 
