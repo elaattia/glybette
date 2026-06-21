@@ -191,9 +191,9 @@ docker compose up -d --build
 
 ```bash
 docker compose ps
-curl -fsS http://127.0.0.1:3000/api/health
-curl -fsS http://127.0.0.1:3007/health
-curl -fsS http://127.0.0.1:5173/
+curl -fsS http://127.0.0.1:13000/api/health
+curl -fsS http://127.0.0.1:13007/health
+curl -fsS http://127.0.0.1:15173/
 ```
 
 - [ ] All services show `healthy` or `running` (AI may show degraded until Gemini key is valid)
@@ -244,9 +244,9 @@ Check in order:
 | `pnpm docker:env:check:prod` fails | Fix listed errors; ensure HTTPS URLs and matching portfolio domains |
 | Client shows wrong subdomain behavior | Rebuild client (`VITE_PORTFOLIO_ROOT_DOMAIN` is build-time) |
 | `502` on `/api/` | `docker compose ps` — is `api-gateway` up? Check logs |
-| `502` on `/` | Is `client` container up on port 5173? |
+| `502` on `/` | Is `client` container up on host port 15173? |
 | Subdomain portfolio 404 | Wildcard DNS + TLS + `X-Forwarded-Host` on API proxy |
-| AI features fail | `AI_PROVIDER=gemini`, valid `GEMINI_API_KEY`, `curl localhost:3007/health` |
+| AI features fail | `AI_PROVIDER=gemini`, valid `GEMINI_API_KEY`, `curl localhost:13007/health` |
 | Emails not sent | `EMAIL_PROVIDER=resend`, verified domain, `RESEND_API_KEY`, RabbitMQ up |
 | Upload fails | Nginx `client_max_body_size 10m`; `projects_uploads` volume mounted |
 
@@ -366,11 +366,11 @@ for i in $(seq 1 36); do
 done
 
 docker compose ps
-curl -fsS http://127.0.0.1:3000/api/health
-curl -fsS http://127.0.0.1:3007/health
-curl -fsS http://127.0.0.1:3003/health
-curl -fsS http://127.0.0.1:3008/health
-curl -fsS -H "Host: glybette.com" http://127.0.0.1:5173/ -o /dev/null
+curl -fsS http://127.0.0.1:13000/api/health
+curl -fsS http://127.0.0.1:13007/health
+curl -fsS http://127.0.0.1:13003/health
+curl -fsS http://127.0.0.1:13008/health
+curl -fsS -H "Host: glybette.com" http://127.0.0.1:15173/ -o /dev/null
 
 sudo cp deploy/nginx/glybette.conf /etc/nginx/sites-available/glybette
 sudo ln -sf /etc/nginx/sites-available/glybette /etc/nginx/sites-enabled/
@@ -397,7 +397,7 @@ Agent can mark the task **done** when all of these pass:
 - [ ] `pnpm docker:env:check:prod` exits 0  
 - [ ] `docker compose ps` shows core services up (gateway, client, portfolio, ai, etc.)  
 - [ ] Localhost smoke curls in Phase 6 all succeed  
-- [ ] Nginx proxies `/` → `:5173` and `/api/` → `:3000` (test with `curl -H "Host: $DOMAIN" http://127.0.0.1/`)  
+- [ ] Nginx proxies `/` → `:15173` and `/api/` → `:13000` (test with `curl -H "Host: $DOMAIN" http://127.0.0.1/`)  
 - [ ] Human confirmed HTTPS + browser checks (Phase 7) — agent reports “blocked on human” until then  
 
 Jenkins + webhook auto-deploy is **optional follow-up**, not required for “app is live.”

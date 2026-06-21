@@ -35,7 +35,7 @@ services:
                 VITE_PORTFOLIO_ROOT_DOMAIN: ${VITE_PORTFOLIO_ROOT_DOMAIN}
                 VITE_API_BASE_URL: ${VITE_API_BASE_URL:-}
         ports:
-            - "5173:80"
+            - "15173:80"
         restart: unless-stopped
         healthcheck:
             test: [ "CMD", "wget", "-qO-", "http://localhost/" ]
@@ -50,7 +50,7 @@ services:
             args:
                 APP_NAME: api-gateway
         ports:
-            - "3000:3000"
+            - "13000:3000"
         environment:
             - PORT=3000
             - NODE_ENV=production
@@ -100,7 +100,7 @@ services:
             args:
                 APP_NAME: users-service
         ports:
-            - "3001:3001"
+            - "13001:3001"
         environment:
             - PORT=3001
             - PORT_USERS_SERVICE=3001
@@ -127,7 +127,7 @@ services:
             args:
                 APP_NAME: notifications-service
         ports:
-            - "3003:3003"
+            - "13003:3003"
         environment:
             - PORT=3003
             - PORT_NOTIFICATIONS_SERVICE=3003
@@ -161,7 +161,7 @@ services:
             args:
                 APP_NAME: portfolio-service
         ports:
-            - "3004:3004"
+            - "13004:3004"
         environment:
             - PORT=3004
             - PORT_PORTFOLIO_SERVICE=3004
@@ -192,7 +192,7 @@ services:
             args:
                 APP_NAME: projects-service
         ports:
-            - "3008:3008"
+            - "13008:3008"
         environment:
             - PORT=3008
             - PORT_PROJECTS_SERVICE=3008
@@ -236,7 +236,7 @@ services:
             context: .
             dockerfile: apps/scraping-service/Dockerfile
         ports:
-            - "3002:3002"
+            - "13002:3002"
         environment:
             - PORT=3002
             - PORT_SCRAPING_SERVICE=3002
@@ -276,7 +276,7 @@ services:
             args:
                 APP_NAME: ai-service
         ports:
-            - "3007:3007"
+            - "13007:3007"
         environment:
             - PORT=3007
             - PORT_AI_SERVICE=3007
@@ -304,7 +304,7 @@ services:
             args:
                 APP_NAME: cv-service
         ports:
-            - "3006:3006"
+            - "13006:3006"
         environment:
             - PORT=3006
             - PORT_CV_SERVICE=3006
@@ -332,7 +332,7 @@ services:
             args:
                 APP_NAME: jobs-service
         ports:
-            - "3005:3005"
+            - "13005:3005"
         environment:
             - PORT=3005
             - PORT_JOBS_SERVICE=3005

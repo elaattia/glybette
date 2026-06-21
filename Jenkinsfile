@@ -64,12 +64,12 @@ pipeline {
     stage('Smoke Tests') {
       steps {
         dir("${APP_DIR}") {
-          sh 'curl -fsS http://127.0.0.1:3000/api/health'
-          sh 'curl -fsS http://127.0.0.1:3007/health'
-          sh 'curl -fsS http://127.0.0.1:3003/health'
-          sh 'curl -fsS http://127.0.0.1:3008/health'
-          sh 'curl -fsS -H "Host: glybette.com" http://127.0.0.1:5173/ -o /dev/null'
-          sh """curl -fsS "http://127.0.0.1:3000/api/portfolio/public/resolve?slug=${params.PORTFOLIO_SMOKE_SLUG}" """
+          sh 'curl -fsS http://127.0.0.1:13000/api/health'
+          sh 'curl -fsS http://127.0.0.1:13007/health'
+          sh 'curl -fsS http://127.0.0.1:13003/health'
+          sh 'curl -fsS http://127.0.0.1:13008/health'
+          sh 'curl -fsS -H "Host: glybette.com" http://127.0.0.1:15173/ -o /dev/null'
+          sh """curl -fsS "http://127.0.0.1:13000/api/portfolio/public/resolve?slug=${params.PORTFOLIO_SMOKE_SLUG}" """
         }
       }
     }

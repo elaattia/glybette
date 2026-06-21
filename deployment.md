@@ -155,8 +155,8 @@ sudo nginx -t && sudo systemctl reload nginx
 
 The config proxies:
 
-- `/` -> `127.0.0.1:5173` (production `client` container: Vite build + nginx)
-- `/api/` -> `127.0.0.1:3000` (api-gateway)
+- `/` -> `127.0.0.1:15173` (production `client` container: Vite build + nginx on host port 15173)
+- `/api/` -> `127.0.0.1:13000` (api-gateway on host port 13000)
 - Sets `X-Forwarded-Host` (required for `username.glybette.com` portfolio resolve)
 - Sets `client_max_body_size 10m` for project cover uploads
 
@@ -208,12 +208,12 @@ Jenkins setup:
 Smoke tests run against compose ports on localhost (before/without host Nginx):
 
 ```bash
-curl -fsS http://127.0.0.1:3000/api/health
-curl -fsS http://127.0.0.1:3007/health
-curl -fsS http://127.0.0.1:3003/health
-curl -fsS http://127.0.0.1:3008/health
-curl -fsS -H "Host: glybette.com" http://127.0.0.1:5173/ -o /dev/null
-curl -fsS "http://127.0.0.1:3000/api/portfolio/public/resolve?slug=<slug>"
+curl -fsS http://127.0.0.1:13000/api/health
+curl -fsS http://127.0.0.1:13007/health
+curl -fsS http://127.0.0.1:13003/health
+curl -fsS http://127.0.0.1:13008/health
+curl -fsS -H "Host: glybette.com" http://127.0.0.1:15173/ -o /dev/null
+curl -fsS "http://127.0.0.1:13000/api/portfolio/public/resolve?slug=<slug>"
 ```
 
 ## 7) Verification checklist after each deploy
@@ -284,7 +284,7 @@ Linux Docker note for Ollama on host:
 Add these smoke checks after deploy:
 
 ```bash
-curl -fsS http://127.0.0.1:3007/health
+curl -fsS http://127.0.0.1:13007/health
 ```
 
 Expected behavior:
@@ -326,7 +326,7 @@ Also ensure:
 After deploy:
 
 ```bash
-curl -fsS http://127.0.0.1:3003/health
+curl -fsS http://127.0.0.1:13003/health
 docker compose logs notifications-service --since=2m
 ```
 
@@ -386,7 +386,7 @@ Code enforces bucket/region presence for S3 mode at startup.
 - Health:
 
 ```bash
-curl -fsS http://127.0.0.1:3008/health
+curl -fsS http://127.0.0.1:13008/health
 ```
 
 - Functional check (post-login test token): upload one cover image and verify returned `publicUrl` loads.
