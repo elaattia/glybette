@@ -32,13 +32,14 @@ Before deploying, confirm what the code already does:
 - **VPS** runs:
   - Jenkins
   - Docker Engine + Compose
-  - Nginx reverse proxy
-  - Glybette services via `docker-compose.yml`
+  - Host Nginx + Certbot (TLS termination)
+  - Glybette services via `docker-compose.yml` (includes production `client` container)
+- **Database**: MongoDB Atlas via `MONGODB_URI` (no local `mongodb` container in prod compose)
 - **DNS** points:
   - `glybette.com` -> VPS IP
   - `www.glybette.com` -> VPS IP
   - `*.glybette.com` -> VPS IP
-- **TLS** includes apex + wildcard cert (`glybette.com`, `*.glybette.com`).
+- **TLS** includes apex + wildcard cert (`glybette.com`, `*.glybette.com`) via Certbot DNS-01
 
 ## 3) One-time VPS setup
 
@@ -79,165 +80,140 @@ sudo mkdir -p /opt/glybette
 sudo chown -R jenkins:jenkins /opt/glybette
 ```
 
+## 3.4 Install Node.js + pnpm for Jenkins preflight
+
+Jenkins runs `pnpm docker:env:check:prod` before deploy. On the VPS:
+
+```bash
+curl -fsSL https://deb.nodesource.com/setup_22.x | sudo -E bash -
+sudo apt install -y nodejs
+sudo corepack enable
+corepack prepare pnpm@10.17.0 --activate
+```
+
+Alternatively, run preflight inside a `node:22` container if you prefer not to install Node on the host.
+
+## 3.5 Configure GitHub webhook (auto-deploy on `main`)
+
+1. In Jenkins: install **GitHub** / **GitHub Integration** plugin.
+2. Create a **Pipeline** job pointing at repo root `Jenkinsfile`.
+3. In GitHub repo settings -> Webhooks -> Add webhook:
+   - Payload URL: `http://<vps-ip>:8080/github-webhook/`
+   - Content type: `application/json`
+   - Events: **Just the push event**
+4. Restrict Jenkins UI (`8080`) to your IP or VPN where possible.
+5. Open firewall ports: `22`, `80`, `443` (and `8080` if needed for webhook from GitHub).
+
 ## 4) Production env file
 
-Store your production `.env` in Jenkins credentials (Secret file).  
+Copy [`.env.production.example`](.env.production.example) as a starting point, then store the filled file in Jenkins credentials (Secret file `glybette-env-prod`).
+
+Validate locally before first deploy:
+
+```bash
+cp .env.production.example .env
+# fill secrets...
+pnpm docker:env:check:prod
+```
+
 At minimum, include values required by compose + routing:
 
 ```env
 NODE_ENV=production
 
-MONGODB_URI=...
+MONGODB_URI=mongodb+srv://...
 INTERNAL_SERVICE_SECRET=... # one shared strong secret
 
-PORTFOLIO_SERVICE_URL=http://portfolio-service:3004
 PORTFOLIO_PUBLIC_ROOT_DOMAIN=glybette.com
-
 VITE_PORTFOLIO_ROOT_DOMAIN=glybette.com
 VITE_API_BASE_URL=
 
-CORS_ORIGINS=https://glybette.com,https://www.glybette.com,https://*.glybette.com
+AI_PROVIDER=gemini
+GEMINI_API_KEY=...
+GEMINI_MODEL=gemini-2.0-flash
+
+EMAIL_PROVIDER=resend
+RESEND_API_KEY=...
+EMAIL_FROM=no-reply@glybette.com
+
+CORS_ORIGINS=https://glybette.com,https://www.glybette.com
 BETTER_AUTH_TRUSTED_ORIGINS=https://glybette.com,https://www.glybette.com
 BETTER_AUTH_URL=https://glybette.com/api/auth
 ```
 
-Note: wildcard syntax support for `CORS_ORIGINS` depends on your CORS parser. If unsupported, enumerate exact hosts you allow.
+Note: enumerate exact HTTPS origins in `CORS_ORIGINS` (wildcard subdomain CORS is not guaranteed).
 
-## 5) Nginx reverse proxy (critical for portfolio routing)
+## 5) Host Nginx + TLS (critical for portfolio routing)
 
-Use one server block that accepts apex + wildcard and forwards `/api` with forwarded host headers.
+Use the committed template [`deploy/nginx/glybette.conf`](deploy/nginx/glybette.conf):
 
-```nginx
-server {
-    listen 80;
-    server_name glybette.com www.glybette.com *.glybette.com;
-
-    # Redirect to HTTPS in real deployment
-    # return 301 https://$host$request_uri;
-}
-
-server {
-    listen 443 ssl http2;
-    server_name glybette.com www.glybette.com *.glybette.com;
-
-    # ssl_certificate ...;
-    # ssl_certificate_key ...;
-
-    # Frontend SPA (served by your frontend container or static host)
-    location / {
-        proxy_pass http://127.0.0.1:5173;
-        proxy_set_header Host $host;
-        proxy_set_header X-Forwarded-Host $host;
-        proxy_set_header X-Forwarded-Proto $scheme;
-        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
-    }
-
-    # Gateway API
-    location /api/ {
-        proxy_pass http://127.0.0.1:3000;
-        proxy_set_header Host $host;
-        proxy_set_header X-Forwarded-Host $host;
-        proxy_set_header X-Forwarded-Proto $scheme;
-        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
-    }
-}
+```bash
+sudo cp deploy/nginx/glybette.conf /etc/nginx/sites-available/glybette
+sudo ln -sf /etc/nginx/sites-available/glybette /etc/nginx/sites-enabled/
+sudo nginx -t && sudo systemctl reload nginx
 ```
 
-This matches `docs/portfolio-routing.md` and backend `resolvePublic()` expectations.
+The config proxies:
+
+- `/` -> `127.0.0.1:5173` (production `client` container: Vite build + nginx)
+- `/api/` -> `127.0.0.1:3000` (api-gateway)
+- Sets `X-Forwarded-Host` (required for `username.glybette.com` portfolio resolve)
+- Sets `client_max_body_size 10m` for project cover uploads
+
+### 5.1 TLS with Certbot
+
+**Apex + www** can use HTTP-01:
+
+```bash
+sudo apt install -y certbot python3-certbot-nginx
+sudo certbot --nginx -d glybette.com -d www.glybette.com
+```
+
+**Wildcard `*.glybette.com`** requires **DNS-01** (HTTP-01 cannot issue wildcard certs):
+
+```bash
+sudo certbot certonly --manual --preferred-challenges dns \
+  -d glybette.com -d '*.glybette.com'
+```
+
+Certbot will prompt for a `_acme-challenge` TXT record. Add it at your DNS provider, wait for propagation, then complete issuance.
+
+After certificate paths are known, uncomment/update `ssl_certificate` directives in `deploy/nginx/glybette.conf` and reload Nginx.
+
+Renewal:
+
+```bash
+sudo certbot renew --dry-run
+```
 
 ## 6) Jenkins pipeline flow
 
-Pipeline stages:
+The repo includes [`Jenkinsfile`](Jenkinsfile). Pipeline stages:
 
-1. Checkout `main`
-2. Inject production `.env` from Jenkins credentials
-3. Validate env (`pnpm docker:env:check`)
+1. Checkout `main` into `/opt/glybette`
+2. Inject production `.env` from Jenkins credential `glybette-env-prod`
+3. Validate env (`pnpm docker:env:check:prod`)
 4. Deploy (`docker compose up -d --build`)
-5. Smoke-test health + portfolio routing
+5. Smoke-test health + portfolio API resolve
 
-Create `Jenkinsfile` in repo root:
+Jenkins setup:
 
-```groovy
-pipeline {
-  agent any
+1. Create credentials:
+   - `glybette-git` — SSH deploy key for the repo
+   - `glybette-env-prod` — secret file (production `.env`)
+2. Create Pipeline job from SCM using root `Jenkinsfile`.
+3. Update `REPO_URL` in `Jenkinsfile` to your GitHub SSH URL.
+4. Set `PORTFOLIO_SMOKE_SLUG` build parameter to a real portfolio slug.
 
-  environment {
-    APP_DIR = '/opt/glybette'
-    REPO_URL = 'git@github.com:YOUR_ORG/YOUR_REPO.git'
-    BRANCH = 'main'
-  }
+Smoke tests run against compose ports on localhost (before/without host Nginx):
 
-  options {
-    timestamps()
-    disableConcurrentBuilds()
-  }
-
-  stages {
-    stage('Checkout') {
-      steps {
-        dir("${APP_DIR}") {
-          checkout([$class: 'GitSCM',
-            branches: [[name: "*/${BRANCH}"]],
-            userRemoteConfigs: [[url: "${REPO_URL}", credentialsId: 'glybette-git']]
-          ])
-        }
-      }
-    }
-
-    stage('Inject Env') {
-      steps {
-        dir("${APP_DIR}") {
-          withCredentials([file(credentialsId: 'glybette-env-prod', variable: 'ENV_FILE')]) {
-            sh 'cp "$ENV_FILE" .env'
-          }
-        }
-      }
-    }
-
-    stage('Preflight') {
-      steps {
-        dir("${APP_DIR}") {
-          sh 'corepack enable'
-          sh 'pnpm --version'
-          sh 'pnpm docker:env:check'
-        }
-      }
-    }
-
-    stage('Deploy') {
-      steps {
-        dir("${APP_DIR}") {
-          sh 'docker compose down'
-          sh 'docker compose up -d --build'
-        }
-      }
-    }
-
-    stage('Smoke Tests') {
-      steps {
-        sh 'curl -fsS http://127.0.0.1:3000/api/health'
-
-        // Path-based portfolio URL should be reachable through apex host.
-        sh 'curl -fsS -H "Host: glybette.com" http://127.0.0.1/user/demo -o /dev/null'
-
-        // Subdomain root should serve SPA shell (PortfolioRoot decides by host).
-        sh 'curl -fsS -H "Host: demo.glybette.com" http://127.0.0.1/ -o /dev/null'
-
-        // API resolve endpoint with explicit slug (used by current client flow).
-        sh 'curl -fsS -H "Host: demo.glybette.com" "http://127.0.0.1/api/portfolio/public/resolve?slug=demo"'
-      }
-    }
-  }
-
-  post {
-    always {
-      sh 'docker compose ps || true'
-    }
-    cleanup {
-      sh 'docker image prune -f || true'
-    }
-  }
-}
+```bash
+curl -fsS http://127.0.0.1:3000/api/health
+curl -fsS http://127.0.0.1:3007/health
+curl -fsS http://127.0.0.1:3003/health
+curl -fsS http://127.0.0.1:3008/health
+curl -fsS -H "Host: glybette.com" http://127.0.0.1:5173/ -o /dev/null
+curl -fsS "http://127.0.0.1:3000/api/portfolio/public/resolve?slug=<slug>"
 ```
 
 ## 7) Verification checklist after each deploy
@@ -374,6 +350,8 @@ Code evidence:
 - Disk file serving implementation in `apps/projects-service/src/controllers/projects.controller.ts`.
 
 ### 11.1 Disk mode (simple VPS start)
+
+Prod compose mounts a named volume `projects_uploads` at `/app/.data/projects-uploads`.
 
 ```env
 UPLOAD_PROVIDER=disk

@@ -1,18 +1,4 @@
 services:
-    mongodb:
-        image: mongo:7
-        ports:
-            - "27017:27017"
-        volumes:
-            - mongodb_data:/data/db
-        healthcheck:
-            test: [ "CMD", "mongosh", "--eval", "db.adminCommand('ping')" ]
-            interval: 10s
-            timeout: 5s
-            retries: 5
-            start_period: 20s
-        restart: unless-stopped
-
     redis:
         image: redis:7-alpine
         ports:
@@ -39,6 +25,23 @@ services:
             interval: 10s
             timeout: 5s
             retries: 8
+        restart: unless-stopped
+
+    client:
+        build:
+            context: .
+            dockerfile: apps/client/Dockerfile
+            args:
+                VITE_PORTFOLIO_ROOT_DOMAIN: ${VITE_PORTFOLIO_ROOT_DOMAIN}
+                VITE_API_BASE_URL: ${VITE_API_BASE_URL:-}
+        ports:
+            - "5173:80"
+        restart: unless-stopped
+        healthcheck:
+            test: [ "CMD", "wget", "-qO-", "http://localhost/" ]
+            interval: 20s
+            timeout: 5s
+            retries: 8
 
     api-gateway:
         build:
@@ -60,18 +63,35 @@ services:
             - JOBS_SERVICE_URL=http://jobs-service:3005
             - PROJECTS_SERVICE_URL=http://projects-service:3008
             - INTERNAL_SERVICE_SECRET=${INTERNAL_SERVICE_SECRET}
+            - CORS_ORIGINS=${CORS_ORIGINS}
+            - PROXY_TIMEOUT_MS=${PROXY_TIMEOUT_MS:-30000}
         env_file:
             - .env
         depends_on:
-            - rabbitmq
-            - users-service
-            - scraping-service
-            - notifications-service
-            - portfolio-service
-            - cv-service
-            - ai-service
-            - jobs-service
-            - projects-service
+            rabbitmq:
+                condition: service_healthy
+            users-service:
+                condition: service_started
+            scraping-service:
+                condition: service_started
+            notifications-service:
+                condition: service_started
+            portfolio-service:
+                condition: service_started
+            cv-service:
+                condition: service_started
+            ai-service:
+                condition: service_started
+            jobs-service:
+                condition: service_started
+            projects-service:
+                condition: service_started
+        restart: unless-stopped
+        healthcheck:
+            test: [ "CMD", "node", "-e", "fetch('http://localhost:3000/api/health').then(r=>process.exit(r.ok?0:1)).catch(()=>process.exit(1))" ]
+            interval: 15s
+            timeout: 5s
+            retries: 8
 
     users-service:
         build:
@@ -85,12 +105,20 @@ services:
             - PORT=3001
             - PORT_USERS_SERVICE=3001
             - NODE_ENV=production
+            - MONGODB_URI=${MONGODB_URI}
             - RABBITMQ_URL=amqp://rabbitmq:5672
             - INTERNAL_SERVICE_SECRET=${INTERNAL_SERVICE_SECRET}
         env_file:
             - .env
         depends_on:
-            - rabbitmq
+            rabbitmq:
+                condition: service_healthy
+        restart: unless-stopped
+        healthcheck:
+            test: [ "CMD", "node", "-e", "fetch('http://localhost:3001/health').then(r=>process.exit(r.ok?0:1)).catch(()=>process.exit(1))" ]
+            interval: 15s
+            timeout: 5s
+            retries: 8
 
     notifications-service:
         build:
@@ -104,6 +132,7 @@ services:
             - PORT=3003
             - PORT_NOTIFICATIONS_SERVICE=3003
             - NODE_ENV=production
+            - MONGODB_URI=${MONGODB_URI}
             - RABBITMQ_URL=amqp://rabbitmq:5672
             - PROJECTS_SERVICE_URL=http://projects-service:3008
             - USERS_SERVICE_URL=http://users-service:3001
@@ -114,8 +143,16 @@ services:
         env_file:
             - .env
         depends_on:
-            - rabbitmq
-            - projects-service
+            rabbitmq:
+                condition: service_healthy
+            projects-service:
+                condition: service_started
+        restart: unless-stopped
+        healthcheck:
+            test: [ "CMD", "node", "-e", "fetch('http://localhost:3003/health').then(r=>process.exit(r.ok?0:1)).catch(()=>process.exit(1))" ]
+            interval: 15s
+            timeout: 5s
+            retries: 8
 
     portfolio-service:
         build:
@@ -129,11 +166,24 @@ services:
             - PORT=3004
             - PORT_PORTFOLIO_SERVICE=3004
             - NODE_ENV=production
+            - MONGODB_URI=${MONGODB_URI}
+            - PORTFOLIO_PUBLIC_ROOT_DOMAIN=${PORTFOLIO_PUBLIC_ROOT_DOMAIN}
+            - RABBITMQ_URL=amqp://rabbitmq:5672
+            - USERS_SERVICE_URL=http://users-service:3001
             - INTERNAL_SERVICE_SECRET=${INTERNAL_SERVICE_SECRET}
         env_file:
             - .env
         depends_on:
-            - rabbitmq
+            rabbitmq:
+                condition: service_healthy
+            users-service:
+                condition: service_started
+        restart: unless-stopped
+        healthcheck:
+            test: [ "CMD", "node", "-e", "fetch('http://localhost:3004/health').then(r=>process.exit(r.ok?0:1)).catch(()=>process.exit(1))" ]
+            interval: 15s
+            timeout: 5s
+            retries: 8
 
     projects-service:
         build:
@@ -149,24 +199,37 @@ services:
             - NODE_ENV=production
             - MONGODB_URI=${MONGODB_URI}
             - PROJECTS_SERVICE_MONGODB_DB_NAME=glybette_projects
-            - UPLOAD_PROVIDER=disk
+            - UPLOAD_PROVIDER=${UPLOAD_PROVIDER:-disk}
             - PROJECTS_UPLOAD_DISK_DIR=/app/.data/projects-uploads
             - PROJECTS_UPLOAD_PUBLIC_BASE_URL=/api/projects/media
             - PROJECTS_UPLOAD_MAX_MB=5
+            - PROJECTS_UPLOAD_S3_BUCKET=${PROJECTS_UPLOAD_S3_BUCKET:-}
+            - PROJECTS_UPLOAD_S3_REGION=${PROJECTS_UPLOAD_S3_REGION:-}
+            - PROJECTS_UPLOAD_S3_PREFIX=${PROJECTS_UPLOAD_S3_PREFIX:-projects/covers}
+            - PROJECTS_UPLOAD_S3_ENDPOINT=${PROJECTS_UPLOAD_S3_ENDPOINT:-}
+            - PROJECTS_UPLOAD_S3_FORCE_PATH_STYLE=${PROJECTS_UPLOAD_S3_FORCE_PATH_STYLE:-false}
+            - PROJECTS_UPLOAD_S3_ACCESS_KEY_ID=${PROJECTS_UPLOAD_S3_ACCESS_KEY_ID:-}
+            - PROJECTS_UPLOAD_S3_SECRET_ACCESS_KEY=${PROJECTS_UPLOAD_S3_SECRET_ACCESS_KEY:-}
+            - PROJECTS_UPLOAD_S3_PUBLIC_BASE_URL=${PROJECTS_UPLOAD_S3_PUBLIC_BASE_URL:-}
             - USERS_SERVICE_URL=http://users-service:3001
             - RABBITMQ_URL=amqp://rabbitmq:5672
             - INTEROP_SYNC_TIMEOUT_MS=7000
             - INTERNAL_SERVICE_SECRET=${INTERNAL_SERVICE_SECRET}
         env_file:
             - .env
+        volumes:
+            - projects_uploads:/app/.data/projects-uploads
         depends_on:
-            mongodb:
-                condition: service_healthy
             rabbitmq:
                 condition: service_healthy
             users-service:
                 condition: service_started
         restart: unless-stopped
+        healthcheck:
+            test: [ "CMD", "node", "-e", "fetch('http://localhost:3008/health').then(r=>process.exit(r.ok?0:1)).catch(()=>process.exit(1))" ]
+            interval: 15s
+            timeout: 5s
+            retries: 8
 
     scraping-service:
         build:
@@ -195,13 +258,16 @@ services:
         env_file:
             - .env
         depends_on:
-            mongodb:
-                condition: service_healthy
             redis:
                 condition: service_healthy
             rabbitmq:
                 condition: service_healthy
         restart: unless-stopped
+        healthcheck:
+            test: [ "CMD", "python", "-c", "import urllib.request,sys;sys.exit(0 if urllib.request.urlopen('http://localhost:3002/health').status==200 else 1)" ]
+            interval: 20s
+            timeout: 5s
+            retries: 8
 
     ai-service:
         build:
@@ -224,10 +290,12 @@ services:
             - INTERNAL_SERVICE_SECRET=${INTERNAL_SERVICE_SECRET}
         env_file:
             - .env
-        depends_on:
-            mongodb:
-                condition: service_healthy
         restart: unless-stopped
+        healthcheck:
+            test: [ "CMD", "node", "-e", "fetch('http://localhost:3007/health').then(r=>process.exit(r.ok?0:1)).catch(()=>process.exit(1))" ]
+            interval: 20s
+            timeout: 5s
+            retries: 8
 
     cv-service:
         build:
@@ -248,11 +316,14 @@ services:
         env_file:
             - .env
         depends_on:
-            mongodb:
-                condition: service_healthy
             ai-service:
                 condition: service_started
         restart: unless-stopped
+        healthcheck:
+            test: [ "CMD", "node", "-e", "fetch('http://localhost:3006/health').then(r=>process.exit(r.ok?0:1)).catch(()=>process.exit(1))" ]
+            interval: 15s
+            timeout: 5s
+            retries: 8
 
     jobs-service:
         build:
@@ -277,11 +348,17 @@ services:
         depends_on:
             rabbitmq:
                 condition: service_healthy
-            mongodb:
-                condition: service_healthy
             ai-service:
                 condition: service_started
+            users-service:
+                condition: service_started
         restart: unless-stopped
+        healthcheck:
+            test: [ "CMD", "node", "-e", "fetch('http://localhost:3005/health').then(r=>process.exit(r.ok?0:1)).catch(()=>process.exit(1))" ]
+            interval: 15s
+            timeout: 5s
+            retries: 8
+
 volumes:
-    mongodb_data:
     redis_data:
+    projects_uploads:

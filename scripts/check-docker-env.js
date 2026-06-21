@@ -8,6 +8,7 @@ const repoRoot = process.cwd();
 const envPath = path.join(repoRoot, ".env");
 const args = new Set(process.argv.slice(2));
 const includesAi = args.has("--ai");
+const isProd = args.has("--prod");
 
 function parseEnvFile(filePath) {
     const parsed = {};
@@ -58,15 +59,51 @@ function validateMongoUri(value) {
     );
 }
 
+function isHttpsUrl(value) {
+    try {
+        const url = new URL(value);
+        return url.protocol === "https:";
+    } catch {
+        return false;
+    }
+}
+
+function looksLikeLocalOrigin(value) {
+    return /localhost|127\.0\.0\.1|\.test(?::|$)/i.test(value);
+}
+
+function validateOriginList(value, label, errors, { requireHttps = false } = {}) {
+    if (!isNonEmptyString(value)) {
+        errors.push(`${label} is required`);
+        return;
+    }
+
+    const origins = value.split(",").map((s) => s.trim()).filter(Boolean);
+    if (origins.length === 0) {
+        errors.push(`${label} must include at least one origin`);
+        return;
+    }
+
+    for (const origin of origins) {
+        if (looksLikeLocalOrigin(origin)) {
+            errors.push(`${label} must not include local/dev origins in production (${origin})`);
+        }
+        if (requireHttps && !isHttpsUrl(origin)) {
+            errors.push(`${label} entries must use https:// in production (${origin})`);
+        }
+    }
+}
+
 function fail(message) {
     console.error(`\n[docker-env-check] ${message}\n`);
 }
 
 function main() {
     if (!fs.existsSync(envPath)) {
-        fail(
-            "Missing .env file. Copy .env.docker.dev.example to .env and fill required values before running Docker compose.",
-        );
+        const hint = isProd
+            ? "Copy .env.production.example to .env and fill required values before production deploy."
+            : "Copy .env.docker.dev.example to .env and fill required values before running Docker compose.";
+        fail(`Missing .env file. ${hint}`);
         process.exit(1);
     }
 
@@ -90,18 +127,54 @@ function main() {
         errors.push("RESEND_API_KEY is required when EMAIL_PROVIDER=resend");
     }
 
-    if (includesAi && env.AI_PROVIDER === "anthropic" && !isNonEmptyString(env.ANTHROPIC_API_KEY)) {
-        errors.push("ANTHROPIC_API_KEY is required when --ai and AI_PROVIDER=anthropic");
+    const checkAiKeys = includesAi || isProd;
+    if (checkAiKeys && env.AI_PROVIDER === "anthropic" && !isNonEmptyString(env.ANTHROPIC_API_KEY)) {
+        errors.push("ANTHROPIC_API_KEY is required when AI_PROVIDER=anthropic");
     }
 
-    if (includesAi && env.AI_PROVIDER === "gemini" && !isNonEmptyString(env.GEMINI_API_KEY)) {
-        errors.push("GEMINI_API_KEY is required when --ai and AI_PROVIDER=gemini");
+    if (checkAiKeys && env.AI_PROVIDER === "gemini" && !isNonEmptyString(env.GEMINI_API_KEY)) {
+        errors.push("GEMINI_API_KEY is required when AI_PROVIDER=gemini");
     }
 
     if (includesAi && !isNonEmptyString(env.OLLAMA_BASE_URL)) {
         warnings.push(
             "OLLAMA_BASE_URL is empty. Compose defaults to http://host.docker.internal:11434 for AI profile.",
         );
+    }
+
+    if (isProd) {
+        if (!isNonEmptyString(env.PORTFOLIO_PUBLIC_ROOT_DOMAIN)) {
+            errors.push("PORTFOLIO_PUBLIC_ROOT_DOMAIN is required in production");
+        }
+
+        if (!isNonEmptyString(env.VITE_PORTFOLIO_ROOT_DOMAIN)) {
+            errors.push("VITE_PORTFOLIO_ROOT_DOMAIN is required in production (client build arg)");
+        }
+
+        if (
+            isNonEmptyString(env.PORTFOLIO_PUBLIC_ROOT_DOMAIN) &&
+            isNonEmptyString(env.VITE_PORTFOLIO_ROOT_DOMAIN) &&
+            env.PORTFOLIO_PUBLIC_ROOT_DOMAIN.trim() !== env.VITE_PORTFOLIO_ROOT_DOMAIN.trim()
+        ) {
+            errors.push(
+                "PORTFOLIO_PUBLIC_ROOT_DOMAIN and VITE_PORTFOLIO_ROOT_DOMAIN must match in production",
+            );
+        }
+
+        if (!isHttpsUrl(env.BETTER_AUTH_URL ?? "")) {
+            errors.push("BETTER_AUTH_URL must be a valid https:// URL in production");
+        }
+
+        validateOriginList(env.CORS_ORIGINS, "CORS_ORIGINS", errors, { requireHttps: true });
+        validateOriginList(env.BETTER_AUTH_TRUSTED_ORIGINS, "BETTER_AUTH_TRUSTED_ORIGINS", errors, {
+            requireHttps: true,
+        });
+
+        if (isNonEmptyString(env.MONGODB_URI) && env.MONGODB_URI.includes("mongodb://mongodb:")) {
+            warnings.push(
+                "MONGODB_URI points at local compose hostname 'mongodb'. Production uses Atlas — update MONGODB_URI.",
+            );
+        }
     }
 
     if (errors.length > 0) {
@@ -119,7 +192,7 @@ function main() {
         }
     }
 
-    console.log("[docker-env-check] OK");
+    console.log(`[docker-env-check] OK${isProd ? " (production)" : ""}`);
 }
 
 main();
