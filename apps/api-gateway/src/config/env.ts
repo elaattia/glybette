@@ -12,6 +12,8 @@ export const gatewayEnvSchema = baseEnvSchema.extend({
     /** Comma-separated origins; defaults to local Vite dev URLs if unset. */
     CORS_ORIGINS: z.string().optional(),
     PROXY_TIMEOUT_MS: z.coerce.number().min(1000).default(30_000),
+    /** Timeout for AI-heavy proxy routes (CV/jobs matching, interview, etc.). */
+    AI_PROXY_TIMEOUT_MS: z.coerce.number().min(1000).max(600_000).default(180_000),
 });
 
 export type GatewayEnv = z.infer<typeof gatewayEnvSchema>;

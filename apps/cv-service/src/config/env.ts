@@ -10,6 +10,7 @@ const schema = z.object({
     RABBITMQ_URL: z.string().optional(),
     INTERNAL_SERVICE_SECRET: z.string().min(1),
     INTEROP_SYNC_TIMEOUT_MS: z.coerce.number().min(1000).max(60000).default(7000),
+    AI_REQUEST_TIMEOUT_MS: z.coerce.number().min(1000).max(600_000).default(120_000),
 });
 
 export type CvServiceEnv = z.infer<typeof schema>;

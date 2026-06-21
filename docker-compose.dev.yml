@@ -50,6 +50,7 @@ services:
             CHOKIDAR_USEPOLLING: "1"
             CHOKIDAR_INTERVAL: "300"
             WATCHPACK_POLLING: "true"
+            AI_PROXY_TIMEOUT_MS: ${AI_PROXY_TIMEOUT_MS:-180000}
         volumes:
             - ./:/workspace
             - node_modules:/workspace/node_modules
@@ -241,6 +242,7 @@ services:
             NODE_ENV: development
             PORT_CV_SERVICE: 3006
             AI_SERVICE_URL: http://ai-service:3007
+            AI_REQUEST_TIMEOUT_MS: ${AI_REQUEST_TIMEOUT_MS:-120000}
             CHOKIDAR_USEPOLLING: "1"
             CHOKIDAR_INTERVAL: "300"
             WATCHPACK_POLLING: "true"
@@ -273,6 +275,7 @@ services:
             RABBITMQ_URL: amqp://rabbitmq:5672
             AI_SERVICE_URL: http://ai-service:3007
             USERS_SERVICE_URL: http://users-service:3001
+            AI_REQUEST_TIMEOUT_MS: ${AI_REQUEST_TIMEOUT_MS:-120000}
             CHOKIDAR_USEPOLLING: "1"
             CHOKIDAR_INTERVAL: "300"
             WATCHPACK_POLLING: "true"

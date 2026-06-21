@@ -1,22 +1,20 @@
 import { internalRequestJson } from "@glybette/utils";
+import { loadEnv } from "../config/env.js";
+
+const env = loadEnv();
 
 function getBaseUrl() {
-    const url = process.env.AI_SERVICE_URL;
-    if (!url) throw new Error("AI_SERVICE_URL environment variable is required");
-    return url;
+    return env.AI_SERVICE_URL;
 }
+
 function getSecret() {
-    const secret = process.env.INTERNAL_SERVICE_SECRET;
-    if (!secret) throw new Error("INTERNAL_SERVICE_SECRET environment variable is required");
-    return secret;
+    return env.INTERNAL_SERVICE_SECRET;
 }
 
 async function post<T>(path: string, body: object, timeoutMs?: number): Promise<T> {
-    const finalTimeout = timeoutMs ?? Number(process.env.INTEROP_SYNC_TIMEOUT_MS ?? 12_000);
-    console.log(`[ai.client] post to ${path} with timeout ${finalTimeout}ms (param was ${timeoutMs})`);
     return internalRequestJson<T>(`${getBaseUrl()}/ai/cv${path}`, {
         method: "POST",
-        timeoutMs: finalTimeout,
+        timeoutMs: timeoutMs ?? env.AI_REQUEST_TIMEOUT_MS,
         internalSecret: getSecret(),
         body: JSON.stringify(body),
     });
@@ -79,7 +77,7 @@ export class AiClient {
         return post<CoverLetterResult>("/cover-letter", { cvText, jobDescription, tone: tone ?? "professional" });
     }
     extractFromText(text: string) {
-        return post<ExtractResult>("/extract", { text }, 60_000);
+        return post<ExtractResult>("/extract", { text });
     }
     suggestSkills(role: string, existingSkills: string[]) {
         return post<{ skills: string[] }>("/suggest-skills", { role, existingSkills });

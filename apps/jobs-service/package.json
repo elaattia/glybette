@@ -11,6 +11,7 @@
         "@glybette/contracts": "workspace:*",
         "@glybette/env": "workspace:*",
         "@glybette/types": "workspace:*",
+        "@glybette/utils": "workspace:*",
         "@hono/node-server": "^1.19.9",
         "@hono/zod-validator": "^0.4.3",
         "amqplib": "^0.10.4",

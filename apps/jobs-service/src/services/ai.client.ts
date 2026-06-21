@@ -1,24 +1,15 @@
-function getBaseUrl() {
-    return process.env.AI_SERVICE_URL ?? "http://localhost:3007";
-}
-function getSecret() {
-    return process.env.INTERNAL_SERVICE_SECRET ?? "dev-secret-change-in-prod";
-}
+import { internalRequestJson } from "@glybette/utils";
+import { loadEnv } from "../config/env.js";
+
+const env = loadEnv();
 
 async function post<T>(path: string, body: object): Promise<T> {
-    const res = await fetch(`${getBaseUrl()}/ai/jobs${path}`, {
+    return internalRequestJson<T>(`${env.AI_SERVICE_URL}/ai/jobs${path}`, {
         method: "POST",
-        headers: {
-            "Content-Type": "application/json",
-            "x-internal-secret": getSecret(),
-        },
+        timeoutMs: env.AI_REQUEST_TIMEOUT_MS,
+        internalSecret: env.INTERNAL_SERVICE_SECRET,
         body: JSON.stringify(body),
     });
-    if (!res.ok) {
-        const err = await res.text();
-        throw new Error(`[ai-service] ${res.status} ${path}: ${err}`);
-    }
-    return res.json() as Promise<T>;
 }
 
 export interface MatchingResult {

@@ -8,7 +8,7 @@ export function registerCvServiceRoutes(api: Hono, ctx: { env: GatewayEnv; servi
     const { env, services } = ctx;
     const base = services.cv.baseUrl;
     const timeout = env.PROXY_TIMEOUT_MS;
-    const aiTimeout = timeout * 3;
+    const aiTimeout = env.AI_PROXY_TIMEOUT_MS;
     const auth = requireBetterAuthSession(env, services);
 
     api.post("/cvs/extract", auth, (c) =>

@@ -11,7 +11,7 @@ export function registerJobsServiceRoutes(
     const { env, services } = ctx;
     const base      = services.jobs.baseUrl;
     const timeout   = env.PROXY_TIMEOUT_MS;
-    const aiTimeout = timeout * 3; 
+    const aiTimeout = env.AI_PROXY_TIMEOUT_MS;
     const auth      = requireBetterAuthSession(env, services);
  
  

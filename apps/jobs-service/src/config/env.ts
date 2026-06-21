@@ -8,6 +8,7 @@ const schema = z.object({
     AI_SERVICE_URL: z.string().url(),
     INTERNAL_SERVICE_SECRET: z.string().min(1),
     USERS_SERVICE_URL: z.string().url(),
+    AI_REQUEST_TIMEOUT_MS: z.coerce.number().min(1000).max(600_000).default(120_000),
 });
 
 export type JobsServiceEnv = z.infer<typeof schema>;

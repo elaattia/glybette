@@ -65,6 +65,7 @@ services:
             - INTERNAL_SERVICE_SECRET=${INTERNAL_SERVICE_SECRET}
             - CORS_ORIGINS=${CORS_ORIGINS}
             - PROXY_TIMEOUT_MS=${PROXY_TIMEOUT_MS:-30000}
+            - AI_PROXY_TIMEOUT_MS=${AI_PROXY_TIMEOUT_MS:-180000}
         env_file:
             - .env
         depends_on:
@@ -279,6 +280,20 @@ services:
             start_period: 30s
         restart: unless-stopped
 
+    ollama-model-pull:
+        image: ollama/ollama:latest
+        environment:
+            - OLLAMA_HOST=http://ollama:11434
+            - OLLAMA_MODEL=${OLLAMA_MODEL:-qwen3:4b}
+        entrypoint:
+            - /bin/sh
+            - -c
+            - ollama pull "$$OLLAMA_MODEL"
+        depends_on:
+            ollama:
+                condition: service_healthy
+        restart: "no"
+
     ai-service:
         build:
             context: .
@@ -303,6 +318,8 @@ services:
         depends_on:
             ollama:
                 condition: service_healthy
+            ollama-model-pull:
+                condition: service_completed_successfully
         restart: unless-stopped
         healthcheck:
             test: [ "CMD", "node", "-e", "fetch('http://localhost:3007/health').then(r=>process.exit(r.ok?0:1)).catch(()=>process.exit(1))" ]
@@ -324,6 +341,7 @@ services:
             - NODE_ENV=production
             - MONGODB_URI=${MONGODB_URI}
             - AI_SERVICE_URL=http://ai-service:3007
+            - AI_REQUEST_TIMEOUT_MS=${AI_REQUEST_TIMEOUT_MS:-120000}
             - INTERNAL_SERVICE_SECRET=${INTERNAL_SERVICE_SECRET}
             - ALLOWED_ORIGINS=${ALLOWED_ORIGINS}
         env_file:
@@ -353,6 +371,7 @@ services:
             - MONGODB_URI=${MONGODB_URI}
             - RABBITMQ_URL=amqp://rabbitmq:5672
             - AI_SERVICE_URL=http://ai-service:3007
+            - AI_REQUEST_TIMEOUT_MS=${AI_REQUEST_TIMEOUT_MS:-120000}
             - INTERNAL_SERVICE_SECRET=${INTERNAL_SERVICE_SECRET}
             - ALLOWED_ORIGINS=${ALLOWED_ORIGINS}
             - USERS_SERVICE_URL=http://users-service:3001
