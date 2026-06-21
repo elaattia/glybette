@@ -11,7 +11,8 @@ pipeline {
 
   parameters {
     string(name: 'PORTFOLIO_SMOKE_SLUG', defaultValue: 'demo', description: 'Existing portfolio slug for routing smoke test')
-    string(name: 'COMPOSE_PARALLEL_LIMIT', defaultValue: '2', description: 'Max concurrent docker compose build/pull ops (2 recommended on this VPS)')
+    string(name: 'COMPOSE_PARALLEL_LIMIT', defaultValue: '1', description: 'Max concurrent image builds during FORCE_REBUILD (1 safest on this 7.6GB VPS)')
+    booleanParam(name: 'FORCE_REBUILD', defaultValue: false, description: 'Rebuild all images (slow, high RAM). Off = restart containers with new .env only.')
   }
 
   environment {
@@ -74,10 +75,17 @@ pipeline {
     stage('Deploy') {
       steps {
         dir("${APP_DIR}") {
-          sh """
-            export COMPOSE_PARALLEL_LIMIT=${params.COMPOSE_PARALLEL_LIMIT}
-            docker compose -p ${COMPOSE_PROJECT} up -d --build
-          """
+          script {
+            def parallel = params.COMPOSE_PARALLEL_LIMIT
+            if (params.FORCE_REBUILD) {
+              sh """
+                docker compose --parallel ${parallel} -p ${COMPOSE_PROJECT} build
+                docker compose -p ${COMPOSE_PROJECT} up -d
+              """
+            } else {
+              sh "docker compose -p ${COMPOSE_PROJECT} up -d"
+            }
+          }
         }
       }
     }

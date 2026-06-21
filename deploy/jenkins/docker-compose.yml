@@ -17,6 +17,8 @@ services:
     environment:
       - JENKINS_OPTS=--httpPort=8080
       - DOCKER_HOST=unix:///var/run/docker.sock
+      # Cap JVM heap so builds have more headroom on the shared 7.6GB VPS.
+      - JAVA_OPTS=-Xmx512m -Xms256m
     volumes:
       - jenkins_home:/var/jenkins_home
       - /var/run/docker.sock:/var/run/docker.sock
@@ -28,6 +30,10 @@ services:
       - /usr/libexec/docker/cli-plugins:/usr/libexec/docker/cli-plugins:ro
     group_add:
       - "987" # host docker group — getent group docker
+    deploy:
+      resources:
+        limits:
+          memory: 768M
 
 volumes:
   jenkins_home:
