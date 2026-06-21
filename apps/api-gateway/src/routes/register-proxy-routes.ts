@@ -40,7 +40,12 @@ export function registerProxyRoutes(
         const baseUrl = services[route.service].baseUrl;
         const forward = async (c: Context) => {
             const auth = c.get("gatewayAuth");
-            const requiresRoleChecks = Boolean(route.requiredAdmin || route.allowedBaseRoles?.length);
+            const pathname = new URL(c.req.url).pathname;
+            const isAnonymousPath = route.anonymousPathPrefixes?.some(
+                (prefix) => pathname === prefix || pathname.startsWith(`${prefix}/`),
+            );
+            const requiresRoleChecks =
+                !isAnonymousPath && Boolean(route.requiredAdmin || route.allowedBaseRoles?.length);
             if (requiresRoleChecks && !auth?.userId) {
                 return c.json(
                     {

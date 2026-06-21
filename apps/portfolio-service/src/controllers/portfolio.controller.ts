@@ -43,7 +43,10 @@ export class PortfolioController {
     }
 
     async getPublicBySlug(c: Context): Promise<Response> {
-        const response = await this.portfolioService.getPublicBySlug(c.req.param("slug"));
+        const slug = validatePortfolioSlug(c.req.param("slug"));
+        const response = await this.portfolioService.getPublicBySlug(slug, {
+            requirePremiumSubdomain: this.isPortfolioSubdomainRequest(c),
+        });
         return c.json(response, 200);
     }
 
@@ -57,7 +60,9 @@ export class PortfolioController {
             throw new BadRequestError("A portfolio slug or portfolio subdomain host is required.");
         }
 
-        const response = await this.portfolioService.getPublicBySlug(slug);
+        const response = await this.portfolioService.getPublicBySlug(slug, {
+            requirePremiumSubdomain: this.isPortfolioSubdomainRequest(c),
+        });
         return c.json(response, 200);
     }
 
@@ -83,6 +88,12 @@ export class PortfolioController {
         this.requireAdmin(c);
         const response = await this.portfolioService.adminDeleteById(c.req.param("id"));
         return c.json(response, 200);
+    }
+
+    private isPortfolioSubdomainRequest(c: Context): boolean {
+        const forwardedHost = c.req.header("x-forwarded-host");
+        const host = forwardedHost ?? c.req.header("host") ?? undefined;
+        return extractSlugFromHost(host, this.rootDomain) !== null;
     }
 
     private requireAuth(c: Context) {

@@ -253,11 +253,22 @@ export class PortfolioService {
         return this.getCurrent(userId);
     }
 
-    async getPublicBySlug(rawSlug: string): Promise<PublicPortfolioResponse> {
+    async getPublicBySlug(
+        rawSlug: string,
+        options?: { requirePremiumSubdomain?: boolean },
+    ): Promise<PublicPortfolioResponse> {
         const slug = validatePortfolioSlug(rawSlug);
         const portfolio = await this.collection().findOne({ slug });
         if (!portfolio) {
             throw new NotFoundError("Portfolio not found");
+        }
+
+        if (options?.requirePremiumSubdomain) {
+            const owners = await this.getUserSummariesByIds([portfolio.userId]);
+            const owner = owners.get(portfolio.userId);
+            if (!owner?.isPremium) {
+                throw new NotFoundError("Portfolio not found");
+            }
         }
 
         return {

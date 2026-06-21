@@ -30,6 +30,8 @@ export interface GatewayProxyRoute {
     allowedBaseRoles?: readonly ("student" | "enterprise")[];
     /** `"all"` uses a catch-all sub-app; otherwise `api.on(methods, mount/*, ...)`. */
     methods: MethodsSpec;
+    /** Full `/api/...` path prefixes that skip auth and role checks (e.g. public portfolio reads). */
+    anonymousPathPrefixes?: readonly string[];
 }
 
 /**
@@ -101,6 +103,7 @@ export const gatewayProxyRoutes: readonly GatewayProxyRoute[] = [
         session: "optional",
         injectGatewayAuth: true,
         allowedBaseRoles: ["student"],
+        anonymousPathPrefixes: ["/api/portfolio/public"],
         methods: "all",
     },
     {
