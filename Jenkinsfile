@@ -1,7 +1,10 @@
 // Glybette production deploy (shared VPS).
 // - Always use COMPOSE_PROJECT=glybette so other Docker stacks are untouched.
 // - Host ports are remapped in docker-compose.yml (gateway 13000, client 15173, etc.).
-// - Jenkins UI/webhook: port 18080 (8080 is used by another project on this host).
+// - Jenkins UI: port 18080 (8080 is used by another project on this host).
+//
+// Deploy triggers (current): manual "Build Now" or Poll SCM on the job (e.g. H/5 * * * *).
+// GitHub webhooks are intentionally disabled for now — see block below to enable later.
 
 pipeline {
   agent any
@@ -22,9 +25,18 @@ pipeline {
     disableConcurrentBuilds()
   }
 
-  triggers {
-    githubPush()
-  }
+  // --- Optional: poll GitHub every ~5 min instead of manual builds ---
+  // triggers { pollSCM('H/5 * * * *') }
+  //
+  // --- Later: auto-deploy on push via GitHub webhook ---
+  // 1. Uncomment the triggers block below (and remove pollSCM if you use both).
+  // 2. Repo admin: Settings → Webhooks → Add webhook
+  //    - Payload URL: http://51.210.178.46:18080/github-webhook/
+  //    - Content type: application/json
+  //    - Events: Just the push event
+  // 3. Ensure port 18080 is reachable from GitHub (firewall / security group).
+  // 4. Job: enable "GitHub hook trigger for GITScm polling" OR rely on pipeline trigger only.
+  // triggers { githubPush() }
 
   stages {
     stage('Checkout') {
