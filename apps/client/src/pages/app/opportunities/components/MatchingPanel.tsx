@@ -6,12 +6,14 @@ import type { Matching } from "../types";
 
 interface MatchingPanelProps {
     matching: Matching | null;
-    loading: boolean;
+    loadingDb: boolean;
+    loadingAi: boolean;
     onRefresh: () => void;
 }
 
-export function MatchingPanel({ matching, loading, onRefresh }: MatchingPanelProps) {
+export function MatchingPanel({ matching, loadingDb, loadingAi, onRefresh }: MatchingPanelProps) {
     const { t } = useLocale("opportunities");
+    const loading = loadingDb || loadingAi;
 
     return (
         <div style={styles.matchCard}>
@@ -25,10 +27,23 @@ export function MatchingPanel({ matching, loading, onRefresh }: MatchingPanelPro
                 </button>
             </div>
 
-            {loading ? (
+            {loadingDb ? (
                 <div style={styles.loadingInline}>
                     <div style={styles.spinnerSm} />
-                    <span style={{ color: "var(--gb-muted)", fontSize: 12 }}>{t("detail.matching.calculating")}</span>
+                    <span style={{ color: "var(--gb-muted)", fontSize: 12 }}>{t("detail.matching.loadingCached")}</span>
+                </div>
+            ) : loadingAi ? (
+                <div style={styles.aiLoadingBlock}>
+                    <div style={styles.aiLoadingIconWrap}>
+                        <Sparkles size={20} style={{ color: "#a78bfa", animation: "pulse 1.5s ease-in-out infinite" }} />
+                    </div>
+                    <div style={styles.aiLoadingTitle}>{t("detail.matching.computingAi")}</div>
+                    <div style={styles.aiLoadingSub}>{t("detail.matching.computingAiSub")}</div>
+                    <div style={styles.aiLoadingDots}>
+                        <span style={styles.aiLoadingDot(0)} />
+                        <span style={styles.aiLoadingDot(1)} />
+                        <span style={styles.aiLoadingDot(2)} />
+                    </div>
                 </div>
             ) : matching ? (
                 <div>
@@ -110,12 +125,7 @@ export function MatchingPanel({ matching, loading, onRefresh }: MatchingPanelPro
                         </div>
                     )}
                 </div>
-            ) : (
-                <div style={styles.loadingInline}>
-                    <span style={{ color: "var(--gb-muted)", fontSize: 12 }}>{t("detail.matching.notCalculated")}</span>
-                    <button onClick={onRefresh} style={styles.calcBtn}>{t("detail.matching.calculate")}</button>
-                </div>
-            )}
+            ) : null}
         </div>
     );
 }

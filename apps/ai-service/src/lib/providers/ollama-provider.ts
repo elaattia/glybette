@@ -74,6 +74,7 @@ export class OllamaProvider implements AiProvider {
             model: this.config.model,
             messages,
             stream: false,
+            think: false,
             options: {
                 num_predict: numPredict,
                 temperature,

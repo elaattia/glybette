@@ -141,6 +141,9 @@
         },
         "matching": {
             "title": "AI Match Score",
+            "loadingCached": "Loading match score...",
+            "computingAi": "Hold on tight!",
+            "computingAiSub": "We're fetching the freshest score for this match.",
             "calculating": "Calculating...",
             "notCalculated": "Score not calculated",
             "calculate": "Calculate",

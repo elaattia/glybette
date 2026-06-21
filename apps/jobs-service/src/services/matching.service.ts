@@ -5,9 +5,12 @@ import { AiClient } from "./ai.client.js";
 const ai = new AiClient();
 
 export class MatchingService {
-    
+    async get(userId: string, offreId: string): Promise<MatchingDoc | null> {
+        return MatchingModel.findOne({ userId, offreId });
+    }
+
     async getOrCompute(userId: string, offreId: string, userProfile: UserProfile): Promise<MatchingDoc> {
-        const existing = await MatchingModel.findOne({ userId, offreId });
+        const existing = await this.get(userId, offreId);
         if (existing) return existing;
 
         return this.compute(userId, offreId, userProfile);
@@ -85,13 +88,13 @@ interface UserProfile {
 
 function buildOffreText(offre: any): string {
     return [
-        `Titre: ${offre.titre}`,
-        offre.entreprise ? `Entreprise: ${offre.entreprise}` : "",
+        `Title: ${offre.titre}`,
+        offre.entreprise ? `Company: ${offre.entreprise}` : "",
         offre.description ? `Description: ${offre.description}` : "",
-        offre.competences?.length ? `Compétences requises: ${offre.competences.join(", ")}` : "",
-        offre.localisation ? `Localisation: ${offre.localisation}` : "",
-        offre.niveau_experience ? `Niveau: ${offre.niveau_experience}` : "",
-        offre.type_contrat ? `Contrat: ${offre.type_contrat}` : "",
+        offre.competences?.length ? `Required skills: ${offre.competences.join(", ")}` : "",
+        offre.localisation ? `Location: ${offre.localisation}` : "",
+        offre.niveau_experience ? `Experience level: ${offre.niveau_experience}` : "",
+        offre.type_contrat ? `Contract: ${offre.type_contrat}` : "",
     ]
         .filter(Boolean)
         .join("\n");
@@ -99,16 +102,16 @@ function buildOffreText(offre: any): string {
 
 function buildProfileText(profile: UserProfile): string {
     return [
-        profile.summary ? `Résumé: ${profile.summary}` : "",
-        profile.skills?.length ? `Compétences: ${profile.skills.join(", ")}` : "",
+        profile.summary ? `Summary: ${profile.summary}` : "",
+        profile.skills?.length ? `Skills: ${profile.skills.join(", ")}` : "",
         profile.experience?.length
-            ? `Expérience:\n${profile.experience.map((e) => `  - ${e.position} @ ${e.company}: ${e.description}`).join("\n")}`
+            ? `Experience:\n${profile.experience.map((e) => `  - ${e.position} @ ${e.company}: ${e.description}`).join("\n")}`
             : "",
         profile.education?.length
-            ? `Formation:\n${profile.education.map((e) => `  - ${e.degree} ${e.field} @ ${e.institution}`).join("\n")}`
+            ? `Education:\n${profile.education.map((e) => `  - ${e.degree} ${e.field} @ ${e.institution}`).join("\n")}`
             : "",
-        profile.languages?.length ? `Langues: ${profile.languages.map((l) => `${l.language} (${l.level})`).join(", ")}` : "",
-        profile.lookingFor?.length ? `Cherche: ${profile.lookingFor.join(", ")}` : "",
+        profile.languages?.length ? `Languages: ${profile.languages.map((l) => `${l.language} (${l.level})`).join(", ")}` : "",
+        profile.lookingFor?.length ? `Looking for: ${profile.lookingFor.join(", ")}` : "",
     ]
         .filter(Boolean)
         .join("\n");

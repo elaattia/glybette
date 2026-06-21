@@ -38,6 +38,13 @@ export function registerJobsServiceRoutes(
     );
  
  
+    api.get("/jobs/matching/offre/:id", auth, (c) =>
+        forwardToService(c, base, `/api/matching/offre/${c.req.param("id")}`, {
+            timeoutMs: timeout,
+            injectGatewayAuth: true,
+        }),
+    );
+
     api.post("/jobs/matching/offre/:id", auth, (c) =>
         forwardToService(c, base, `/api/matching/offre/${c.req.param("id")}`, {
             timeoutMs: aiTimeout,

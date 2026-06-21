@@ -15,6 +15,13 @@ function uid(c: any): string {
     return id;
 }
 
+matchingController.get("/offre/:id", async (c) => {
+    const userId = uid(c);
+    const offreId = c.req.param("id");
+    const matching = await matchingService.get(userId, offreId);
+    return c.json({ matching });
+});
+
 matchingController.post(
     "/offre/:id",
     zValidator("json", z.object({ userProfile: z.any() })),
@@ -22,7 +29,7 @@ matchingController.post(
         const userId = uid(c);
         const offreId = c.req.param("id");
         const { userProfile } = c.req.valid("json");
-        const result = await matchingService.getOrCompute(userId, offreId, userProfile);
+        const result = await matchingService.compute(userId, offreId, userProfile);
         return c.json({ matching: result });
     },
 );

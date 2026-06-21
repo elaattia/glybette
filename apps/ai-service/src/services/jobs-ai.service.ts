@@ -9,23 +9,23 @@ export class JobsAiService {
     constructor(private readonly provider: AiProvider) {}
 
     async computeMatching(profileText: string, offreText: string) {
-        const prompt = `Tu es un expert RH et recrutement. Analyse la compatibilité entre ce profil et cette offre.
+        const prompt = `You are an HR and recruitment expert. Analyze the compatibility between this candidate profile and this job offer.
 
-=== PROFIL CANDIDAT ===
+=== CANDIDATE PROFILE ===
 ${profileText.slice(0, 3000)}
 
-=== OFFRE D'EMPLOI ===
+=== JOB OFFER ===
 ${offreText.slice(0, 2000)}
 
-Retourne UNIQUEMENT ce JSON, sans explication ni markdown :
+Return ONLY this JSON, with no explanation or markdown. All text values must be in English:
 {
   "score": 85,
-  "pointsForts": ["point 1", "point 2", "point 3"],
-  "pointsFaibles": ["manque 1", "manque 2"],
-  "recommandations": ["conseil 1", "conseil 2"],
+  "pointsForts": ["strength 1", "strength 2", "strength 3"],
+  "pointsFaibles": ["gap 1", "gap 2"],
+  "recommandations": ["tip 1", "tip 2"],
   "skillsManquantes": ["skill1", "skill2"],
   "skillsCorrespondantes": ["skill3", "skill4"],
-  "explication": "Explication concise en 2-3 phrases du score."
+  "explication": "Concise 2-3 sentence explanation of the score."
 }`;
         return this.provider.generateJson<any>(prompt, { maxTokens: 800 });
     }

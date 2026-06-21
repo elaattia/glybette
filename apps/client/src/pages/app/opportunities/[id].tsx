@@ -20,7 +20,7 @@ type Tab = "overview" | "interview" | "cover-letter" | "cv-adapt";
 export default function JobDetailPage() {
     const { id } = useParams<{ id: string }>();
     const navigate = useNavigate();
-    const { profile, profileText } = useFullProfile();
+    const { profile, profileText, isProfileReady } = useFullProfile();
     const { t } = useLocale("opportunities");
     const [isApplyModalOpen, setIsApplyModalOpen] = React.useState(false);
 
@@ -40,9 +40,9 @@ export default function JobDetailPage() {
 
     const {
         offre, matching, questions,
-        loadingOffre, loadingMatch, loadingQuestions,
-        computeMatching, generateQuestions,
-    } = useJobDetail(id, userProfile);
+        loadingOffre, loadingMatchDb, loadingMatchAi, loadingQuestions,
+        refreshMatching, generateQuestions,
+    } = useJobDetail(id, userProfile, isProfileReady);
 
     React.useEffect(() => {
         if (!id) return;
@@ -137,8 +137,9 @@ export default function JobDetailPage() {
 
                     <MatchingPanel
                         matching={matching}
-                        loading={loadingMatch}
-                        onRefresh={computeMatching}
+                        loadingDb={loadingMatchDb}
+                        loadingAi={loadingMatchAi}
+                        onRefresh={refreshMatching}
                     />
 
                     <div style={styles.actionsCard}>
