@@ -21,6 +21,8 @@ services:
       - jenkins_home:/var/jenkins_home
       - /var/run/docker.sock:/var/run/docker.sock
       - /home/glybette/Glybette:/home/glybette/Glybette
+      # GitHub SSH host keys (Jenkins git plugin runs as glybette).
+      - /home/glybette/.ssh/known_hosts:/home/glybette/.ssh/known_hosts:ro
       # Use host Docker CLI + compose plugin (paths on Ubuntu 25.04).
       - /usr/bin/docker:/usr/bin/docker:ro
       - /usr/libexec/docker/cli-plugins:/usr/libexec/docker/cli-plugins:ro
