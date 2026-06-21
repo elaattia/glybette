@@ -9,6 +9,8 @@ export function createAiProvider(env: AiServiceEnv): AiProvider {
             return new OllamaProvider({
                 baseUrl: env.OLLAMA_BASE_URL,
                 model: env.OLLAMA_MODEL,
+                cfAccessClientId: env.OLLAMA_CF_ACCESS_CLIENT_ID,
+                cfAccessClientSecret: env.OLLAMA_CF_ACCESS_CLIENT_SECRET,
             });
         case "gemini":
             return new GeminiProvider({

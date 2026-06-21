@@ -356,6 +356,8 @@ services:
             NODE_ENV: development
             PORT_AI_SERVICE: 3007
             OLLAMA_BASE_URL: ${OLLAMA_BASE_URL:-http://host.docker.internal:11434}
+            OLLAMA_CF_ACCESS_CLIENT_ID: ${OLLAMA_CF_ACCESS_CLIENT_ID:-}
+            OLLAMA_CF_ACCESS_CLIENT_SECRET: ${OLLAMA_CF_ACCESS_CLIENT_SECRET:-}
             CHOKIDAR_USEPOLLING: "1"
             CHOKIDAR_INTERVAL: "300"
             WATCHPACK_POLLING: "true"

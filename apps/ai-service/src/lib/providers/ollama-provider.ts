@@ -5,7 +5,20 @@ import { parseJsonWithRetry } from "../json-utils.js";
 type OllamaConfig = {
     baseUrl: string;
     model: string;
+    cfAccessClientId?: string;
+    cfAccessClientSecret?: string;
 };
+
+function buildOllamaHeaders(config: OllamaConfig, extra?: HeadersInit): Headers {
+    const headers = new Headers(extra);
+    if (config.cfAccessClientId?.trim()) {
+        headers.set("CF-Access-Client-Id", config.cfAccessClientId.trim());
+    }
+    if (config.cfAccessClientSecret?.trim()) {
+        headers.set("CF-Access-Client-Secret", config.cfAccessClientSecret.trim());
+    }
+    return headers;
+}
 
 interface OllamaChatResponse {
     message?: { content?: string };
@@ -18,7 +31,10 @@ export class OllamaProvider implements AiProvider {
 
     async ping(): Promise<boolean> {
         try {
-            const res = await fetch(`${this.config.baseUrl}/api/tags`, { signal: AbortSignal.timeout(3000) });
+            const res = await fetch(`${this.config.baseUrl}/api/tags`, {
+                headers: buildOllamaHeaders(this.config),
+                signal: AbortSignal.timeout(3000),
+            });
             return res.ok;
         } catch {
             return false;
@@ -71,7 +87,7 @@ export class OllamaProvider implements AiProvider {
 
         const res = await fetch(`${this.config.baseUrl}/api/chat`, {
             method: "POST",
-            headers: { "Content-Type": "application/json" },
+            headers: buildOllamaHeaders(this.config, { "Content-Type": "application/json" }),
             body: JSON.stringify(body),
         });
 

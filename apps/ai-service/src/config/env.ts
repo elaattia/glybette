@@ -8,6 +8,8 @@ const schema = z
         AI_PROVIDER: z.enum(["ollama", "anthropic", "gemini"]).default("ollama"),
         OLLAMA_BASE_URL: z.string().url().default("http://localhost:11434"),
         OLLAMA_MODEL: z.string().default("mistral"),
+        OLLAMA_CF_ACCESS_CLIENT_ID: z.string().optional(),
+        OLLAMA_CF_ACCESS_CLIENT_SECRET: z.string().optional(),
         GEMINI_MODEL: z.string().default("gemini-2.0-flash"),
         ANTHROPIC_API_KEY: z.string().optional(),
         GEMINI_API_KEY: z.string().optional(),
