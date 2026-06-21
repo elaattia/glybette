@@ -1,3 +1,8 @@
+// Glybette production deploy (shared VPS).
+// - Always use COMPOSE_PROJECT=glybette so other Docker stacks are untouched.
+// - Host ports are remapped in docker-compose.yml (gateway 13000, client 15173, etc.).
+// - Jenkins UI/webhook: port 18080 (8080 is used by another project on this host).
+
 pipeline {
   agent any
 
@@ -6,8 +11,9 @@ pipeline {
   }
 
   environment {
-    APP_DIR = '/opt/glybette'
-    REPO_URL = 'git@github.com:YOUR_ORG/YOUR_REPO.git'
+    APP_DIR = '/home/glybette/Glybette'
+    COMPOSE_PROJECT = 'glybette'
+    REPO_URL = 'git@github.com:boussaidamine/Glybette.git'
     BRANCH = 'main'
   }
 
@@ -55,8 +61,7 @@ pipeline {
     stage('Deploy') {
       steps {
         dir("${APP_DIR}") {
-          sh 'docker compose down'
-          sh 'docker compose up -d --build'
+          sh "docker compose -p ${COMPOSE_PROJECT} up -d --build"
         }
       }
     }
@@ -78,7 +83,7 @@ pipeline {
   post {
     always {
       dir("${APP_DIR}") {
-        sh 'docker compose ps || true'
+        sh "docker compose -p ${COMPOSE_PROJECT} ps || true"
       }
     }
     cleanup {
