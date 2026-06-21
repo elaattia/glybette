@@ -265,6 +265,20 @@ services:
             timeout: 5s
             retries: 8
 
+    ollama:
+        image: ollama/ollama:latest
+        expose:
+            - "11434"
+        volumes:
+            - ollama_data:/root/.ollama
+        healthcheck:
+            test: [ "CMD", "ollama", "list" ]
+            interval: 30s
+            timeout: 10s
+            retries: 5
+            start_period: 30s
+        restart: unless-stopped
+
     ai-service:
         build:
             context: .
@@ -278,14 +292,17 @@ services:
             - PORT_AI_SERVICE=3007
             - NODE_ENV=production
             - AI_PROVIDER=${AI_PROVIDER}
-            - OLLAMA_BASE_URL=${OLLAMA_BASE_URL:-http://localhost:11434}
-            - OLLAMA_MODEL=${OLLAMA_MODEL}
+            - OLLAMA_BASE_URL=${OLLAMA_BASE_URL:-http://ollama:11434}
+            - OLLAMA_MODEL=${OLLAMA_MODEL:-qwen3:4b}
             - GEMINI_MODEL=${GEMINI_MODEL:-gemini-2.0-flash}
             - ANTHROPIC_API_KEY=${ANTHROPIC_API_KEY}
             - GEMINI_API_KEY=${GEMINI_API_KEY}
             - INTERNAL_SERVICE_SECRET=${INTERNAL_SERVICE_SECRET}
         env_file:
             - .env
+        depends_on:
+            ollama:
+                condition: service_healthy
         restart: unless-stopped
         healthcheck:
             test: [ "CMD", "node", "-e", "fetch('http://localhost:3007/health').then(r=>process.exit(r.ok?0:1)).catch(()=>process.exit(1))" ]
@@ -358,3 +375,4 @@ services:
 volumes:
     redis_data:
     projects_uploads:
+    ollama_data:
