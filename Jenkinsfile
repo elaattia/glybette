@@ -11,6 +11,7 @@ pipeline {
 
   parameters {
     string(name: 'PORTFOLIO_SMOKE_SLUG', defaultValue: 'demo', description: 'Existing portfolio slug for routing smoke test')
+    string(name: 'COMPOSE_PARALLEL_LIMIT', defaultValue: '2', description: 'Max concurrent docker compose build/pull ops (2 recommended on this VPS)')
   }
 
   environment {
@@ -73,7 +74,10 @@ pipeline {
     stage('Deploy') {
       steps {
         dir("${APP_DIR}") {
-          sh "docker compose -p ${COMPOSE_PROJECT} up -d --build"
+          sh """
+            export COMPOSE_PARALLEL_LIMIT=${params.COMPOSE_PARALLEL_LIMIT}
+            docker compose -p ${COMPOSE_PROJECT} up -d --build
+          """
         }
       }
     }
