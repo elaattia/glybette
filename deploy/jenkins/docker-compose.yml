@@ -1,0 +1,32 @@
+# Jenkins controller for Glybette deploys (isolated from app stack).
+# Start:  docker compose -p jenkins -f deploy/jenkins/docker-compose.yml up -d
+# UI:     http://<vps-ip>:18080
+# Stop:   docker compose -p jenkins -f deploy/jenkins/docker-compose.yml down
+# Do NOT use compose project name "glybette" — that is the application stack.
+
+services:
+  jenkins:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    image: glybette-jenkins:lts
+    container_name: jenkins-glybette
+    restart: unless-stopped
+    ports:
+      - "18080:8080"
+    environment:
+      - JENKINS_OPTS=--httpPort=8080
+      - DOCKER_HOST=unix:///var/run/docker.sock
+    volumes:
+      - jenkins_home:/var/jenkins_home
+      - /var/run/docker.sock:/var/run/docker.sock
+      - /home/glybette/Glybette:/home/glybette/Glybette
+      # Use host Docker CLI + compose plugin (paths on Ubuntu 25.04).
+      - /usr/bin/docker:/usr/bin/docker:ro
+      - /usr/libexec/docker/cli-plugins:/usr/libexec/docker/cli-plugins:ro
+    group_add:
+      - "987" # host docker group — getent group docker
+    user: "1002:1002" # host glybette user — id -u glybette
+
+volumes:
+  jenkins_home:

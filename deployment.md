@@ -53,56 +53,44 @@ docker --version
 docker compose version
 ```
 
-## 3.2 Install Jenkins
+## 3.2 Install Jenkins (Docker — recommended on shared VPS)
+
+Port `8080` is often taken by other stacks on a shared host. Run Jenkins in Docker on **18080** instead of apt/systemd.
+
+If you previously installed apt Jenkins, remove it first:
 
 ```bash
-sudo apt update
-sudo apt install -y fontconfig openjdk-21-jre git curl
-
-curl -fsSL https://pkg.jenkins.io/debian-stable/jenkins.io-2023.key | sudo tee \
-  /usr/share/keyrings/jenkins-keyring.asc > /dev/null
-
-echo "deb [signed-by=/usr/share/keyrings/jenkins-keyring.asc] https://pkg.jenkins.io/debian-stable binary/" | \
-  sudo tee /etc/apt/sources.list.d/jenkins.list > /dev/null
-
-sudo apt update
-sudo apt install -y jenkins
-sudo systemctl enable --now jenkins
-
-sudo usermod -aG docker jenkins
-sudo systemctl restart jenkins
+sudo bash deploy/jenkins/uninstall-apt-jenkins.sh
 ```
 
-## 3.3 Create deploy directory
+Start Jenkins:
 
 ```bash
-sudo mkdir -p /opt/glybette
-sudo chown -R jenkins:jenkins /opt/glybette
+cd /home/glybette/Glybette
+docker compose -p jenkins -f deploy/jenkins/docker-compose.yml up -d --build
+docker exec jenkins-glybette cat /var/jenkins_home/secrets/initialAdminPassword
 ```
 
-## 3.4 Install Node.js + pnpm for Jenkins preflight
+The image includes Node 22 + pnpm for `pnpm docker:env:check:prod` in the pipeline. The container mounts the Docker socket and `/home/glybette/Glybette` (compose project `glybette` for deploys).
 
-Jenkins runs `pnpm docker:env:check:prod` before deploy. On the VPS:
+## 3.3 App directory
 
-```bash
-curl -fsSL https://deb.nodesource.com/setup_22.x | sudo -E bash -
-sudo apt install -y nodejs
-sudo corepack enable
-corepack prepare pnpm@10.17.0 --activate
-```
+Production app path: `/home/glybette/Glybette` (see `APP_DIR` in `Jenkinsfile`). No separate `/opt/glybette` required.
 
-Alternatively, run preflight inside a `node:22` container if you prefer not to install Node on the host.
+## 3.4 Node.js + pnpm
+
+Bundled in `deploy/jenkins/Dockerfile`. Host Node/pnpm is optional if you only use Docker Jenkins.
 
 ## 3.5 Configure GitHub webhook (auto-deploy on `main`)
 
 1. In Jenkins: install **GitHub** / **GitHub Integration** plugin.
 2. Create a **Pipeline** job pointing at repo root `Jenkinsfile`.
 3. In GitHub repo settings -> Webhooks -> Add webhook:
-   - Payload URL: `http://<vps-ip>:8080/github-webhook/`
+   - Payload URL: `http://<vps-ip>:18080/github-webhook/`
    - Content type: `application/json`
    - Events: **Just the push event**
-4. Restrict Jenkins UI (`8080`) to your IP or VPN where possible.
-5. Open firewall ports: `22`, `80`, `443` (and `8080` if needed for webhook from GitHub).
+4. Restrict Jenkins UI (`18080`) to your IP or VPN where possible.
+5. Open firewall ports: `22`, `80`, `443` (and `18080` for GitHub webhooks).
 
 ## 4) Production env file
 
