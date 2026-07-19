@@ -8,7 +8,7 @@ describe("user service mappers", () => {
             id: "user-1",
             email: "user@example.com",
             emailVerified: true,
-            displayName: "Rayen",
+            displayName: "Ela",
             avatarUrl: "https://example.com/avatar.png",
             isPremium: true,
             baseRole: "student",
@@ -22,7 +22,7 @@ describe("user service mappers", () => {
 
         assert.deepEqual(summary, {
             id: "user-1",
-            displayName: "Rayen",
+            displayName: "Ela",
             avatarUrl: "https://example.com/avatar.png",
             isPremium: true,
             baseRole: "student",

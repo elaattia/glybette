@@ -30,6 +30,8 @@ COPY --from=builder /app/apps ./apps
 COPY --from=builder /app/packages ./packages
 COPY --from=deps /app/node_modules ./node_modules
 COPY pnpm-lock.yaml pnpm-workspace.yaml package.json ./
+# Create writable directories needed at runtime (before switching to non-root user)
+RUN mkdir -p /app/uploads && chown -R node:node /app/uploads
 USER node
 EXPOSE 3000
 CMD ["sh", "-c", "node apps/${APP_NAME}/dist/index.js"]

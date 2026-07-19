@@ -18,6 +18,7 @@ RUN pnpm config set registry https://registry.npmjs.org/ && \
     pnpm run --filter "@glybette/client..." build
 
 FROM nginx:alpine AS runner
+RUN apk add --no-cache wget
 COPY apps/client/nginx.conf /etc/nginx/conf.d/default.conf
 COPY --from=builder /app/apps/client/dist /usr/share/nginx/html
 EXPOSE 80

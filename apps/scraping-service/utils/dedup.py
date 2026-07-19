@@ -44,7 +44,7 @@ def is_new_and_mark(titre: str, entreprise: str, lien: str) -> tuple[bool, str]:
             key = f"offre:{h}"
             if _redis.exists(key):
                 return False, h
-            _redis.set(key, "1")
+            _redis.set(key, "1") #(TTL) je vpeut ajoute ca pour si une offre a ete modifer je l'enreistre  (key, "1", ex=86400) ici pour 24 ou bien ex=60400 pour 7 jours 
             return True, h
         except Exception:
             pass

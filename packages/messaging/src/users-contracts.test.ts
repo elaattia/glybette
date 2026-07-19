@@ -10,7 +10,7 @@ test("isUserProfileUpsertedEvent validates event payload", () => {
         occurredAtIso: new Date().toISOString(),
         profile: {
             userId: "user-1",
-            displayName: "Rayen",
+            displayName: "Ela",
             avatarUrl: "https://example.com/avatar.png",
             isPremium: false,
             roles: ["student"],

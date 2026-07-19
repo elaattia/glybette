@@ -372,6 +372,8 @@ applicationController.post("/", async (c: any) => {
 
         return c.json({ success: true, application }, 201);
     } catch (error: any) {
+        const message = error instanceof Error ? error.message : String(error);
+        console.error("[jobs-service] POST /applications error:", message, error?.stack ?? "");
         if (error.status) {
             return c.json({ error: error.message }, error.status);
         }

@@ -38,7 +38,7 @@ services:
             - "15173:80"
         restart: unless-stopped
         healthcheck:
-            test: [ "CMD", "wget", "-qO-", "http://localhost/" ]
+            test: [ "CMD", "sh", "-c", "echo > /dev/tcp/localhost/80" ]
             interval: 20s
             timeout: 5s
             retries: 8
@@ -371,6 +371,8 @@ services:
             - USERS_SERVICE_URL=http://users-service:3001
         env_file:
             - .env
+        volumes:
+            - jobs_uploads:/app/uploads
         depends_on:
             rabbitmq:
                 condition: service_healthy
@@ -388,4 +390,5 @@ services:
 volumes:
     redis_data:
     projects_uploads:
+    jobs_uploads:
     # ollama_data:

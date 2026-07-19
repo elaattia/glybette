@@ -7,7 +7,7 @@ export function createCorsMiddleware(env: GatewayEnv): MiddlewareHandler {
     return cors({
         origin: resolveCorsOrigins(env),
         credentials: true,
-        allowMethods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
+        allowMethods: ["GET", "POST", "PUT", "DELETE", "PATCH", "OPTIONS"],
         allowHeaders: ["Content-Type", "Authorization"],
     });
 }

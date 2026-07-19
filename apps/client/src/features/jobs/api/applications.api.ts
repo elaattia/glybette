@@ -1,9 +1,7 @@
-import { jobsApiBase } from "@/lib/env";
-
-const JOBS_API = jobsApiBase;
+import { apiRequest } from "@/lib/api";
 
 export const applicationsApi = {
-    async submitApplication({ offreId, resume, coverLetter }: {
+    submitApplication({ offreId, resume, coverLetter }: {
         offreId: string;
         resume: File;
         coverLetter: File;
@@ -13,64 +11,44 @@ export const applicationsApi = {
         formData.append("resume", resume);
         formData.append("coverLetter", coverLetter);
 
-        const response = await fetch(`${JOBS_API}/applications`, {
+        return apiRequest(`/api/jobs/applications`, {
             method: "POST",
             body: formData,
         });
-        if (!response.ok) {
-            const error = await response.json().catch(() => null);
-            throw new Error(error?.error || "Failed to submit application");
-        }
-        return response.json();
     },
 
-    async getMyApplicationForOffre(offreId: string) {
-        const response = await fetch(`${JOBS_API}/applications/offre/${offreId}/user`);
-        if (!response.ok) {
-            const error = await response.json().catch(() => null);
-            throw new Error(error?.error || "Failed to load application status");
-        }
-        return response.json();
+    getMyApplicationForOffre(offreId: string) {
+        return apiRequest(`/api/jobs/applications/offre/${offreId}/user`);
     },
 
-    async getMyApplications() {
-        const response = await fetch(`${JOBS_API}/applications/user/my-applications`);
-        if (!response.ok) throw new Error("Failed to fetch applications");
-        return response.json();
+    getMyApplications() {
+        return apiRequest(`/api/jobs/applications/user/my-applications`);
     },
 
-    async getApplicationsByOffre(offreId: string, status?: string) {
+    getApplicationsByOffre(offreId: string, status?: string) {
         const params = new URLSearchParams();
         if (status) params.set("status", status);
-        const response = await fetch(`${JOBS_API}/applications/offre/${offreId}?${params}`);
-        if (!response.ok) throw new Error("Failed to fetch applications");
-        return response.json();
+        const q = params.toString() ? `?${params.toString()}` : "";
+        return apiRequest(`/api/jobs/applications/offre/${offreId}${q}`);
     },
 
-    async getEnterpriseApplications() {
-        const response = await fetch(`${JOBS_API}/applications/enterprise/all`);
-        if (!response.ok) throw new Error("Failed to fetch enterprise applications");
-        return response.json();
+    getEnterpriseApplications() {
+        return apiRequest(`/api/jobs/applications/enterprise/all`);
     },
 
-    async updateApplicationStatus(
+    updateApplicationStatus(
         applicationId: string,
         status: string,
         recruiterNotes?: string,
         rating?: number,
     ) {
-        const response = await fetch(`${JOBS_API}/applications/${applicationId}/status`, {
+        return apiRequest(`/api/jobs/applications/${applicationId}/status`, {
             method: "PATCH",
-            headers: { "Content-Type": "application/json" },
             body: JSON.stringify({ status, recruiterNotes, rating }),
         });
-        if (!response.ok) throw new Error("Failed to update application");
-        return response.json();
     },
 
-    async getApplicationDetails(applicationId: string) {
-        const response = await fetch(`${JOBS_API}/applications/${applicationId}`);
-        if (!response.ok) throw new Error("Failed to fetch application");
-        return response.json();
+    getApplicationDetails(applicationId: string) {
+        return apiRequest(`/api/jobs/applications/${applicationId}`);
     },
 };

@@ -9,7 +9,7 @@ import {
 
 describe("portfolio validation", () => {
     it("normalizes portfolio slugs", () => {
-        assert.equal(normalizePortfolioSlug(" Rayen Portfolio_2026! "), "rayen-portfolio-2026");
+        assert.equal(normalizePortfolioSlug(" Ela Portfolio_2026! "), "Ela-portfolio-2026");
     });
 
     it("rejects reserved slugs", () => {
@@ -17,14 +17,14 @@ describe("portfolio validation", () => {
     });
 
     it("extracts subdomain slugs", () => {
-        assert.equal(extractSlugFromHost("rayen.glybette.com", "glybette.com"), "rayen");
+        assert.equal(extractSlugFromHost("ela.glybette.com", "glybette.com"), "ela");
         assert.equal(extractSlugFromHost("glybette.com", "glybette.com"), null);
-        assert.equal(extractSlugFromHost("deep.rayen.glybette.com", "glybette.com"), null);
+        assert.equal(extractSlugFromHost("deep.ela.glybette.com", "glybette.com"), null);
     });
 
     it("accepts a valid live save payload", () => {
         const payload = validateSavePortfolioRequest({
-            slug: "rayen",
+            slug: "ela",
             templateId: "atelier",
             style: {
                 theme: "dark",
@@ -49,7 +49,7 @@ describe("portfolio validation", () => {
             ],
         });
 
-        assert.equal(payload.slug, "rayen");
+        assert.equal(payload.slug, "ela");
         assert.equal(payload.tabs[0]?.blocks[0]?.source?.kind, "manual");
     });
 });

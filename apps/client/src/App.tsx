@@ -60,8 +60,10 @@ function App() {
             <Route element={<RequireAuth />}>
                 <Route path="/app" element={<AppShellLayout />}>
                     <Route index element={<AppHomeRedirect />} />
-                    <Route path="enterprise" element={<EnterpriseDashboardPage />} />
-                    <Route path="enterprise/applications" element={<EnterpriseApplicationsPage />} />
+                    <Route element={<RequireBaseRole allowed={["enterprise"]} redirectTo="/app/dashboard" />}>
+                        <Route path="enterprise" element={<EnterpriseDashboardPage />} />
+                        <Route path="enterprise/applications" element={<EnterpriseApplicationsPage />} />
+                    </Route>
                     <Route path="settings" element={<SettingsPage />} />
 
                     <Route element={<RequireBaseRole allowed={["student"]} redirectTo="/app/enterprise" />}>

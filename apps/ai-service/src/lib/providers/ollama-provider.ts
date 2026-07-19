@@ -5,6 +5,7 @@ import { parseJsonWithRetry } from "../json-utils.js";
 type OllamaConfig = {
     baseUrl: string;
     model: string;
+    //pour cloudflare access mais pour le moment je ne l'utilise pas
     cfAccessClientId?: string;
     cfAccessClientSecret?: string;
 };
